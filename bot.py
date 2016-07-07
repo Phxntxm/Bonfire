@@ -84,7 +84,10 @@ async def on_ready():
 
     '''success = checkSetup(cursor)
     if success=="Error: default_db":
-        fmt = "The bot ran into an error while checking the database information."
+        fmt = "The bot ran into an error while checking for the default database information."
+        await bot.send_message(determineId(ownerID),fmt)
+    elif success="Error: boop_db":
+        fmt = "The bot ran into an error while checking for the boop database information."
         await bot.send_message(determineId(ownerID),fmt)'''
 
     cursor.execute('use {0}'.format(db_default))
@@ -148,7 +151,7 @@ async def py(ctx):
                 result = eval(match_single[0])
                 await bot.say("```{0}```".format(result))
             else:
-                def r(v):
+                def say(v):
                     loop.create_task(bot.say("```{0}```".format(v)))
 
                 exec(match_multi[0])
