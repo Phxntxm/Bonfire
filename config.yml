@@ -1,0 +1,64 @@
+bot_token: MTgzNzQ5MDg3MDM4OTMwOTQ0.CiNDoA.n7rcci9rf-3DzrUZOsnJnL7GioY
+owner_id: '115997555619266561'
+description: Bot created by Phantom, for a few servers of his own.
+command_prefix: '!'
+default_status: '!commands for a list of commands'
+nsfw_channel: ['194979363911892992','183670904176246785']
+
+db_host: 'localhost'
+db_user_pass: 'rguFJ4tC22QKAMd6'
+db_user:  'phxntx5_bonfire'
+
+db_default: 'phxntx5_bonfire'
+db_boops: 'phxntx5_bonfire_boops'
+
+modCommands:
+ status: Changes the game the Bot is playing
+ say: Has the bot say whatever you tell it to, this will remove your message before the bot repeats it
+ volume: Sets the volume of the bot's 'voice'
+ pause: Pauses the current song
+ resume: Resumes the current paused song
+ stop: Stops playing audio and leaves the voice channel. This also clears the queue.
+ modskip: Forces a song skip, bypasses the skip vote system
+
+openCommands:
+ commands: Sends you a private message with a list of the commands you have access to
+ roll: Rolls a virtual six-sided die, and gives you the number of the roll
+ joke: Prints a random riddle, based on Unix's fortune riddle command
+ derpi: Provide a search term after the command to search derpibooru for the image, it will then provide a random image from the first page. Without any search terms, it will be completely random
+ battle: Mention someone in this message to setup a battle with them, the user can then accept or decline the battle, and each person has a 50/50 chance of winning
+ boop: Boops the person that is mentioned! Also saves and prints out the amount of times this user has booped the person mentioned
+ mostboops: Lets you know who you have booped the most, as well as the amount of times
+ mostwins: Prints a 'leaderboard' showing everyone's battling record, in order from the best to the worst
+ urban: Provides the top urbandictionary.com definition for the term(s) after the command
+ 
+voiceCommands:
+ join: Tells the bot to join a specific voice channel that you specify
+ summon: Pulls the bot into the voice channel you are in
+ play: Plays a song. If there is a song currently in the queue, then it is queued until the next song is done playing. This command automatically searches as well from YouTube. The list of supported sites can be found here https://rg3.github.io/youtube-dl/supportedsites.html
+ skip: Vote to skip a song. The song requester can automatically skip. 3 skip votes are needed for the song to be skipped.
+ playing: Shows information about the current song playing
+
+ownerCommands:
+ shutdown: Shuts down the bot completely
+ restart: Will restart the bot, useful for script changes
+ py: Evaluate any coding live, useful for live testing
+ avatar: Changes the avatar to what\'s provided, must be in the images/ folder
+ name: Changes the name of the bot
+ leave: Forces the bot to leave the server
+
+adminCommands: {}
+
+battleWins: ["A meteor fell on {1}, {0} is left standing and has been declared the victor!",
+             "{0} has bucked {1} into a tree, even Big Mac would be impressed at that kick!",
+             "As they were battling, {1} was struck by lightning! {0} you lucked out this time!",
+             "{1} tried to dive at {0} while fighting, somehow they missed and landed in quicksand. Try paying more attention next time {1}",
+             "{1} got a little...heated during the battle and ended up getting set on fire. {0} wins by remaining cool",
+             "Princess Celestia came in and banished {1} to the moon. Good luck getting into any battles up there",
+             "{1} took an arrow to the knee, they are no longer an adventurer. Keep on adventuring {0}",
+             "Common sense should make it obvious not to get into battle with {0}. Apparently {1} didn't get the memo",
+             "{0} had a nice cup of tea with {1} over their conflict, and mutually agreed that {0} was Best Pony",
+             "{0} and {1} had an intense staring contest. Sadly, {1} forgot to breathe and lost much more than the staring contest",
+             "It appears {1} is actually a pacifist, they ran away screaming and crying. Maybe you should have thought of that before getting in a fight?",
+             "A bunch of parasprites came in and ate up the jetpack while {1} was flying with it. Those pesky critters...",
+             "{0} used their charm to seduce {1} to surrender."]
