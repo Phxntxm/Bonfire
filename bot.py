@@ -1,20 +1,22 @@
 #!/usr/local/bin/python3.5
 
 import asyncio
-import discord
-from discord.ext import commands
-import sys
+import json
 import os
 import random
-import subprocess
-import urllib.request
-import urllib.parse
-import json
 import re
-import pymysql.cursors
+import subprocess
+import sys
+import urllib.parse
+import urllib.request
 import yaml
-import playlist
 from threading import Timer
+
+import discord
+import pymysql.cursors
+from discord.ext import commands
+
+import playlist
 
 with open("/home/phxntx5/public_html/bot/config.yml", "r") as f:
     global_config = yaml.load(f)
@@ -151,7 +153,7 @@ async def py(ctx):
                 result = eval(match_single[0])
                 await bot.say("```{0}```".format(result))
             else:
-                def say(v):
+                def r(v):
                     loop.create_task(bot.say("```{0}```".format(v)))
 
                 exec(match_multi[0])
@@ -596,7 +598,7 @@ def checkSetup(cursor):
         except pymysql.ProgrammingError:
             # battle_records does not exist, create it
             sql = "create table `battle_records` (`id` varchar(32) not null,`record` varchar(32) not null," + \
-                "primary key (`id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
+                  "primary key (`id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
             cursor.execute(sql)
             connection.commit()
         try:
@@ -604,7 +606,7 @@ def checkSetup(cursor):
         except pymysql.ProgrammingError:
             # restart_server does not exist, create it
             sql = "create table `restart_server` (`id` int(11) not null auto_increment,`channel_id` varchar(32)" + \
-                "not null,primary key (`id`)) engine=InnoDB default charset=utf8 collate=utf8_bin;"
+                  "not null,primary key (`id`)) engine=InnoDB default charset=utf8 collate=utf8_bin;"
             cursor.execute(sql)
             connection.commit()
             sql = "insert into restart_server (id,channel_id) values (1,'0')"
