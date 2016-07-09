@@ -16,6 +16,7 @@ class Core:
 
     @commands.command()
     async def addbot(self):
+        """Provides a link that you can use to add me to a server"""
         perms = discord.Permissions.none()
         perms.read_messages = True
         perms.send_messages = True
