@@ -30,6 +30,7 @@ class Stats:
     @commands.command(pass_context=True, no_pm=True)
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times"""
+        members = ctx.message.server.members
         cursor = config.connection.cursor()
         cursor.execute('use {}'.format(config.db_boops))
         sql = "select * from `{}`".format(ctx.message.author.id)
@@ -42,7 +43,8 @@ class Stats:
         for r in result:
             member = find(lambda m: m.id == r['id'], self.bot.get_all_members())
             amount = r['amount']
-            output += "\n{0.name}: {1} times".format(member,amount)
+            if member in members:
+                output += "\n{0.name}: {1} times".format(member,amount)
         await self.bot.say("```{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
