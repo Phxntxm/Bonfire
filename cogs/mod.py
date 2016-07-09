@@ -21,6 +21,37 @@ class Mod:
         msg = ' '.join(msg)
         await self.bot.say(msg)
         await self.bot.delete_message(ctx.message)
+    
+    @commands.command()
+    @checks.isAdmin()
+    async def load(self, *, module : str):
+        """Loads a module"""
+        if not len(module) > 0:
+            await self.bot.say("Please provide a module!")
+            return
+        self.bot.load_extension(module)
+        await self.bot.say("I have just loaded the {} module".format(module))
+        
+    @commands.command()
+    @checks.isAdmin()
+    async def unload(self, *, module : str):
+        """Unloads a module"""
+        if not len(module) > 0:
+            await self.bot.say("Please provide a module!")
+            return
+        self.bot.unload_extension(module)
+        await self.bot.say("I have just unloaded the {} module".format(module))
+        
+    @commands.command()
+    @checks.isAdmin()
+    async def reload(self, *, module : str):
+        """Reloads a module"""
+        if not len(module) > 0:
+            await self.bot.say("Please provide a module!")
+            return
+        self.bot.unload_extension(module)
+        self.bot.load_extension(module)
+        await self.bot.say("I have just reloaded the {} module".format(module))
 
 
 def setup(bot):
