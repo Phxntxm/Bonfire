@@ -113,7 +113,7 @@ class Interaction:
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         updateBattleRecords(battleP1, battleP2)
         battlingOff()
-
+        
     @commands.command(pass_context=True, no_pm=True)
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""

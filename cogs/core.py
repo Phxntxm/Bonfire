@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 import json
 import random
+import discord
 
 
 class Core:
@@ -13,6 +14,19 @@ class Core:
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command()
+    async def join(self)
+        perms = discord.Permissions.none()
+        perms.read_messages = True
+        perms.send_messages = True
+        perms.manage_roles = True
+        perms.ban_members = True
+        perms.kick_members = True
+        perms.manage_messages = True
+        perms.embed_links = True
+        perms.read_message_history = True
+        perms.attach_files = True
+        await bot.say("Use this URL to add me to a server that you'd like!\n{}'".format(discord.utils.oauth_url('183748889814237186',perms)))
     @commands.command()
     async def joke(self):
         """Prints a random riddle"""

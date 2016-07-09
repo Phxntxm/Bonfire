@@ -13,7 +13,7 @@ class Mod:
     @commands.command(pass_context=True)
     @checks.isMod()
     async def nsfw(self, ctx):
-        """Registers this channel as a 'nsfw' channel''"""
+        """Registers this channel as a 'nsfw' channel"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         try:
