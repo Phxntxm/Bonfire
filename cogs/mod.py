@@ -31,7 +31,7 @@ class Mod:
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         try:
-            cursor.execute('delete from nsfw_channels where channel_id="{}"'.format(ctx.messsage.channel.id))
+            cursor.execute('delete from nsfw_channels where channel_id="{}"'.format(ctx.message.channel.id))
         except pymysql.IntegrityError:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
             return
