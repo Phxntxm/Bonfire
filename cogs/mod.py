@@ -27,9 +27,9 @@ class Mod:
     async def load(self, *, module : str):
         """Loads a module"""
         try:
-            if not len(module) > 0:
-                await self.bot.say("Please provide a module!")
-                return
+            module = module.lower()
+            if not module.startswith("cogs"):
+                module = "cogs.{}".format(module)
             self.bot.load_extension(module)
             await self.bot.say("I have just loaded the {} module".format(module))
         except Exception as e:
@@ -41,9 +41,9 @@ class Mod:
     async def unload(self, *, module : str):
         """Unloads a module"""
         try:
-            if not len(module) > 0:
-                await self.bot.say("Please provide a module!")
-                return
+            module = module.lower()
+            if not module.startswith("cogs"):
+                module = "cogs.{}".format(module)
             self.bot.unload_extension(module)
             await self.bot.say("I have just unloaded the {} module".format(module))
         except Exception as e:
@@ -55,9 +55,9 @@ class Mod:
     async def reload(self, *, module : str):
         """Reloads a module"""
         try:
-            if not len(module) > 0:
-                await self.bot.say("Please provide a module!")
-                return
+            module = module.lower()
+            if not module.startswith("cogs"):
+                module = "cogs.{}".format(module)
             self.bot.unload_extension(module)
             self.bot.load_extension(module)
             await self.bot.say("I have just reloaded the {} module".format(module))
