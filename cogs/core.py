@@ -15,7 +15,7 @@ class Core:
         self.bot = bot
 
     @commands.command()
-    async def join(self)
+    async def join(self):
         perms = discord.Permissions.none()
         perms.read_messages = True
         perms.send_messages = True
