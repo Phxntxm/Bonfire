@@ -68,7 +68,7 @@ class Owner:
 
     @commands.command()
     @checks.isOwner()
-    async def avatar(self, content):
+    async def avatar(self, content: str):
         """Changes the avatar for the bot to the filename following the command"""
         try:
             file = '/home/phxntx5/public_html/bot/images/' + content
@@ -80,7 +80,7 @@ class Owner:
 
     @commands.command()
     @checks.isOwner()
-    async def name(self, newNick):
+    async def name(self, newNick: str):
         """Changes the bot's name"""
         try:
             await self.bot.edit_profile(username=newNick)

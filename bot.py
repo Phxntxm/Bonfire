@@ -41,6 +41,12 @@ async def on_member_join(member):
 async def on_member_remove(member):
     await bot.say("{0} has left the server, I hope it wasn't because of something I said :c".format(member))
 
+
+@bot.event
+async def on_command_error(error, ctx):
+    fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+    await bot.say(fmt.format(type(e).__name__, e))
+
 if __name__ == '__main__':
     for e in extensions:
         bot.load_extension(e)

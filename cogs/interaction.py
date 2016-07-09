@@ -2,6 +2,7 @@ from discord.ext import commands
 from .utils import checks
 from .utils import config
 from threading import Timer
+import discord
 import random
 
 battling = False
@@ -58,7 +59,7 @@ class Interaction:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    async def battle(self, ctx):
+    async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         try:
             global battleP1
@@ -72,7 +73,6 @@ class Interaction:
             if len(ctx.message.mentions) > 1:
                 await self.bot.say("You cannot battle more than one person at once!")
                 return
-            player2 = ctx.message.mentions[0]
             if ctx.message.author.id == player2.id:
                 await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
                 return
@@ -125,17 +125,16 @@ class Interaction:
             await self.bot.say(fmt.format(type(e).__name__, e))
 
     @commands.command(pass_context=True, no_pm=True)
-    async def boop(self, ctx):
+    async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""
         try:
+            booper = ctx.message.author
             if len(ctx.message.mentions) == 0:
                 await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
                 return
             if len(ctx.message.mentions) > 1:
                 await self.bot.say("You cannot boop more than one person at once!")
                 return
-            boopee = ctx.message.mentions[0]
-            booper = ctx.message.author
             if boopee.id == booper.id:
                 await self.bot.say("You can't boop yourself! Silly...")
                 return
