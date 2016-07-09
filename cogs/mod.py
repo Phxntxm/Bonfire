@@ -10,7 +10,7 @@ class Mod:
         self.bot = bot
     
     @commands.group(pass_context=True)
-    async def nsfw(self, ctx)
+    async def nsfw(self, ctx):
     """Handles adding or removing a channel as a nsfw channel"""
         if ctx.invoked_subcommand is None:
             await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
