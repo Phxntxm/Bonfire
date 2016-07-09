@@ -34,7 +34,7 @@ class Mod:
             await self.bot.say("I have just loaded the {} module".format(module))
         except Exception as e:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await bot.say(fmt.format(type(e).__name__, e))
+            await self.bot.say(fmt.format(type(e).__name__, e))
         
     @commands.command()
     @checks.isAdmin()
@@ -48,7 +48,7 @@ class Mod:
             await self.bot.say("I have just unloaded the {} module".format(module))
         except Exception as e:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await bot.say(fmt.format(type(e).__name__, e))
+            await self.bot.say(fmt.format(type(e).__name__, e))
         
     @commands.command()
     @checks.isAdmin()
@@ -63,7 +63,7 @@ class Mod:
             await self.bot.say("I have just reloaded the {} module".format(module))
         except Exception as e:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await bot.say(fmt.format(type(e).__name__, e))
+            await self.bot.say(fmt.format(type(e).__name__, e))
 
 
 def setup(bot):
