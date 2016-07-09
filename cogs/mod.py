@@ -15,8 +15,9 @@ class Mod:
         """Registers this channel in the database as a 'nsfw' channel''"""
         cursor = config.connection.cursor()
         cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('insert into nsfw_channels (channel_id) values ("{}")'.format(ctx.message.id))
+        cursor.execute('insert into nsfw_channels (channel_id) values ("{}")'.format(ctx.message.channel.id))
         config.connection.commit()
+        await bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.isAdmin()
