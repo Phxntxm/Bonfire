@@ -4,3 +4,5 @@ __pycache__
 nohup.out
 restartcron.sh
 GitAutoDeploy.conf.json
+.htaccess
+autoupdate.php
