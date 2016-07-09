@@ -42,8 +42,16 @@ class Core:
             url = 'https://derpibooru.org/search.json?q='
             query = '+'.join(search)
             url += query
-            if ctx.message.channel.id in config.nsfwChannels:
+            
+            cursor = config.getCursor()
+            cursor.execute('use phxntx5_bonfire')
+            cursor.execute('select * from nsfw_channels')
+            result = cursor.fetchall()
+            if {'channel_id': '{}'.format(ctx.message.channel.id)} in result:
                 url += ",+explicit&filter_id=95938"
+            config.connection.commit()
+            config.connection.close()
+            
             # url should now be in the form of url?q=search+terms
             # Next part processes the json format, and saves the data in useful lists/dictionaries
             response = urllib.request.urlopen(url)

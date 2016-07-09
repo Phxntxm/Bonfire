@@ -12,8 +12,8 @@ class Mod:
     
     @commands.command(pass_context=True)
     @checks.isMod()
-    async def nsfwchannel(self, ctx):
-        """Registers this channel in the database as a 'nsfw' channel''"""
+    async def nsfw(self, ctx):
+        """Registers this channel as a 'nsfw' channel''"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         try:
@@ -24,7 +24,22 @@ class Mod:
         config.connection.commit()
         config.connection.close()
         await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
-
+    
+    @commands.command(pass_context=True)
+    @checks.isMod()
+    async def unnsfw(self, ctx)
+    """Removes this channel as a 'nsfw' channel"""
+        cursor = config.getCursor()
+        cursor.execute('use {}'.format(config.db_default))
+        try:
+            cursor.execute('delete from nsfw_channels where channel_id="{}"'.format(ctx.messsage.channel.id))
+        except pymysql.IntegrityError:
+            await self.bot.say("This channel is not registered as a ''nsfw' channel!")
+            return
+        config.connection.commit()
+        config.connection.close()
+        await self.bot.say("This channel has just been unregistered as a nsfw channel")
+    
     @commands.command(pass_context=True, no_pm=True)
     @checks.isAdmin()
     async def leave(self, ctx):

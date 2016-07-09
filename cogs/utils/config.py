@@ -9,7 +9,6 @@ with open("/home/phxntx5/public_html/Bonfire/config.yml", "r") as f:
 
 db_default = global_config.get("db_default")
 db_boops = global_config.get("db_boops")
-nsfwChannels = global_config.get("nsfw_channel")
 
 botDescription = global_config.get("description")
 commandPrefix = global_config.get("command_prefix")
