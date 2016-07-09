@@ -2,9 +2,11 @@ import asyncio
 import discord
 import traceback
 from discord.ext import commands
+from .utils import checks
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
+
 
 class VoiceEntry:
     def __init__(self, message, player):
@@ -16,9 +18,10 @@ class VoiceEntry:
         fmt = '*{0.title}* uploaded by {0.uploader} and requested by {1.display_name}'
         duration = self.player.duration
         if duration:
-            fmt += ' [length: {0[0]}m {0[1]}s]'.format(divmod(round(duration,0), 60))
+            fmt += ' [length: {0[0]}m {0[1]}s]'.format(divmod(round(duration, 0), 60))
         return fmt.format(self.player, self.requester)
-        
+
+
 class VoiceState:
     def __init__(self, bot):
         self.current = None
@@ -26,7 +29,7 @@ class VoiceState:
         self.bot = bot
         self.play_next_song = asyncio.Event()
         self.songs = asyncio.Queue()
-        self.skip_votes = set() # a set of user_ids that voted
+        self.skip_votes = set()  # a set of user_ids that voted
         self.audio_player = self.bot.loop.create_task(self.audio_player_task())
 
     def is_playing(self):
@@ -55,6 +58,7 @@ class VoiceState:
             await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
             self.current.player.start()
             await self.play_next_song.wait()
+
 
 class Music:
     """Voice related commands.
@@ -85,13 +89,9 @@ class Music:
                     self.bot.loop.create_task(state.voice.disconnect())
             except:
                 pass
-    def isMod():
-        def predicate(ctx):
-            return ctx.message.author.top_role.permissions.kick_members
-        return commands.check(predicate)
 
-    @commands.command(pass_context=True, no_pm=True)
-    async def join(self, ctx, *, channel : discord.Channel):
+    @commands.command(no_pm=True)
+    async def join(self, *, channel: discord.Channel):
         """Joins a voice channel."""
         try:
             await self.create_voice_client(channel)
@@ -121,7 +121,7 @@ class Music:
         return True
 
     @commands.command(pass_context=True, no_pm=True)
-    async def play(self, ctx, *, song : str):
+    async def play(self, ctx, *, song: str):
         """Plays a song.
         If there is a song currently in the queue, then it is
         queued until the next song is done playing.
@@ -147,8 +147,8 @@ class Music:
         await state.songs.put(entry)
 
     @commands.command(pass_context=True, no_pm=True)
-    @isMod()
-    async def volume(self, ctx, value : int):
+    @checks.isMod()
+    async def volume(self, ctx, value: int):
         """Sets the volume of the currently playing song."""
 
         state = self.get_voice_state(ctx.message.server)
@@ -158,7 +158,7 @@ class Music:
             await self.bot.say('Set the volume to {:.0%}'.format(player.volume))
 
     @commands.command(pass_context=True, no_pm=True)
-    @isMod()
+    @checks.isMod()
     async def pause(self, ctx):
         """Pauses the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -167,7 +167,7 @@ class Music:
             player.pause()
 
     @commands.command(pass_context=True, no_pm=True)
-    @isMod()
+    @checks.isMod()
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -176,7 +176,7 @@ class Music:
             player.resume()
 
     @commands.command(pass_context=True, no_pm=True)
-    @isMod()
+    @checks.isMod()
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
         This also clears the queue.
@@ -194,11 +194,13 @@ class Music:
             await state.voice.disconnect()
         except:
             pass
-    @commands.command(pass_context=True,no_pm=True)
-    async def queuelength(self,ctx):
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def queuelength(self, ctx):
         """Prints the length of the queue"""
         try:
-            await self.bot.say("There are a total of {} songs in the queue".format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
+            await self.bot.say("There are a total of {} songs in the queue"
+                               .format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
         except:
             await self.bot.say(traceback.format_exc())
         
@@ -229,7 +231,7 @@ class Music:
             await self.bot.say('You have already voted to skip this song.')
             
     @commands.command(pass_context=True, no_pm=True)
-    @isMod()
+    @checks.isMod()
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
         state = self.get_voice_state(ctx.message.server)
@@ -250,3 +252,7 @@ class Music:
         else:
             skip_count = len(state.skip_votes)
             await self.bot.say('Now playing {} [skips: {}/3]'.format(state.current, skip_count))
+
+
+def setup(bot):
+    bot.add_cog(Music(bot))

@@ -1,0 +1,92 @@
+from discord.ext import commands
+from .utils import config
+import discord
+import subprocess
+import urllib.parse
+import urllib.request
+import json
+import random
+
+
+class Core:
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def joke(self):
+        """Prints a random riddle"""
+        try:
+            fortuneCommand = "/usr/bin/fortune riddles"
+            fortune = subprocess.check_output(fortuneCommand.split()).decode("utf-8")
+            await self.bot.say(fortune)
+        except Exception as e:
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(e).__name__, e))
+
+    @commands.command()
+    async def urban(self, *msg: str):
+        """Pulls the top urbandictionary.com definition for a term"""
+        try:
+            term = '+'.join(msg)
+            url = "http://api.urbandictionary.com/v0/define?term={}".format(term)
+            response = urllib.request.urlopen(url)
+            data = json.loads(response.read().decode('utf-8'))
+            if len(data['list']) == 0:
+                await self.bot.say("No result with that term!")
+            else:
+                await self.bot.say(data['list'][0]['definition'])
+        except discord.HTTPException:
+            await self.bot.say('```Error: Definition is too long for me to send```')
+        except Exception as e:
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(e).__name__, e))
+
+    @commands.command(pass_context=True)
+    async def derpi(self, ctx, *search: str):
+        """Provides a random image from the first page of derpibooru.org for the following term"""
+        try:
+            if len(search) > 0:
+                url = 'https://derpibooru.org/search.json?q='
+                query = '+'.join(search)
+                url += query
+                if ctx.message.channel.id in config.nsfwChannels:
+                    url += ",+explicit&filter_id=95938"
+                # url should now be in the form of url?q=search+terms
+                # Next part processes the json format, and saves the data in useful lists/dictionaries
+                response = urllib.request.urlopen(url)
+                data = json.loads(response.read().decode('utf-8'))
+                results = data['search']
+
+                if len(results) > 0:
+                    index = random.randint(0, len(results) - 1)
+                    randImageUrl = results[index].get('representations').get('full')[2:]
+                    randImageUrl = 'http://' + randImageUrl
+                    imageLink = randImageUrl.strip()
+                else:
+                    await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
+                    return
+            else:
+                with urllib.request.urlopen('https://derpibooru.org/images/random') as response:
+                    imageLink = response.geturl()
+            url = 'https://shpro.link/redirect.php/'
+            data = urllib.parse.urlencode({'link': imageLink}).encode('ascii')
+            response = urllib.request.urlopen(url, data).read().decode('utf-8')
+            await self.bot.say(response)
+        except Exception as e:
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(e).__name__, e))
+
+    @commands.command(pass_context=True)
+    async def roll(self, ctx):
+        """Rolls a six sided die"""
+        try:
+            num = random.randint(1, 6)
+            fmt = '{0.message.author.name} has rolled a die and got the number {1}!'
+            await self.bot.say(fmt.format(ctx, num))
+        except Exception as e:
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(e).__name__, e))
+
+
+def setup(bot):
+    bot.add_cog(Core(bot))
