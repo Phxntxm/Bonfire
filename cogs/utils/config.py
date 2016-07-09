@@ -28,7 +28,7 @@ openCommands = global_config.get("openCommands", {})
 ownerCommands = global_config.get("ownerCommands", {})
 voiceCommands = global_config.get("voiceCommands", {})
 
-def resetConnection()
+def resetConnection():
     global connection
     connection = pymysql.connect(host=global_config.get("db_host"), user=global_config.get("db_user"),
                              password=global_config.get("db_user_pass"), charset='utf8mb4',
