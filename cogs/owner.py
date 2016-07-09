@@ -23,8 +23,7 @@ class Owner:
         cursor.execute('use {0}'.format(config.db_default))
         sql = "update restart_server set channel_id={0} where id=1".format(ctx.message.channel.id)
         cursor.execute(sql)
-        config.connection.commit()
-        config.connection.close()
+        config.closeConnection()
         await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)

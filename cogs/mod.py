@@ -21,8 +21,7 @@ class Mod:
         except pymysql.IntegrityError:
             await self.bot.say("This channel is already registered as 'nsfw'!")
             return
-        config.connection.commit()
-        config.connection.close()
+        config.closeConnection()
         await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
     
     @commands.command(pass_context=True)
@@ -36,8 +35,7 @@ class Mod:
         except pymysql.IntegrityError:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
             return
-        config.connection.commit()
-        config.connection.close()
+        config.closeConnection()
         await self.bot.say("This channel has just been unregistered as a nsfw channel")
     
     @commands.command(pass_context=True, no_pm=True)

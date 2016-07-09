@@ -29,8 +29,7 @@ async def on_ready():
         destination = discord.utils.find(lambda m: m.id == result, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
         cursor.execute('update restart_server set channel_id=0 where id=1')
-        config.connection.commit()
-        config.connection.close()
+        config.closeConnection()
 
 
 @bot.event

@@ -25,7 +25,12 @@ ownerCommands = global_config.get("ownerCommands", {})
 voiceCommands = global_config.get("voiceCommands", {})
 
 def getCursor():
+    global connection
     connection = pymysql.connect(host=global_config.get("db_host"), user=global_config.get("db_user"),
                              password=global_config.get("db_user_pass"), charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
     return connection.cursor()
+
+def closeConnection():
+    connection.commit()
+    connection.close()

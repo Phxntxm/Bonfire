@@ -52,8 +52,7 @@ def updateBattleRecords(winner, loser):
         sql = "insert into battle_records (id,record) values ('{0}','0-1')".format(loser.id)
         cursor.execute(sql)
 
-    config.connection.commit()
-    config.connection.close()
+    config.closeConnection()
 
 
 class Interaction:
@@ -163,8 +162,7 @@ class Interaction:
             cursor.execute(sql)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
-        config.connection.commit()
-        config.connection.close()
+        config.closeConnection()
 
 
 def setup(bot):

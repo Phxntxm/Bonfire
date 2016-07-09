@@ -49,8 +49,7 @@ class Core:
             result = cursor.fetchall()
             if {'channel_id': '{}'.format(ctx.message.channel.id)} in result:
                 url += ",+explicit&filter_id=95938"
-            config.connection.commit()
-            config.connection.close()
+            config.closeConnection()
             
             # url should now be in the form of url?q=search+terms
             # Next part processes the json format, and saves the data in useful lists/dictionaries
