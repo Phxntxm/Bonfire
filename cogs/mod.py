@@ -1,6 +1,7 @@
 from discord.ext import commands
 from .utils import checks
 from .utils import config
+import pymysql
 
 
 class Mod:
