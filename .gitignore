@@ -6,3 +6,4 @@ restartcron.sh
 GitAutoDeploy.conf.json
 .htaccess
 autoupdate.php
+error_log
