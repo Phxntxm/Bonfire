@@ -62,122 +62,106 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
-        try:
-            global battleP1
-            global battleP2
-            global battling
-            if battling:
-                return
-            if len(ctx.message.mentions) == 0:
-                await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
-                return
-            if len(ctx.message.mentions) > 1:
-                await self.bot.say("You cannot battle more than one person at once!")
-                return
-            if ctx.message.author.id == player2.id:
-                await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
-                return
-            if self.bot.user.id == player2.id:
-                await self.bot.say("I always win, don't even try it.")
-                return
-            fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
-            battleP1 = ctx.message.author
-            battleP2 = player2
-            await self.bot.say(fmt.format(ctx.message.author, player2))
-            t = Timer(180, battlingOff)
-            t.start()
-            battling = True
-        except Exception as e:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(e).__name__, e))
+        global battleP1
+        global battleP2
+        global battling
+        if battling:
+            return
+        if len(ctx.message.mentions) == 0:
+            await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
+            return
+        if len(ctx.message.mentions) > 1:
+            await self.bot.say("You cannot battle more than one person at once!")
+            return
+        if ctx.message.author.id == player2.id:
+            await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
+            return
+        if self.bot.user.id == player2.id:
+            await self.bot.say("I always win, don't even try it.")
+            return
+        fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
+        battleP1 = ctx.message.author
+        battleP2 = player2
+        await self.bot.say(fmt.format(ctx.message.author, player2))
+        t = Timer(180, battlingOff)
+        t.start()
+        battling = True
 
     @commands.command(no_pm=True)
     @checks.battled(battleP2)
     async def accept(self):
         """Accepts the battle challenge"""
-        try:
-            if not battling:
-                return
-            num = random.randint(1, 100)
-            fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
-            if num <= 50:
-                await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
-                updateBattleRecords(battleP1, battleP2)
-            elif num > 50:
-                await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
-                updateBattleRecords(battleP2, battleP1)
-                battlingOff()
-        except Exception as e:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(e).__name__, e))
-
+        if not battling:
+            return
+        num = random.randint(1, 100)
+        fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
+        if num <= 50:
+            await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
+            updateBattleRecords(battleP1, battleP2)
+        elif num > 50:
+            await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
+            updateBattleRecords(battleP2, battleP1)
+            battlingOff()
+            
     @commands.command(no_pm=True)
     @checks.battled(battleP2)
     async def decline(self):
         """Declines the battle challenge"""
-        try:
-            if not battling:
-                return
-            await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
-            updateBattleRecords(battleP1, battleP2)
-            battlingOff()
-        except Exception as e:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(e).__name__, e))
+        if not battling:
+            return
+        await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
+        updateBattleRecords(battleP1, battleP2)
+        battlingOff()
 
     @commands.command(pass_context=True, no_pm=True)
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""
-        try:
-            booper = ctx.message.author
-            if len(ctx.message.mentions) == 0:
-                await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
-                return
-            if len(ctx.message.mentions) > 1:
-                await self.bot.say("You cannot boop more than one person at once!")
-                return
-            if boopee.id == booper.id:
-                await self.bot.say("You can't boop yourself! Silly...")
-                return
-            if boopee.id == self.bot.user.id:
-                await self.bot.say("Why the heck are you booping me? Get away from me >:c")
-                return
+        booper = ctx.message.author
+        if len(ctx.message.mentions) == 0:
+            await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
+            return
+        if len(ctx.message.mentions) > 1:
+            await self.bot.say("You cannot boop more than one person at once!")
+            return
+        if boopee.id == booper.id:
+            await self.bot.say("You can't boop yourself! Silly...")
+            return
+        if boopee.id == self.bot.user.id:
+            await self.bot.say("Why the heck are you booping me? Get away from me >:c")
+            return
 
-            cursor = config.connection.cursor()
-            cursor.execute('use {0}'.format(config.db_boops))
-            sql = "show tables like '" + str(booper.id) + "'"
+        cursor = config.connection.cursor()
+        cursor.execute('use {0}'.format(config.db_boops))
+        sql = "show tables like '" + str(booper.id) + "'"
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        amount = 1
+        # Booper's table exists, continue
+        if result is not None:
+            sql = "select `amount` from `" + booper.id + "` where id='" + str(boopee.id) + "'"
             cursor.execute(sql)
             result = cursor.fetchone()
-            amount = 1
-            # Booper's table exists, continue
+            # Boopee's entry exists, continue
             if result is not None:
-                sql = "select `amount` from `" + booper.id + "` where id='" + str(boopee.id) + "'"
+                amount = result.get('amount') + 1
+                sql = "update `" + str(booper.id) + "` set amount = " + str(amount) + " where id=" + str(
+                    boopee.id)
                 cursor.execute(sql)
-                result = cursor.fetchone()
-                # Boopee's entry exists, continue
-                if result is not None:
-                    amount = result.get('amount') + 1
-                    sql = "update `" + str(booper.id) + "` set amount = " + str(amount) + " where id=" + str(
-                        boopee.id)
-                    cursor.execute(sql)
-                # Boopee does not exist, need to create the field for it
-                else:
-                    sql = "insert into `" + str(booper.id) + "` (id,amount) values ('" + str(boopee.id) + "',1)"
-                    cursor.execute(sql)
-            # Booper's table does not exist, need to create the table
+            # Boopee does not exist, need to create the field for it
             else:
-                sql = "create table `" + str(booper.id) + \
-                      "` (`id` varchar(255) not null,`amount` int(11) not null" + \
-                      ",primary key (`id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
-                cursor.execute(sql)
                 sql = "insert into `" + str(booper.id) + "` (id,amount) values ('" + str(boopee.id) + "',1)"
                 cursor.execute(sql)
-            fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
-            await self.bot.say(fmt.format(booper, boopee, amount))
-            config.connection.commit()
-        except Exception as e:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(e).__name__, e))
+        # Booper's table does not exist, need to create the table
+        else:
+            sql = "create table `" + str(booper.id) + \
+                  "` (`id` varchar(255) not null,`amount` int(11) not null" + \
+                  ",primary key (`id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
+            cursor.execute(sql)
+            sql = "insert into `" + str(booper.id) + "` (id,amount) values ('" + str(boopee.id) + "',1)"
+            cursor.execute(sql)
+        fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
+        await self.bot.say(fmt.format(booper, boopee, amount))
+        config.connection.commit()
 
 
 def setup(bot):

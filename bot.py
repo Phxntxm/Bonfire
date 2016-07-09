@@ -44,6 +44,9 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_command_error(error, ctx):
+    if isinstance(error,pymysql.OperationalError):
+        config.resetConnection()
+        await bot.say("The connection to the MySQL server was lost! Please try your command one more time {}".format(ctx.message.author.mention)
     fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
     await bot.say(fmt.format(type(e).__name__, e))
 

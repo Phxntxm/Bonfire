@@ -198,11 +198,8 @@ class Music:
     @commands.command(pass_context=True, no_pm=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
-        try:
-            await self.bot.say("There are a total of {} songs in the queue"
-                               .format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
-        except:
-            await self.bot.say(traceback.format_exc())
+        await self.bot.say("There are a total of {} songs in the queue"
+                           .format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
         
     @commands.command(pass_context=True, no_pm=True)
     async def skip(self, ctx):
