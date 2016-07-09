@@ -9,10 +9,15 @@ class Mod:
     def __init__(self, bot):
         self.bot = bot
     
-    
-    @commands.command(pass_context=True)
+    @commands.group(pass_context=True)
+    async def nsfw(self, ctx)
+    """Handles adding or removing a channel as a nsfw channel"""
+        if ctx.invoked_subcommand is None:
+            await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
+            
+    @nsfw.command(name="add", pass_context=True)
     @checks.isMod()
-    async def nsfw(self, ctx):
+    async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
@@ -25,9 +30,9 @@ class Mod:
         config.closeConnection()
         await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
     
-    @commands.command(pass_context=True)
+    @nsfw.command(name="remove", aliases=["delete"], pass_context=True)
     @checks.isMod()
-    async def unnsfw(self, ctx):
+    async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
