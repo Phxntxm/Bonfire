@@ -48,6 +48,13 @@ class Mod:
         await self.bot.say('Why must I leave? Hopefully I can come back :c')
         await self.bot.leave_server(ctx.message.server)
 
+    @commands.command(pass_context=True)
+    @checks.isMod()
+    async def say(self, ctx, *msg: str):
+        """Tells the bot to repeat what you say"""
+        msg = ' '.join(msg)
+        await self.bot.say(msg)
+        await self.bot.delete_message(ctx.message)
     
     @commands.command()
     @checks.isAdmin()
