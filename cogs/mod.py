@@ -1,11 +1,22 @@
 from discord.ext import commands
 from .utils import checks
+from .utils import config
 
 
 class Mod:
     """Commands that can be used by a or an admin, depending on the command"""
     def __init__(self, bot):
         self.bot = bot
+    
+    
+    @commands.command(pass_context=True)
+    @checks.isMod()
+    async def nsfwchannel(self, ctx):
+        """Registers this channel in the database as a 'nsfw' channel''"""
+        cursor = config.connection.cursor()
+        cursor.execute('use {}'.format(config.db_default))
+        cursor.execute('insert into nsfw_channels (channel_id) values ("{}")'.format(ctx.message.id))
+        config.connection.commit()
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.isAdmin()
@@ -14,13 +25,6 @@ class Mod:
         await self.bot.say('Why must I leave? Hopefully I can come back :c')
         await self.bot.leave_server(ctx.message.server)
 
-    @commands.command(pass_context=True)
-    @checks.isMod()
-    async def say(self, ctx, *msg: str):
-        """Tells the bot to repeat what you say"""
-        msg = ' '.join(msg)
-        await self.bot.say(msg)
-        await self.bot.delete_message(ctx.message)
     
     @commands.command()
     @checks.isAdmin()
