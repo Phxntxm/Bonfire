@@ -59,7 +59,7 @@ class Stats:
             fmt = []
             if result is not None:
                 for r in result:
-                    member = self.bot.determineId(r['id'])
+                    member = find(lambda m: m.id == r['id'], self.bot.get_all_members())
                     if member in members:
                         record = r['record']
 
