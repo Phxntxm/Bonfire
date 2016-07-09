@@ -15,7 +15,7 @@ class Core:
         self.bot = bot
 
     @commands.command()
-    async def join(self):
+    async def addbot(self):
         perms = discord.Permissions.none()
         perms.read_messages = True
         perms.send_messages = True
@@ -27,6 +27,7 @@ class Core:
         perms.read_message_history = True
         perms.attach_files = True
         await bot.say("Use this URL to add me to a server that you'd like!\n{}'".format(discord.utils.oauth_url('183748889814237186',perms)))
+        
     @commands.command()
     async def joke(self):
         """Prints a random riddle"""
