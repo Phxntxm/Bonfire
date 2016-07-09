@@ -20,6 +20,7 @@ class Mod:
             cursor.execute('insert into nsfw_channels (channel_id) values ("{}")'.format(ctx.message.channel.id))
         except pymysql.IntegrityError:
             await self.bot.say("This channel is already registered as 'nsfw'!")
+            return
         config.connection.commit()
         await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
