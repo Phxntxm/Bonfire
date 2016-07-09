@@ -13,7 +13,7 @@ class Stats:
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
         try:
-            cursor = config.connection.cursor()
+            cursor = config.getCursor()
             cursor.execute('use {0}'.format(config.db_boops))
             sql = "select id,amount from `{0}` where amount=(select MAX(amount) from `{0}`)"\
                 .format(ctx.message.author.id)
@@ -23,6 +23,7 @@ class Stats:
             await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
                 ctx.message.author.mention, member.mention, result.get('amount')))
             config.connection.commit()
+            config.connection.close()
         except Exception as e:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(e).__name__, e))
@@ -31,7 +32,7 @@ class Stats:
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times"""
         members = ctx.message.server.members
-        cursor = config.connection.cursor()
+        cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_boops))
         sql = "select * from `{}`".format(ctx.message.author.id)
         cursor.execute(sql)
@@ -45,6 +46,8 @@ class Stats:
             amount = r['amount']
             if member in members:
                 output += "\n{0.name}: {1} times".format(member,amount)
+        config.connection.commit()
+        config.connection.close()
         await self.bot.say("```{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
@@ -52,7 +55,7 @@ class Stats:
         """Prints a 'leaderboard' of everyone in the server's battling record"""
         try:
             members = ctx.message.server.members
-            cursor = config.connection.cursor()
+            cursor = config.getCursor()
             cursor.execute('use {0}'.format(config.db_default))
             sql = "select * from battle_records"
             cursor.execute(sql)
@@ -88,6 +91,7 @@ class Stats:
                 for index in range(0, len(fmt)):
                     fmt[index] = "{0}) {1}".format(index + 1, fmt[index])
             config.connection.commit()
+            config.connection.close()
             if len(fmt) == 0:
                 await self.bot.say("```No battling records found from any members in this server```")
                 return

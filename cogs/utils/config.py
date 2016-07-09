@@ -10,9 +10,6 @@ with open("/home/phxntx5/public_html/Bonfire/config.yml", "r") as f:
 db_default = global_config.get("db_default")
 db_boops = global_config.get("db_boops")
 nsfwChannels = global_config.get("nsfw_channel")
-connection = pymysql.connect(host=global_config.get("db_host"), user=global_config.get("db_user"),
-                             password=global_config.get("db_user_pass"), charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
 
 botDescription = global_config.get("description")
 commandPrefix = global_config.get("command_prefix")
@@ -28,8 +25,8 @@ openCommands = global_config.get("openCommands", {})
 ownerCommands = global_config.get("ownerCommands", {})
 voiceCommands = global_config.get("voiceCommands", {})
 
-def resetConnection():
-    global connection
+def getCursor():
     connection = pymysql.connect(host=global_config.get("db_host"), user=global_config.get("db_user"),
                              password=global_config.get("db_user_pass"), charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
+    return connection.cursor()

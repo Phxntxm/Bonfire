@@ -20,7 +20,7 @@ async def on_ready():
     # Change the status upon connection to the default status
     game = discord.Game(name=config.defaultStatus, type=0)
     await bot.change_status(game)
-    cursor = config.connection.cursor()
+    cursor = config.getCursor()
 
     cursor.execute('use {0}'.format(config.db_default))
     cursor.execute('select channel_id from restart_server where id=1')
@@ -30,6 +30,7 @@ async def on_ready():
         await bot.send_message(destination, "I have just finished restarting!")
         cursor.execute('update restart_server set channel_id=0 where id=1')
         config.connection.commit()
+        config.connection.close()
 
 
 @bot.event
@@ -44,9 +45,6 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_command_error(error, ctx):
-    if isinstance(error,pymysql.OperationalError):
-        config.resetConnection()
-        await bot.say("The connection to the MySQL server was lost! Please try your command one more time {}".format(ctx.message.author.mention))
     fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
     await bot.say(fmt.format(type(error).__name__, error))
 

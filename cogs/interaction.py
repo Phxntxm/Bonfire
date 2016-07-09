@@ -20,7 +20,7 @@ def battlingOff():
 
 
 def updateBattleRecords(winner, loser):
-    cursor = config.connection.cursor()
+    cursor = config.getCursor()
     cursor.execute('use {0}'.format(config.db_default))
 
     # Update winners records
@@ -37,6 +37,7 @@ def updateBattleRecords(winner, loser):
         cursor.execute(sql)
 
     config.connection.commit()
+    config.connection.close()
 
     # Update losers records
     sql = "select record from battle_records where id={0}".format(loser.id)
@@ -52,6 +53,7 @@ def updateBattleRecords(winner, loser):
         cursor.execute(sql)
 
     config.connection.commit()
+    config.connection.close()
 
 
 class Interaction:
@@ -130,7 +132,7 @@ class Interaction:
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
             return
 
-        cursor = config.connection.cursor()
+        cursor = config.getCursor()
         cursor.execute('use {0}'.format(config.db_boops))
         sql = "show tables like '" + str(booper.id) + "'"
         cursor.execute(sql)
@@ -162,6 +164,7 @@ class Interaction:
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
         config.connection.commit()
+        config.connection.close()
 
 
 def setup(bot):
