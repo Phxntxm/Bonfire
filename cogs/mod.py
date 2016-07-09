@@ -28,3 +28,7 @@ class Mod:
         except Exception as e:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(e).__name__, e))
+
+
+def setup(bot):
+    bot.add_cog(Mod(bot))
