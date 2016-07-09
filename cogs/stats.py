@@ -5,6 +5,7 @@ import re
 
 
 class Stats:
+    """Leaderboard/stats related commands"""
     def __init__(self, bot):
         self.bot = bot
 
@@ -25,6 +26,24 @@ class Stats:
         except Exception as e:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(e).__name__, e))
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def listboops(self, ctx):
+        """Lists all the users you have booped and the amount of times"""
+        cursor = config.connection.cursor()
+        cursor.execute('use {}'.format(config.db_boops))
+        sql = "select * from `{}`".format(ctx.message.author.id)
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        if result is None:
+            await self.bot.say("You have not booped anyone!")
+            return
+        output = "You have booped:"
+        for r in result:
+            member = find(lambda m: m.id == r['id'], self.bot.get_all_members())
+            amount = r['amount']
+            output += "\n{0.name}: {1} times".format(member,amount)
+        await self.bot.say("```{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
     async def mostwins(self, ctx):

@@ -11,6 +11,7 @@ multi = re.compile(r'```(.*?)```', re.DOTALL)
 
 
 class Owner:
+    """Commands that can only be used by Phantom, bot management commands"""
     def __init__(self, bot):
         self.bot = bot
 

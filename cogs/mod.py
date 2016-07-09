@@ -3,6 +3,7 @@ from .utils import checks
 
 
 class Mod:
+    """Commands that can be used by a or an admin, depending on the command"""
     def __init__(self, bot):
         self.bot = bot
 

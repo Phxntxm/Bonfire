@@ -9,6 +9,7 @@ import random
 
 
 class Core:
+    """Core commands, these are the not 'complicated' commands."""
     def __init__(self, bot):
         self.bot = bot
 

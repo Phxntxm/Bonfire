@@ -55,6 +55,7 @@ def updateBattleRecords(winner, loser):
 
 
 class Interaction:
+    """Commands that interact with another user"""
     def __init__(self, bot):
         self.bot = bot
 
