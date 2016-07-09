@@ -20,6 +20,7 @@ class Mod:
             cursor.execute('insert into nsfw_channels (channel_id) values ("{}")'.format(ctx.message.channel.id))
         except pymysql.IntegrityError:
             await self.bot.say("This channel is already registered as 'nsfw'!")
+            config.closeConnection()
             return
         config.closeConnection()
         await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
@@ -30,11 +31,13 @@ class Mod:
         """Removes this channel as a 'nsfw' channel"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
-        try:
-            cursor.execute('delete from nsfw_channels where channel_id="{}"'.format(ctx.message.channel.id))
-        except pymysql.IntegrityError:
+        cursor.execute('select * from nsfw_channels where channel_id="{}"'.format(ctx.message.channel.id))
+        if cursor.fetchone() is None:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
+            config.closeConnection()
             return
+
+        cursor.execute('delete from nsfw_channels where channel_id="{}"'.format(ctx.message.channel.id))
         config.closeConnection()
         await self.bot.say("This channel has just been unregistered as a nsfw channel")
     
