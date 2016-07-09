@@ -1,0 +1,6 @@
+config.yml
+.idea
+__pycache__
+nohup.out
+restartcron.sh
+GitAutoDeploy.conf.json
