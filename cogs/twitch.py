@@ -20,7 +20,7 @@ async def checkChannels(bot):
     cursor.execute('select * from twitch')
     result = cursor.fetchall()
     for r in result:
-        server = r['server_id']
+        server = discord.utils.find(lambda s: s.id == r['server_id'], bot.servers)
         member = discord.utils.find(lambda m: m.id == r['user_id'], server.members)
         url = r['twitch_url']
         live = int(r['live'])
