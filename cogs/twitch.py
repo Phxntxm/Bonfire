@@ -58,5 +58,5 @@ class Twitch:
             await bot.say("I do not have your twitch URL added {}".format(ctx.message.author.mention))
             config.closeConnection()
             
-def setup(bot)
+def setup(bot):
     bot.add_cog(Twitch(bot))
