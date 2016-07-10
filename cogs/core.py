@@ -7,6 +7,7 @@ import urllib.request
 import json
 import random
 import discord
+import re
 
 
 class Core:
