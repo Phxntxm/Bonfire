@@ -46,7 +46,7 @@ class Twitch:
         cursor.execute('select twitch_url from twitch where user_id="{}"'.format(ctx.message.author.id))
         result = cursor.fetchone()
         if result is not None:
-            cursor.execute('update twitch set twitch_url="{}" from twitch where user_id="{}"'.format(url,ctx.message.author.id))
+            cursor.execute('update twitch set twitch_url="{}" where user_id="{}"'.format(url,ctx.message.author.id))
         else:
             cursor.execute('insert into twitch (user_id,server_id,twitch_url,notifications_on) values ("{}","{}","{}",1)'
                 .format(ctx.message.author.id,ctx.message.server.id,url))
