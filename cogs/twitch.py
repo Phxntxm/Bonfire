@@ -45,7 +45,7 @@ class Twitch:
     
     @commands.group(pass_context=True,no_pm=True,invoke_without_command=True)
     async def twitch(self, ctx, *, member : discord.Member = None):
-        """Use this command to check the twitch stream of a user"""
+        """Use this command to check the twitch info of a user"""
         pass
         if member is not None:
             cursor = config.getCursor()
@@ -53,7 +53,15 @@ class Twitch:
             cursor.execute('select twitch_url from twitch where user_id="{}"'.format(member.id))
             result = cursor.fetchone()
             if result is not None:
-                await self.bot.say("{}'s twitch URL is {}".format(member.name,result['twitch_url']))
+                url = result['twitch_url']
+                user = re.search("(?<=twitch.tv/)(.*)",url).group(1)
+                result = urllib.request.urlopen("https://api.twitch.tv/kraken/channels/{}".format(user))
+                data = json.loads(response.read().decode('utf-8'))
+                fmt = "Username: {}".format(data['display_name'])
+                fmt += "\nStatus: {}".format(data['status'])
+                fmt += "\nFollwers: {}".format(data['followers'])
+                fmt += "\nURL: {}".format(url)
+                await self.bot.say("```{}```".format(fmt))
                 config.closeConnection()
             else:
                 await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
