@@ -56,7 +56,7 @@ class Twitch:
                 url = result['twitch_url']
                 user = re.search("(?<=twitch.tv/)(.*)",url).group(1)
                 result = urllib.request.urlopen("https://api.twitch.tv/kraken/channels/{}".format(user))
-                data = json.loads(response.read().decode('utf-8'))
+                data = json.loads(result.read().decode('utf-8'))
                 fmt = "Username: {}".format(data['display_name'])
                 fmt += "\nStatus: {}".format(data['status'])
                 fmt += "\nFollwers: {}".format(data['followers'])
