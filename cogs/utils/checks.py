@@ -28,10 +28,3 @@ def isPM():
         return ctx.message.channel.is_private
 
     return commands.check(predicate)
-
-
-def battled(battleP2=None):
-    def predicate(ctx):
-        return ctx.message.author == battleP2
-
-    return commands.check(predicate)
