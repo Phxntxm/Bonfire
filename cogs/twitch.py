@@ -1,5 +1,7 @@
 from discord.ext import commands
 from .utils import config
+import urllib.request
+import urllib.parse
 import discord
 import re
 
