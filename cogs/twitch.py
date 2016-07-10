@@ -3,8 +3,15 @@ from .utils import config
 import urllib.request
 import urllib.parse
 import discord
+import json
 import re
 
+def channelOnline(channel: str):
+    url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
+    response = urllib.request.urlopen(url)
+    data = json.loads(response.read().decode('utf-8'))
+    return data['stream'] is not None
+    
 class Twitch:
     """Class for some twitch integration"""
     def __init__(self, bot):
