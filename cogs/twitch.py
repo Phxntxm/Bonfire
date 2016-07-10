@@ -17,10 +17,10 @@ class Twitch:
             cursor.execute('select twitch_url from twitch where user_id="{}"'.format(member.id))
             result = cursor.fetchone()
             if result is not None:
-                await self.bot.say("{}'s twitch URL is {}'".format(member.name,result['twitch_url']))
+                await self.bot.say("{}'s twitch URL is {}".format(member.name,result['twitch_url']))
                 config.closeConnection()
             else:
-                await self.bot.say("{} has not savede their twitch URL yet!".format(member.name))
+                await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
                 config.closeConnection()
     
     @twitch.command(name='add',pass_context=True,no_pm=True)
@@ -53,7 +53,7 @@ class Twitch:
         cursor.execute('select twitch_url from twitch where user_id="{}"'.format(ctx.message.author.id))
         result = cursor.fetchone()
         if result is not None:
-            cursor.execute('delete from twitch where user_id="{}"'.format(url,ctx.message.author.id))
+            cursor.execute('delete from twitch where user_id="{}"'.format(ctx.message.author.id))
         else:
             await bot.say("I do not have your twitch URL added {}".format(ctx.message.author.mention))
             config.closeConnection()
