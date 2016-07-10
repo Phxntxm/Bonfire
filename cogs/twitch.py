@@ -2,6 +2,7 @@ from discord.ext import commands
 from .utils import config
 import urllib.request
 import urllib.parse
+import asyncio
 import discord
 import json
 import re
@@ -11,6 +12,26 @@ def channelOnline(channel: str):
     response = urllib.request.urlopen(url)
     data = json.loads(response.read().decode('utf-8'))
     return data['stream'] is not None
+    
+async def checkChannels(bot)
+    await client.wait_until_ready()
+    cursor = config.getCursor()
+    cursor.execute('use {}'.format(config.db_default))
+    cursor.execute('select * from twitch')
+    result = cursor.fetchall()
+    for r in result:
+        server = r['server_id']
+        member = discord.utils.find(lambda m: m.id == r['user_id'], server.members)
+        url = r['twitch_url']
+        live = int(r['live'])
+        notify = int(r['notifications_on'])
+        user = re.search("(?<=twitch.tv/)(.*)",url).group(1)
+        if not live and notify and channelOnline(user):
+            cursor.execute('update twitch set live=1 where user_id="{}"'.format(r['user_id']))
+            await bot.send_message(server,"{} has just gone live! View their stream at {}".format(member.name,url))
+    config.closeConnection()
+    await asyncio.sleep(180)
+            
     
 class Twitch:
     """Class for some twitch integration"""
@@ -55,7 +76,7 @@ class Twitch:
         if result is not None:
             cursor.execute('update twitch set twitch_url="{}" where user_id="{}"'.format(url,ctx.message.author.id))
         else:
-            cursor.execute('insert into twitch (user_id,server_id,twitch_url,notifications_on) values ("{}","{}","{}",1)'
+            cursor.execute('insert into twitch (user_id,server_id,twitch_url,notifications_on,live) values ("{}","{}","{}",1,0)'
                 .format(ctx.message.author.id,ctx.message.server.id,url))
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
         config.closeConnection()
@@ -77,3 +98,4 @@ class Twitch:
             
 def setup(bot):
     bot.add_cog(Twitch(bot))
+    bot.loop.create_task(checkChannels(bot))
