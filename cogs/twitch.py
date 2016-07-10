@@ -55,6 +55,7 @@ class Twitch:
         if result is not None:
             cursor.execute('delete from twitch where user_id="{}"'.format(ctx.message.author.id))
             await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
+            config.closeConnection()
         else:
             await self.bot.say("I do not have your twitch URL added {}".format(ctx.message.author.mention))
             config.closeConnection()
