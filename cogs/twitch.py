@@ -14,7 +14,7 @@ def channelOnline(channel: str):
     return data['stream'] is not None
     
 async def checkChannels(bot):
-    await client.wait_until_ready()
+    await bot.wait_until_ready()
     cursor = config.getCursor()
     cursor.execute('use {}'.format(config.db_default))
     cursor.execute('select * from twitch')
