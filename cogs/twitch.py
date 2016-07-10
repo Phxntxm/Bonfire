@@ -99,4 +99,4 @@ class Twitch:
             
 def setup(bot):
     bot.add_cog(Twitch(bot))
-    bot.loop.create_task(checkChannels(bot))
+    config.loop.create_task(checkChannels(bot))
