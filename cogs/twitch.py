@@ -118,7 +118,7 @@ class Twitch:
             await self.bot.say("I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(ctx.message.author.mention))
             config.closeConnection()
             return
-        elif result:
+        elif result == "1":
             await self.bot.say("What do you want me to do, send two notifications? Not gonna happen {}".format(ctx.message.author.mention))
             config.closeConnection()
             return
@@ -139,7 +139,7 @@ class Twitch:
             await self.bot.say("I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(ctx.message.author.mention))
             config.closeConnection()
             return
-        elif not result:
+        elif result == "0":
             await self.bot.say("I am already set to not notify if you go live! Pay attention brah {}".format(ctx.message.author.mention))
             config.closeConnection()
             return
