@@ -88,7 +88,7 @@ class Twitch:
         config.closeConnection()
     
     @twitch.command(name='remove',aliases=['delete'],pass_context=True,no_pm=True)
-    async def remove_twitch_url(self,ctx):
+    async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
@@ -99,9 +99,57 @@ class Twitch:
             await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
             config.closeConnection()
         else:
-            await self.bot.say("I do not have your twitch URL added {}".format(ctx.message.author.mention))
+            await self.bot.say("I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(ctx.message.author.mention))
             config.closeConnection()
+    
+    @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
+    async def notify(self, ctx)
+        """This can be used to turn notifications on or off"""
+        pass
+        
+    @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
+    async def notify_on(self, ctx):
+        """Turns twitch notifications on"""
+        cursor = config.getCursor()
+        cursor.execute('use {}'.format(config.db_default))
+        cursor.execute('select notifications_on from twitch where user_id="{}"'.format(ctx.message.author.id))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say("I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(ctx.message.author.mention))
+            config.closeConnection()
+            return
+        elif result:
+            await self.bot.say("What do you want me to do, send two notifications? Not gonna happen {}".format(ctx.message.author.mention))
+            config.closeConnection()
+            return
+        else:
+            cursor.execute('update twitch set notifications_on=1 where user_id="{}"'.format(ctx.message.author.id))
+            await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(ctx.message.author.mention))
+            config.closeConnection()
+            return
             
+    @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
+    async def notify_off(self, ctx):
+        """Turns twitch notifications off"""
+        cursor = config.getCursor()
+        cursor.execute('use {}'.format(config.db_default))
+        cursor.execute('select notifications_on from twitch where user_id="{}"'.format(ctx.message.author.id))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say("I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(ctx.message.author.mention))
+            config.closeConnection()
+            return
+        elif not result:
+            await self.bot.say("I am already set to not notify if you go live! Pay attention brah {}".format(ctx.message.author.mention))
+            config.closeConnection()
+            return
+        else:
+            cursor.execute('update twitch set notifications_on=0 where user_id="{}"'.format(ctx.message.author.id))
+            await self.bot.say("I will not notify if you go live anymore {}, are you going to stream some lewd stuff you don't want people to see?~".format(ctx.message.author.mention))
+            config.closeConnection()
+            return
+            
+        
 def setup(bot):
     bot.add_cog(Twitch(bot))
     config.loop.create_task(checkChannels(bot))
