@@ -93,8 +93,8 @@ class Core:
         """Rolls a die based on the notation given
         Format should be #d#"""
         try:
-            dice = re.search("(\d?)d(\d?)",notation).group(1)
-            num = re.search("(\d?)d(\d?)",notation).group(2)
+            dice = re.search("(\d*)d(\d*)",notation).group(1)
+            num = re.search("(\d*)d(\d*)",notation).group(2)
         except AttributeError:
             await self.bot.say("Please provide the die notation in #d#!")
             return
