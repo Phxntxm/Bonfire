@@ -8,7 +8,7 @@ class Twitch:
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.group(pass_context=True,no_pm=True)
+    @commands.group(pass_context=True,no_pm=True,invoke_without_command=True)
     async def twitch(self, ctx, *, member : discord.Member = None):
         pass
         if member is not None:
@@ -20,7 +20,7 @@ class Twitch:
                 await self.bot.say("{}'s twitch URL is {}'".format(member.name,result['twitch_url']))
                 config.closeConnection()
             else:
-                await self.bot.say("{} has not savede their twitch URL yet!")
+                await self.bot.say("{} has not savede their twitch URL yet!".format(member.name))
                 config.closeConnection()
     
     @twitch.command(name='add',pass_context=True,no_pm=True)
