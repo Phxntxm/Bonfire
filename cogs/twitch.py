@@ -103,7 +103,7 @@ class Twitch:
             config.closeConnection()
     
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    async def notify(self, ctx)
+    async def notify(self, ctx):
         """This can be used to turn notifications on or off"""
         pass
         
