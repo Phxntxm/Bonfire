@@ -13,7 +13,7 @@ def channelOnline(channel: str):
     data = json.loads(response.read().decode('utf-8'))
     return data['stream'] is not None
     
-async def checkChannels(bot)
+async def checkChannels(bot):
     await client.wait_until_ready()
     cursor = config.getCursor()
     cursor.execute('use {}'.format(config.db_default))
@@ -40,6 +40,7 @@ class Twitch:
     
     @commands.group(pass_context=True,no_pm=True,invoke_without_command=True)
     async def twitch(self, ctx, *, member : discord.Member = None):
+        """Use this command to check the twitch stream of a user"""
         pass
         if member is not None:
             cursor = config.getCursor()
