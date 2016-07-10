@@ -59,7 +59,7 @@ class Twitch:
                 data = json.loads(result.read().decode('utf-8'))
                 fmt = "Username: {}".format(data['display_name'])
                 fmt += "\nStatus: {}".format(data['status'])
-                fmt += "\nFollwers: {}".format(data['followers'])
+                fmt += "\nFollowers: {}".format(data['followers'])
                 fmt += "\nURL: {}".format(url)
                 await self.bot.say("```{}```".format(fmt))
                 config.closeConnection()
