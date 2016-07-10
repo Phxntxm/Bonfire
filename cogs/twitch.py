@@ -29,6 +29,9 @@ async def checkChannels(bot):
         if not live and notify and channelOnline(user):
             cursor.execute('update twitch set live=1 where user_id="{}"'.format(r['user_id']))
             await bot.send_message(server,"{} has just gone live! View their stream at {}".format(member.name,url))
+        elif live and not channelOnline(user):
+            cursor.execute('update twitch set live=0 where user_id="{}"'.format(r['user_id']))
+            await bot.send_message(server,"{} has just gone offline! Catch them next time they stream at {}".format(member.name,url))
     config.closeConnection()
     await asyncio.sleep(180)
             
