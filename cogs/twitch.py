@@ -37,7 +37,9 @@ async def checkChannels(bot):
             
     
 class Twitch:
-    """Class for some twitch integration"""
+    """Class for some twitch integration
+    You can add or remove your twitch stream for your user
+    I will then notify the server when you have gone live or offline"""
     def __init__(self, bot):
         self.bot = bot
     
