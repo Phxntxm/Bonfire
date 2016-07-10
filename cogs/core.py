@@ -12,6 +12,7 @@ import re
 
 class Core:
     """Core commands, these are the not 'complicated' commands."""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -28,8 +29,9 @@ class Core:
         perms.embed_links = True
         perms.read_message_history = True
         perms.attach_files = True
-        await self.bot.say("Use this URL to add me to a server that you'd like!\n{}".format(discord.utils.oauth_url('183748889814237186',perms)))
-        
+        await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
+                           .format(discord.utils.oauth_url('183748889814237186', perms)))
+
     @commands.command()
     async def joke(self):
         """Prints a random riddle"""
@@ -59,7 +61,7 @@ class Core:
             url = 'https://derpibooru.org/search.json?q='
             query = '+'.join(search)
             url += query
-            
+
             cursor = config.getCursor()
             cursor.execute('use phxntx5_bonfire')
             cursor.execute('select * from nsfw_channels')
@@ -67,7 +69,7 @@ class Core:
             if {'channel_id': '{}'.format(ctx.message.channel.id)} in result:
                 url += ",+explicit&filter_id=95938"
             config.closeConnection()
-            
+
             # url should now be in the form of url?q=search+terms
             # Next part processes the json format, and saves the data in useful lists/dictionaries
             response = urllib.request.urlopen(url)
@@ -89,12 +91,12 @@ class Core:
         await self.bot.say(response)
 
     @commands.command(pass_context=True)
-    async def roll(self, ctx, notation: str = "d6"):
+    async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         try:
-            dice = re.search("(\d*)d(\d*)",notation).group(1)
-            num = re.search("(\d*)d(\d*)",notation).group(2)
+            dice = re.search("(\d*)d(\d*)", notation).group(1)
+            num = re.search("(\d*)d(\d*)", notation).group(2)
         except AttributeError:
             await self.bot.say("Please provide the die notation in #d#!")
             return
@@ -106,11 +108,11 @@ class Core:
         if int(num) > 25:
             await self.bot.say("What die has more than 25 sides? Please, calm down")
             return
-        valueStr = str(random.randint(1,int(num)))
-        for i in range(1,int(dice)):
+        valueStr = str(random.randint(1, int(num)))
+        for i in range(1, int(dice)):
             value = random.randint(1, int(num))
             valueStr += ", {}".format(value)
-        
+
         if int(dice) == 1:
             fmt = '{0.message.author.name} has rolled a die and got the number {2}!'
         else:

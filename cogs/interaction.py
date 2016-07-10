@@ -36,8 +36,7 @@ def updateBattleRecords(winner, loser):
         sql = "insert into battle_records (id,record) values ('{0}','1-0')".format(winner.id)
         cursor.execute(sql)
 
-    config.connection.commit()
-    config.connection.close()
+        config.closeConnection()
 
     # Update losers records
     sql = "select record from battle_records where id={0}".format(loser.id)
