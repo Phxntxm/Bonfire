@@ -95,6 +95,7 @@ class Interaction:
         if num <= 50:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
             updateBattleRecords(battleP1, battleP2)
+            battlingOff()
         elif num > 50:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             updateBattleRecords(battleP2, battleP1)
