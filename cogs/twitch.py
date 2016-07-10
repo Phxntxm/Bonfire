@@ -32,7 +32,13 @@ class Twitch:
             url="https://www.twitch.tv/{}".format(url)
         else:
             url="https://www.{}".format(url)
-        
+            
+        try:
+            urllib.request.urlopen(url)
+        except urllib.request.HTTPError:
+            await self.bot.say("That twitch user does not exist! What would be the point of adding a nonexistant twitch user? Silly")
+            return
+            
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select twitch_url from twitch where user_id="{}"'.format(ctx.message.author.id))
