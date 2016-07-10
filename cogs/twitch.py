@@ -17,10 +17,10 @@ class Twitch:
             cursor.execute('select twitch_url from twitch where user_id="{}"'.format(member.id))
             result = cursor.fetchone()
             if result is not None:
-                await bot.say("{}'s twitch URL is {}'".format(member.name,result['twitch_url']))
+                await self.bot.say("{}'s twitch URL is {}'".format(member.name,result['twitch_url']))
                 config.closeConnection()
             else:
-                await bot.say("{} has not savede their twitch URL yet!")
+                await self.bot.say("{} has not savede their twitch URL yet!")
                 config.closeConnection()
     
     @twitch.command(name='add',pass_context=True,no_pm=True)
