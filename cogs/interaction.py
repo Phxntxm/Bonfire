@@ -21,22 +21,20 @@ def battlingOff():
 
 def updateBattleRecords(winner, loser):
     cursor = config.getCursor()
-    cursor.execute('use {0}'.format(config.db_default))
+    cursor.execute('use {}'.format(config.db_default))
 
     # Update winners records
-    sql = "select record from battle_records where id={0}".format(winner.id)
+    sql = "select record from battle_records where id='{}'".format(winner.id)
     cursor.execute(sql)
     result = cursor.fetchone()
     if result is not None:
         result = result['record'].split('-')
         result[0] = str(int(result[0]) + 1)
-        sql = "update battle_records set record ='{0}' where id='{1}'".format("-".join(result), winner.id)
+        sql = "update battle_records set record ='{}' where id='{}'".format("-".join(result), winner.id)
         cursor.execute(sql)
     else:
-        sql = "insert into battle_records (id,record) values ('{0}','1-0')".format(winner.id)
+        sql = "insert into battle_records (id,record) values ('{}','1-0')".format(winner.id)
         cursor.execute(sql)
-
-        config.closeConnection()
 
     # Update losers records
     sql = "select record from battle_records where id={0}".format(loser.id)
@@ -87,11 +85,10 @@ class Interaction:
         t.start()
         battling = True
 
-    @commands.command(no_pm=True)
-    @checks.battled(battleP2)
-    async def accept(self):
+    @commands.command(pass_context=True, no_pm=True)
+    async def accept(self, ctx):
         """Accepts the battle challenge"""
-        if not battling:
+        if not battling or battleP2 != ctx.message.author:
             return
         num = random.randint(1, 100)
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
@@ -103,11 +100,10 @@ class Interaction:
             updateBattleRecords(battleP2, battleP1)
             battlingOff()
             
-    @commands.command(no_pm=True)
-    @checks.battled(battleP2)
-    async def decline(self):
+    @commands.command(pass_context=True, no_pm=True)
+    async def decline(self, ctx):
         """Declines the battle challenge"""
-        if not battling:
+        if not battling or battleP2 != ctx.message.author:
             return
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         updateBattleRecords(battleP1, battleP2)

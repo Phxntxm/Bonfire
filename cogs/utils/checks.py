@@ -30,7 +30,7 @@ def isPM():
     return commands.check(predicate)
 
 
-def battled(battleP2=""):
+def battled(battleP2=None):
     def predicate(ctx):
         return ctx.message.author == battleP2
 
