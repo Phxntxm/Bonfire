@@ -75,9 +75,7 @@ class Core:
 
             if len(results) > 0:
                 index = random.randint(0, len(results) - 1)
-                randImageUrl = results[index].get('representations').get('full')[2:]
-                randImageUrl = 'http://' + randImageUrl
-                imageLink = randImageUrl.strip()
+                imageLink = 'http://' + results[index].get('representations').get('full')[2:].strip()
             else:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
                 return
@@ -90,11 +88,33 @@ class Core:
         await self.bot.say(response)
 
     @commands.command(pass_context=True)
-    async def roll(self, ctx):
-        """Rolls a six sided die"""
-        num = random.randint(1, 6)
-        fmt = '{0.message.author.name} has rolled a die and got the number {1}!'
-        await self.bot.say(fmt.format(ctx, num))
+    async def roll(self, ctx, notation: str = "d6"):
+        """Rolls a die based on the notation given
+        Format should be #d#"""
+        try:
+            dice = re.search("(\d?)d(\d?)",notation).group(1)
+            num = re.search("(\d?)d(\d?)",notation).group(2)
+        except AttributeError:
+            await self.bot.say("Please provide the die notation in #d#!")
+            return
+        if dice == '':
+            dice = '1'
+        if int(dice) > 10:
+            await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
+            return
+        if int(num) > 25:
+            await self.bot.say("What die has more than 25 sides? Please, calm down")
+            return
+        valueStr = str(random.randint(1,int(num)))
+        for i in range(0,int(dice)):
+            value = random.randint(1, int(num))
+            valueStr += ", {}".format(value)
+        
+        if int(dice) == 1:
+            fmt = '{0.message.author.name} has rolled a die and got the number {2}!'
+        else:
+            fmt = '{0.message.author.name} has rolled {1} dice and got the numbers {2}!'
+        await self.bot.say(fmt.format(ctx, dice, valueStr))
 
 
 def setup(bot):
