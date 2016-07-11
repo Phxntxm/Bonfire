@@ -36,7 +36,7 @@ async def checkChannels(bot):
             await bot.send_message(server, "{} has just gone offline! Catch them next time they stream at {}"
                                    .format(member.name, url))
     config.closeConnection()
-    await asyncio.sleep(180)
+    await asyncio.sleep(60)
 
 
 class Twitch:
@@ -117,7 +117,7 @@ class Twitch:
                     ctx.message.author.mention))
             config.closeConnection()
 
-    @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
+    @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
     async def notify(self, ctx):
         """This can be used to turn notifications on or off"""
         pass
