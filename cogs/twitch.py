@@ -16,8 +16,8 @@ def channelOnline(channel: str):
 
 
 async def checkChannels(bot):
-    try:
-        await bot.wait_until_ready()
+    await bot.wait_until_ready()
+    while not bot.is_closed:
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from twitch')
@@ -37,13 +37,7 @@ async def checkChannels(bot):
                 await bot.send_message(server, "{} has just gone offline! Catch them next time they stream at {}"
                                        .format(member.name, url))
         config.closeConnection()
-        await asyncio.sleep(60)
-    except Exception as e:
-        
-        server = discord.utils.find(lambda s: s.id == "183662839741939712", bot.servers)
-        channel = discord.utils.find(lambda c: c.id == "184201951381028864", server.channels)
-        fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-        await bot.send_message(channel, fmt.format(type(e).__name__, e))
+        await asyncio.sleep(30)
 
 
 class Twitch:
