@@ -48,7 +48,7 @@ class Twitch:
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    async def twitch(self, ctx, *, member: discord.Member = None):
+    async def twitch(self, ctx, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is not None:
             cursor = config.getCursor()
