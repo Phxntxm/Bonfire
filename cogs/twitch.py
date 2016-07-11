@@ -16,27 +16,34 @@ def channelOnline(channel: str):
 
 
 async def checkChannels(bot):
-    await bot.wait_until_ready()
-    cursor = config.getCursor()
-    cursor.execute('use {}'.format(config.db_default))
-    cursor.execute('select * from twitch')
-    result = cursor.fetchall()
-    for r in result:
-        server = discord.utils.find(lambda s: s.id == r['server_id'], bot.servers)
-        member = discord.utils.find(lambda m: m.id == r['user_id'], server.members)
-        url = r['twitch_url']
-        live = int(r['live'])
-        notify = int(r['notifications_on'])
-        user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-        if not live and notify and channelOnline(user):
-            cursor.execute('update twitch set live=1 where user_id="{}"'.format(r['user_id']))
-            await bot.send_message(server, "{} has just gone live! View their stream at {}".format(member.name, url))
-        elif live and not channelOnline(user):
-            cursor.execute('update twitch set live=0 where user_id="{}"'.format(r['user_id']))
-            await bot.send_message(server, "{} has just gone offline! Catch them next time they stream at {}"
-                                   .format(member.name, url))
-    config.closeConnection()
-    await asyncio.sleep(60)
+    try:
+        await bot.wait_until_ready()
+        cursor = config.getCursor()
+        cursor.execute('use {}'.format(config.db_default))
+        cursor.execute('select * from twitch')
+        result = cursor.fetchall()
+        for r in result:
+            server = discord.utils.find(lambda s: s.id == r['server_id'], bot.servers)
+            member = discord.utils.find(lambda m: m.id == r['user_id'], server.members)
+            url = r['twitch_url']
+            live = int(r['live'])
+            notify = int(r['notifications_on'])
+            user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
+            if not live and notify and channelOnline(user):
+                cursor.execute('update twitch set live=1 where user_id="{}"'.format(r['user_id']))
+                await bot.send_message(server, "{} has just gone live! View their stream at {}".format(member.name, url))
+            elif live and not channelOnline(user):
+                cursor.execute('update twitch set live=0 where user_id="{}"'.format(r['user_id']))
+                await bot.send_message(server, "{} has just gone offline! Catch them next time they stream at {}"
+                                       .format(member.name, url))
+        config.closeConnection()
+        await asyncio.sleep(60)
+    except Exception as e:
+        
+        server = discord.utils.find(lambda s: s.id == "183662839741939712", bot.servers)
+        channel = discord.utils.find(lambda c: c.id == "184201951381028864", server.channels)
+        fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+        await bot.send_message(, fmt.format(type(error).__name__, error))
 
 
 class Twitch:
