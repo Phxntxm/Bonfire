@@ -43,7 +43,7 @@ async def checkChannels(bot):
         server = discord.utils.find(lambda s: s.id == "183662839741939712", bot.servers)
         channel = discord.utils.find(lambda c: c.id == "184201951381028864", server.channels)
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-        await bot.send_message(channel, fmt.format(type(error).__name__, error))
+        await bot.send_message(channel, fmt.format(type(e).__name__, e))
 
 
 class Twitch:
