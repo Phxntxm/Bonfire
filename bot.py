@@ -52,10 +52,11 @@ async def on_member_remove(member):
 @bot.event
 async def on_command_error(error, ctx):
     if isinstance(error, commands.CommandNotFound):
-        fmt = "That is not a valid command! If you need asistance on what command to use, please type '!help'"
+        fmt = "That is not a valid command! If you need asistance on what command to use, please enter '!help'"
         await bot.send_message(ctx.message.channel, fmt)
-    fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-    await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
+    else:
+        fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+        await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
 
 if __name__ == '__main__':
     for e in extensions:
