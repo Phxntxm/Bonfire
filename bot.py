@@ -55,7 +55,7 @@ async def on_command_error(error, ctx):
         fmt = "That is not a valid command! If you need asistance on what command to use, please enter '!help'"
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.BadArgument):
-        fmt = "Please provide a valid argument to pass to the command: {}:".format(error)
+        fmt = "Please provide a valid argument to pass to the command: {}".format(error)
         await bot.send_message(ctx.message.channel, fmt)
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
