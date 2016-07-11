@@ -97,7 +97,10 @@ class Core:
         try:
             dice = int(re.search("(\d*)d(\d*)", notation).group(1))
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
-        except AttributeError or ValueError:
+        except AttributeError:
+            await self.bot.say("Please provide the die notation in #d#!")
+            return
+        except ValueError:
             await self.bot.say("Please provide the die notation in #d#!")
             return
         if dice == '':
