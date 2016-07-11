@@ -105,8 +105,8 @@ class Core:
         if int(dice) > 10:
             await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
             return
-        if int(num) > 25:
-            await self.bot.say("What die has more than 25 sides? Please, calm down")
+        if int(num) > 100:
+            await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
         valueStr = str(random.randint(1, int(num)))
         for i in range(1, int(dice)):
