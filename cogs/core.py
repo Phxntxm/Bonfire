@@ -95,22 +95,22 @@ class Core:
         """Rolls a die based on the notation given
         Format should be #d#"""
         try:
-            dice = re.search("(\d*)d(\d*)", notation).group(1)
-            num = re.search("(\d*)d(\d*)", notation).group(2)
-        except AttributeError:
+            dice = int(re.search("(\d*)d(\d*)", notation).group(1))
+            num = int(re.search("(\d*)d(\d*)", notation).group(2))
+        except AttributeError or ValueError:
             await self.bot.say("Please provide the die notation in #d#!")
             return
         if dice == '':
             dice = '1'
-        if int(dice) > 10:
+        if dice > 10:
             await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
             return
-        if int(num) > 100:
+        if num > 100:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
-        valueStr = str(random.randint(1, int(num)))
+        valueStr = str(random.randint(1, num))
         for i in range(1, int(dice)):
-            value = random.randint(1, int(num))
+            value = random.randint(1, num)
             valueStr += ", {}".format(value)
 
         if int(dice) == 1:
