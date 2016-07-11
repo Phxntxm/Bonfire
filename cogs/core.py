@@ -114,10 +114,10 @@ class Core:
             valueStr += ", {}".format(value)
 
         if int(dice) == 1:
-            fmt = '{0.message.author.name} has rolled a {1} sided die and got the number {3}!'
+            fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
         else:
             fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
-        await self.bot.say(fmt.format(ctx, num, dice, valueStr))
+        await self.bot.say(fmt.format(ctx, dice, num, valueStr))
 
 
 def setup(bot):
