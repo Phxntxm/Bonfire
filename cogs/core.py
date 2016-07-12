@@ -125,7 +125,7 @@ class Core:
     @commands.group(pass_context=True, invoke_without_command=True)
     async def tag(self, ctx, tag: str):
         cursor = config.getCursor()
-        cursor.excute('use %s', config.db_default)
+        cursor.execute('use %s', config.db_default)
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         result = cursor.fetchone()
         if result is None:
@@ -142,10 +142,10 @@ class Core:
         tag = result[0:result.find('-')]
         result = result[result.find('-') + 2:]
         cursor = config.getCursor()
-        cursor.excute('use %s', config.db_default)
+        cursor.execute('use %s', config.db_default)
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
-        result = cursor.fetchone()
-        if result is not None:
+        response = cursor.fetchone()
+        if response is not None:
             await self.bot.say('That tag already exists! Please remove it and re-add it!')
             config.closeConnection()
             return
