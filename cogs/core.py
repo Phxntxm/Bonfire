@@ -125,7 +125,7 @@ class Core:
     @commands.group(pass_context=True, invoke_without_command=True)
     async def tag(self, ctx, tag: str):
         cursor = config.getCursor()
-        cursor.execute('use %s',  (config.db_default,))
+        cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         result = cursor.fetchone()
         if result is None:
@@ -169,6 +169,6 @@ class Core:
         await self.bot.say('I have just removed the tag {}'.format(tag))
         config.closeConnection()
 
-
+!
 def setup(bot):
     bot.add_cog(Core(bot))
