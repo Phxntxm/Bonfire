@@ -127,7 +127,6 @@ class Core:
         """This can be used for custom tags
          The format to call a custom tag is !tag <tag>"""
         tag = ' '.join(tag).strip()
-        await self.bot.say("Tag is ```{}```".format(tag))
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
