@@ -124,6 +124,8 @@ class Core:
 
     @commands.group(pass_context=True, invoke_without_command=True)
     async def tag(self, ctx, tag: str):
+        """This can be used for custom tags
+         The format to call a custom tag is !tag <tag>"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
@@ -138,6 +140,8 @@ class Core:
     @tag.command(name='add', aliases=['create', 'start'], pass_context=True)
     @commands.has_permissions(kick_members=True)
     async def add_tag(self, ctx, *result: str):
+        """Use this to add a new tag that can be used in this server
+        Format to add a tag is !tag add <tag> - <result>"""
         result = ' '.join(result)
         tag = result[0:result.find('-')]
         result = result[result.find('-') + 2:]
@@ -157,6 +161,8 @@ class Core:
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
     @commands.has_permissions(kick_members=True)
     async def del_tag(self, ctx, tag: str):
+        """Use this to remove a tag that from use for this server
+        Format to delete a tag is !tag delete <tag>"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
