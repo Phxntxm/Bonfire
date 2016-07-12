@@ -91,7 +91,7 @@ class Core:
         await self.bot.say(response)
 
     @commands.command(pass_context=True)
-    async def roll(self, ctx, notation: str="d6"):
+    async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         try:
@@ -122,6 +122,52 @@ class Core:
             fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
         await self.bot.say(fmt.format(ctx, dice, num, valueStr))
 
+    @commands.group(pass_context=True, invoke_without_command=True)
+    async def tag(self, ctx, tag: str):
+        cursor = config.getCursor()
+        cursor.excute('use %s', config.db_default)
+        cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say('That tag does not exist!')
+            config.closeConnection()
+            return
+        await self.bot.say("{}".format(result['result']))
+        config.closeConnection()
+
+    @tag.command(name='add', aliases=['create', 'start'], pass_context=True)
+    @commands.has_permissions(kick_members=True)
+    async def add_tag(self, ctx, *result: str):
+        result = ' '.join(result)
+        tag = result[0:result.find('-')]
+        result = result[result.find('-') + 2:]
+        cursor = config.getCursor()
+        cursor.excute('use %s', config.db_default)
+        cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
+        result = cursor.fetchone()
+        if result is not None:
+            await self.bot.say('That tag already exists! Please remove it and re-add it!')
+            config.closeConnection()
+            return
+        sql = 'insert into tags (server_id, tag, result) values ("%s", "%s", "%s")'
+        cursor.execute(sql, (ctx.message.server.id, tag, result))
+        await self.bot.say("I have just added the tag {0}! You can call this tag by entering !tag {0}".format(tag))
+        config.closeConnection()
+
+    @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
+    @commands.has_permissions(kick_members=True)
+    async def del_tag(self, ctx, tag: str):
+        cursor = config.getCursor()
+        cursor.execute('use %s', config.db_default)
+        cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say("That tag does not exist! You can't remove something if it doesn't exist...")
+            config.closeConnection()
+            return
+        cursor.execute('delete from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
+        await self.bot.say('I have just removed the tag {}'.format(tag))
+        config.closeConnection()
 
 def setup(bot):
     bot.add_cog(Core(bot))
