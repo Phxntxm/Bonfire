@@ -143,7 +143,7 @@ class Core:
     async def add_tag(self, ctx, *result: str):
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
-        result = ' '.join(result)
+        result = ' '.join(result).strip()
         tag = result[0:result.find('-')]
         result = result[result.find('-') + 2:]
         cursor = config.getCursor()
