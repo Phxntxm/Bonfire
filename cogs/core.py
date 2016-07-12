@@ -125,7 +125,7 @@ class Core:
     @commands.group(pass_context=True, invoke_without_command=True)
     async def tag(self, ctx, tag: str):
         cursor = config.getCursor()
-        cursor.execute('use %s', config.db_default)
+        cursor.execute('use %s',  (config.db_default,))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         result = cursor.fetchone()
         if result is None:
@@ -142,14 +142,14 @@ class Core:
         tag = result[0:result.find('-')]
         result = result[result.find('-') + 2:]
         cursor = config.getCursor()
-        cursor.execute('use %s', config.db_default)
+        cursor.execute('use %s', (config.db_default,))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         response = cursor.fetchone()
         if response is not None:
             await self.bot.say('That tag already exists! Please remove it and re-add it!')
             config.closeConnection()
             return
-        sql = 'insert into tags (server_id, tag, result) values ("%s", "%s", "%s")'
+        sql = 'insert into tags (server_id, tag, result) values (%s, %s, %s)'
         cursor.execute(sql, (ctx.message.server.id, tag, result))
         await self.bot.say("I have just added the tag {0}! You can call this tag by entering !tag {0}".format(tag))
         config.closeConnection()
@@ -158,7 +158,7 @@ class Core:
     @commands.has_permissions(kick_members=True)
     async def del_tag(self, ctx, tag: str):
         cursor = config.getCursor()
-        cursor.execute('use %s', config.db_default)
+        cursor.execute('use %s', (config.db_default,))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         result = cursor.fetchone()
         if result is None:
