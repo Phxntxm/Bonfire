@@ -161,9 +161,10 @@ class Core:
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
     @commands.has_permissions(kick_members=True)
-    async def del_tag(self, ctx, tag: str):
+    async def del_tag(self, ctx, *tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
+        tag = ' '.join(tag).strip()
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
