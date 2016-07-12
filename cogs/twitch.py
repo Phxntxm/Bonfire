@@ -15,32 +15,6 @@ def channelOnline(channel: str):
     return data['stream'] is not None
 
 
-async def checkChannels(bot):
-    await bot.wait_until_ready()
-    while not bot.is_closed:
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select * from twitch')
-        result = cursor.fetchall()
-        for r in result:
-            server = discord.utils.find(lambda s: s.id == r['server_id'], bot.servers)
-            member = discord.utils.find(lambda m: m.id == r['user_id'], server.members)
-            url = r['twitch_url']
-            live = int(r['live'])
-            notify = int(r['notifications_on'])
-            user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-            if not live and notify and channelOnline(user):
-                cursor.execute('update twitch set live=1 where user_id="{}"'.format(r['user_id']))
-                await bot.send_message(server, "{} has just gone live! "
-                                               "View their stream at {}".format(member.name, url))
-            elif live and not channelOnline(user):
-                cursor.execute('update twitch set live=0 where user_id="{}"'.format(r['user_id']))
-                await bot.send_message(server, "{} has just gone offline! Catch them next time they stream at {}"
-                                       .format(member.name, url))
-        config.closeConnection()
-        await asyncio.sleep(30)
-
-
 class Twitch:
     """Class for some twitch integration
     You can add or remove your twitch stream for your user
@@ -48,6 +22,32 @@ class Twitch:
 
     def __init__(self, bot):
         self.bot = bot
+
+    async def checkChannels(self):
+        await self.bot.wait_until_ready()
+        while not self.bot.is_closed:
+            cursor = config.getCursor()
+            cursor.execute('use {}'.format(config.db_default))
+            cursor.execute('select * from twitch')
+            result = cursor.fetchall()
+            for r in result:
+                server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
+                member = discord.utils.find(lambda m: m.id == r['user_id'], server.members)
+                url = r['twitch_url']
+                live = r['live']
+                notify = r['notifications_on']
+                user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
+                if not live and notify and channelOnline(user):
+                    cursor.execute('update twitch set live=1 where user_id="{}"'.format(r['user_id']))
+                    await self.bot.send_message(server, "{} has just gone live! "
+                                                        "View their stream at {}".format(member.name, url))
+                elif live and not channelOnline(user):
+                    cursor.execute('update twitch set live=0 where user_id="{}"'.format(r['user_id']))
+                    await self.bot.send_message(server,
+                                                "{} has just gone offline! Catch them next time they stream at {}"
+                                                .format(member.name, url))
+            config.closeConnection()
+            await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True)
     async def twitch(self, *, member: discord.Member=None):
@@ -178,5 +178,6 @@ class Twitch:
 
 
 def setup(bot):
+    t = Twitch(bot)
+    config.loop.create_task(t.checkChannels())
     bot.add_cog(Twitch(bot))
-    config.loop.create_task(checkChannels(bot))
