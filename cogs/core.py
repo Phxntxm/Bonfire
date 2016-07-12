@@ -169,6 +169,6 @@ class Core:
         await self.bot.say('I have just removed the tag {}'.format(tag))
         config.closeConnection()
 
-!
+
 def setup(bot):
     bot.add_cog(Core(bot))
