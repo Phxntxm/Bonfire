@@ -123,9 +123,10 @@ class Core:
         await self.bot.say(fmt.format(ctx, dice, num, valueStr))
 
     @commands.group(pass_context=True, invoke_without_command=True)
-    async def tag(self, ctx, tag: str):
+    async def tag(self, ctx, *tag: str):
         """This can be used for custom tags
          The format to call a custom tag is !tag <tag>"""
+        tag = ' '.join(tag)
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
@@ -155,7 +156,7 @@ class Core:
             return
         sql = 'insert into tags (server_id, tag, result) values (%s, %s, %s)'
         cursor.execute(sql, (ctx.message.server.id, tag, result))
-        await self.bot.say("I have just added the tag {0}! You can call this tag by entering !tag {0}".format(tag))
+        await self.bot.say("I have just added the tag {0! You can call this tag by entering !tag {0}".format(tag))
         config.closeConnection()
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
