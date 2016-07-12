@@ -142,14 +142,14 @@ class Core:
         tag = result[0:result.find('-')]
         result = result[result.find('-') + 2:]
         cursor = config.getCursor()
-        cursor.execute('use %s', (config.db_default,))
-        cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
+        cursor.execute("""use %s""", (config.db_default,))
+        cursor.execute("""select * from tags where server_id=%s and tag=%s""", (ctx.message.server.id, tag))
         response = cursor.fetchone()
         if response is not None:
             await self.bot.say('That tag already exists! Please remove it and re-add it!')
             config.closeConnection()
             return
-        sql = 'insert into tags (server_id, tag, result) values (%s, %s, %s)'
+        sql = """insert into tags (server_id, tag, result) values (%s, %s, %s)"""
         cursor.execute(sql, (ctx.message.server.id, tag, result))
         await self.bot.say("I have just added the tag {0}! You can call this tag by entering !tag {0}".format(tag))
         config.closeConnection()
