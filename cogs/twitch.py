@@ -31,7 +31,8 @@ async def checkChannels(bot):
             user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
             if not live and notify and channelOnline(user):
                 cursor.execute('update twitch set live=1 where user_id="{}"'.format(r['user_id']))
-                await bot.send_message(server, "{} has just gone live! View their stream at {}".format(member.name, url))
+                await bot.send_message(server, "{} has just gone live! "
+                                               "View their stream at {}".format(member.name, url))
             elif live and not channelOnline(user):
                 cursor.execute('update twitch set live=0 where user_id="{}"'.format(r['user_id']))
                 await bot.send_message(server, "{} has just gone offline! Catch them next time they stream at {}"
@@ -49,7 +50,7 @@ class Twitch:
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    async def twitch(self, ctx, *, member: discord.Member=None):
+    async def twitch(self, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is not None:
             cursor = config.getCursor()

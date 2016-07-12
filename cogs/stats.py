@@ -2,6 +2,7 @@ from discord.ext import commands
 from discord.utils import find
 from .utils import config
 import re
+import pymysql
 
 
 class Stats:
@@ -47,7 +48,7 @@ class Stats:
                 member = find(lambda m: m.id == r['id'], self.bot.get_all_members())
                 amount = r['amount']
                 if member in members:
-                    output += "\n{0.name}: {1} times".format(member,amount)
+                    output += "\n{0.name}: {1} times".format(member, amount)
             config.closeConnection()
             await self.bot.say("```{}```".format(output))
         except pymysql.ProgrammingError:
