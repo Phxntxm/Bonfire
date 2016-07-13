@@ -57,6 +57,9 @@ async def on_command_error(error, ctx):
     elif isinstance(error, commands.BadArgument):
         fmt = "Please provide a valid argument to pass to the command: {}".format(error)
         await bot.send_message(ctx.message.channel, fmt)
+    elif isinstance(error, commands.CheckFailure):
+        fmt = "You do not have permissions to run that command!"
+        await bot.send_message(ctx.message.channel, fmt)
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
         await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
