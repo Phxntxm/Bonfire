@@ -40,6 +40,7 @@ class Owner:
         else:
             if not match_multi:
                 result = eval(match_single[0])
+
                 if inspect.isawaitable(result):
                     result = await result
                 await self.bot.say("```{0}```".format(result))
