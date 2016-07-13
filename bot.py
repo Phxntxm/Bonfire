@@ -52,13 +52,13 @@ async def on_member_remove(member):
 @bot.event
 async def on_command_error(error, ctx):
     if isinstance(error, commands.CommandNotFound):
-        fmt = "That is not a valid command! If you need asistance on what command to use, please enter '!help'"
+        fmt = "That is not a valid command! There's a help command for a reason, learn to use it."
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.BadArgument):
         fmt = "Please provide a valid argument to pass to the command: {}".format(error)
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CheckFailure):
-        fmt = "You do not have permissions to run that command!"
+        fmt = "You can't tell me what to do!"
         await bot.send_message(ctx.message.channel, fmt)
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
