@@ -156,7 +156,7 @@ class Core:
             return
         sql = 'insert into tags (server_id, tag, result) values (%s, %s, %s)'
         cursor.execute(sql, (ctx.message.server.id, tag, result))
-        await self.bot.say("I have just added the tag '{0}'! You can call this tag by entering !tag {0}".format(tag))
+        await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
         config.closeConnection()
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
@@ -174,7 +174,7 @@ class Core:
             config.closeConnection()
             return
         cursor.execute('delete from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
-        await self.bot.say('I have just removed the tag \'{}\''.format(tag))
+        await self.bot.say('I have just removed the tag `{}`'.format(tag))
         config.closeConnection()
 
 

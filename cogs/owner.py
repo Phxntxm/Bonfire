@@ -5,6 +5,7 @@ import re
 import os
 import sys
 import discord
+import inspect
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```', re.DOTALL)
@@ -39,6 +40,8 @@ class Owner:
         else:
             if not match_multi:
                 result = eval(match_single[0])
+                if inspect.isawaitable(result):
+                    result = await result
                 await self.bot.say("```{0}```".format(result))
             else:
                 def r(v):
