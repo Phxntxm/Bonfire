@@ -52,11 +52,11 @@ class Overwatch:
             g_stats = data['general_stats']
             
         fmt = "\n".join("{}: {}".format(i, r) for i, r in g_stats.items() if i in check_g_stats)
-        if not hero == "":
-            fmt += "\n"
-            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
         fmt += "\n"
-        fmt += "\n".join("{}: {}".format(i, r) for i, r in o_stats.items() if i in check_o_stats)
+        if not hero == "":
+            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
+        else:
+            fmt += "\n".join("{}: {}".format(i, r) for i, r in o_stats.items() if i in check_o_stats)
 
         #fmt = "Kills: {}".format(int(g_stats['eliminations']))
         #fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
