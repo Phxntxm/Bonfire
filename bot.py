@@ -10,7 +10,8 @@ extensions = ['cogs.interaction',
               'cogs.owner',
               'cogs.stats',
               'cogs.playlist',
-              'cogs.twitch']
+              'cogs.twitch',
+              'cogs.overwatch']
 
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=True)
 
