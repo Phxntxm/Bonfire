@@ -71,7 +71,7 @@ class Overwatch:
                 #pass
             #fmt += "\nTime Played: {}\n".format(g_stats['time_played'])
         if hero == "":
-            await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmttitle().replace("_", " ")))
+            await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
             await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
                                .format(user.name, hero, fmt.title().replace("_", " ")))
