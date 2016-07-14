@@ -55,8 +55,12 @@ class Overwatch:
                 fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
                 await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
                                    .format(user.name, hero.title(), fmt.title().replace("_", " ")))
-        except urllib.error.HTTPError:
-            await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title()))
+        except urllib.error.HTTPError as error:
+            error_no = int(re.search("\d+",str(error)).group(0))
+            if error_no = 500:
+                await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title()))
+            elif error_no = 400:
+                await self.bot.say("{} is not an actual hero!".format(hero.title())
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
