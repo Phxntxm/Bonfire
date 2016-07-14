@@ -8,14 +8,15 @@ import urllib.error
 import json
 
 base_url = "https://owapi.net/api/v2/u/"
-
+check_g_stats = ["eliminations","deaths",'kpd','wins','losses','time_played']
+check_o_stats = ['wins','losses']
 
 class Overwatch:
     """Class for viewing Overwatch stats"""
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group(no_pm=True)
     async def ow(self):
         pass
 
@@ -43,29 +44,33 @@ class Overwatch:
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
         result = urllib.request.urlopen(url)
         data = json.loads(result.read().decode('utf-8'))
+        
         if hero == "":
             o_stats = data['overall_stats']
             g_stats = data['game_stats']
         else:
             g_stats = data['general_stats']
+            
+        fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
+        fmt += "\n".join("{}: {}".format(i, r) for i, r in g_stats if i in check_g_stats
+        fmt += "\n".join("{}: {}".format(i, r) for i, r in o_stats if i in check_o_stats
 
-        fmt = "Kills: {}".format(int(g_stats['eliminations']))
-        fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
+        #fmt = "Kills: {}".format(int(g_stats['eliminations']))
+        #fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
+        #if hero == "":
+            #fmt += "\nKill/Death Ratio: {}".format(g_stats['kpd'])
+            #fmt += "\nWins: {}".format(o_stats['wins'])
+            #fmt += "\nLosses: {}".format(o_stats['losses'])
+            #d = divmod(g_stats['time_played'], 24)
+            #fmt += "\nTime Played: {} days {} hours".format(int(d[0]), int(d[1]))
+        #else:
+            #try:
+                #fmt += "\nWin Percentage: {}".format(g_stats['win_percentage'])
+            #except KeyError:
+                #pass
+            #fmt += "\nTime Played: {}\n".format(g_stats['time_played'])
         if hero == "":
-            fmt += "\nKill/Death Ratio: {}".format(g_stats['kpd'])
-            fmt += "\nWins: {}".format(o_stats['wins'])
-            fmt += "\nLosses: {}".format(o_stats['losses'])
-            d = divmod(g_stats['time_played'], 24)
-            fmt += "\nTime Played: {} days {} hours".format(int(d[0]), int(d[1]))
-        else:
-            try:
-                fmt += "\nWin Percentage: {}".format(g_stats['win_percentage'])
-            except KeyError:
-                pass
-            fmt += "\nTime Played: {}\n".format(g_stats['time_played'])
-            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
-        if hero == "":
-            await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
+            await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmttitle().replace("_", " ")))
         else:
             await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
                                .format(user.name, hero, fmt.title().replace("_", " ")))
