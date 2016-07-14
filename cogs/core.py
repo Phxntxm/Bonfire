@@ -103,18 +103,18 @@ class Core:
         except ValueError:
             await self.bot.say("Please provide the die notation in #d#!")
             return
-        if dice == '':
-            dice = '1'
+        dice = dice or '1'
         if dice > 10:
             await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
             return
         if num > 100:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
-        valueStr = str(random.randint(1, num))
-        for i in range(1, int(dice)):
-            value = random.randint(1, num)
-            valueStr += ", {}".format(value)
+        #valueStr = str(random.randint(1, num))
+        valueStr += ", ".join("{}".format(random.randint(1, num)) for i in range(1, int(dice)))
+        #for i in range(1, int(dice)):
+            #value = random.randint(1, num)
+            #valueStr += ", {}".format(value)
 
         if int(dice) == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
