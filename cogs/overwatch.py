@@ -58,9 +58,9 @@ class Overwatch:
                                    .format(user.name, hero.title(), fmt.title().replace("_", " ")))
         except urllib.error.HTTPError as error:
             error_no = int(re.search("\d+",str(error)).group(0))
-            if error_no = 500:
+            if error_no == 500:
                 await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title()))
-            elif error_no = 400:
+            elif error_no == 400:
                 await self.bot.say("{} is not an actual hero!".format(hero.title())
 
     @ow.command(pass_context=True, name="add")
