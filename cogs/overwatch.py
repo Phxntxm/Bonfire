@@ -41,7 +41,9 @@ class Overwatch:
         data = json.loads(result.read().decode('utf-8'))
         if hero == "":
             o_stats = data['overall_stats']
-        g_stats = data['game_stats']
+            g_stats = data['general_stats']
+        else:
+            g_stats = data['game_stats']
 
         fmt = "Kills: {}".format(int(g_stats['eliminations']))
         fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
