@@ -40,7 +40,7 @@ class Overwatch:
         config.closeConnection()
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'])
-    async def add(self, ctx):
+    async def delete(self, ctx):
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from overwatch where id=%s', (ctx.message.author.id,))
