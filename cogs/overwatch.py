@@ -61,7 +61,7 @@ class Overwatch:
             if error_no == 500:
                 await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title()))
             elif error_no == 400:
-                await self.bot.say("{} is not an actual hero!".format(hero.title())
+                await self.bot.say("{} is not an actual hero!".format(hero.title()))
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
