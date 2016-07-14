@@ -38,25 +38,21 @@ class Overwatch:
             return
         bt = result['battletag']
         await self.bot.say("Searching profile information....")
-        if hero == "":
-            url = base_url + "{}/stats/general".format(bt)
-        else:
-            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
-        result = urllib.request.urlopen(url)
-        data = json.loads(result.read().decode('utf-8'))
         
         if hero == "":
-            o_stats = data['overall_stats']
-            g_stats = data['game_stats']
+            url = base_url + "{}/stats/general".format(bt)
+            result = urllib.request.urlopen(url)
+            data = json.loads(result.read().decode('utf-8'))
+            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
+            fmt += "\n"
+            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
         else:
-            g_stats = data['general_stats']
-            
-        fmt = "\n".join("{}: {}".format(i, r) for i, r in g_stats.items() if i in check_g_stats)
-        fmt += "\n"
-        if not hero == "":
+            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
+            result = urllib.request.urlopen(url)
+            data = json.loads(result.read().decode('utf-8'))
+            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
+            fmt += "\n"
             fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
-        else:
-            fmt += "\n".join("{}: {}".format(i, r) for i, r in o_stats.items() if i in check_o_stats)
 
         #fmt = "Kills: {}".format(int(g_stats['eliminations']))
         #fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
@@ -76,7 +72,7 @@ class Overwatch:
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
             await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
-                               .format(user.name, hero, fmt.title().replace("_", " ")))
+                               .format(user.name, hero.title(), fmt.title().replace("_", " ")))
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
