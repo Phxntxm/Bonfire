@@ -39,7 +39,8 @@ class Overwatch:
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
         result = urllib.request.urlopen(url)
         data = json.loads(result.read().decode('utf-8'))
-        o_stats = data['overall_stats']
+        if hero == "":
+            o_stats = data['overall_stats']
         g_stats = data['game_stats']
 
         fmt = "Kills: {}".format(int(g_stats['eliminations']))
