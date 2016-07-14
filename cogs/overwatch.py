@@ -15,7 +15,7 @@ class Overwatch:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(no_pm=True, invote_without_command=True)
+    @commands.group(pass_context=True, no_pm=True, invote_without_command=True)
     async def ow(self, ctx, user: discord.Member=None):
         if user is None:
             user = ctx.message.author
