@@ -111,7 +111,7 @@ class Core:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
         #valueStr = str(random.randint(1, num))
-        valueStr += ", ".join("{}".format(random.randint(1, num)) for i in range(1, int(dice)))
+        valueStr = ", ".join("{}".format(random.randint(1, num)) for i in range(1, int(dice)))
         #for i in range(1, int(dice)):
             #value = random.randint(1, num)
             #valueStr += ", {}".format(value)
