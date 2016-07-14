@@ -34,7 +34,7 @@ class Overwatch:
         cursor.execute('select * from overwatch where id=%s', (ctx.message.author.id,))
         result = cursor.fetchone()
         if result:
-            cursor.execute('update overwatch set battletag=%s where id=$s', (username, ctx.message.author.id))
+            cursor.execute('update overwatch set battletag=%s where id=%s', (username, ctx.message.author.id))
             await self.bot.say("I have updated your saved battletag {}".format(ctx.message.author.mention))
         else:
             cursor.execute('insert into overwatch (id, battletag) values (%s, %s)', (ctx.message.author.id, username))
