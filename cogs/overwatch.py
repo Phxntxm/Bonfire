@@ -59,13 +59,12 @@ class Overwatch:
             except KeyError:
                 pass
             fmt += "\nTime Played: {}\n".format(g_stats['time_played'])
-            fmt += "\n".join("{}: {}".format(i.title(), r) for i, r in data['hero_stats'].items())
-            #for i, r in data['hero_stats'].items():
-                #fmt += "\n{}: {}".format(i.replace("_", " ").title(), r)
+            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
         if hero == "":
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
         else:
-            await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` ".format(user.name, hero, fmt.replace("_"," ")))
+            await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
+                               .format(user.name, hero, fmt.title().replace("_", " ")))
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
