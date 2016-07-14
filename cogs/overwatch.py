@@ -38,41 +38,24 @@ class Overwatch:
             return
         bt = result['battletag']
         await self.bot.say("Searching profile information....")
-        
-        if hero == "":
-            url = base_url + "{}/stats/general".format(bt)
-            result = urllib.request.urlopen(url)
-            data = json.loads(result.read().decode('utf-8'))
-            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
-            fmt += "\n"
-            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
-        else:
-            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
-            result = urllib.request.urlopen(url)
-            data = json.loads(result.read().decode('utf-8'))
-            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
-            fmt += "\n"
-            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
-
-        #fmt = "Kills: {}".format(int(g_stats['eliminations']))
-        #fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
-        #if hero == "":
-            #fmt += "\nKill/Death Ratio: {}".format(g_stats['kpd'])
-            #fmt += "\nWins: {}".format(o_stats['wins'])
-            #fmt += "\nLosses: {}".format(o_stats['losses'])
-            #d = divmod(g_stats['time_played'], 24)
-            #fmt += "\nTime Played: {} days {} hours".format(int(d[0]), int(d[1]))
-        #else:
-            #try:
-                #fmt += "\nWin Percentage: {}".format(g_stats['win_percentage'])
-            #except KeyError:
-                #pass
-            #fmt += "\nTime Played: {}\n".format(g_stats['time_played'])
-        if hero == "":
-            await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
-        else:
-            await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
-                               .format(user.name, hero.title(), fmt.title().replace("_", " ")))
+        try:
+            if hero:
+                result = urllib.request.urlopen(base_url + "{}/stats/general".format(bt))
+                data = json.loads(result.read().decode('utf-8'))
+                fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
+                fmt += "\n"
+                fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
+                await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
+            else:
+                result = urllib.request.urlopen(base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', '')))
+                data = json.loads(result.read().decode('utf-8'))
+                fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
+                fmt += "\n"
+                fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
+                await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
+                                   .format(user.name, hero.title(), fmt.title().replace("_", " ")))
+        except urllib.error.HTTPError:
+            await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title())
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
