@@ -40,7 +40,7 @@ class Overwatch:
         await self.bot.say("Searching profile information....")
         
         try:
-            if hero = "":
+            if hero == "":
                 result = urllib.request.urlopen(base_url + "{}/stats/general".format(bt))
                 data = json.loads(result.read().decode('utf-8'))
                 fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
