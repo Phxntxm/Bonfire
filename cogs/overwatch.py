@@ -47,13 +47,14 @@ class Overwatch:
 
         fmt = "Kills: {}".format(int(g_stats['eliminations']))
         fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
-        fmt += "\nKill/Death Ratio: {}".format(g_stats['kpd'])
         if hero == "":
+            fmt += "\nKill/Death Ratio: {}".format(g_stats['kpd'])
             fmt += "\nWins: {}".format(o_stats['wins'])
             fmt += "\nLosses: {}".format(o_stats['losses'])
             d = divmod(g_stats['time_played'], 24)
             fmt += "\nTime Played: {} days {} hours".format(int(d[0]), int(d[1]))
         else:
+            fmt += "\nWin Percentage: {}".format(g_stats['win_percentage'])
             fmt += "\nTime Played: {}".format(g_stats['time_played'])
             for i, r in data['hero_stats'].items():
                 fmt += "\n{}: {}".format(i.replace("_", " ").title(), r)
