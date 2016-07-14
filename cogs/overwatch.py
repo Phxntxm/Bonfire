@@ -61,7 +61,7 @@ class Overwatch:
         if hero == "":
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
         else:
-            await self.bot.say("Overwatch stats for {} using the hero {}: ".format(user.name, hero))
+            await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}```: ".format(user.name, hero, fmt))
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
