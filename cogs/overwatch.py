@@ -4,6 +4,7 @@ from discord.ext import commands
 import urllib.parse
 import urllib.request
 import urllib.error
+import asyncio
 import json
 
 base_url = "https://owapi.net/api/v2/u/"
@@ -20,6 +21,7 @@ class Overwatch:
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, username: str):
         username = username.replace("#", "-")
+        await self.bot.say("Looking up your profile information....")
         url = base_url + "{}/stats/general".format(username)
         try:
             urllib.request.urlopen(url)
@@ -36,7 +38,7 @@ class Overwatch:
             await self.bot.say("I have updated your saved battletag {}".format(ctx.message.author.mention))
         else:
             cursor.execute('insert into overwatch (id, battletag) values (%s, %s)', (ctx.message.author.id, username))
-            await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.id))
+            await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
         config.closeConnection()
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'])
