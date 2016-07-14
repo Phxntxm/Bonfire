@@ -35,12 +35,12 @@ class Overwatch:
         o_stats = data['overall_stats']
         g_stats = data['game_stats']
         fmt = "Wins: {}".format(o_stats['wins'])
-        fmt += "Losses: {}".format(o_stats['losses'])
-        fmt += "Kills: {}".format(g_stats['eliminations'])
-        fmt += "Deaths: {}".format(g_stats['deaths'])
-        fmt += "Kill/Death Ratio: {}".format(g_stats['kpd'])
+        fmt += "\nLosses: {}".format(o_stats['losses'])
+        fmt += "\nKills: {}".format(g_stats['eliminations'])
+        fmt += "\nDeaths: {}".format(g_stats['deaths'])
+        fmt += "\nKill/Death Ratio: {}".format(g_stats['kpd'])
         d = divmod(g_stats['time_played'], 24)
-        fmt += "Time Played: {} days {} hours".format(int(d[0]), int(d[1]))
+        fmt += "\nTime Played: {} days {} hours".format(int(d[0]), int(d[1]))
         await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
     @ow.command(pass_context=True, name="add")
