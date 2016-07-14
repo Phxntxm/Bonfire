@@ -17,7 +17,7 @@ class Overwatch:
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True, invote_without_command=True)
-    async def ow(self, ctx, user: discord.Member=None):
+    async def ow(self, ctx, user: discord.Member=None, hero: str=""):
         """Command used to lookup information on your own user, or on another's
         When adding your battletag, it is quite picky, use the exact format user#xxxx
         Multiple names with the same username can be used, this is why the numbers are needed
@@ -34,19 +34,31 @@ class Overwatch:
             return
         bt = result['battletag']
         await self.bot.say("Searching profile information....")
-        url = base_url + "{}/stats/general".format(bt)
+        if hero == ""
+            url = base_url + "{}/stats/general".format(bt)
+        else:
+            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-',''))
         result = urllib.request.urlopen(url)
         data = json.loads(result.read().decode('utf-8'))
         o_stats = data['overall_stats']
         g_stats = data['game_stats']
-        fmt = "Wins: {}".format(o_stats['wins'])
-        fmt += "\nLosses: {}".format(o_stats['losses'])
-        fmt += "\nKills: {}".format(g_stats['eliminations'])
-        fmt += "\nDeaths: {}".format(g_stats['deaths'])
+
+        fmt = "Kills: {}".format(int(g_stats['eliminations']))
+        fmt += "\nDeaths: {}".format(int(g_stats['deaths']))
         fmt += "\nKill/Death Ratio: {}".format(g_stats['kpd'])
-        d = divmod(g_stats['time_played'], 24)
-        fmt += "\nTime Played: {} days {} hours".format(int(d[0]), int(d[1]))
-        await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
+        if hero == "":
+            fmt += "\nWins: {}".format(o_stats['wins'])
+            fmt += "\nLosses: {}".format(o_stats['losses'])
+            d = divmod(g_stats['time_played'], 24)
+            fmt += "\nTime Played: {} days {} hours".format(int(d[0]), int(d[1]))
+        else:
+            fmt += "\nTime Played: {}".format(g_stats['time_played'])
+            for i, r in data['hero_stats'].items():
+                fmt += "\n{}: {}".format(i.replace("_"," ").title(), r)
+        if hero == "":
+            await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
+        else:
+            await self.bot.say("Overwatch stats for {} using the hero {}: ".format(user.name, hero))
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
