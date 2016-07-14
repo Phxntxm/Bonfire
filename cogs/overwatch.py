@@ -5,7 +5,6 @@ import discord
 import urllib.parse
 import urllib.request
 import urllib.error
-import asyncio
 import json
 
 base_url = "https://owapi.net/api/v2/u/"
@@ -34,10 +33,10 @@ class Overwatch:
             return
         bt = result['battletag']
         await self.bot.say("Searching profile information....")
-        if hero == ""
+        if hero == "":
             url = base_url + "{}/stats/general".format(bt)
         else:
-            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-',''))
+            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
         result = urllib.request.urlopen(url)
         data = json.loads(result.read().decode('utf-8'))
         o_stats = data['overall_stats']
@@ -54,7 +53,7 @@ class Overwatch:
         else:
             fmt += "\nTime Played: {}".format(g_stats['time_played'])
             for i, r in data['hero_stats'].items():
-                fmt += "\n{}: {}".format(i.replace("_"," ").title(), r)
+                fmt += "\n{}: {}".format(i.replace("_", " ").title(), r)
         if hero == "":
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
         else:
