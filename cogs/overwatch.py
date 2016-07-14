@@ -59,8 +59,9 @@ class Overwatch:
             except KeyError:
                 pass
             fmt += "\nTime Played: {}".format(g_stats['time_played'])
-            for i, r in data['hero_stats'].items():
-                fmt += "\n{}: {}".format(i.replace("_", " ").title(), r)
+            fmt += "\n".join("{}: {}".format(i.replace("_", " ").title(), r) for i, r in data['hero_stats'].items())
+            #for i, r in data['hero_stats'].items():
+                #fmt += "\n{}: {}".format(i.replace("_", " ").title(), r)
         if hero == "":
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
         else:
