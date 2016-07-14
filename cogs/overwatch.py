@@ -12,11 +12,16 @@ base_url = "https://owapi.net/api/v2/u/"
 
 
 class Overwatch:
+    """Class for viewing Overwatch stats"""
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True, invote_without_command=True)
     async def ow(self, ctx, user: discord.Member=None):
+        """Command used to lookup information on your own user, or on another's
+        When adding your battletag, it is quite picky, use the exact format user#xxxx
+        Multiple names with the same username can be used, this is why the numbers are needed
+        Capitalization also matters"""
         if user is None:
             user = ctx.message.author
         cursor = config.getCursor()
@@ -45,6 +50,7 @@ class Overwatch:
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
+        """Saves your battletag for looking up information"""
         bt = bt.replace("#", "-")
         await self.bot.say("Looking up your profile information....")
         url = base_url + "{}/stats/general".format(bt)
@@ -68,6 +74,7 @@ class Overwatch:
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'])
     async def delete(self, ctx):
+        """Removes your battletag from the records"""
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from overwatch where id=%s', (ctx.message.author.id,))
