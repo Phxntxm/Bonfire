@@ -15,8 +15,12 @@ class Overwatch:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(pass_context=True, no_pm=True, invote_without_command=True)
-    async def ow(self, ctx, user: discord.Member=None, hero: str=""):
+    @commands.group(pass_context=True, no_pm=True)
+    async def ow(self):
+        pass
+
+    @ow.command(name="stats", pass_context=True, no_pm=True)
+    async def ow_stats(self, ctx, user: discord.Member=None, hero: str=""):
         """Command used to lookup information on your own user, or on another's
         When adding your battletag, it is quite picky, use the exact format user#xxxx
         Multiple names with the same username can be used, this is why the numbers are needed
