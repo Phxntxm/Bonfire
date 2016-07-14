@@ -38,6 +38,7 @@ class Overwatch:
             return
         bt = result['battletag']
         await self.bot.say("Searching profile information....")
+        
         try:
             if hero:
                 result = urllib.request.urlopen(base_url + "{}/stats/general".format(bt))
@@ -55,7 +56,7 @@ class Overwatch:
                 await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
                                    .format(user.name, hero.title(), fmt.title().replace("_", " ")))
         except urllib.error.HTTPError:
-            await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title())
+            await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title()))
 
     @ow.command(pass_context=True, name="add")
     async def add(self, ctx, bt: str):
