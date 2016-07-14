@@ -110,11 +110,8 @@ class Core:
         if num > 100:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
-        #valueStr = str(random.randint(1, num))
+            
         valueStr = ", ".join("{}".format(random.randint(1, num)) for i in range(0, int(dice)))
-        #for i in range(1, int(dice)):
-            #value = random.randint(1, num)
-            #valueStr += ", {}".format(value)
 
         if int(dice) == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
@@ -151,7 +148,7 @@ class Core:
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         response = cursor.fetchone()
         if response is not None:
-            await self.bot.say('That tag already exists! Please remove it and re-add it!')
+            await self.bot.say('That tag already exists! Please remove it and re-add it if you want to change it')
             config.closeConnection()
             return
         sql = 'insert into tags (server_id, tag, result) values (%s, %s, %s)'
