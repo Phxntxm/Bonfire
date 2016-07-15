@@ -9,6 +9,8 @@ def isOwner(ctx):
 def customPermsOrRole(perm):
     def predicate(ctx):
         nonlocal perm
+        if ctx.message.channel.is_private:
+            return False
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_perms))
         cmd = str(ctx.command)
