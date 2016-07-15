@@ -122,7 +122,7 @@ class Mod:
                     cursor.execute(sql,(command,permissions))
                 else:
                     sql = "update `"+ctx.message.server.id+"` set perms=%s where command=%s"
-                    cursor.execute(sql,(perms,command))
+                    cursor.execute(sql,(permissions,command))
                     
         await self.bot.say("I have just added your custom permissions; you now need to have {} permissions to use the command {}".format(permissions, command))
         config.closeConnection()
