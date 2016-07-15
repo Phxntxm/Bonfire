@@ -86,7 +86,7 @@ class Mod:
             
     @perms.command(name="add", aliases=["setup,create"], pass_context=True)
     async def add_perms(self, ctx, command: str, permissions: str=None):
-        for checks in self.bot.commands.get(command).checks
+        for checks in self.bot.commands.get(command).checks:
             if "isOwner" == checks.__name__:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
