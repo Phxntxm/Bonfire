@@ -136,7 +136,7 @@ class Core:
         config.closeConnection()
 
     @tag.command(name='add', aliases=['create', 'start'], pass_context=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole(kick_members=True)
     async def add_tag(self, ctx, *result: str):
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
