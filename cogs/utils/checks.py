@@ -21,7 +21,7 @@ def customPermsOrRole(perm):
             else:
                 for role in ctx.message.author.roles:
                     if getattr(role,perm):
-                        return True:
+                        return True
                 return False
         return True
     return commands.check(predicate)
