@@ -64,8 +64,8 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt)
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-        await bot.send_message(ctx.message.channel,str(traceback.format_exc()))
-        #await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
+        traceback.print_exc(file="/home/phxntx5/public_html/Bonfire/bot_error")
+        await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
 
 if __name__ == '__main__':
     for e in extensions:
