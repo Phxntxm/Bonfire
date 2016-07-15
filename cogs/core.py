@@ -175,7 +175,7 @@ class Core:
         config.closeConnection()
 
     @commands.command()
-    async def test(self, *, first, second):
+    async def test(self, *first: str, second: str):
         await self.bot.say("First: {}\nSecond: {}".format(first, second))
 
 
