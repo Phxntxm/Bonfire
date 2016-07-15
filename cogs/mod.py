@@ -71,13 +71,11 @@ class Mod:
         await self.bot.delete_message(ctx.message)
 
     @commands.group(pass_context=True, invoke_without_command=True)
-    async def perms(self, ctx, command: str=""):
-        if command == "":
+    async def perms(self, ctx, *command: str):
+        if command is None:
             await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
-        if command not in self.bot.commands:
-            await self.bot.say("{} does not appear to be a valid command!".format(command))
-            return
+        command = " ".join(command)
 
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_perms))
