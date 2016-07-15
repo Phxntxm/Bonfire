@@ -13,17 +13,18 @@ def customPermsOrRole(perm):
         cursor.execute('use {}'.format(config.db_perms))
         cmd = str(ctx.command)
         sid = ctx.message.server.id
-        f = open("/home/phxntx5/public_html/Bonfire/checkstest.txt","r+")
+        f = open("/home/phxntx5/public_html/Bonfire/checkstest.txt", "r+")
         f.write("cmd: {}\nsid: {}".format(cmd, sid))
         f.close()
-        
+
         cursor.execute("show tables like %s", (sid,))
         result = cursor.fetchone()
         if result is not None:
-            sql = "select perms from `"+sid+"` where command=%s"
+            sql = "select perms from `" + sid + "` where command=%s"
             cursor.execute(sql, (cmd,))
             result = cursor.fetchone()
-            perm = result['perms']
+            if result is not None:
+                perm = result['perms']
             if perm == "none":
                 return True
         config.closeConnection()
@@ -31,6 +32,7 @@ def customPermsOrRole(perm):
             if getattr(role, perm):
                 return True
         return False
+
     return commands.check(predicate)
 
 

@@ -174,6 +174,10 @@ class Core:
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
         config.closeConnection()
 
+    @commands.command()
+    async def test(self, *, first, second):
+        await self.bot.say("First: {}\nSecond: {}".format(first, second))
+
 
 def setup(bot):
     bot.add_cog(Core(bot))
