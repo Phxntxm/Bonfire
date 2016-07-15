@@ -110,7 +110,7 @@ class Mod:
                 sql = "create table `%s` (`server_id` varchar(255) not null,`command` varchar(32) not null,"
                 "`perms` varchar(32) not null,primary key (`server_id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
                 cursor.execute(sql, (ctx.message.server.id,))
-                cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,command,perms))
+                cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,ctx.message.server.id,command,perms))
             else:
                 cursor.execute("select perms from %s where command=%s",(ctx.message.server.id,command))
                 if cursor.fetchone() is None:
