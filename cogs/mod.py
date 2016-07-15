@@ -97,7 +97,7 @@ class Mod:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
             
-        if getattr(discord.Permissions, permissions, None) is None && not permissions.lower() == "none":
+        if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
             .format(permissions, "\n".join(valid_perms)))
         else:
