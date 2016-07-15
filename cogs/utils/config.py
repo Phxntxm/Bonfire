@@ -11,6 +11,7 @@ connection = None
 
 db_default = global_config.get("db_default")
 db_boops = global_config.get("db_boops")
+db_perms = global_config.get("db_perms")
 
 botDescription = global_config.get("description")
 commandPrefix = global_config.get("command_prefix")
