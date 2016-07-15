@@ -29,7 +29,7 @@ def customPermsOrRole(perm):
                 return True
         config.closeConnection()
         for role in ctx.message.author.roles:
-            if getattr(role, perm):
+            if getattr(role.permissions, perm):
                 return True
         return False
 
