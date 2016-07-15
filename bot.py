@@ -3,7 +3,6 @@
 import discord
 from discord.ext import commands
 from cogs.utils import config
-import traceback
 
 extensions = ['cogs.interaction',
               'cogs.core',
@@ -64,8 +63,6 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt)
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-        #await bot.send_message(ctx.message.channel,str(traceback.format_exc()))
-        traceback.print_exc(file=open("/home/phxntx5/public_html/Bonfire/bot_error","a"))
         await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
 
 if __name__ == '__main__':

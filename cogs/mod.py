@@ -92,34 +92,36 @@ class Mod:
     @perms.command(name="add", aliases=["setup,create"], pass_context=True)
     @commands.has_permissions(manage_server=True)
     async def add_perms(self, ctx, command: str, permissions: str):
-        for checks in self.bot.commands.get(command).checks:
-            if "isOwner" == checks.__name__:
-                await self.bot.say("This command cannot have custom permissions setup!")
-                return
-            
-        if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
-            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
-            .format(permissions, "\n".join(valid_perms)))
-        else:
-            cursor = config.getCursor()
-            cursor.execute('use {}'.format(config.db_default))
-            cursor.execute("show tables like %s", (ctx.message.server.id,))
-            result = cursor.fetchone()
-            if result is None:
-                #Server's data doesn't exist yet, need to create it
-                sql = "create table `{}` (`command` varchar(32) not null,`perms` varchar(32) not null,"
-                "primary key (`command`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
-                cursor.execute(sql.format(ctx.message.server.id))
-                cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
+        try:
+            for checks in self.bot.commands.get(command).checks:
+                if "isOwner" == checks.__name__:
+                    await self.bot.say("This command cannot have custom permissions setup!")
+                    return
+                
+            if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
+                await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
+                .format(permissions, "\n".join(valid_perms)))
             else:
-                cursor.execute("select perms from %s where command=%s",(ctx.message.server.id,command))
-                if cursor.fetchone() is None:
+                cursor = config.getCursor()
+                cursor.execute('use {}'.format(config.db_default))
+                cursor.execute("show tables like %s", (ctx.message.server.id,))
+                result = cursor.fetchone()
+                if result is None:
+                    #Server's data doesn't exist yet, need to create it
+                    sql = "create table `{}` (`command` varchar(32) not null,`perms` varchar(32) not null,"
+                    "primary key (`command`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
+                    cursor.execute(sql.format(ctx.message.server.id))
                     cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
                 else:
-                    cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,perms,command))
-                    
-        config.closeConnection()
-    
+                    cursor.execute("select perms from %s where command=%s",(ctx.message.server.id,command))
+                    if cursor.fetchone() is None:
+                        cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
+                    else:
+                        cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,perms,command))
+                        
+            config.closeConnection()
+        except:
+            traceback.print_exc(file=open("/home/phxntx5/public_html/Bonfire/bot_error","a"))
 
 
 def setup(bot):
