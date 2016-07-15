@@ -65,8 +65,32 @@ class Mod:
     @commands.has_permissions(manage_server=True)
     async def perms(self, ctx, command: str):
         if command not in self.bot.commands:
-            await bot.say("{} does not appear to be a valid command, I can't set permissions for a command that doesn't exist!")
+            await bot.say("{} does not appear to be a valid command!")
             return
+            
+        cursor = config.getCursor()
+        cursor.execute('use {}'.format(config.db_default))
+        cursor.execute("show tables like '{}'".format(ctx.message.server.id))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say("There are no custom permissions setup on this server yet!")
+            return
+        
+        cursor.execute('select perms from custom_permissions where server_id=%s and command=%s', (ctx.message.server.id,command))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say("That command has no custom permissions setup on it!")
+            return
+        
+        await self.bot.say("You need to have the permission `{}` to use the command `{}` in this server".format(result['perm'],command))
+            
+    @perms.command(name="add", aliases=["setup,create"], pass_context=True)
+    async def add_perms(self, ctx, command: str, permissions: str=None):
+        for checks in self.bot.commands.get(command).checks
+            if "isOwner" == checks.__name__:
+                await self.bot.say("This command cannot have custom permissions setup!")
+                return
+        
     
 
 
