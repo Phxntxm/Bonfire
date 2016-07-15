@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3.5
 
 import discord
+import traceback
 from discord.ext import commands
 from cogs.utils import config
 
@@ -64,6 +65,7 @@ async def on_command_error(error, ctx):
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
         await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
+        await bot.send_message(ctx.message.channel, "```{}```".format(traceback.format_exc()))
 
 if __name__ == '__main__':
     for e in extensions:
