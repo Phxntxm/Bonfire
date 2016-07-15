@@ -107,7 +107,7 @@ class Mod:
         cmd = self.bot.commands.get(msg[count])
         while isinstance(cmd, commands.Group):
             count += 1
-            cmd = cmd.get(msg[count])
+            cmd = cmd.commands.get(msg[count])
 
         for check in cmd.checks:
             if "isOwner" == check.__name__:
