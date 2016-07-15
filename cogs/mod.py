@@ -114,7 +114,7 @@ class Mod:
             else:
                 cursor.execute("select perms from %s where command=%s",(ctx.message.server.id,command))
                 if cursor.fetchone() is None:
-                    cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,command,perms))
+                    cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,ctx.message.server.id,command,perms))
                 else:
                     cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,command,perms,command))
                     
