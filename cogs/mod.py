@@ -93,8 +93,8 @@ class Mod:
     @commands.has_permissions(manage_server=True)
     async def add_perms(self, ctx, command: str, permissions: str):
         try:
-            await self.bot.say("Command is: `{}`\nPermissions is: `{}`\n Type of command is `{}`\n Type of permissions is `{}`".format(command,permissions,type(command),type(permissions)))
-            return
+            #await self.bot.say("Command is: `{}`\nPermissions is: `{}`\n Type of command is `{}`\n Type of permissions is `{}`".format(command,permissions,type(command),type(permissions)))
+            #return
             for checks in self.bot.commands.get(command).checks:
                 if "isOwner" == checks.__name__:
                     await self.bot.say("This command cannot have custom permissions setup!")
