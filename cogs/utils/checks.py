@@ -12,10 +12,10 @@ def customPermsOrRole(perm):
         cmd = str(ctx.command)
         sid = ctx.message.server.id
         
-        cursor.execute("show tables like '{}'".format(sid))
+        cursor.execute("show tables like %s", (sid,))
         result = cursor.fetchone()
         if result is not None:
-            sql = "select perms from `"+ctx.message.server.id+"`where command=%s"
+            sql = "select perms from `"+sid+"`where command=%s"
             cursor.execute(sql,(cmd,))
             result = cursor.fetchone()
             perm = result['perms']
