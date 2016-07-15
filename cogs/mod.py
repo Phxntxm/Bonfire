@@ -25,7 +25,7 @@ class Mod:
             await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
 
     @nsfw.command(name="add", pass_context=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
         cursor = config.getCursor()
@@ -40,7 +40,7 @@ class Mod:
         await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @nsfw.command(name="remove", aliases=["delete"], pass_context=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
         cursor = config.getCursor()
@@ -56,14 +56,14 @@ class Mod:
         await self.bot.say("This channel has just been unregistered as a nsfw channel")
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.has_permissions(manage_server=True)
+    @checks.customPermsOrRole("manage_server")
     async def leave(self, ctx):
         """Forces the bot to leave the server"""
         await self.bot.say('Why must I leave? Hopefully I can come back :c')
         await self.bot.leave_server(ctx.message.server)
 
     @commands.command(pass_context=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def say(self, ctx, *msg: str):
         """Tells the bot to repeat what you say"""
         msg = ' '.join(msg)
@@ -96,7 +96,7 @@ class Mod:
                                                                                                  command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True)
-    @commands.has_permissions(manage_server=True)
+    @checks.customPermsOrRole("manage_server")
     async def add_perms(self, ctx, *msg: str):
         command = " ".join(msg[0:len(msg)-1])
         permissions = msg[len(msg)-1]
@@ -109,7 +109,7 @@ class Mod:
                 cmd = cmd.commands.get(msg[count])
             except:
                 break
-                
+
         for check in cmd.checks:
             if "isOwner" == check.__name__:
                 await self.bot.say("This command cannot have custom permissions setup!")

@@ -157,7 +157,7 @@ class Core:
         config.closeConnection()
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def del_tag(self, ctx, *tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
@@ -173,10 +173,6 @@ class Core:
         cursor.execute('delete from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
         config.closeConnection()
-
-    @commands.command()
-    async def test(self, *first: str, second: str):
-        await self.bot.say("First: {}\nSecond: {}".format(first, second))
 
 
 def setup(bot):
