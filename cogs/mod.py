@@ -2,7 +2,7 @@ from discord.ext import commands
 from .utils import checks
 from .utils import config
 import pymysql
-
+import traceback
 import discord
 
 valid_perms = ['kick_members','ban_members','administrator','manage_channels','manage_server','read_messages',
