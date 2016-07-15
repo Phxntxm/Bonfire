@@ -2,7 +2,7 @@ from discord.ext import commands
 from . import config
 
 
-def isOwner(ctx)
+def isOwner(ctx):
     return ctx.message.author.id == config.ownerID
 
 #def isOwner():
