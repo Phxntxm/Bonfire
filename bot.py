@@ -2,6 +2,7 @@
 
 import discord
 import traceback
+import sys
 from discord.ext import commands
 from cogs.utils import config
 
@@ -63,9 +64,9 @@ async def on_command_error(error, ctx):
         fmt = "You can't tell me what to do!"
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CommandInvokeError):
-        fmt = 'In {0.command.qualified_name}:'.format(ctx), file=sys.stderr
+        fmt = 'In {0.command.qualified_name}:'.format(ctx)
         fmt += error.original.__traceback__
-        fmt += '{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr
+        fmt += '{0.__class__.__name__}: {0}'.format(error.original)
         await bot.send_message(ctx.message.channel,"```{}```".format(fmt))
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
