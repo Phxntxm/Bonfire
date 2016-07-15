@@ -77,7 +77,7 @@ class Mod:
             return
             
         cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
+        cursor.execute('use {}'.format(config.db_perms))
         cursor.execute("show tables like '{}'".format(ctx.message.server.id))
         result = cursor.fetchone()
         if result is None:
@@ -124,7 +124,7 @@ class Mod:
                     sql = "update `"+ctx.message.server.id+"` set perms=%s where command=%s"
                     cursor.execute(sql,(permissions,command))
                     
-        await self.bot.say("I have just added your custom permissions; you now need to have {} permissions to use the command {}".format(permissions, command))
+        await self.bot.say("I have just added your custom permissions; you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
         config.closeConnection()
 
 
