@@ -102,7 +102,7 @@ class Mod:
             .format(permissions, "\n".join(valid_perms)))
         else:
             cursor = config.getCursor()
-            cursor.execute('use %s', (config.db_default,))
+            cursor.execute('use {}'.format(config.db_default))
             cursor.execute("show tables like %s", (ctx.message.server.id,))
             result = cursor.fetchone()
             if result is None:
