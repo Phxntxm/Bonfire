@@ -60,6 +60,14 @@ class Mod:
         msg = ' '.join(msg)
         await self.bot.say(msg)
         await self.bot.delete_message(ctx.message)
+        
+    @commands.group(pass_context=True, invoke_without_command=True)
+    @commands.has_permissions(manage_server=True)
+    async def perms(self, ctx, command: str)
+        if command not in self.bot.commands:
+            await bot.say("{} does not appear to be a valid command, I can't set permissions for a command that doesn't exist!")
+            return
+    
 
 
 def setup(bot):
