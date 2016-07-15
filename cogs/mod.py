@@ -68,7 +68,10 @@ class Mod:
         await self.bot.delete_message(ctx.message)
         
     @commands.group(pass_context=True, invoke_without_command=True)
-    async def perms(self, ctx, command: str):
+    async def perms(self, ctx, command: str = ""):
+        if command == "":
+            await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
+            return
         if command not in self.bot.commands:
             await self.bot.say("{} does not appear to be a valid command!".format(command))
             return
@@ -92,41 +95,37 @@ class Mod:
     @perms.command(name="add", aliases=["setup,create"], pass_context=True)
     @commands.has_permissions(manage_server=True)
     async def add_perms(self, ctx, command: str, permissions: str):
-        try:
-            #await self.bot.say("Command is: `{}`\nPermissions is: `{}`\n Type of command is `{}`\n Type of permissions is `{}`".format(command,permissions,type(command),type(permissions)))
-            #return
-            for checks in self.bot.commands.get(command).checks:
-                if "isOwner" == checks.__name__:
-                    await self.bot.say("This command cannot have custom permissions setup!")
-                    return
-                
-            if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
-                await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
-                .format(permissions, "\n".join(valid_perms)))
+        for checks in self.bot.commands.get(command).checks:
+            if "isOwner" == checks.__name__:
+                await self.bot.say("This command cannot have custom permissions setup!")
+                return
+            
+        if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
+            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
+            .format(permissions, "\n".join(valid_perms)))
+        else:
+            cursor = config.getCursor()
+            cursor.execute('use {}'.format(config.db_perms))
+            cursor.execute("show tables like %s", (ctx.message.server.id,))
+            result = cursor.fetchone()
+            if result is None:
+                #Server's data doesn't exist yet, need to create it
+                sql = "create table `"+ctx.message.server.id+"` (`command` varchar(32) not null,`perms` varchar(32) not null,primary key (`command`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
+                cursor.execute(sql)
+                sql = "insert into `"+ctx.message.server.id+"` (command, perms) values(%s, %s)"
+                cursor.execute(sql,(command,permissions))
             else:
-                cursor = config.getCursor()
-                cursor.execute('use {}'.format(config.db_perms))
-                cursor.execute("show tables like %s", (ctx.message.server.id,))
-                result = cursor.fetchone()
-                if result is None:
-                    #Server's data doesn't exist yet, need to create it
-                    sql = "create table `"+ctx.message.server.id+"` (`command` varchar(32) not null,`perms` varchar(32) not null,primary key (`command`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
-                    cursor.execute(sql)
+                sql = "select perms from `"+ctx.message.server.id+"`where command=%s"
+                cursor.execute(sql,(command,))
+                if cursor.fetchone() is None:
                     sql = "insert into `"+ctx.message.server.id+"` (command, perms) values(%s, %s)"
                     cursor.execute(sql,(command,permissions))
                 else:
-                    sql = "select perms from `"+ctx.message.server.id+"`where command=%s"
-                    cursor.execute(sql,(command,))
-                    if cursor.fetchone() is None:
-                        sql = "insert into `"+ctx.message.server.id+"` (command, perms) values(%s, %s)"
-                        cursor.execute(sql,(command,permissions))
-                    else:
-                        sql = "update `"+ctx.message.server.id+"` set perms=%s where command=%s"
-                        cursor.execute(sql,(perms,command))
-                        
-            config.closeConnection()
-        except:
-            traceback.print_exc(file=open("/home/phxntx5/public_html/Bonfire/bot_error","a"))
+                    sql = "update `"+ctx.message.server.id+"` set perms=%s where command=%s"
+                    cursor.execute(sql,(perms,command))
+                    
+        await self.bot.say("I have just added your custom permissions; you now need to have {} permissions to use the command {}".format(permissions, command))
+        config.closeConnection()
 
 
 def setup(bot):
