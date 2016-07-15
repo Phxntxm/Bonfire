@@ -4,7 +4,6 @@ import discord
 from discord.ext import commands
 from cogs.utils import config
 import traceback
-import logging
 
 extensions = ['cogs.interaction',
               'cogs.core',
@@ -16,11 +15,7 @@ extensions = ['cogs.interaction',
               'cogs.overwatch']
 
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=True)
-logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='/home/phxntx5/public_html/Bonfire/bot_error', encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-logger.addHandler(handler)
+
 
 # Bot event overrides
 @bot.event
@@ -69,6 +64,8 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt)
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+        #await bot.send_message(ctx.message.channel,str(traceback.format_exc()))
+        traceback.print_exc(file=open("/home/phxntx5/public_html/Bonfire/bot_error","a"))
         await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
 
 if __name__ == '__main__':
