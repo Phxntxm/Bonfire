@@ -122,7 +122,7 @@ class Mod:
                         cursor.execute(sql,(command,permissions))
                     else:
                         sql = "update `"+ctx.message.server.id+"` set perms=%s where command=%s"
-                        cursor.execute(,(perms,command))
+                        cursor.execute(sql,(perms,command))
                         
             config.closeConnection()
         except:
