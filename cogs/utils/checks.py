@@ -16,14 +16,13 @@ def customPermsOrRole(perm):
         result = cursor.fetchone()
         config.closeConnection()
         if result is not None:
-            if perm is None:
+            perm = result['perms']
+            if perm == "none":
                 return True
-            else:
-                for role in ctx.message.author.roles:
-                    if getattr(role,perm):
-                        return True
-                return False
-        return True
+        for role in ctx.message.author.roles:
+            if getattr(role,perm):
+                return True
+        return False
     return commands.check(predicate)
     
 def isPM():
