@@ -1,6 +1,7 @@
 import asyncio
 import discord
 from discord.ext import commands
+from .utils import checks
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -145,7 +146,7 @@ class Music:
         await state.songs.put(entry)
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def volume(self, ctx, value: int):
         """Sets the volume of the currently playing song."""
 
@@ -156,7 +157,7 @@ class Music:
             await self.bot.say('Set the volume to {:.0%}'.format(player.volume))
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def pause(self, ctx):
         """Pauses the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -165,7 +166,7 @@ class Music:
             player.pause()
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -174,7 +175,7 @@ class Music:
             player.resume()
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
         This also clears the queue.
@@ -226,7 +227,7 @@ class Music:
             await self.bot.say('You have already voted to skip this song.')
             
     @commands.command(pass_context=True, no_pm=True)
-    @commands.has_permissions(kick_members=True)
+    @checks.customPermsOrRole("kick_members")
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
         state = self.get_voice_state(ctx.message.server)
