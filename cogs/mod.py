@@ -65,7 +65,7 @@ class Mod:
     @commands.has_permissions(manage_server=True)
     async def perms(self, ctx, command: str):
         if command not in self.bot.commands:
-            await bot.say("{} does not appear to be a valid command!")
+            await self.bot.say("{} does not appear to be a valid command!")
             return
             
         cursor = config.getCursor()
