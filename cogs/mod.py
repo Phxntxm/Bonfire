@@ -72,6 +72,8 @@ class Mod:
 
     @commands.group(pass_context=True, invoke_without_command=True)
     async def perms(self, ctx, *command: str):
+        """This command can be used to print the current allowed permissions on a specific command
+        This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
         if command is None:
             await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
@@ -98,6 +100,8 @@ class Mod:
     @perms.command(name="add", aliases=["setup,create"], pass_context=True)
     @checks.customPermsOrRole("manage_server")
     async def add_perms(self, ctx, *msg: str):
+        """Setups up custom permissions on the provided command
+        Format must be 'perms add <command> <permission>'"""
         command = " ".join(msg[0:len(msg)-1])
         permissions = msg[len(msg)-1]
         msg = msg[0:len(msg)-1]
