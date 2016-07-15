@@ -1,7 +1,6 @@
 from discord.ext import commands
 from .utils import config
 from .utils import checks
-import discord
 import subprocess
 import urllib.parse
 import urllib.request
@@ -92,7 +91,7 @@ class Core:
         await self.bot.say(response)
 
     @commands.command(pass_context=True)
-    async def roll(self, ctx, notation: str = "d6"):
+    async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         try:
@@ -111,7 +110,7 @@ class Core:
         if num > 100:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
-            
+
         valueStr = ", ".join("{}".format(random.randint(1, num)) for i in range(0, int(dice)))
 
         if int(dice) == 1:

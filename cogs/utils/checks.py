@@ -5,29 +5,35 @@ from . import config
 def isOwner(ctx):
     return ctx.message.author.id == config.ownerID
 
+
 def customPermsOrRole(perm):
     def predicate(ctx):
+        nonlocal perm
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_perms))
         cmd = str(ctx.command)
         sid = ctx.message.server.id
+        f = open("/home/phxntx5/public_html/Bonfire/checkstest.txt","r+")
+        f.write("cmd: {}\nsid: {}".format(cmd, sid))
+        f.close()
         
         cursor.execute("show tables like %s", (sid,))
         result = cursor.fetchone()
         if result is not None:
-            sql = "select perms from `"+sid+"`where command=%s"
-            cursor.execute(sql,(cmd,))
+            sql = "select perms from `"+sid+"` where command=%s"
+            cursor.execute(sql, (cmd,))
             result = cursor.fetchone()
             perm = result['perms']
             if perm == "none":
                 return True
         config.closeConnection()
         for role in ctx.message.author.roles:
-            if getattr(role,perm):
+            if getattr(role, perm):
                 return True
         return False
     return commands.check(predicate)
-    
+
+
 def isPM():
     def predicate(ctx):
         return ctx.message.channel.is_private
