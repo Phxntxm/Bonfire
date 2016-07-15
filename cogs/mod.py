@@ -83,14 +83,14 @@ class Mod:
         if result is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return
-        
-        cursor.execute('select perms from custom_permissions where server_id=%s and command=%s', (ctx.message.server.id,command))
+        sql = "select perms from `"+ctx.message.server.id+"` where command=%s"
+        cursor.execute(sql, (command,))
         result = cursor.fetchone()
         if result is None:
             await self.bot.say("That command has no custom permissions setup on it!")
             return
         
-        await self.bot.say("You need to have the permission `{}` to use the command `{}` in this server".format(result['perm'],command))
+        await self.bot.say("You need to have the permission `{}` to use the command `{}` in this server".format(result['perms'],command))
             
     @perms.command(name="add", aliases=["setup,create"], pass_context=True)
     @commands.has_permissions(manage_server=True)
