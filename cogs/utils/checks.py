@@ -2,11 +2,14 @@ from discord.ext import commands
 from . import config
 
 
-def isOwner():
-    def predicate(ctx):
-        return ctx.message.author.id == config.ownerID
+def isOwner(ctx)
+    return ctx.message.author.id == config.ownerID
 
-    return commands.check(predicate)
+#def isOwner():
+    #def predicate(ctx):
+        #return ctx.message.author.id == config.ownerID
+
+    #return commands.check(predicate)
 
 
 def isPM():
