@@ -3,6 +3,12 @@ from .utils import checks
 from .utils import config
 import pymysql
 
+import discord
+
+valid_perms = ['kick_members','ban_members','administrator','manage_channels','manage_server','read_messages',
+                'send_messages','send_tts_messages','manage_messages','embed_links','attach_files','read_message_history',
+                'mention_everyone','connect','speak','mute_members','deafen_members','move_members','use_voice_activation',
+                'change_nicknames','manage_nicknames','manage_roles']
 
 class Mod:
     """Commands that can be used by a or an admin, depending on the command"""
@@ -62,7 +68,6 @@ class Mod:
         await self.bot.delete_message(ctx.message)
         
     @commands.group(pass_context=True, invoke_without_command=True)
-    @commands.has_permissions(manage_server=True)
     async def perms(self, ctx, command: str):
         if command not in self.bot.commands:
             await self.bot.say("{} does not appear to be a valid command!".format(command))
@@ -85,12 +90,35 @@ class Mod:
         await self.bot.say("You need to have the permission `{}` to use the command `{}` in this server".format(result['perm'],command))
             
     @perms.command(name="add", aliases=["setup,create"], pass_context=True)
-    async def add_perms(self, ctx, command: str, permissions: str=None):
+    @commands.has_permissions(manage_server=True)
+    async def add_perms(self, ctx, command: str, permissions: str):
         for checks in self.bot.commands.get(command).checks:
             if "isOwner" == checks.__name__:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
-        
+            
+        if getattr(discord.Permissions, permissions, None) is None && not permissions.lower() == "none":
+            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
+            .format(permissions, "\n".join(valid_perms)))
+        else:
+            cursor = config.getCursor()
+            cursor.execute('use {}'.format(config.db_default))
+            cursor.execute("show tables like '{}'".format(ctx.message.server.id))
+            result = cursor.fetchone()
+            if result is None:
+                #Server's data doesn't exist yet, need to create it
+                sql = "create table `%s` (`server_id` varchar(255) not null,`command` varchar(32) not null,"
+                      "`perms` varchar(32) not null,primary key (`server_id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
+                cursor.execute(sql, (ctx.message.server.id,))
+                cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,command,perms))
+            else:
+                cursor.execute("select perms from %s where command=%s",(ctx.message.server.id,command))
+                if cursor.fetchone() is None:
+                    cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,command,perms))
+                else:
+                    cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,command,perms,command))
+                    
+        config.closeConnection()
     
 
 
