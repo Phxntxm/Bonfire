@@ -112,7 +112,7 @@ class Mod:
                     cursor.execute(sql)
                     cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
                 else:
-                    cursor.execute("select perms from %s where command=%s",(ctx.message.server.id,command))
+                    cursor.execute("select perms from `%s` where command=%s",(ctx.message.server.id,command))
                     if cursor.fetchone() is None:
                         cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
                     else:
