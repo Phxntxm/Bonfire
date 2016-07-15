@@ -105,8 +105,11 @@ class Mod:
         cmd = self.bot.commands.get(msg[count])
         while isinstance(cmd, commands.Group):
             count += 1
-            cmd = cmd.commands.get(msg[count])
-
+            try:
+                cmd = cmd.commands.get(msg[count])
+            except:
+                break
+                
         for check in cmd.checks:
             if "isOwner" == check.__name__:
                 await self.bot.say("This command cannot have custom permissions setup!")
