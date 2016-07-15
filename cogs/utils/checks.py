@@ -14,11 +14,14 @@ def customPermsOrRole(perm):
         
         cursor.execute("show tables like '{}'".format(sid))
         result = cursor.fetchone()
-        config.closeConnection()
         if result is not None:
+            sql = "select perms from `"+ctx.message.server.id+"`where command=%s"
+            cursor.execute(sql,(cmd,))
+            result = cursor.fetchone()
             perm = result['perms']
             if perm == "none":
                 return True
+        config.closeConnection()
         for role in ctx.message.author.roles:
             if getattr(role,perm):
                 return True
