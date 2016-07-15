@@ -110,11 +110,11 @@ class Mod:
                     #Server's data doesn't exist yet, need to create it
                     sql = "create table `"+ctx.message.server.id+"` (`command` varchar(32) not null,`perms` varchar(32) not null,primary key (`command`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
                     cursor.execute(sql)
-                    cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
+                    cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,permissions))
                 else:
                     cursor.execute("select perms from `%s` where command=%s",(ctx.message.server.id,command))
                     if cursor.fetchone() is None:
-                        cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
+                        cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,permissions))
                     else:
                         cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,perms,command))
                         
