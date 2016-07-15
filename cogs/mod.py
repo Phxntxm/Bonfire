@@ -116,7 +116,7 @@ class Mod:
                 if cursor.fetchone() is None:
                     cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,ctx.message.server.id,command,perms))
                 else:
-                    cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,command,perms,command))
+                    cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,perms,command))
                     
         config.closeConnection()
     
