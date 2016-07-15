@@ -17,7 +17,7 @@ class Owner:
         self.bot = bot
 
     @commands.command(pass_context=True)
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def restart(self, ctx):
         """Forces the bot to restart"""
         cursor = config.getCursor()
@@ -30,7 +30,7 @@ class Owner:
         os.execl(python, python, *sys.argv)
 
     @commands.command(pass_context=True)
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def py(self, ctx):
         """Executes code"""
         match_single = getter.findall(ctx.message.content)
@@ -51,7 +51,7 @@ class Owner:
                 exec(match_multi[0])
 
     @commands.command(pass_context=True)
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def shutdown(self, ctx):
         """Shuts the bot down"""
         fmt = 'Shutting down, I will miss you {0.author.name}'
@@ -60,7 +60,7 @@ class Owner:
         await self.bot.close()
 
     @commands.command()
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def avatar(self, content: str):
         """Changes the avatar for the bot to the filename following the command"""
         file = '/home/phxntx5/public_html/bot/images/' + content
@@ -68,7 +68,7 @@ class Owner:
             await self.bot.edit_profile(avatar=fp.read())
 
     @commands.command()
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def name(self, newNick: str):
         """Changes the bot's name"""
         await self.bot.edit_profile(username=newNick)
@@ -78,7 +78,7 @@ class Owner:
         os.execl(python, python, *sys.argv)
 
     @commands.command()
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def status(self, *stat: str):
         """Changes the bot's 'playing' status"""
         newStatus = ' '.join(stat)
@@ -87,7 +87,7 @@ class Owner:
         await self.bot.say("Just changed my status to '{0}'!".format(newStatus))
 
     @commands.command()
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def load(self, *, module: str):
         """Loads a module"""
         try:
@@ -101,7 +101,7 @@ class Owner:
             await self.bot.say(fmt.format(type(e).__name__, e))
 
     @commands.command()
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def unload(self, *, module: str):
         """Unloads a module"""
         try:
@@ -115,7 +115,7 @@ class Owner:
             await self.bot.say(fmt.format(type(e).__name__, e))
 
     @commands.command()
-    @checks.isOwner()
+    @commands.check(isOwner)
     async def reload(self, *, module: str):
         """Reloads a module"""
         try:
