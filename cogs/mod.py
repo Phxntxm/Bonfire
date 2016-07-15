@@ -107,14 +107,14 @@ class Mod:
             result = cursor.fetchone()
             if result is None:
                 #Server's data doesn't exist yet, need to create it
-                sql = "create table `{}` (`server_id` varchar(255) not null,`command` varchar(32) not null,"
-                "`perms` varchar(32) not null,primary key (`server_id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
+                sql = "create table `{}` (`command` varchar(32) not null,`perms` varchar(32) not null,"
+                "primary key (`command`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
                 cursor.execute(sql.format(ctx.message.server.id))
-                cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,ctx.message.server.id,command,perms))
+                cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
             else:
                 cursor.execute("select perms from %s where command=%s",(ctx.message.server.id,command))
                 if cursor.fetchone() is None:
-                    cursor.execute("insert into %s (server_id, command, perms) values(%s, %s, %s)",(ctx.message.server.id,ctx.message.server.id,command,perms))
+                    cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,perms))
                 else:
                     cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,perms,command))
                     
