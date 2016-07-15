@@ -112,13 +112,17 @@ class Mod:
                     #Server's data doesn't exist yet, need to create it
                     sql = "create table `"+ctx.message.server.id+"` (`command` varchar(32) not null,`perms` varchar(32) not null,primary key (`command`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
                     cursor.execute(sql)
-                    cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,permissions))
+                    sql = "insert into `"+ctx.message.server.id+"` (command, perms) values(%s, %s)"
+                    cursor.execute(sql,(command,permissions))
                 else:
-                    cursor.execute("select perms from `%d` where command=%s",(ctx.message.server.id,command))
+                    sql = "select perms from `"+ctx.message.server.id+"`where command=%s"
+                    cursor.execute(sql,(command,))
                     if cursor.fetchone() is None:
-                        cursor.execute("insert into {} (command, perms) values({}, {})",(ctx.message.server.id,command,permissions))
+                        sql = "insert into `"+ctx.message.server.id+"` (command, perms) values(%s, %s)"
+                        cursor.execute(sql,(command,permissions))
                     else:
-                        cursor.execute("update %s set perms=%s where command=%s",(ctx.message.server.id,perms,command))
+                        sql = "update `"+ctx.message.server.id+"` set perms=%s where command=%s"
+                        cursor.execute(,(perms,command))
                         
             config.closeConnection()
         except:
