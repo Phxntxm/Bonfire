@@ -175,8 +175,8 @@ class Core:
         config.closeConnection()
     
     @commands.command()
-    async def test(self, first: str, second: str):
-        await self.bot.say("First: {}\n Second: {}".format(first,second))
+    async def test(self, first: discord.Member, second: str):
+        await self.bot.say("First: {}\nSecond: {}".format(first,second))
 
 
 def setup(bot):
