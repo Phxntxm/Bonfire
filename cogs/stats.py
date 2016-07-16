@@ -1,6 +1,7 @@
 from discord.ext import commands
 from discord.utils import find
 from .utils import config
+from .utils import checks
 import re
 import pymysql
 

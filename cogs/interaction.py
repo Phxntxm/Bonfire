@@ -1,5 +1,6 @@
 from discord.ext import commands
 from .utils import config
+from .utils import checks
 from threading import Timer
 import discord
 import random
