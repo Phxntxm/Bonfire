@@ -110,7 +110,7 @@ class Mod:
         msg = msg[0:len(msg)-1]
         count = 0
         cmd = self.bot.commands.get(msg[count])
-        await self.bot.say("2: Trying to add `{}` permissions on `{}`".format(permissions, command))
+        await self.bot.say("Trying to add `{}` permissions on `{}`".format(permissions, command))
         await self.bot.say("Checking nesting for groups of commands")
         while isinstance(cmd, commands.Group):
             count += 1
