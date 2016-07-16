@@ -101,7 +101,8 @@ class Mod:
     @commands.has_permissions(manage_server=True)
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
-        Format must be 'perms add <command> <permission>'"""
+        Format must be 'perms add <command> <permission>'
+        If you want to open the command to everyone, provide 'none' as the permission"""
         command = " ".join(msg[0:len(msg)-1])
         permissions = msg[len(msg)-1]
         msg = msg[0:len(msg)-1]
@@ -154,7 +155,7 @@ class Mod:
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
     async def remove_perms(self, ctx, *command: str):
-        """Removes the custom permissions on the command specified"""
+        """Removes the custom permissions setup on the command specified"""
         cmd = " ".join(command)
         sid = ctx.message.server.id
         cursor = config.getCursor()
