@@ -4,6 +4,8 @@ from .utils import checks
 import subprocess
 import urllib.parse
 import urllib.request
+import os
+import glob
 import json
 import random
 import discord
@@ -35,6 +37,11 @@ class Core:
     async def doggo(self, ctx)
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
+        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        f = glob.glob('doggo*')[random.randint(0,len(glob.glob('doggo*'))-1)]
+        f = open(f,'rb')
+        await self.bot.send_file(ctx.message.channel,f)
+        f.close()
         
         
     @commands.command()
