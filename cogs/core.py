@@ -34,7 +34,7 @@ class Core:
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
     @commands.command(pass_context=True)
-    async def doggo(self, ctx)
+    async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
         os.chdir('/home/phxntx5/public_html/Bonfire/images')
