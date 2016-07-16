@@ -173,6 +173,7 @@ class Mod:
         sql = "delete from `"+sid+"` where command=%s"
         cursor.execute(sql, (cmd,))
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
+        config.closeConnection()
 
 def setup(bot):
     bot.add_cog(Mod(bot))
