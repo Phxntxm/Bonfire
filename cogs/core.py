@@ -31,7 +31,12 @@ class Core:
         perms.attach_files = True
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
-
+    @commands.command(pass_context=True)
+    async def doggo(self, ctx)
+        """Use this to print a random doggo image.
+        Doggo is love, doggo is life."""
+        
+        
     @commands.command()
     async def joke(self):
         """Prints a random riddle"""
@@ -58,24 +63,26 @@ class Core:
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term"""
         if len(search) > 0:
+            # This sets the url as url?q=search+terms
             url = 'https://derpibooru.org/search.json?q='
             query = '+'.join(search)
             url += query
-
+            
+            # This will check if the channel is a 'nsfw' channel, if so add 'explicit' to the search term
             cursor = config.getCursor()
-            cursor.execute('use phxntx5_bonfire')
+            cursor.execute('use {}'.format(config.db_default))
             cursor.execute('select * from nsfw_channels')
             result = cursor.fetchall()
             if {'channel_id': '{}'.format(ctx.message.channel.id)} in result:
                 url += ",+explicit&filter_id=95938"
             config.closeConnection()
-
-            # url should now be in the form of url?q=search+terms
-            # Next part processes the json format, and saves the data in useful lists/dictionaries
+            
+            # Get the response from derpibooru and parse the 'searc' result from it
             response = urllib.request.urlopen(url)
             data = json.loads(response.read().decode('utf-8'))
             results = data['search']
-
+            
+            # Get the link if it exists, if not return saying no results found
             if len(results) > 0:
                 index = random.randint(0, len(results) - 1)
                 imageLink = 'http://' + results[index].get('representations').get('full')[2:].strip()
@@ -83,8 +90,12 @@ class Core:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
                 return
         else:
+            # If no search term was provided, search for a random image
             with urllib.request.urlopen('https://derpibooru.org/images/random') as response:
                 imageLink = response.geturl()
+        
+        # Post link to my link shortening site
+        # discord still shows image previews through redirects so this is not an issue.
         url = 'https://shpro.link/redirect.php/'
         data = urllib.parse.urlencode({'link': imageLink}).encode('ascii')
         response = urllib.request.urlopen(url, data).read().decode('utf-8')
@@ -97,12 +108,16 @@ class Core:
         try:
             dice = int(re.search("(\d*)d(\d*)", notation).group(1))
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
+        # This error will be hit if the notation is completely different than #d#
         except AttributeError:
             await self.bot.say("Please provide the die notation in #d#!")
             return
+        # This error will be hit if there was an issue converting to an int
+        # This means the notation was still given wrong
         except ValueError:
             await self.bot.say("Please provide the die notation in #d#!")
             return
+        # Dice will be None if d# was provided, assume this means 1d#
         dice = dice or '1'
         if dice > 10:
             await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
