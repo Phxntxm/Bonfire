@@ -49,7 +49,7 @@ class Twitch:
             config.closeConnection()
             await asyncio.sleep(30)
 
-    @commands.group(no_pm=True, invoke_without_command=True, no_pm=True)
+    @commands.group(no_pm=True, invoke_without_command=True)
     async def twitch(self, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is not None:
