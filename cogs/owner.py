@@ -1,8 +1,10 @@
 from discord.ext import commands
 from .utils import config
 from .utils import checks
+import urllib.request
 import re
 import os
+import glob
 import sys
 import discord
 import inspect
@@ -28,7 +30,17 @@ class Owner:
         await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)
+    
 
+    @commands.command(pass_context=True)
+    @commands.check(checks.isOwner)
+    async def adddoggo(self, ctx, url: str):
+        """Saves a URL as a image to add for the doggo command"""
+        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        local_path = 'doggo{}.jpg'.format(len(glob.glob('doggo*')))
+        urllib.request.urlretrieve(url,local_path)
+        await self.bot.say("Just saved a new doggo image! You now have {} doggo images!".format(len(glob.glob('doggo*'))))
+        
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
     async def py(self, ctx):
