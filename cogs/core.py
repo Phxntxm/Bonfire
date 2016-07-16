@@ -33,6 +33,8 @@ class Core:
         perms.attach_files = True
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
+                           
+                           
     @commands.command(pass_context=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
