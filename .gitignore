@@ -8,3 +8,4 @@ GitAutoDeploy.conf.json
 autoupdate.php
 error_log
 images/*
+.ftpquota
