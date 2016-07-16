@@ -152,7 +152,7 @@ class Mod:
         config.closeConnection()
         
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
-    @checks.has_permissions("manage_server")
+    @commands.has_permissions("manage_server")
     async def remove_perms(self, ctx, *command: str):
         """Removes the custom permissions on the command specified"""
         cmd = " ".join(command)
