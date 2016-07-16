@@ -63,7 +63,7 @@ class Overwatch:
             elif error_no == 404:
                 await self.bot.say("{} is not an actual hero!".format(hero.title()))
 
-    @ow.command(pass_context=True, name="add")
+    @ow.command(pass_context=True, name="add", no_pm=True)
     async def add(self, ctx, bt: str):
         """Saves your battletag for looking up information"""
         bt = bt.replace("#", "-")
@@ -87,7 +87,7 @@ class Overwatch:
             await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
         config.closeConnection()
 
-    @ow.command(pass_context=True, name="delete", aliases=['remove'])
+    @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
     async def delete(self, ctx):
         """Removes your battletag from the records"""
         cursor = config.getCursor()

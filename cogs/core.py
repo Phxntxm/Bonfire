@@ -119,7 +119,7 @@ class Core:
             fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
         await self.bot.say(fmt.format(ctx, dice, num, valueStr))
 
-    @commands.group(pass_context=True, invoke_without_command=True)
+    @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     async def tag(self, ctx, *tag: str):
         """This can be used for custom tags
          The format to call a custom tag is !tag <tag>"""
@@ -135,7 +135,7 @@ class Core:
         await self.bot.say("{}".format(result['result']))
         config.closeConnection()
 
-    @tag.command(name='add', aliases=['create', 'start'], pass_context=True)
+    @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
     async def add_tag(self, ctx, *result: str):
         """Use this to add a new tag that can be used in this server
@@ -156,7 +156,7 @@ class Core:
         await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
         config.closeConnection()
 
-    @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
+    @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
     async def del_tag(self, ctx, *tag: str):
         """Use this to remove a tag that from use for this server
