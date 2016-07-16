@@ -98,7 +98,7 @@ class Mod:
                                                                                                  command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("manage_server")
+    @checks.has_permissions("manage_server")
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'"""
@@ -113,7 +113,9 @@ class Mod:
                 cmd = cmd.commands.get(msg[count])
             except:
                 break
-
+    
+        """Need to also check here if this is perms add or perms remove, 
+        do not want to allow anyone less than an admin to access these no matter what"""
         for check in cmd.checks:
             if "isOwner" == check.__name__:
                 await self.bot.say("This command cannot have custom permissions setup!")
@@ -148,7 +150,29 @@ class Mod:
         await self.bot.say("I have just added your custom permissions; "
                            "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
         config.closeConnection()
-
+        
+    @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
+    @checks.has_permissions("manage_server")
+    async def remove_perms(self, ctx, *command: str):
+        """Removes the custom permissions on the command specified"""
+        cmd = " ".join(command)
+        sid = ctx.message.server.id
+        cursor = config.getCursor()
+        cursor.execute('use {}'.format(config.db_perms))
+        cursor.execute("show tables like %s", (sid,))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say("You do not have custom permissions setup on this server yet!")
+            return
+        sql = "select * from `"+sid+"` where command=%s"
+        cursor.execute(sql, (cmd,))
+        result = cursor.fetchone()
+        if result is None:
+            await self.bot.say("You do not have custom permissions setup on this command yet!")
+            return
+        sql = "delete from `"+sid+"` where command=%s"
+        cursor.execute(sql, (cmd,))
+        await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
 
 def setup(bot):
     bot.add_cog(Mod(bot))
