@@ -72,6 +72,7 @@ class Mod:
         await self.bot.delete_message(ctx.message)
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def perms(self, ctx, *command: str):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
@@ -115,9 +116,7 @@ class Mod:
                 cmd = cmd.commands.get(msg[count])
             except:
                 break
-    
-        """Need to also check here if this is perms add or perms remove, 
-        do not want to allow anyone less than an admin to access these no matter what"""
+                
         for check in cmd.checks:
             if "isOwner" == check.__name__ or "has_permissions" == re.search("has_permissions",str(check)).group(0):
                 await self.bot.say("This command cannot have custom permissions setup!")
@@ -127,26 +126,28 @@ class Mod:
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
                                .format(permissions, "\n".join(valid_perms)))
         else:
+            await self.bot.say("Trying to add `{}` permissions on `{}`".format(permissions, command))
+            sid = ctx.message.server.id
             cursor = config.getCursor()
             cursor.execute('use {}'.format(config.db_perms))
-            cursor.execute("show tables like %s", (ctx.message.server.id,))
+            cursor.execute("show tables like %s", (sid,))
             result = cursor.fetchone()
             if result is None:
                 # Server's data doesn't exist yet, need to create it
-                sql = "create table `" + ctx.message.server.id + "` (`command` varchar(32) not null,`perms` " \
+                sql = "create table `" + sid + "` (`command` varchar(32) not null,`perms` " \
                                                                  "varchar(32) not null,primary key (`command`))" \
                                                                  " engine=InnoDB default charset=utf8 collate=utf8_bin"
                 cursor.execute(sql)
-                sql = "insert into `" + ctx.message.server.id + "` (command, perms) values(%s, %s)"
+                sql = "insert into `" + sid + "` (command, perms) values(%s, %s)"
                 cursor.execute(sql, (command, permissions))
             else:
-                sql = "select perms from `" + ctx.message.server.id + "`where command=%s"
+                sql = "select perms from `" + sid + "`where command=%s"
                 cursor.execute(sql, (command,))
                 if cursor.fetchone() is None:
-                    sql = "insert into `" + ctx.message.server.id + "` (command, perms) values(%s, %s)"
+                    sql = "insert into `" + sid + "` (command, perms) values(%s, %s)"
                     cursor.execute(sql, (command, permissions))
                 else:
-                    sql = "update `" + ctx.message.server.id + "` set perms=%s where command=%s"
+                    sql = "update `" + sid + "` set perms=%s where command=%s"
                     cursor.execute(sql, (permissions, command))
 
         await self.bot.say("I have just added your custom permissions; "
