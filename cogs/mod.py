@@ -121,7 +121,7 @@ class Mod:
                 
         await self.bot.say("Checking for owner role commands, or commands that don't allow customer permissions")
         for check in cmd.checks:
-            if "isOwner" == check.__name__ or "has_permissions" == re.search("has_permissions",str(check)).group(0):
+            if "isOwner" == check.__name__ or re.search("has_permissions",str(check)) is not None:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
 
