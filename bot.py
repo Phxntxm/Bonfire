@@ -15,7 +15,7 @@ extensions = ['cogs.interaction',
               'cogs.twitch',
               'cogs.overwatch']
 
-bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=True)
+bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 
 
 # Bot event overrides
