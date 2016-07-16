@@ -3,6 +3,7 @@ from .utils import checks
 from .utils import config
 import pymysql
 import discord
+import re
 
 valid_perms = ['kick_members', 'ban_members', 'administrator', 'manage_channels', 'manage_server', 'read_messages',
                'send_messages', 'send_tts_messages', 'manage_messages', 'embed_links', 'attach_files',
@@ -118,7 +119,7 @@ class Mod:
         """Need to also check here if this is perms add or perms remove, 
         do not want to allow anyone less than an admin to access these no matter what"""
         for check in cmd.checks:
-            if "isOwner" == check.__name__:
+            if "isOwner" == check.__name__ or "has_permissions" == re.search("has_permissions",str(check)).group(0):
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
 
