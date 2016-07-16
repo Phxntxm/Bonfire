@@ -15,9 +15,6 @@ def customPermsOrRole(perm):
         cursor.execute('use {}'.format(config.db_perms))
         cmd = str(ctx.command)
         sid = ctx.message.server.id
-        f = open("/home/phxntx5/public_html/Bonfire/checkstest.txt", "r+")
-        f.write("cmd: {}\nsid: {}".format(cmd, sid))
-        f.close()
 
         cursor.execute("show tables like %s", (sid,))
         result = cursor.fetchone()
