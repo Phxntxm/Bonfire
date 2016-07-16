@@ -98,7 +98,7 @@ class Mod:
                                                                                                  command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True, no_pm=True)
-    @commands.has_permissions("manage_server")
+    @commands.has_permissions(manage_server=True)
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'"""
@@ -152,7 +152,7 @@ class Mod:
         config.closeConnection()
         
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
-    @commands.has_permissions("manage_server")
+    @commands.has_permissions(manage_server=True)
     async def remove_perms(self, ctx, *command: str):
         """Removes the custom permissions on the command specified"""
         cmd = " ".join(command)
