@@ -98,7 +98,7 @@ class Mod:
                                                                                                  command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True, no_pm=True)
-    @checks.has_permissions("manage_server")
+    @commands.has_permissions("manage_server")
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'"""
