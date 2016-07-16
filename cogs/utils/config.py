@@ -1,6 +1,7 @@
 import yaml
 import pymysql.cursors
 import asyncio
+import json
 
 loop = asyncio.get_event_loop()
 
@@ -39,3 +40,9 @@ def getCursor():
 def closeConnection():
     connection.commit()
     connection.close()
+
+def saveContent(key: str, content):
+    with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as f:
+        jfile = json.load(f)
+    if key in content:
+        jfile[key]= content
