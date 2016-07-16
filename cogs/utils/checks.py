@@ -24,8 +24,8 @@ def customPermsOrRole(perm):
             result = cursor.fetchone()
             if result is not None:
                 perm = result['perms']
-            if perm == "none":
-                return True
+        if perm == "none":
+            return True
         config.closeConnection()
         for role in ctx.message.author.roles:
             if getattr(role.permissions, perm):

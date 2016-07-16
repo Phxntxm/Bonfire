@@ -171,8 +171,11 @@ class Core:
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
         result = ' '.join(result).strip()
-        tag = result[0:result.find('-')]
-        result = result[result.find('-') + 2:]
+        tag = result[0:result.find('-')].strip()
+        result = result[result.find('-') + 2:].strip()
+        if len(tag) == 0 or len(result) == 0:
+            await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
+            return
         cursor = config.getCursor()
         cursor.execute('use {}'.format(config.db_default))
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
