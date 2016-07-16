@@ -19,6 +19,7 @@ class Core:
         self.bot = bot
 
     @commands.command()
+    @checks.customPermsOrRole("none")
     async def addbot(self):
         """Provides a link that you can use to add me to a server"""
         perms = discord.Permissions.none()
@@ -36,6 +37,7 @@ class Core:
                            
                            
     @commands.command(pass_context=True)
+    @checks.customPermsOrRole("none")
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
@@ -47,6 +49,7 @@ class Core:
         
         
     @commands.command()
+    @checks.customPermsOrRole("none")
     async def joke(self):
         """Prints a random riddle"""
         fortuneCommand = "/usr/bin/fortune riddles"
@@ -54,6 +57,7 @@ class Core:
         await self.bot.say(fortune)
 
     @commands.command()
+    @checks.customPermsOrRole("none")
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         try:
@@ -69,6 +73,7 @@ class Core:
             await self.bot.say('```Error: Definition is too long for me to send```')
 
     @commands.command(pass_context=True)
+    @checks.customPermsOrRole("none")
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term"""
         if len(search) > 0:
@@ -111,6 +116,7 @@ class Core:
         await self.bot.say(response)
 
     @commands.command(pass_context=True)
+    @checks.customPermsOrRole("none")
     async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""

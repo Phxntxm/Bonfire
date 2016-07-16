@@ -90,6 +90,7 @@ class Music:
                 pass
 
     @commands.command(no_pm=True)
+    @checks.customPermsOrRole("none")
     async def join(self, *, channel: discord.Channel):
         """Joins a voice channel."""
         try:
@@ -105,6 +106,7 @@ class Music:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def summon(self, ctx):
         """Summons the bot to join your voice channel."""
         summoned_channel = ctx.message.author.voice_channel
@@ -120,6 +122,7 @@ class Music:
         return True
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def play(self, ctx, *, song: str):
         """Plays a song.
         If there is a song currently in the queue, then it is
@@ -195,12 +198,14 @@ class Music:
             pass
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
         await self.bot.say("There are a total of {} songs in the queue"
                            .format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
         
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
         3 skip votes are needed for the song to be skipped.
@@ -239,6 +244,7 @@ class Music:
         await self.bot.say('Song has just been skipped.')
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def playing(self, ctx):
         """Shows info about the currently played song."""
 

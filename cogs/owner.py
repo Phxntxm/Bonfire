@@ -35,7 +35,7 @@ class Owner:
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
     async def adddoggo(self, ctx, url: str):
-        """Saves a URL as a image to add for the doggo command"""
+        """Saves a URL as an image to add for the doggo command"""
         os.chdir('/home/phxntx5/public_html/Bonfire/images')
         local_path = 'doggo{}.jpg'.format(len(glob.glob('doggo*')))
         urllib.request.urlretrieve(url,local_path)

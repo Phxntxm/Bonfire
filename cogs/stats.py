@@ -11,6 +11,7 @@ class Stats:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
         try:
@@ -31,6 +32,7 @@ class Stats:
             await self.bot.say(fmt.format(type(e).__name__, e))
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def listboops(self, ctx):
         try:
             """Lists all the users you have booped and the amount of times"""
@@ -55,6 +57,7 @@ class Stats:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def mostwins(self, ctx):
         """Prints a 'leaderboard' of everyone in the server's battling record"""
         try:

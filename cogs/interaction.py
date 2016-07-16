@@ -57,6 +57,7 @@ class Interaction:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         global battleP1
@@ -85,6 +86,7 @@ class Interaction:
         battling = True
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def accept(self, ctx):
         """Accepts the battle challenge"""
         if not battling or battleP2 != ctx.message.author:
@@ -101,6 +103,7 @@ class Interaction:
             battlingOff()
             
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def decline(self, ctx):
         """Declines the battle challenge"""
         if not battling or battleP2 != ctx.message.author:
@@ -110,6 +113,7 @@ class Interaction:
         battlingOff()
         
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""
         booper = ctx.message.author

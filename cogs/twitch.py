@@ -50,6 +50,7 @@ class Twitch:
             await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True)
+    @checks.customPermsOrRole("none")
     async def twitch(self, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is not None:
@@ -73,6 +74,7 @@ class Twitch:
                 config.closeConnection()
 
     @twitch.command(name='add', pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def add_twitch_url(self, ctx, url: str):
         """Saves your user's twitch URL"""
         try:
@@ -103,6 +105,7 @@ class Twitch:
         config.closeConnection()
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
         cursor = config.getCursor()
@@ -120,11 +123,13 @@ class Twitch:
             config.closeConnection()
 
     @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
+    @checks.customPermsOrRole("none")
     async def notify(self, ctx):
         """This can be used to turn notifications on or off"""
         pass
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def notify_on(self, ctx):
         """Turns twitch notifications on"""
         cursor = config.getCursor()
@@ -150,6 +155,7 @@ class Twitch:
             return
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole("none")
     async def notify_off(self, ctx):
         """Turns twitch notifications off"""
         cursor = config.getCursor()
