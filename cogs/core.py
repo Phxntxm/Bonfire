@@ -197,7 +197,7 @@ class Core:
         cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         result = cursor.fetchone()
         if result is None:
-            await self.bot.say("That tag does not exist! You can't remove something if it doesn't exist...")
+            await self.bot.say("The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
             config.closeConnection()
             return
         cursor.execute('delete from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
