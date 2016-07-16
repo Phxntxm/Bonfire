@@ -110,8 +110,6 @@ class Mod:
         msg = msg[0:len(msg)-1]
         count = 0
         cmd = self.bot.commands.get(msg[count])
-        await self.bot.say("Trying to add `{}` permissions on `{}`".format(permissions, command))
-        await self.bot.say("Checking nesting for groups of commands")
         while isinstance(cmd, commands.Group):
             count += 1
             try:
@@ -119,18 +117,16 @@ class Mod:
             except:
                 break
                 
-        await self.bot.say("Checking for owner role commands, or commands that don't allow customer permissions")
         for check in cmd.checks:
             if "isOwner" == check.__name__ or re.search("has_permissions",str(check)) is not None:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
 
-        await self.bot.say("Checking if {} is a valid permission".format(permissions))
         if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
                                .format(permissions, "\n".join(valid_perms)))
+            return 
         else:
-            await self.bot.say("Permission is fine, continuing with MySQL stuff")
             sid = ctx.message.server.id
             cursor = config.getCursor()
             cursor.execute('use {}'.format(config.db_perms))
