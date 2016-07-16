@@ -173,10 +173,6 @@ class Core:
         cursor.execute('delete from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
         config.closeConnection()
-    
-    @commands.command()
-    async def test(self, first: discord.Member, second: str):
-        await self.bot.say("First: {}\nSecond: {}".format(first,second))
 
 
 def setup(bot):
