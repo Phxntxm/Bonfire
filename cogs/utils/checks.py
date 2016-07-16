@@ -27,10 +27,7 @@ def customPermsOrRole(perm):
         if perm == "none":
             return True
         config.closeConnection()
-        for role in ctx.message.author.roles:
-            if getattr(role.permissions, perm):
-                return True
-        return False
+        return getattr(ctx.message.author.permissions_in(ctx.message.channel),perm)
 
     return commands.check(predicate)
 
