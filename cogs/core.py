@@ -190,7 +190,7 @@ class Core:
             return
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
-                tags.remove(tag)
+                tags.remove(t)
                 config.saveContent('tags',tags)
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
 
