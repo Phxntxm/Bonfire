@@ -90,7 +90,7 @@ class Twitch:
         result = twitch.get(ctx.message.author.id)
         
         if result is not None:
-            twitch[ctx.message.author.id]['twitch_url'] = result
+            twitch[ctx.message.author.id]['twitch_url'] = url
         else:
             twitch[ctx.message.author.id] = {'twitch_url':url,'server_id':ctx.message.server.id,'notifications_on': 1,'live':0}
         config.saveContent('twitch',twitch)
