@@ -5,12 +5,7 @@ import pymysql
 import discord
 import re
 
-valid_perms = ['kick_members', 'ban_members', 'administrator', 'manage_channels', 'manage_server', 'read_messages',
-               'send_messages', 'send_tts_messages', 'manage_messages', 'embed_links', 'attach_files',
-               'read_message_history',
-               'mention_everyone', 'connect', 'speak', 'mute_members', 'deafen_members', 'move_members',
-               'use_voice_activation',
-               'change_nicknames', 'manage_nicknames', 'manage_roles']
+valid_perms = list(dict(discord.Permissions.none()))
 
 
 class Mod:
