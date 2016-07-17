@@ -11,6 +11,7 @@ def customPermsOrRole(perm):
         if ctx.message.channel.is_private:
             return False
         custom_permissions = config.getContent('custom_permissions')
+        _perm = None
         try:
             _perm = custom_permissions[ctx.message.server.id][str(ctx.command)]
         except KeyError:
