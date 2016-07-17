@@ -168,9 +168,9 @@ class Core:
             await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
             return
         tags = config.getContent('tags')
-        for tag in tags:
-            if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id:
-                tag['result'] = tag_result
+        for t in tags:
+            if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
+                t['result'] = tag_result
                 config.saveContent('tags',tags)
                 return
         tags.append({'server_id':ctx.message.server.id,'tag':tag,'result':tag_result})
@@ -184,7 +184,7 @@ class Core:
         Format to delete a tag is !tag delete <tag>"""
         tag = ' '.join(tag).strip()
         tags = config.getContent('tags')
-        result = [tag for tag in tags if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id]
+        result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
             await self.bot.say("The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
             return
