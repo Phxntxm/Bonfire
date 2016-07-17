@@ -144,12 +144,11 @@ class Mod:
         if server_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return
-        command_perms = server_perms.get(command)
+        command_perms = server_perms.get(cmd)
         if command_perms is None:
             await self.bot.say("You do not have custom permissions setup on this command yet!")
             return
-        del server_perms[command]
-        custom_perms[ctx.message.server.id] = server_perms
+        del custom_perms[ctx.message.server.id][cmd]
         config.saveContent('custom_permissions',custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
 
