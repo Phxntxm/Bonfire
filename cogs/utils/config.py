@@ -44,16 +44,20 @@ def closeConnection():
 def saveContent(key: str, content):
     with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
         data = json.load(jf)
-        data[key] = content
         jf.seek(0)
-        json.dump(data, jf, indent=4)
-        jf.close()
+        newData = dict(data)
+        newData[key] = content
+        jf.truncate()
+        try:
+            json.dump(newData, jf, indent=4)
+        except:
+            json.dump(data, jf, indent=4)
         
+
 def getContent(key: str):
     try:
         with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
             data = json.load(jf)
-            jf.close()
             return data[key]
     except KeyError:
         return None
