@@ -1,4 +1,5 @@
 config.yml
+config.json
 .idea
 __pycache__
 nohup.out

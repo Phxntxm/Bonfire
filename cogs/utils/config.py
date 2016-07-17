@@ -50,7 +50,10 @@ def saveContent(key: str, content):
         jf.close()
         
 def getContent(key: str):
-    with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
-        data = json.load(jf)
-        jf.close()
-        return data[key]
+    try:
+        with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
+            data = json.load(jf)
+            jf.close()
+            return data[key]
+    except KeyError:
+        return None

@@ -29,32 +29,25 @@ class Mod:
     @checks.customPermsOrRole("kick_members")
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        try:
-            cursor.execute('insert into nsfw_channels (channel_id) values ("{}")'.format(ctx.message.channel.id))
-        except pymysql.IntegrityError:
+        nsfw_channels = config.getContent('nsfw_channels')
+        if ctx.message.channel.id in nsfw_channels:
             await self.bot.say("This channel is already registered as 'nsfw'!")
-            config.closeConnection()
-            return
-        config.closeConnection()
-        await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
+        else:
+            nsfw_channels.append(ctx.message.channel.id)
+            config.saveContent('nsfw_channels',nsfw_channels)
+            await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @nsfw.command(name="remove", aliases=["delete"], pass_context=True)
     @checks.customPermsOrRole("kick_members")
     async def nsfw_remove(self, ctx, no_pm=True):
         """Removes this channel as a 'nsfw' channel"""
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select * from nsfw_channels where channel_id="{}"'.format(ctx.message.channel.id))
-        if cursor.fetchone() is None:
+        nsfw_channels = config.getContent('nsfw_channels')
+        if not ctx.message.channel.id in nsfw_channels:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
-            config.closeConnection()
-            return
-
-        cursor.execute('delete from nsfw_channels where channel_id="{}"'.format(ctx.message.channel.id))
-        config.closeConnection()
-        await self.bot.say("This channel has just been unregistered as a nsfw channel")
+        else:
+            nsfw_channels.remove(ctx.message.channel.id)
+            config.saveContent('nsfw_channels',nsfw_channels)
+            await self.bot.say("This channel has just been unregistered as a nsfw channel")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("manage_server")
@@ -80,24 +73,21 @@ class Mod:
             await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
         command = " ".join(command)
-
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_perms))
-        cursor.execute("show tables like '{}'".format(ctx.message.server.id))
-        result = cursor.fetchone()
-        if result is None:
+        
+        custom_perms = config.getContent('custom_permissions')
+        if custom_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return
-        sql = "select perms from `" + ctx.message.server.id + "` where command=%s"
-        cursor.execute(sql, (command,))
-        result = cursor.fetchone()
-        if result is None:
-            await self.bot.say("That command has no custom permissions setup on it!")
+        server_perms = custom_perms.get(ctx.message.server.id)
+        if server_perms is None:
+            await self.bot.say("There are no custom permissions setup on this server yet!")
             return
-
-        await self.bot.say(
-            "You need to have the permission `{}` to use the command `{}` in this server".format(result['perms'],
-                                                                                                 command))
+        command_perms = server_perms.get(command)
+        if command_perms is None:
+            await self.bot.say("That command has no custom permissions setup on it!")
+        else:
+            await self.bot.say("You need to have the permission `{}` " \
+                               "to use the command `{}` in this server".format(command_perms,command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
@@ -126,33 +116,19 @@ class Mod:
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
                                .format(permissions, "\n".join(valid_perms)))
             return 
+            
+        custom_perms = config.getContent('custom_permissions')
+        if custom_perms is None:
+            custom_perms = {}
+        server_perms = custom_perms.get(ctx.message.server.id)
+        if server_perms is None:
+            custom_perms[ctx.message.server.id] = {command:permissions}
         else:
-            sid = ctx.message.server.id
-            cursor = config.getCursor()
-            cursor.execute('use {}'.format(config.db_perms))
-            cursor.execute("show tables like %s", (sid,))
-            result = cursor.fetchone()
-            if result is None:
-                # Server's data doesn't exist yet, need to create it
-                sql = "create table `" + sid + "` (`command` varchar(32) not null,`perms` " \
-                                                                 "varchar(32) not null,primary key (`command`))" \
-                                                                 " engine=InnoDB default charset=utf8 collate=utf8_bin"
-                cursor.execute(sql)
-                sql = "insert into `" + sid + "` (command, perms) values(%s, %s)"
-                cursor.execute(sql, (command, permissions))
-            else:
-                sql = "select perms from `" + sid + "`where command=%s"
-                cursor.execute(sql, (command,))
-                if cursor.fetchone() is None:
-                    sql = "insert into `" + sid + "` (command, perms) values(%s, %s)"
-                    cursor.execute(sql, (command, permissions))
-                else:
-                    sql = "update `" + sid + "` set perms=%s where command=%s"
-                    cursor.execute(sql, (permissions, command))
-
+            server_perms[command] = permissions
+            custom_perms[ctx.message.server.id] = server_perms
+        config.saveContent('custom_permissions',custom_perms)
         await self.bot.say("I have just added your custom permissions; "
                            "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
-        config.closeConnection()
         
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
@@ -160,23 +136,22 @@ class Mod:
         """Removes the custom permissions setup on the command specified"""
         cmd = " ".join(command)
         sid = ctx.message.server.id
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_perms))
-        cursor.execute("show tables like %s", (sid,))
-        result = cursor.fetchone()
-        if result is None:
+        custom_perms = config.getContent('custom_permissions')
+        if custom_perms is None:
             await self.bot.say("You do not have custom permissions setup on this server yet!")
             return
-        sql = "select * from `"+sid+"` where command=%s"
-        cursor.execute(sql, (cmd,))
-        result = cursor.fetchone()
-        if result is None:
+        server_perms = custom_perms.get(ctx.message.server.id)
+        if server_perms is None:
+            await self.bot.say("There are no custom permissions setup on this server yet!")
+            return
+        command_perms = server_perms.get(command)
+        if command_perms is None:
             await self.bot.say("You do not have custom permissions setup on this command yet!")
             return
-        sql = "delete from `"+sid+"` where command=%s"
-        cursor.execute(sql, (cmd,))
+        del server_perms[command]
+        custom_perms[ctx.message.server.id] = server_perms
+        config.saveContent('custom_permissions',custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
-        config.closeConnection()
 
 def setup(bot):
     bot.add_cog(Mod(bot))

@@ -20,36 +20,21 @@ def battlingOff():
 
 
 def updateBattleRecords(winner, loser):
-    cursor = config.getCursor()
-    cursor.execute('use {}'.format(config.db_default))
-
-    # Update winners records
-    sql = "select record from battle_records where id='{}'".format(winner.id)
-    cursor.execute(sql)
-    result = cursor.fetchone()
-    if result is not None:
-        result = result['record'].split('-')
-        result[0] = str(int(result[0]) + 1)
-        sql = "update battle_records set record ='{}' where id='{}'".format("-".join(result), winner.id)
-        cursor.execute(sql)
+    battles = config.getContent('battle_records')
+    if battles is not None:
+        record = battles.get(winner.id)
+        if record is not None:
+            result = record.split('-')
+            result[0] = str(int(result[0]) + 1)
+            battles[winner.id] = result.join("-")
+        record = battles.get(loser.id)
+        if record is not None:
+            result = record.split('-')
+            result[1] = str(int(result[1]) + 1)
+            battles[loser.id] = result.join("-")
     else:
-        sql = "insert into battle_records (id,record) values ('{}','1-0')".format(winner.id)
-        cursor.execute(sql)
-
-    # Update losers records
-    sql = "select record from battle_records where id={0}".format(loser.id)
-    cursor.execute(sql)
-    result = cursor.fetchone()
-    if result is not None:
-        result = result['record'].split('-')
-        result[1] = str(int(result[1]) + 1)
-        sql = "update battle_records set record ='{0}' where id='{1}'".format('-'.join(result), loser.id)
-        cursor.execute(sql)
-    else:
-        sql = "insert into battle_records (id,record) values ('{0}','0-1')".format(loser.id)
-        cursor.execute(sql)
-
-    config.closeConnection()
+        battles = {winner.id:"1-0",loser.id:"0-1"}
+    config.saveContent('battle_records',battles)
 
 
 class Interaction:
@@ -131,38 +116,24 @@ class Interaction:
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
             return
 
-        cursor = config.getCursor()
-        cursor.execute('use {0}'.format(config.db_boops))
-        sql = "show tables like '" + str(booper.id) + "'"
-        cursor.execute(sql)
-        result = cursor.fetchone()
+        boops = config.getContent('boops')
+        if boops is None:
+            boops = {}
         amount = 1
-        # Booper's table exists, continue
-        if result is not None:
-            sql = "select `amount` from `" + booper.id + "` where id='" + str(boopee.id) + "'"
-            cursor.execute(sql)
-            result = cursor.fetchone()
-            # Boopee's entry exists, continue
-            if result is not None:
-                amount = result.get('amount') + 1
-                sql = "update `" + str(booper.id) + "` set amount = " + str(amount) + " where id=" + str(
-                    boopee.id)
-                cursor.execute(sql)
-            # Boopee does not exist, need to create the field for it
-            else:
-                sql = "insert into `" + str(booper.id) + "` (id,amount) values ('" + str(boopee.id) + "',1)"
-                cursor.execute(sql)
-        # Booper's table does not exist, need to create the table
+        booper_boops = boops.get(ctx.message.author.id)
+        if booper_boops is None:
+            boops[ctx.message.author.id] = {boopee.id:1}
+        elif booper_boops.get(boopee.id) is None:
+            booper_boops[boopee.id] = 1
+            boops[ctx.message.author.id] = booper_boops
         else:
-            sql = "create table `" + str(booper.id) + \
-                  "` (`id` varchar(255) not null,`amount` int(11) not null" + \
-                  ",primary key (`id`)) engine=InnoDB default charset=utf8 collate=utf8_bin"
-            cursor.execute(sql)
-            sql = "insert into `" + str(booper.id) + "` (id,amount) values ('" + str(boopee.id) + "',1)"
-            cursor.execute(sql)
+            amount = booper_boops.get(boopee.id) + 1
+            booper_boops[boopee.id] = amount
+            boops[ctx.message.author.id] = booper_boops
+            
+        config.saveContent('boops',boops)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
-        config.closeConnection()
 
 
 def setup(bot):

@@ -31,15 +31,11 @@ class Overwatch:
         Capitalization also matters"""
         if user is None:
             user = ctx.message.author
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select battletag from overwatch where id=%s', (user.id,))
-        result = cursor.fetchone()
-        config.closeConnection()
-        if result is None:
+        bt = config.getContent('overwatch').get(ctx.message.author.id)
+        
+        if bt is None:
             await self.bot.say("I do not have this user's battletag saved!")
             return
-        bt = result['battletag']
         await self.bot.say("Searching profile information....")
         
         try:
@@ -78,32 +74,23 @@ class Overwatch:
             await self.bot.say("Profile does not exist! Battletags are picky, "
                                "format needs to be `user#xxxx`. Capitalization matters")
             return
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select * from overwatch where id=%s', (ctx.message.author.id,))
-        result = cursor.fetchone()
-        if result:
-            cursor.execute('update overwatch set battletag=%s where id=%s', (bt, ctx.message.author.id))
-            await self.bot.say("I have updated your saved battletag {}".format(ctx.message.author.mention))
-        else:
-            cursor.execute('insert into overwatch (id, battletag) values (%s, %s)', (ctx.message.author.id, bt))
-            await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
-        config.closeConnection()
+        ow = config.getContent('overwatch')
+        ow[ctx.message.author.id] = bt
+        config.saveContent('overwatch',ow)
+        
+        await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
     @checks.customPermsOrRole("none")
     async def delete(self, ctx):
         """Removes your battletag from the records"""
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select * from overwatch where id=%s', (ctx.message.author.id,))
-        result = cursor.fetchone()
-        if result:
-            cursor.execute('delete from overwatch where id=%s', (ctx.message.author.id,))
+        result = config.getContent('overwatch')
+        if result.get(ctx.message.author.id):
+            del result[ctx.message.author.id]
+            config.saveContent('overwatch',result)
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
         else:
             await self.bot.say("I don't even have your battletag saved {}".format(ctx.message.author.mention))
-        config.closeConnection()
 
 
 def setup(bot):

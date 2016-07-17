@@ -22,11 +22,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def restart(self, ctx):
         """Forces the bot to restart"""
-        cursor = config.getCursor()
-        cursor.execute('use {0}'.format(config.db_default))
-        sql = "update restart_server set channel_id={0} where id=1".format(ctx.message.channel.id)
-        cursor.execute(sql)
-        config.closeConnection()
+        config.saveContent('restart_server',ctx.message.channel.id)
         await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)

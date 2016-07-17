@@ -82,15 +82,9 @@ class Core:
             query = '+'.join(search)
             url += query
             
-            # This will check if the channel is a 'nsfw' channel, if so add 'explicit' to the search term
-            #cursor = config.getCursor()
-            #cursor.execute('use {}'.format(config.db_default))
-            #cursor.execute('select * from nsfw_channels')
-            #result = cursor.fetchall()
             nsfw_channels = config.getContent("nsfw_channels")
-            if {'channel_id': '{}'.format(ctx.message.channel.id)} in result:
+            if ctx.message.channel.id in nsfw_channels:
                 url += ",+explicit&filter_id=95938"
-            config.closeConnection()
             
             # Get the response from derpibooru and parse the 'searc' result from it
             response = urllib.request.urlopen(url)
@@ -152,19 +146,15 @@ class Core:
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     async def tag(self, ctx, *tag: str):
-        """This can be used for custom tags
+        """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
         tag = ' '.join(tag).strip()
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
-        result = cursor.fetchone()
-        if result is None:
+        tags = config.getContent('tags')
+        result = [tag for tag in tags if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id]
+        if len(result) == 0:
             await self.bot.say('That tag does not exist!')
-            config.closeConnection()
             return
-        await self.bot.say("{}".format(result['result']))
-        config.closeConnection()
+        await self.bot.say("{}".format(result[0]['result']))
 
     @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
@@ -173,22 +163,19 @@ class Core:
         Format to add a tag is !tag add <tag> - <result>"""
         result = ' '.join(result).strip()
         tag = result[0:result.find('-')].strip()
-        result = result[result.find('-') + 2:].strip()
+        tag_result = result[result.find('-') + 2:].strip()
         if len(tag) == 0 or len(result) == 0:
             await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
             return
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
-        response = cursor.fetchone()
-        if response is not None:
-            await self.bot.say('That tag already exists! Please remove it and re-add it if you want to change it')
-            config.closeConnection()
-            return
-        sql = 'insert into tags (server_id, tag, result) values (%s, %s, %s)'
-        cursor.execute(sql, (ctx.message.server.id, tag, result))
+        tags = config.getContent('tags')
+        for tag in tags:
+            if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id:
+                tag['result'] = tag_result
+                config.saveContent('tags',tags)
+                return
+        tags.append({'server_id':ctx.message.server.id,'tag':tag,'result':tag_result})
+        config.saveContent('tags',tags)
         await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
-        config.closeConnection()
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
@@ -196,17 +183,16 @@ class Core:
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
         tag = ' '.join(tag).strip()
-        cursor = config.getCursor()
-        cursor.execute('use {}'.format(config.db_default))
-        cursor.execute('select * from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
-        result = cursor.fetchone()
-        if result is None:
+        tags = config.getContent('tags')
+        result = [tag for tag in tags if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id]
+        if len(result) == 0:
             await self.bot.say("The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
-            config.closeConnection()
             return
-        cursor.execute('delete from tags where server_id=%s and tag=%s', (ctx.message.server.id, tag))
+        for tag in tags:
+            if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id:
+                tags.remove(tag)
+                config.saveContent('tags',tags)
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
-        config.closeConnection()
 
 
 def setup(bot):
