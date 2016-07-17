@@ -23,16 +23,11 @@ bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDe
 async def on_ready():
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.defaultStatus, type=0))
-    cursor = config.getCursor()
-
-    cursor.execute('use {0}'.format(config.db_default))
-    cursor.execute('select channel_id from restart_server where id=1')
-    result = cursor.fetchone()['channel_id']
-    if int(result) != 0:
+    channel_id = config.getContent('restart_server')
+    if result != 0:
         destination = discord.utils.find(lambda m: m.id == result, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
-        cursor.execute('update restart_server set channel_id=0 where id=1')
-    config.closeConnection()
+        config.saveContent('restart_server',0)
 
 
 @bot.event
