@@ -13,13 +13,14 @@ def customPermsOrRole(perm):
             return False
         custom_permissions = config.getContent('custom_permissions')
         try:
-            perm = custom_permissions[ctx.message.server.id][str(ctx.command)]
+            _perm = custom_permissions[ctx.message.server.id][str(ctx.command)]
         except KeyError:
             pass
-        
-        if perm == "none":
-            return True
-        return getattr(ctx.message.author.permissions_in(ctx.message.channel),perm)
+            
+        if _perm is None:
+            return getattr(ctx.message.author.permissions_in(ctx.message.channel),perm)
+        else:
+            return getattr(ctx.message.author.permissions_in(ctx.message.channel),_perm)
 
     return commands.check(predicate)
 
