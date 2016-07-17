@@ -28,19 +28,19 @@ class Twitch:
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
             twitch = config.getContent('twitch')
-            for id,r in twitch.items():
+            for m_id, r in twitch.items():
                 server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
-                member = discord.utils.find(lambda m: m.id == r['user_id'], server.members)
+                member = discord.utils.find(lambda m: m.id == m_id, server.members)
                 url = r['twitch_url']
                 live = r['live']
                 notify = r['notifications_on']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
                 if not live and notify and channelOnline(user):
-                    twitch[id]['live'] = 1
+                    twitch[m_id]['live'] = 1
                     await self.bot.send_message(server, "{} has just gone live! "
                                                         "View their stream at {}".format(member.name, url))
                 elif live and not channelOnline(user):
-                    twitch[id]['live'] = 0
+                    twitch[m_id]['live'] = 0
                     await self.bot.send_message(server,
                                                 "{} has just gone offline! Catch them next time they stream at {}"
                                                 .format(member.name, url))
