@@ -52,7 +52,7 @@ def saveContent(key: str, content):
             json.dump(newData, jf, indent=4)
         except:
             json.dump(data, jf, indent=4)
-        
+
 
 def getContent(key: str):
     try:
