@@ -83,10 +83,11 @@ class Core:
             url += query
             
             # This will check if the channel is a 'nsfw' channel, if so add 'explicit' to the search term
-            cursor = config.getCursor()
-            cursor.execute('use {}'.format(config.db_default))
-            cursor.execute('select * from nsfw_channels')
-            result = cursor.fetchall()
+            #cursor = config.getCursor()
+            #cursor.execute('use {}'.format(config.db_default))
+            #cursor.execute('select * from nsfw_channels')
+            #result = cursor.fetchall()
+            nsfw_channels = config.getContent("nsfw_channels")
             if {'channel_id': '{}'.format(ctx.message.channel.id)} in result:
                 url += ",+explicit&filter_id=95938"
             config.closeConnection()

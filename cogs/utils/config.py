@@ -42,7 +42,15 @@ def closeConnection():
     connection.close()
 
 def saveContent(key: str, content):
-    with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as f:
-        jfile = json.load(f)
-    if key in content:
-        jfile[key]= content
+    with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
+        data = json.load(jf)
+        data[key] = content
+        jf.seek(0)
+        json.dump(data, jf, indent=4)
+        jf.close()
+        
+def getContent(key: str):
+    with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
+        data = json.load(jf)
+        jf.close()
+        return data[key]
