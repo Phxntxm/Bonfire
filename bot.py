@@ -24,8 +24,8 @@ async def on_ready():
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.defaultStatus, type=0))
     channel_id = config.getContent('restart_server')
-    if result != 0:
-        destination = discord.utils.find(lambda m: m.id == result, bot.get_all_channels())
+    if channel_id != 0:
+        destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
         config.saveContent('restart_server',0)
 
