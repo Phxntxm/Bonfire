@@ -188,8 +188,8 @@ class Core:
         if len(result) == 0:
             await self.bot.say("The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
             return
-        for tag in tags:
-            if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id:
+        for t in tags:
+            if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 tags.remove(tag)
                 config.saveContent('tags',tags)
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
