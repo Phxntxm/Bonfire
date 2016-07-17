@@ -92,7 +92,7 @@ class Mod:
         If you want to open the command to everyone, provide 'none' as the permission"""
         command = " ".join(msg[0:len(msg)-1])
         permissions = msg[len(msg)-1]
-        if permissions.lower() = "none":
+        if permissions.lower() == "none":
             permissions = "send_message"
         msg = msg[0:len(msg)-1]
         count = 0
