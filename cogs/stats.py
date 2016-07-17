@@ -45,7 +45,7 @@ class Stats:
         for b_id,amt in boops.get(ctx.message.author.id).items():
             member = find(lambda m: m.id == b_id, self.bot.get_all_members())
             if member in members:
-                output += "\n{0.name}: {1} times".format(member.name, amt)
+                output += "\n{0.name}: {1} times".format(member, amt)
         await self.bot.say("```{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
