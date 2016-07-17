@@ -57,6 +57,10 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CheckFailure):
         fmt = "You can't tell me what to do!"
+        f = open("/home/phxntx5/public_html/Bonfire/error_log", 'w')
+        print('In {0.command.qualified_name}:'.format(ctx), file=f)
+        traceback.print_tb(error.original.__traceback__, file=f)
+        print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
         await bot.send_message(ctx.message.channel, fmt)
     #elif isinstance(error, commands.CommandInvokeError):
         #f = open("/home/phxntx5/public_html/Bonfire/error_log", 'w')
