@@ -47,9 +47,9 @@ class Twitch:
             config.closeConnection()
             await asyncio.sleep(30)
 
-    @commands.group(no_pm=True, invoke_without_command=True)
+    @commands.group(no_pm=True, invoke_without_command=True,pass_context=True)
     @checks.customPermsOrRole("none")
-    async def twitch(self, *, member: discord.Member=None):
+    async def twitch(self, ctx, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is not None:
             twitch = config.getContent('twitch')
