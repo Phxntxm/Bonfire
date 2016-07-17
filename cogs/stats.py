@@ -42,7 +42,7 @@ class Stats:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
         output = "You have booped:"
-        for b_id,amt in boops.get(ctx.message.author.id):
+        for b_id,amt in boops.get(ctx.message.author.id).items():
             member = find(lambda m: m.id == b_id, self.bot.get_all_members())
             if member in members:
                 output += "\n{0.name}: {1} times".format(member.name, amt)
