@@ -15,21 +15,20 @@ class Stats:
     @checks.customPermsOrRole("none")
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
-        try:
-            boops = config.getContent('boops')
-            if not boops.get(ctx.message.author.id):
-                await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
-                return
-            
-            most_boops = 0
-            for b_id,amt in boops.get(ctx.message.author.id):
-                if amt > most_boops:
-                    most_boops = amt
-                    most_id = b_id
-            
-            member = find(lambda m: m.id == b_id, self.bot.get_all_members())
-            await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
-                ctx.message.author.mention, member.mention, most_boops))
+        boops = config.getContent('boops')
+        if not boops.get(ctx.message.author.id):
+            await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
+            return
+        
+        most_boops = 0
+        for b_id,amt in boops.get(ctx.message.author.id):
+            if amt > most_boops:
+                most_boops = amt
+                most_id = b_id
+        
+        member = find(lambda m: m.id == b_id, self.bot.get_all_members())
+        await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
+            ctx.message.author.mention, member.mention, most_boops))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
