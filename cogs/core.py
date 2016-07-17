@@ -150,7 +150,7 @@ class Core:
          The format to call a custom tag is !tag <tag>"""
         tag = ' '.join(tag).strip()
         tags = config.getContent('tags')
-        result = [tag for tag in tags if tag['tag'] == tag and tag['server_id'] == ctx.message.server.id]
+        result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
             await self.bot.say('That tag does not exist!')
             return
