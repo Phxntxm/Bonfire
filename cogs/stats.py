@@ -21,7 +21,7 @@ class Stats:
             return
         
         most_boops = 0
-        for b_id,amt in boops.get(ctx.message.author.id):
+        for b_id,amt in boops.get(ctx.message.author.id).items():
             if amt > most_boops:
                 most_boops = amt
                 most_id = b_id
@@ -55,7 +55,7 @@ class Stats:
         count = 0
         fmt = []
         if battles is not None:
-            for m_id,record in battles:
+            for m_id,record in battles.items():
                 member = find(lambda m: m.id == m_id, self.bot.get_all_members())
                 if member in members:
                     winAmt = int(record.split('-')[0])
