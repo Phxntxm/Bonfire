@@ -7,14 +7,17 @@ import urllib.parse
 import urllib.request
 import urllib.error
 import json
+import re
 
 base_url = "https://owapi.net/api/v2/u/"
-check_g_stats = ["eliminations","deaths",'kpd','wins','losses','time_played',
-                'cards','damage_done','healing_done','multikills']
-check_o_stats = ['wins','losses']
+check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
+                 'cards', 'damage_done', 'healing_done', 'multikills']
+check_o_stats = ['wins', 'losses']
+
 
 class Overwatch:
     """Class for viewing Overwatch stats"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -32,12 +35,12 @@ class Overwatch:
         if user is None:
             user = ctx.message.author
         bt = config.getContent('overwatch').get(ctx.message.author.id)
-        
+
         if bt is None:
             await self.bot.say("I do not have this user's battletag saved!")
             return
         await self.bot.say("Searching profile information....")
-        
+
         try:
             if hero == "":
                 result = urllib.request.urlopen(base_url + "{}/stats/general".format(bt))
@@ -45,7 +48,8 @@ class Overwatch:
                 fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
                 fmt += "\n"
                 fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
-                await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
+                await self.bot.say(
+                    "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
             else:
                 result = urllib.request.urlopen(base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', '')))
                 data = json.loads(result.read().decode('utf-8'))
@@ -55,7 +59,7 @@ class Overwatch:
                 await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
                                    .format(user.name, hero.title(), fmt.title().replace("_", " ")))
         except urllib.error.HTTPError as error:
-            error_no = int(re.search("\d+",str(error)).group(0))
+            error_no = int(re.search("\d+", str(error)).group(0))
             if error_no == 500:
                 await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title()))
             elif error_no == 404:
@@ -76,8 +80,8 @@ class Overwatch:
             return
         ow = config.getContent('overwatch')
         ow[ctx.message.author.id] = bt
-        config.saveContent('overwatch',ow)
-        
+        config.saveContent('overwatch', ow)
+
         await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
@@ -87,7 +91,7 @@ class Overwatch:
         result = config.getContent('overwatch')
         if result.get(ctx.message.author.id):
             del result[ctx.message.author.id]
-            config.saveContent('overwatch',result)
+            config.saveContent('overwatch', result)
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
         else:
             await self.bot.say("I don't even have your battletag saved {}".format(ctx.message.author.mention))

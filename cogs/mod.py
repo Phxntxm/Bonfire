@@ -1,7 +1,6 @@
 from discord.ext import commands
 from .utils import checks
 from .utils import config
-import pymysql
 import discord
 import re
 
@@ -29,19 +28,19 @@ class Mod:
             await self.bot.say("This channel is already registered as 'nsfw'!")
         else:
             nsfw_channels.append(ctx.message.channel.id)
-            config.saveContent('nsfw_channels',nsfw_channels)
+            config.saveContent('nsfw_channels', nsfw_channels)
             await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
-    @nsfw.command(name="remove", aliases=["delete"], pass_context=True)
+    @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
-    async def nsfw_remove(self, ctx, no_pm=True):
+    async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
         nsfw_channels = config.getContent('nsfw_channels')
-        if not ctx.message.channel.id in nsfw_channels:
+        if ctx.message.channel.id not in nsfw_channels:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
         else:
             nsfw_channels.remove(ctx.message.channel.id)
-            config.saveContent('nsfw_channels',nsfw_channels)
+            config.saveContent('nsfw_channels', nsfw_channels)
             await self.bot.say("This channel has just been unregistered as a nsfw channel")
 
     @commands.command(pass_context=True, no_pm=True)
@@ -68,7 +67,7 @@ class Mod:
             await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
         command = " ".join(command)
-        
+
         custom_perms = config.getContent('custom_permissions')
         if custom_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
@@ -81,8 +80,8 @@ class Mod:
         if command_perms is None:
             await self.bot.say("That command has no custom permissions setup on it!")
         else:
-            await self.bot.say("You need to have the permission `{}` " \
-                               "to use the command `{}` in this server".format(command_perms,command))
+            await self.bot.say("You need to have the permission `{}` "
+                               "to use the command `{}` in this server".format(command_perms, command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
@@ -90,11 +89,11 @@ class Mod:
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'
         If you want to open the command to everyone, provide 'none' as the permission"""
-        command = " ".join(msg[0:len(msg)-1])
-        permissions = msg[len(msg)-1]
+        command = " ".join(msg[0:len(msg) - 1])
+        permissions = msg[len(msg) - 1]
         if permissions.lower() == "none":
             permissions = "send_messages"
-        msg = msg[0:len(msg)-1]
+        msg = msg[0:len(msg) - 1]
         count = 0
         cmd = self.bot.commands.get(msg[count])
         while isinstance(cmd, commands.Group):
@@ -103,36 +102,35 @@ class Mod:
                 cmd = cmd.commands.get(msg[count])
             except:
                 break
-                
+
         for check in cmd.checks:
-            if "isOwner" == check.__name__ or re.search("has_permissions",str(check)) is not None:
+            if "isOwner" == check.__name__ or re.search("has_permissions", str(check)) is not None:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
 
         if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
                                .format(permissions, "\n".join(valid_perms)))
-            return 
-            
+            return
+
         custom_perms = config.getContent('custom_permissions')
         if custom_perms is None:
             custom_perms = {}
         server_perms = custom_perms.get(ctx.message.server.id)
         if server_perms is None:
-            custom_perms[ctx.message.server.id] = {command:permissions}
+            custom_perms[ctx.message.server.id] = {command: permissions}
         else:
             server_perms[command] = permissions
             custom_perms[ctx.message.server.id] = server_perms
-        config.saveContent('custom_permissions',custom_perms)
+        config.saveContent('custom_permissions', custom_perms)
         await self.bot.say("I have just added your custom permissions; "
                            "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
-        
+
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
     async def remove_perms(self, ctx, *command: str):
         """Removes the custom permissions setup on the command specified"""
         cmd = " ".join(command)
-        sid = ctx.message.server.id
         custom_perms = config.getContent('custom_permissions')
         if custom_perms is None:
             await self.bot.say("You do not have custom permissions setup on this server yet!")
@@ -146,8 +144,9 @@ class Mod:
             await self.bot.say("You do not have custom permissions setup on this command yet!")
             return
         del custom_perms[ctx.message.server.id][cmd]
-        config.saveContent('custom_permissions',custom_perms)
+        config.saveContent('custom_permissions', custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
+
 
 def setup(bot):
     bot.add_cog(Mod(bot))

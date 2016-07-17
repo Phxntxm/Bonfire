@@ -34,16 +34,16 @@ class Core:
         perms.attach_files = True
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
-                           
+
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("none")
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
         os.chdir('/home/phxntx5/public_html/Bonfire/images')
-        f = glob.glob('doggo*')[random.randint(0,len(glob.glob('doggo*'))-1)]
+        f = glob.glob('doggo*')[random.randint(0, len(glob.glob('doggo*')) - 1)]
         f = open(f, 'rb')
-        await self.bot.send_file(ctx.message.channel,f)
+        await self.bot.send_file(ctx.message.channel, f)
         f.close()
 
     @commands.command()
@@ -79,16 +79,16 @@ class Core:
             url = 'https://derpibooru.org/search.json?q='
             query = '+'.join(search)
             url += query
-            
+
             nsfw_channels = config.getContent("nsfw_channels")
             if ctx.message.channel.id in nsfw_channels:
                 url += ",+explicit&filter_id=95938"
-            
+
             # Get the response from derpibooru and parse the 'searc' result from it
             response = urllib.request.urlopen(url)
             data = json.loads(response.read().decode('utf-8'))
             results = data['search']
-            
+
             # Get the link if it exists, if not return saying no results found
             if len(results) > 0:
                 index = random.randint(0, len(results) - 1)
@@ -100,7 +100,7 @@ class Core:
             # If no search term was provided, search for a random image
             with urllib.request.urlopen('https://derpibooru.org/images/random') as response:
                 imageLink = response.geturl()
-        
+
         # Post link to my link shortening site
         # discord still shows image previews through redirects so this is not an issue.
         url = 'https://shpro.link/redirect.php/'
@@ -169,10 +169,10 @@ class Core:
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 t['result'] = tag_result
-                config.saveContent('tags',tags)
+                config.saveContent('tags', tags)
                 return
-        tags.append({'server_id':ctx.message.server.id,'tag':tag,'result':tag_result})
-        config.saveContent('tags',tags)
+        tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
+        config.saveContent('tags', tags)
         await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
@@ -184,12 +184,13 @@ class Core:
         tags = config.getContent('tags')
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
-            await self.bot.say("The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
+            await self.bot.say(
+                "The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
             return
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 tags.remove(t)
-                config.saveContent('tags',tags)
+                config.saveContent('tags', tags)
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
 
 

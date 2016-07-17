@@ -33,12 +33,13 @@ def updateBattleRecords(winner, loser):
             result[1] = str(int(result[1]) + 1)
             battles[loser.id] = "-".join(result)
     else:
-        battles = {winner.id:"1-0",loser.id:"0-1"}
-    config.saveContent('battle_records',battles)
+        battles = {winner.id: "1-0", loser.id: "0-1"}
+    config.saveContent('battle_records', battles)
 
 
 class Interaction:
     """Commands that interact with another user"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -87,7 +88,7 @@ class Interaction:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             updateBattleRecords(battleP2, battleP1)
             battlingOff()
-            
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
     async def decline(self, ctx):
@@ -97,7 +98,7 @@ class Interaction:
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         updateBattleRecords(battleP1, battleP2)
         battlingOff()
-        
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
     async def boop(self, ctx, boopee: discord.Member):
@@ -122,7 +123,7 @@ class Interaction:
         amount = 1
         booper_boops = boops.get(ctx.message.author.id)
         if booper_boops is None:
-            boops[ctx.message.author.id] = {boopee.id:1}
+            boops[ctx.message.author.id] = {boopee.id: 1}
         elif booper_boops.get(boopee.id) is None:
             booper_boops[boopee.id] = 1
             boops[ctx.message.author.id] = booper_boops
@@ -130,8 +131,8 @@ class Interaction:
             amount = booper_boops.get(boopee.id) + 1
             booper_boops[boopee.id] = amount
             boops[ctx.message.author.id] = booper_boops
-            
-        config.saveContent('boops',boops)
+
+        config.saveContent('boops', boops)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
 

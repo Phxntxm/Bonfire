@@ -47,14 +47,14 @@ class Twitch:
             config.closeConnection()
             await asyncio.sleep(30)
 
-    @commands.group(no_pm=True, invoke_without_command=True,pass_context=True)
+    @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
     @checks.customPermsOrRole("none")
     async def twitch(self, ctx, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is not None:
             twitch = config.getContent('twitch')
             result = twitch.get(ctx.message.author.id)
-            
+
             if result is not None:
                 url = result['twitch_url']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
@@ -88,12 +88,13 @@ class Twitch:
 
         twitch = config.getContent('twitch')
         result = twitch.get(ctx.message.author.id)
-        
+
         if result is not None:
             twitch[ctx.message.author.id]['twitch_url'] = url
         else:
-            twitch[ctx.message.author.id] = {'twitch_url':url,'server_id':ctx.message.server.id,'notifications_on': 1,'live':0}
-        config.saveContent('twitch',twitch)
+            twitch[ctx.message.author.id] = {'twitch_url': url, 'server_id': ctx.message.server.id,
+                                             'notifications_on': 1, 'live': 0}
+        config.saveContent('twitch', twitch)
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
@@ -103,7 +104,7 @@ class Twitch:
         twitch = config.getContent('twitch')
         if twitch.get(ctx.message.author.id) is not None:
             del twitch[ctx.message.author.id]
-            config.saveContent('twitch',twitch)
+            config.saveContent('twitch', twitch)
             await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
         else:
             await self.bot.say(
@@ -131,7 +132,7 @@ class Twitch:
                 ctx.message.author.mention))
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 1
-            config.saveContent('twitch',twitch)
+            config.saveContent('twitch', twitch)
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
 
@@ -144,12 +145,12 @@ class Twitch:
             await self.bot.say(
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
                     ctx.message.author.mention))
-        elif not result['notifications_on']:
+        elif not twitch.get(ctx.message.author.id)['notifications_on']:
             await self.bot.say("I am already set to not notify if you go live! Pay attention brah {}".format(
                 ctx.message.author.mention))
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 0
-            config.saveContent('twitch',twitch)
+            config.saveContent('twitch', twitch)
             await self.bot.say(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(

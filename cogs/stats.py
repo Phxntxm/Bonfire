@@ -3,11 +3,11 @@ from discord.utils import find
 from .utils import config
 from .utils import checks
 import re
-import pymysql
 
 
 class Stats:
     """Leaderboard/stats related commands"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -20,14 +20,14 @@ class Stats:
         if not boops.get(ctx.message.author.id):
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
-        
+
         most_boops = 0
-        for b_id,amt in boops.get(ctx.message.author.id).items():
+        for b_id, amt in boops.get(ctx.message.author.id).items():
             member = find(lambda m: m.id == b_id, self.bot.get_all_members())
             if member in members and amt > most_boops:
                 most_boops = amt
                 most_id = b_id
-        
+
         member = find(lambda m: m.id == most_id, self.bot.get_all_members())
         await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
             ctx.message.author.mention, member.mention, most_boops))
@@ -42,7 +42,7 @@ class Stats:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
         output = "You have booped:"
-        for b_id,amt in boops.get(ctx.message.author.id).items():
+        for b_id, amt in boops.get(ctx.message.author.id).items():
             member = find(lambda m: m.id == b_id, self.bot.get_all_members())
             if member in members:
                 output += "\n{0.name}: {1} times".format(member, amt)
@@ -57,7 +57,7 @@ class Stats:
         count = 0
         fmt = []
         if battles is not None:
-            for m_id,record in battles.items():
+            for m_id, record in battles.items():
                 member = find(lambda m: m.id == m_id, self.bot.get_all_members())
                 if member in members:
                     winAmt = int(record.split('-')[0])

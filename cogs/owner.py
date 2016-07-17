@@ -15,6 +15,7 @@ multi = re.compile(r'```(.*?)```', re.DOTALL)
 
 class Owner:
     """Commands that can only be used by Phantom, bot management commands"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -22,21 +23,21 @@ class Owner:
     @commands.check(checks.isOwner)
     async def restart(self, ctx):
         """Forces the bot to restart"""
-        config.saveContent('restart_server',ctx.message.channel.id)
+        config.saveContent('restart_server', ctx.message.channel.id)
         await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)
-    
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.check(checks.isOwner)
-    async def adddoggo(self, ctx, url: str):
+    async def adddoggo(self, url: str):
         """Saves a URL as an image to add for the doggo command"""
         os.chdir('/home/phxntx5/public_html/Bonfire/images')
         local_path = 'doggo{}.jpg'.format(len(glob.glob('doggo*')))
-        urllib.request.urlretrieve(url,local_path)
-        await self.bot.say("Just saved a new doggo image! You now have {} doggo images!".format(len(glob.glob('doggo*'))))
-        
+        urllib.request.urlretrieve(url, local_path)
+        await self.bot.say(
+            "Just saved a new doggo image! You now have {} doggo images!".format(len(glob.glob('doggo*'))))
+
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
     async def py(self, ctx):
