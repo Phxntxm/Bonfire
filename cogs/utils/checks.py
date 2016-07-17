@@ -8,7 +8,6 @@ def isOwner(ctx):
 
 def customPermsOrRole(perm):
     def predicate(ctx):
-        nonlocal perm
         if ctx.message.channel.is_private:
             return False
         custom_permissions = config.getContent('custom_permissions')
@@ -18,9 +17,9 @@ def customPermsOrRole(perm):
             pass
             
         if _perm is None:
-            return getattr(ctx.message.author.permissions_in(ctx.message.channel),perm)
+            return getattr(ctx.message.author.permissions_in(ctx.message.channel), perm)
         else:
-            return getattr(ctx.message.author.permissions_in(ctx.message.channel),_perm)
+            return getattr(ctx.message.author.permissions_in(ctx.message.channel), _perm)
 
     return commands.check(predicate)
 

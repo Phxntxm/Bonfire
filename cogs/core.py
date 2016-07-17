@@ -35,7 +35,6 @@ class Core:
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
                            
-                           
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("none")
     async def doggo(self, ctx):
@@ -46,10 +45,9 @@ class Core:
         f = open(f,'rb')
         await self.bot.send_file(ctx.message.channel,f)
         f.close()
-        
-        
+
     @commands.command()
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_message")
     async def joke(self):
         """Prints a random riddle"""
         fortuneCommand = "/usr/bin/fortune riddles"
