@@ -93,7 +93,7 @@ class Mod:
         command = " ".join(msg[0:len(msg)-1])
         permissions = msg[len(msg)-1]
         if permissions.lower() == "none":
-            permissions = "send_message"
+            permissions = "send_messages"
         msg = msg[0:len(msg)-1]
         count = 0
         cmd = self.bot.commands.get(msg[count])
