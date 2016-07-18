@@ -91,7 +91,7 @@ class Interaction:
         battling[ctx.message.author.id] = ctx.message.mentions[0].id
         config.saveContent('battling',battling)
         await self.bot.say(fmt.format(ctx.message.author, player2))
-        t = Timer(180, battlingOff, {'player1'=ctx.message.author.id})
+        t = Timer(180, battlingOff, {'player1':ctx.message.author.id})
         t.start()
 
     @commands.command(pass_context=True, no_pm=True)
