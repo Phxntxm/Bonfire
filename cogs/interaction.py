@@ -15,10 +15,13 @@ def userBattling(ctx):
     battling = config.getContent('battling')
     if battling is None:
         return False
-    if ctx.message.author.id in battling:
-        return True
     if str(ctx.command) == 'battle':
+        if ctx.message.author.id in battling:
+            return True
         return ctx.message.mentions[0].id in battling.values()
+    else:
+        return ctx.message.author.id in battling.values()
+        
     return False
 
 
