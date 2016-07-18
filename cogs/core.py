@@ -13,6 +13,7 @@ import re
 import calendar
 import datetime
 
+
 class Core:
     """Core commands, these are the not 'complicated' commands."""
 
@@ -20,7 +21,7 @@ class Core:
         self.bot = bot
 
     @commands.command()
-    @checks.customPermsOrRole("send_message")
+    @checks.customPermsOrRole("send_messages")
     async def calendar(self, month: str=None, year: int=None):
         """Provides a printout of the current date
         Provide month and year to print the calendar of that year and month"""
@@ -51,7 +52,7 @@ class Core:
         await self.bot.say("```{}```".format(cal))
 
     @commands.command()
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def addbot(self):
         """Provides a link that you can use to add me to a server"""
         perms = discord.Permissions.none()
@@ -68,7 +69,7 @@ class Core:
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
@@ -87,7 +88,7 @@ class Core:
         await self.bot.say(fortune)
 
     @commands.command()
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         try:
@@ -103,7 +104,7 @@ class Core:
             await self.bot.say('```Error: Definition is too long for me to send```')
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term"""
         if len(search) > 0:
@@ -141,7 +142,7 @@ class Core:
         await self.bot.say(response)
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
@@ -175,6 +176,7 @@ class Core:
         await self.bot.say(fmt.format(ctx, dice, num, valueStr))
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
+    @checks.customPermsOrRole("send_messages")
     async def tag(self, ctx, *tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
