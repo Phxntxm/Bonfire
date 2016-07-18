@@ -69,7 +69,7 @@ class Interaction:
             return
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
         battling = config.getContent('battling')
-        battling[ctx.message.author.id] = ctx.message.mentions.id
+        battling[ctx.message.author.id] = ctx.message.mentions[0].id
         config.saveContent('battling',battling)
         await self.bot.say(fmt.format(ctx.message.author, player2))
         t = Timer(180, battlingOff, ctx.message.author.id)
