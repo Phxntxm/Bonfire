@@ -44,7 +44,6 @@ class Twitch:
                     await self.bot.send_message(server,
                                                 "{} has just gone offline! Catch them next time they stream at {}"
                                                 .format(member.name, url))
-            config.closeConnection()
             await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
