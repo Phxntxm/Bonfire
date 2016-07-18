@@ -60,8 +60,8 @@ class Stats:
             for m_id, record in battles.items():
                 member = find(lambda m: m.id == m_id, self.bot.get_all_members())
                 if member in members:
-                    winAmt = int(record.split('-')[0])
-                    loseAmt = int(record.split('-')[1])
+                    winAmt = record['wins']
+                    loseAmt = record['losses']
                     percentage = winAmt / (winAmt + loseAmt)
 
                     position = count

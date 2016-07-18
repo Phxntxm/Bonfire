@@ -24,14 +24,16 @@ def updateBattleRecords(winner, loser):
     if battles is not None:
         record = battles.get(winner.id)
         if record is not None:
-            result = record.split('-')
-            result[0] = str(int(result[0]) + 1)
-            battles[winner.id] = "-".join(result)
+            record['wins'] = record['wins'] + 1
+        else:
+            record = {'wins':1,'losses':0}
+        battles[winner.id] = record
         record = battles.get(loser.id)
         if record is not None:
-            result = record.split('-')
-            result[1] = str(int(result[1]) + 1)
-            battles[loser.id] = "-".join(result)
+            record['losses'] = record['losses'] + 1
+        else:
+            record = {'wins':0,'losses':1}
+        battles[loser.id] = record
     else:
         battles = {winner.id: "1-0", loser.id: "0-1"}
     if config.saveContent('battle_records', battles):
