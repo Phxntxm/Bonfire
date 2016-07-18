@@ -172,6 +172,7 @@ class Interaction:
             await self.bot.say(fmt.format(booper, boopee, amount))
         else:
             await self.bot.say("I was unable to save this data")
+            await self.bot.whisper("```{}```".format(boops))
 
 
 def setup(bot):
