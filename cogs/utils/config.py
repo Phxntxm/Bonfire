@@ -22,19 +22,19 @@ def saveContent(key: str, content):
     with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
         data = json.load(jf)
         jf.seek(0)
-        newData = dict(data)
-        newData[key] = content
-        jf.truncate()
+        data[key] = content
         try:
-            json.dump(newData, jf, indent=4)
+            json.dumps(data)
         except:
+            return False
+        else:
+            jf.truncate()
             json.dump(data, jf, indent=4)
 
 
 def getContent(key: str):
     try:
         with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
-            data = json.load(jf)
-            return data[key]
+            return json.load(jf)[key]
     except KeyError:
         return None
