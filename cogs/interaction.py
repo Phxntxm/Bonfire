@@ -6,9 +6,9 @@ import discord
 import random
 
 
-def battlingOff(ctx):
+def battlingOff(m_id):
     battling = config.getContent('battling')
-    del battling[ctx.message.author.id]
+    del battling[m_id]
     config.saveContent('battling',battling)
     
 def userBattling(ctx):
@@ -70,7 +70,7 @@ class Interaction:
         battling[ctx.message.author.id] = ctx.message.mentions.id
         config.saveContent('battling',battling)
         await self.bot.say(fmt.format(ctx.message.author, player2))
-        t = Timer(180, battlingOff, ctx)
+        t = Timer(180, battlingOff, ctx.message.author.id)
         t.start()
 
     @commands.command(pass_context=True, no_pm=True)
@@ -85,12 +85,12 @@ class Interaction:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
             if not updateBattleRecords(battleP1, battleP2):
                 await self.bot.say("I was unable to save this data")
-            battlingOff(ctx)
+            battlingOff(ctx.message.author.id)
         elif num > 50:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             if not updateBattleRecords(battleP2, battleP1):
                 await self.bot.say("I was unable to save this data")
-            battlingOff(ctx)
+            battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
@@ -101,7 +101,7 @@ class Interaction:
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         if not updateBattleRecords(battleP1, battleP2):
             await self.bot.say("I was unable to save this data")
-        battlingOff(ctx)
+        battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
