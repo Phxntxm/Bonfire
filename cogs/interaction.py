@@ -11,7 +11,7 @@ def battlingOff(player1 = None, player2 = None):
         battling = config.getContent('battling')
         del battling[player1]
         config.saveContent('battling',battling)
-    else if player2 is not None:
+    elif player2 is not None:
         battling = config.getContent('battling')
         for p1_id,p2_id in battling:
             if p2_id = player2:
