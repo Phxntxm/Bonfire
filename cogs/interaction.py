@@ -20,8 +20,7 @@ def battlingOff(**kwargs):
                 del battling[p1_id]
                 config.saveContent('battling',battling)
                 break
-        
-        
+                
     
 def userBattling(ctx):
     battling = config.getContent('battling')
@@ -101,6 +100,11 @@ class Interaction:
         if not userBattling(ctx):
             await self.bot.say("You are not currently in a battle!")
             return
+        battling = config.getContent('battling')
+        battleP1 = ctx.message.author
+        for p1_id,p2_id in battling:
+            if p2_id == ctx.message.author.id:
+                battleP2 = discord.utils.find(lambda m: m.id == p2_id,ctx.message.server.members)
         num = random.randint(1, 100)
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
         if num <= 50:
@@ -121,6 +125,10 @@ class Interaction:
         if not userBattling(ctx):
             await self.bot.say("You are not currently in a battle!")
             return
+        battleP1 = ctx.message.author
+        for p1_id,p2_id in battling:
+            if p2_id == ctx.message.author.id:
+                battleP2 = discord.utils.find(lambda m: m.id == p2_id,ctx.message.server.members)
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         if not updateBattleRecords(battleP1, battleP2):
             await self.bot.say("I was unable to save this data")
