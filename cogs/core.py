@@ -169,11 +169,16 @@ class Core:
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 t['result'] = tag_result
-                config.saveContent('tags', tags)
+                if config.saveContent('tags', tags):
+                    await self.bot.say("I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+                else:
+                    await self.bot.say("I was unable to save this data")
                 return
         tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
-        config.saveContent('tags', tags)
-        await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+        if config.saveContent('tags', tags):
+            await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+        else:
+            await self.bot.say("I was unable to save this data")
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
@@ -190,8 +195,10 @@ class Core:
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 tags.remove(t)
-                config.saveContent('tags', tags)
-        await self.bot.say('I have just removed the tag `{}`'.format(tag))
+                if config.saveContent('tags', tags):
+                    await self.bot.say('I have just removed the tag `{}`'.format(tag))
+                else:
+                    await self.bot.say("I was unable to save this data")
 
 
 def setup(bot):

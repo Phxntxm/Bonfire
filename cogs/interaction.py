@@ -34,7 +34,9 @@ def updateBattleRecords(winner, loser):
             battles[loser.id] = "-".join(result)
     else:
         battles = {winner.id: "1-0", loser.id: "0-1"}
-    config.saveContent('battle_records', battles)
+    if config.saveContent('battle_records', battles):
+        return True
+    return False
 
 
 class Interaction:
@@ -82,11 +84,13 @@ class Interaction:
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
         if num <= 50:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
-            updateBattleRecords(battleP1, battleP2)
+            if not updateBattleRecords(battleP1, battleP2):
+                await self.bot.say("I was unable to save this data")
             battlingOff()
         elif num > 50:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
-            updateBattleRecords(battleP2, battleP1)
+            if not updateBattleRecords(battleP2, battleP1):
+                await self.bot.say("I was unable to save this data")
             battlingOff()
 
     @commands.command(pass_context=True, no_pm=True)
@@ -96,7 +100,8 @@ class Interaction:
         if not battling or battleP2 != ctx.message.author:
             return
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
-        updateBattleRecords(battleP1, battleP2)
+        if not updateBattleRecords(battleP1, battleP2):
+            await self.bot.say("I was unable to save this data")
         battlingOff()
 
     @commands.command(pass_context=True, no_pm=True)
@@ -132,9 +137,11 @@ class Interaction:
             booper_boops[boopee.id] = amount
             boops[ctx.message.author.id] = booper_boops
 
-        config.saveContent('boops', boops)
-        fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
-        await self.bot.say(fmt.format(booper, boopee, amount))
+        if config.saveContent('boops', boops):
+            fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
+            await self.bot.say(fmt.format(booper, boopee, amount))
+        else:
+            await self.bot.say("I was unable to save this data")
 
 
 def setup(bot):

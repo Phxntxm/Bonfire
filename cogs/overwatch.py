@@ -80,9 +80,10 @@ class Overwatch:
             return
         ow = config.getContent('overwatch')
         ow[ctx.message.author.id] = bt
-        config.saveContent('overwatch', ow)
-
-        await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
+        if config.saveContent('overwatch', ow):
+            await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
+        else:
+            await self.bot.say("I was unable to save this data")
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
     @checks.customPermsOrRole("none")
@@ -91,8 +92,10 @@ class Overwatch:
         result = config.getContent('overwatch')
         if result.get(ctx.message.author.id):
             del result[ctx.message.author.id]
-            config.saveContent('overwatch', result)
-            await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
+            if config.saveContent('overwatch', result):
+                await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
+            else:
+                await self.bot.say("I was unable to save this data")
         else:
             await self.bot.say("I don't even have your battletag saved {}".format(ctx.message.author.mention))
 

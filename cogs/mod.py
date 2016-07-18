@@ -28,8 +28,10 @@ class Mod:
             await self.bot.say("This channel is already registered as 'nsfw'!")
         else:
             nsfw_channels.append(ctx.message.channel.id)
-            config.saveContent('nsfw_channels', nsfw_channels)
-            await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
+            if config.saveContent('nsfw_channels', nsfw_channels):
+                await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
+            else:
+                await self.bot.say("I was unable to save this data")
 
     @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
@@ -40,8 +42,10 @@ class Mod:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
         else:
             nsfw_channels.remove(ctx.message.channel.id)
-            config.saveContent('nsfw_channels', nsfw_channels)
-            await self.bot.say("This channel has just been unregistered as a nsfw channel")
+            if config.saveContent('nsfw_channels', nsfw_channels):
+                await self.bot.say("This channel has just been unregistered as a nsfw channel")
+            else:
+                await self.bot.say("I was unable to save this data")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("manage_server")
@@ -122,9 +126,11 @@ class Mod:
         else:
             server_perms[command] = permissions
             custom_perms[ctx.message.server.id] = server_perms
-        config.saveContent('custom_permissions', custom_perms)
-        await self.bot.say("I have just added your custom permissions; "
-                           "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
+        if config.saveContent('custom_permissions', custom_perms):
+            await self.bot.say("I have just added your custom permissions; "
+                               "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
+        else:
+            await self.bot.say("I was unable to save this data")
 
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
@@ -144,8 +150,10 @@ class Mod:
             await self.bot.say("You do not have custom permissions setup on this command yet!")
             return
         del custom_perms[ctx.message.server.id][cmd]
-        config.saveContent('custom_permissions', custom_perms)
-        await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
+        if config.saveContent('custom_permissions', custom_perms):
+            await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
+        else:
+            await self.bot.say("I was unable to save this data")
 
 
 def setup(bot):
