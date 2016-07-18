@@ -67,7 +67,7 @@ class Mod:
     async def perms(self, ctx, *command: str):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
-        if command is None:
+        if command is None or len(command) == 0:
             await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
         command = " ".join(command)
