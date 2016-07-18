@@ -23,7 +23,7 @@ class Core:
     @commands.command()
     @checks.customPermsOrRole("send_messages")
     async def calendar(self, month: str=None, year: int=None):
-        """Provides a printout of the current date
+        """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
         months = {
             "january": 1,
