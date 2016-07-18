@@ -14,7 +14,7 @@ def battlingOff(player1 = None, player2 = None):
     elif player2 is not None:
         battling = config.getContent('battling')
         for p1_id,p2_id in battling:
-            if p2_id = player2:
+            if p2_id == player2:
                 del battling[p1_id]
                 config.saveContent('battling',battling)
                 break
