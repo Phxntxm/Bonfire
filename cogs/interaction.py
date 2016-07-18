@@ -17,7 +17,9 @@ def userBattling(ctx):
         return False
     if ctx.message.author.id in battling:
         return True
-    return ctx.message.mentions[0].id in battling.values()
+    if str(ctx.command) == 'battle':
+        return ctx.message.mentions[0].id in battling.values()
+    return False
 
 
 def updateBattleRecords(winner, loser):
@@ -69,6 +71,8 @@ class Interaction:
             return
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
         battling = config.getContent('battling')
+        if battling is None:
+            battling = {}
         battling[ctx.message.author.id] = ctx.message.mentions[0].id
         config.saveContent('battling',battling)
         await self.bot.say(fmt.format(ctx.message.author, player2))
@@ -79,7 +83,7 @@ class Interaction:
     @checks.customPermsOrRole("none")
     async def accept(self, ctx):
         """Accepts the battle challenge"""
-        if not battling or battleP2 != ctx.message.author:
+        if not userBattling(ctx):
             return
         num = random.randint(1, 100)
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
@@ -98,7 +102,7 @@ class Interaction:
     @checks.customPermsOrRole("none")
     async def decline(self, ctx):
         """Declines the battle challenge"""
-        if not battling or battleP2 != ctx.message.author:
+        if not userBattling(ctx):
             return
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         if not updateBattleRecords(battleP1, battleP2):
