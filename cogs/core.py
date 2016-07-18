@@ -10,13 +10,45 @@ import json
 import random
 import discord
 import re
-
+import calendar
+import datetime
 
 class Core:
     """Core commands, these are the not 'complicated' commands."""
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    @checks.customPermsOrRole("send_message")
+    async def calendar(self, month: str=None, year: int=None):
+        """Provides a printout of the current date
+        Provide month and year to print the calendar of that year and month"""
+        months = {
+            "january": 1,
+            "february": 2,
+            "march": 3,
+            "april": 4,
+            "may": 5,
+            "june": 6,
+            "july": 7,
+            "august": 8,
+            "september": 9,
+            "october": 10,
+            "november": 11,
+            "december": 12
+        }
+        if month is None:
+            month = datetime.date.today().month
+        else:
+            month = months.get(month)
+            if month is None:
+                await self.bot.say("Please provide a valid Month!")
+                return
+        if year is None:
+            year = datetime.datetime.today().year
+        cal = calendar.TextCalendar().formatmonth(year, month)
+        await self.bot.say("```{}```".format(cal))
 
     @commands.command()
     @checks.customPermsOrRole("none")
