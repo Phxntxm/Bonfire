@@ -30,6 +30,7 @@ def saveContent(key: str, content):
         else:
             jf.truncate()
             json.dump(data, jf, indent=4)
+            return True
 
 
 def getContent(key: str):
