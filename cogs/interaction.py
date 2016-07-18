@@ -13,6 +13,8 @@ def battlingOff(m_id):
     
 def userBattling(ctx):
     battling = config.getContent('battling')
+    if battling is None:
+        return False
     if ctx.message.author.id in battling:
         return True
     return ctx.message.mentions[0].id in battling.values()
