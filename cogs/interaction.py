@@ -5,18 +5,17 @@ from threading import Timer
 import discord
 import random
 
-battling = False
-battleP1 = None
-battleP2 = None
 
-
-def battlingOff():
-    global battleP1
-    global battleP2
-    global battling
-    battling = False
-    battleP1 = ""
-    battleP2 = ""
+def battlingOff(ctx):
+    battling = config.getContent('battling')
+    del battling[ctx.message.author.id]
+    config.saveContent('battling',battling)
+    
+def userBattling(ctx)
+    battling = config.getContent('battling')
+    if ctx.message.author.id in battling:
+        return True
+    return ctx.message.mentions[0].id in battling.values()
 
 
 def updateBattleRecords(winner, loser):
@@ -51,11 +50,6 @@ class Interaction:
     @checks.customPermsOrRole("none")
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
-        global battleP1
-        global battleP2
-        global battling
-        if battling:
-            return
         if len(ctx.message.mentions) == 0:
             await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
             return
@@ -68,13 +62,16 @@ class Interaction:
         if self.bot.user.id == player2.id:
             await self.bot.say("I always win, don't even try it.")
             return
+        if userBattling(ctx):
+            await self.bot.say("You or the person you are trying to battle is already in a battle!")
+            return
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
-        battleP1 = ctx.message.author
-        battleP2 = player2
+        battling = config.getContent('battling')
+        battling[ctx.message.author.id] = ctx.message.mentions.id
+        config.saveContent('battling',battling)
         await self.bot.say(fmt.format(ctx.message.author, player2))
-        t = Timer(180, battlingOff)
+        t = Timer(180, battlingOff, ctx)
         t.start()
-        battling = True
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
@@ -88,12 +85,12 @@ class Interaction:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
             if not updateBattleRecords(battleP1, battleP2):
                 await self.bot.say("I was unable to save this data")
-            battlingOff()
+            battlingOff(ctx)
         elif num > 50:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             if not updateBattleRecords(battleP2, battleP1):
                 await self.bot.say("I was unable to save this data")
-            battlingOff()
+            battlingOff(ctx)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
@@ -104,7 +101,7 @@ class Interaction:
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         if not updateBattleRecords(battleP1, battleP2):
             await self.bot.say("I was unable to save this data")
-        battlingOff()
+        battlingOff(ctx)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
