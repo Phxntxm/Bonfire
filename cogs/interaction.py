@@ -11,7 +11,7 @@ def battlingOff(ctx):
     del battling[ctx.message.author.id]
     config.saveContent('battling',battling)
     
-def userBattling(ctx)
+def userBattling(ctx):
     battling = config.getContent('battling')
     if ctx.message.author.id in battling:
         return True
