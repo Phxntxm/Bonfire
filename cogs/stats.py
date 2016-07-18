@@ -78,7 +78,7 @@ class Stats:
                         indexWin = int(indexRecord.split('-')[0])
                         indexLose = int(indexRecord.split('-')[1])
                         indexPercentage = indexWin / (indexWin + indexLose)
-                    fmt.insert(position, "{0} has a battling record of {1}".format(member.name, record))
+                    fmt.insert(position, "{0} has a battling record of {1}-{2}".format(member.name, winAmt, loseAmt))
                     count += 1
             for index in range(0, len(fmt)):
                 fmt[index] = "{0}) {1}".format(index + 1, fmt[index])
