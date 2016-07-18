@@ -102,7 +102,7 @@ class Interaction:
             return
         battling = config.getContent('battling')
         battleP1 = ctx.message.author
-        for p1_id,p2_id in battling:
+        for p1_id,p2_id in battling.items():
             if p2_id == ctx.message.author.id:
                 battleP2 = discord.utils.find(lambda m: m.id == p2_id,ctx.message.server.members)
         num = random.randint(1, 100)
@@ -126,7 +126,7 @@ class Interaction:
             await self.bot.say("You are not currently in a battle!")
             return
         battleP1 = ctx.message.author
-        for p1_id,p2_id in battling:
+        for p1_id,p2_id in battling.items():
             if p2_id == ctx.message.author.id:
                 battleP2 = discord.utils.find(lambda m: m.id == p2_id,ctx.message.server.members)
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
