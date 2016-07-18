@@ -6,7 +6,9 @@ import discord
 import random
 
 
-def battlingOff(player1 = None, player2 = None):
+def battlingOff(**kwargs):
+    player1 = kwargs.get('player1')
+    player2 = kwargs.get('player2')
     if player1 is not None:
         battling = config.getContent('battling')
         del battling[player1]
@@ -89,7 +91,7 @@ class Interaction:
         battling[ctx.message.author.id] = ctx.message.mentions[0].id
         config.saveContent('battling',battling)
         await self.bot.say(fmt.format(ctx.message.author, player2))
-        t = Timer(180, battlingOff, {player1=ctx.message.author.id})
+        t = Timer(180, battlingOff, {'player1'=ctx.message.author.id})
         t.start()
 
     @commands.command(pass_context=True, no_pm=True)
@@ -104,12 +106,12 @@ class Interaction:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
             if not updateBattleRecords(battleP1, battleP2):
                 await self.bot.say("I was unable to save this data")
-            battlingOff(player2 = ctx.message.author.id)
+            battlingOff('player2' = ctx.message.author.id)
         elif num > 50:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             if not updateBattleRecords(battleP2, battleP1):
                 await self.bot.say("I was unable to save this data")
-            battlingOff(player2 = ctx.message.author.id)
+            battlingOff('player2' = ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
@@ -120,7 +122,7 @@ class Interaction:
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         if not updateBattleRecords(battleP1, battleP2):
             await self.bot.say("I was unable to save this data")
-        battlingOff(player2 = ctx.message.author.id)
+        battlingOff('player2' = ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
