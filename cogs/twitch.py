@@ -39,11 +39,13 @@ class Twitch:
                     twitch[m_id]['live'] = 1
                     await self.bot.send_message(server, "{} has just gone live! "
                                                         "View their stream at {}".format(member.name, url))
+                    config.saveContent('twitch',twitch)
                 elif live and not channelOnline(user):
                     twitch[m_id]['live'] = 0
                     await self.bot.send_message(server,
                                                 "{} has just gone offline! Catch them next time they stream at {}"
                                                 .format(member.name, url))
+                    config.saveContent('twitch',twitch)
             await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
