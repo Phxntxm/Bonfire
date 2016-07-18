@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3.5
 
 import discord
+import traceback
 from discord.ext import commands
 from cogs.utils import config
 
@@ -62,7 +63,6 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'w') as f:
             print('In {0.command.qualified_name}:'.format(ctx), file=f)
-            traceback.print_tb(error.__traceback__, file=f)
             traceback.print_tb(error.original.__traceback__, file=f)
             print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
         
