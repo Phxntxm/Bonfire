@@ -99,6 +99,7 @@ class Interaction:
     async def accept(self, ctx):
         """Accepts the battle challenge"""
         if not userBattling(ctx):
+            await self.bot.say("You are not currently in a battle!")
             return
         num = random.randint(1, 100)
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
@@ -106,23 +107,24 @@ class Interaction:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
             if not updateBattleRecords(battleP1, battleP2):
                 await self.bot.say("I was unable to save this data")
-            battlingOff('player2' = ctx.message.author.id)
+            battlingOff({'player2': ctx.message.author.id})
         elif num > 50:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             if not updateBattleRecords(battleP2, battleP1):
                 await self.bot.say("I was unable to save this data")
-            battlingOff('player2' = ctx.message.author.id)
+            battlingOff({'player2': ctx.message.author.id})
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
     async def decline(self, ctx):
         """Declines the battle challenge"""
         if not userBattling(ctx):
+            await self.bot.say("You are not currently in a battle!")
             return
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         if not updateBattleRecords(battleP1, battleP2):
             await self.bot.say("I was unable to save this data")
-        battlingOff('player2' = ctx.message.author.id)
+        battlingOff({'player2': ctx.message.author.id})
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
