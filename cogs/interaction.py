@@ -15,7 +15,7 @@ def battlingOff(**kwargs):
         config.saveContent('battling',battling)
     elif player2 is not None:
         battling = config.getContent('battling')
-        for p1_id,p2_id in battling:
+        for p1_id,p2_id in battling.items():
             if p2_id == player2:
                 del battling[p1_id]
                 config.saveContent('battling',battling)
@@ -101,10 +101,10 @@ class Interaction:
             await self.bot.say("You are not currently in a battle!")
             return
         battling = config.getContent('battling')
-        battleP1 = ctx.message.author
+        battleP2 = ctx.message.author
         for p1_id,p2_id in battling.items():
             if p2_id == ctx.message.author.id:
-                battleP2 = discord.utils.find(lambda m: m.id == p2_id,ctx.message.server.members)
+                battleP1 = discord.utils.find(lambda m: m.id == p1_id,ctx.message.server.members)
         num = random.randint(1, 100)
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
         if num <= 50:
