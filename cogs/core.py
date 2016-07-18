@@ -42,7 +42,7 @@ class Core:
         if month is None:
             month = datetime.date.today().month
         else:
-            month = months.get(month)
+            month = months.get(month.lower())
             if month is None:
                 await self.bot.say("Please provide a valid Month!")
                 return
