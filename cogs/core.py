@@ -235,6 +235,7 @@ class Core:
                     await self.bot.say("I was unable to save this data")
 
     @commands.command(pass_context=True)
+    @checks.customPermsOrRole("send_messages")
     async def e621(self, ctx, *tag: str):
         """Searches for a random image from e621.net
         Format for the search terms need to be 'search term 1, search term 2, etc.'
@@ -243,6 +244,7 @@ class Core:
         tags = tags.replace(' ', '_')
         tags = tags.replace(',_', '%20')
         url = 'https://e621.net/post/index.json?tags={}'.format(tags)
+        await self.bot.say("Attempting to find an image from the URL: {}".format(url))
         if ctx.message.server.id in config.getContent('nsfw_channels'):
             url += " rating:explicit"
         else:
