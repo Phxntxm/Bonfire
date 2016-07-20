@@ -246,9 +246,9 @@ class Core:
         url = 'https://e621.net/post/index.json?tags={}'.format(tags)
         await self.bot.say("Attempting to find an image from the URL: {}".format(url))
         if ctx.message.server.id in config.getContent('nsfw_channels'):
-            url += " rating:explicit"
+            url += "%20rating:explicit"
         else:
-            url += " rating:safe"
+            url += "%20rating:safe"
         request = urllib.request.Request(url, headers={'User-Agent': 'Bonfire/1.0'})
         with urllib.request.urlopen(request) as response:
             data = json.loads(response.read().decode('utf-8'))
