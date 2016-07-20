@@ -244,8 +244,8 @@ class Core:
         tags = tags.replace(' ', '_')
         tags = tags.replace(',_', '%20')
         url = 'https://e621.net/post/index.json?tags={}'.format(tags)
-        
-        if ctx.message.server.id in config.getContent('nsfw_channels'):
+
+        if ctx.message.channel.id in config.getContent('nsfw_channels'):
             url += "%20rating:explicit"
         else:
             url += "%20rating:safe"
