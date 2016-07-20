@@ -234,6 +234,25 @@ class Core:
                 else:
                     await self.bot.say("I was unable to save this data")
 
+    @commands.command(pass_context=True)
+    async def e621(self, ctx, *tag: str):
+        """Searches for a random image from e621.net
+        Format for the search terms need to be 'search term 1, search term 2, etc.'
+        If the channel the command is ran in, is registered as a nsfw channel, this image will be explicit"""
+        tags = " ".join(tag)
+        tags = tags.replace(' ', '_')
+        tags = tags.replace(',_', '%20')
+        url = 'https://e621.net/post/index.json?tags={}'.format(tags)
+        if ctx.message.server.id in config.getContent('nsfw_channels'):
+            url += " rating:explicit"
+        else:
+            url += " rating:safe"
+        request = urllib.request.Request(url, headers={'User-Agent': 'Bonfire/1.0'})
+        with urllib.request.urlopen(request) as response:
+            data = json.loads(response.read().decode('utf-8'))
+            rand_image = data[random.randint(0, len(data)-1)]['file_url']
+            await self.bot.say(rand_image)
+
 
 def setup(bot):
     bot.add_cog(Core(bot))
