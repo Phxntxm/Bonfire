@@ -133,13 +133,7 @@ class Core:
             # If no search term was provided, search for a random image
             with urllib.request.urlopen('https://derpibooru.org/images/random') as response:
                 imageLink = response.geturl()
-
-        # Post link to my link shortening site
-        # discord still shows image previews through redirects so this is not an issue.
-        url = 'https://shpro.link/redirect.php/'
-        data = urllib.parse.urlencode({'link': imageLink}).encode('ascii')
-        response = urllib.request.urlopen(url, data).read().decode('utf-8')
-        await self.bot.say(response)
+        await self.bot.say(imageLink)
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("send_messages")
@@ -245,6 +239,7 @@ class Core:
         tags = tags.replace(',_', '%20')
         url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
         await self.bot.say("Looking up an image with those tags....")
+
         if ctx.message.channel.id in config.getContent('nsfw_channels'):
             url += "%20rating:explicit"
         else:
