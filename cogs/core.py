@@ -243,8 +243,8 @@ class Core:
         tags = " ".join(tag)
         tags = tags.replace(' ', '_')
         tags = tags.replace(',_', '%20')
-        url = 'https://e621.net/post/index.json?tags={}'.format(tags)
-
+        url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
+        await self.bot.say("Looking up an image with those tags....")
         if ctx.message.channel.id in config.getContent('nsfw_channels'):
             url += "%20rating:explicit"
         else:
