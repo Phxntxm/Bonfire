@@ -8,6 +8,7 @@ import glob
 import sys
 import discord
 import inspect
+import aiohttp
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```', re.DOTALL)
@@ -36,7 +37,11 @@ class Owner:
         """Saves a URL as an image to add for the doggo command"""
         os.chdir('/home/phxntx5/public_html/Bonfire/images')
         local_path = 'doggo{}.jpg'.format(len(glob.glob('doggo*')))
-        urllib.request.urlretrieve(url, local_path)
+        with aiohttp.ClientSession() as s:
+            async with s.get(url) as r:
+                val = await r.read()
+                with open(local_path, "wb") as f:
+                    f.write(val)
         await self.bot.say(
             "Just saved a new doggo image! You now have {} doggo images!".format(len(glob.glob('doggo*'))))
 
