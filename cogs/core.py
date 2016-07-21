@@ -247,7 +247,13 @@ class Core:
         request = urllib.request.Request(url, headers={'User-Agent': 'Bonfire/1.0'})
         with urllib.request.urlopen(request) as response:
             data = json.loads(response.read().decode('utf-8'))
-            rand_image = data[random.randint(0, len(data)-1)]['file_url']
+            if len(data) == 0:
+                await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
+                return
+            elif len(data) == 1:
+                rand_image data[0]['file_url']
+            else:
+                rand_image = data[random.randint(0, len(data)-1)]['file_url']
             await self.bot.say(rand_image)
 
 
