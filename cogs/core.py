@@ -251,7 +251,7 @@ class Core:
                 await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
                 return
             elif len(data) == 1:
-                rand_image data[0]['file_url']
+                rand_image = data[0]['file_url']
             else:
                 rand_image = data[random.randint(0, len(data)-1)]['file_url']
             await self.bot.say(rand_image)
