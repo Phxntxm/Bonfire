@@ -169,10 +169,9 @@ class Core:
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
-    async def tag(self, ctx, *tag: str):
+    async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
-        tag = ' '.join(tag).strip()
         tags = config.getContent('tags')
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
@@ -182,10 +181,9 @@ class Core:
 
     @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
-    async def add_tag(self, ctx, *result: str):
+    async def add_tag(self, ctx, *, result: str):
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
-        result = ' '.join(result).strip()
         tag = result[0:result.find('-')].strip()
         tag_result = result[result.find('-') + 2:].strip()
         if len(tag) == 0 or len(result) == 0:
@@ -208,10 +206,9 @@ class Core:
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
-    async def del_tag(self, ctx, *tag: str):
+    async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
-        tag = ' '.join(tag).strip()
         tags = config.getContent('tags')
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
@@ -225,14 +222,19 @@ class Core:
                     await self.bot.say('I have just removed the tag `{}`'.format(tag))
                 else:
                     await self.bot.say("I was unable to save this data")
+            
+    @commands.command(pass_context=True)
+    async def tags(self, ctx):
+        tags = config.getContent('tags')
+        fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id']==ctx.message.server.id)
+        await self.bot.say('```{}```'.format(fmt))
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("send_messages")
-    async def e621(self, ctx, *tag: str):
+    async def e621(self, ctx, *, tags: str):
         """Searches for a random image from e621.net
         Format for the search terms need to be 'search term 1, search term 2, etc.'
         If the channel the command is ran in, is registered as a nsfw channel, this image will be explicit"""
-        tags = " ".join(tag)
         tags = tags.replace(' ', '_')
         tags = tags.replace(',_', '%20')
         url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
@@ -253,10 +255,6 @@ class Core:
             else:
                 rand_image = data[random.randint(0, len(data)-1)]['file_url']
             await self.bot.say(rand_image)
-    
-    @commands.command()
-    async def test(self, *msg):
-        await self.bot.say("```Type: {}\nMessage: {}```".format(type(msg),msg))
 
 
 def setup(bot):
