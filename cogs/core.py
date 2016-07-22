@@ -256,7 +256,7 @@ class Core:
     
     @commands.command()
     async def test(self, *, msg):
-        await self.bot.say("```Type: {}\nMessage: {}".format(type(msg)))
+        await self.bot.say("```Type: {}\nMessage: {}".format(type(msg),msg))
 
 
 def setup(bot):
