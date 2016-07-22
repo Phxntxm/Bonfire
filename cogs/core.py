@@ -75,9 +75,8 @@ class Core:
         Doggo is love, doggo is life."""
         os.chdir('/home/phxntx5/public_html/Bonfire/images')
         f = glob.glob('doggo*')[random.randint(0, len(glob.glob('doggo*')) - 1)]
-        f = open(f, 'rb')
-        await self.bot.send_file(ctx.message.channel, f)
-        f.close()
+        with open(f, 'rb') as f:
+            await self.bot.send_file(ctx.message.channel, f)
 
     @commands.command()
     @checks.customPermsOrRole("send_messages")
@@ -92,8 +91,7 @@ class Core:
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         try:
-            term = '+'.join(msg)
-            url = "http://api.urbandictionary.com/v0/define?term={}".format(term)
+            url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
             response = urllib.request.urlopen(url)
             data = json.loads(response.read().decode('utf-8'))
             if len(data['list']) == 0:
@@ -255,6 +253,10 @@ class Core:
             else:
                 rand_image = data[random.randint(0, len(data)-1)]['file_url']
             await self.bot.say(rand_image)
+    
+    @commands.command()
+    async def test(self, *, msg)
+        await self.bot.say("```Type: {}\nMessage: {}".format(type(msg)))
 
 
 def setup(bot):
