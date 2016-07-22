@@ -255,7 +255,7 @@ class Core:
             await self.bot.say(rand_image)
     
     @commands.command()
-    async def test(self, *, msg)
+    async def test(self, *, msg):
         await self.bot.say("```Type: {}\nMessage: {}".format(type(msg)))
 
 
