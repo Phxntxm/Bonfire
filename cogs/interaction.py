@@ -1,4 +1,5 @@
 from discord.ext import commands
+from commands.cooldowns import BucketType
 from .utils import config
 from .utils import checks
 from threading import Timer
@@ -130,6 +131,7 @@ class Interaction:
         battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
+    @commands.cooldown(1,180,BucketType.user)
     @checks.customPermsOrRole("none")
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""

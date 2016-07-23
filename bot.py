@@ -60,6 +60,9 @@ async def on_command_error(error, ctx):
     elif isinstance(error, commands.CheckFailure):
         fmt = "You can't tell me what to do!"
         await bot.send_message(ctx.message.channel, fmt)
+    elif isinstance(error, commands.CommandOnCooldown):
+        fmt = "This command is on cooldown! Hold your horses! >:c"
+        await bot.send_message(ctx.message.channel, fmt)
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
         await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
