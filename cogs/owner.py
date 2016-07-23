@@ -47,7 +47,7 @@ class Owner:
 
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
-    async def py(self, ctx):
+    async def debug(self, ctx):
         """Executes code"""
         match_single = getter.findall(ctx.message.content)
         match_multi = multi.findall(ctx.message.content)
