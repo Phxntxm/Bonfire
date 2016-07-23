@@ -14,7 +14,7 @@ def battlingOff(**kwargs):
     if player1:
         del battling[player1]
     elif player2:
-        battling = {p1:p2 p1,p2 in battling.items() if not p2 == player2}
+        battling = {p1:p2 for p1,p2 in battling.items() if not p2 == player2}
     
     config.saveContent('battling',battling)
                 
