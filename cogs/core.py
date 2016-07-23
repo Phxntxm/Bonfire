@@ -1,21 +1,19 @@
+import discord
 from discord.ext import commands
 from .utils import config
 from .utils import checks
+
 import subprocess
-import urllib.parse
-import urllib.request
 import os
 import glob
-import json
 import random
-import discord
 import re
 import calendar
 import datetime
 
 
 class Core:
-    """Core commands, these are the not 'complicated' commands."""
+    """Core commands, these are the miscallaneous commands that don't fit into other categories'"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -86,52 +84,6 @@ class Core:
         fortune = subprocess.check_output(fortuneCommand.split()).decode("utf-8")
         await self.bot.say(fortune)
 
-    @commands.command()
-    @checks.customPermsOrRole("send_messages")
-    async def urban(self, *msg: str):
-        """Pulls the top urbandictionary.com definition for a term"""
-        try:
-            url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
-            response = urllib.request.urlopen(url)
-            data = json.loads(response.read().decode('utf-8'))
-            if len(data['list']) == 0:
-                await self.bot.say("No result with that term!")
-            else:
-                await self.bot.say(data['list'][0]['definition'])
-        except discord.HTTPException:
-            await self.bot.say('```Error: Definition is too long for me to send```')
-
-    @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
-    async def derpi(self, ctx, *search: str):
-        """Provides a random image from the first page of derpibooru.org for the following term"""
-        if len(search) > 0:
-            # This sets the url as url?q=search+terms
-            url = 'https://derpibooru.org/search.json?q='
-            query = '+'.join(search)
-            url += query
-
-            nsfw_channels = config.getContent("nsfw_channels")
-            if ctx.message.channel.id in nsfw_channels:
-                url += ",+explicit&filter_id=95938"
-
-            # Get the response from derpibooru and parse the 'searc' result from it
-            response = urllib.request.urlopen(url)
-            data = json.loads(response.read().decode('utf-8'))
-            results = data['search']
-
-            # Get the link if it exists, if not return saying no results found
-            if len(results) > 0:
-                index = random.randint(0, len(results) - 1)
-                imageLink = 'http://' + results[index].get('representations').get('full')[2:].strip()
-            else:
-                await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
-                return
-        else:
-            # If no search term was provided, search for a random image
-            with urllib.request.urlopen('https://derpibooru.org/images/random') as response:
-                imageLink = response.geturl()
-        await self.bot.say(imageLink)
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("send_messages")
@@ -159,102 +111,13 @@ class Core:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
 
-        valueStr = ", ".join("{}".format(random.randint(1, num)) for i in range(0, int(dice)))
+        valueStr = ", ".join(str(random.randint(1, num)) for i in range(0, int(dice)))
 
         if int(dice) == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
         else:
             fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
         await self.bot.say(fmt.format(ctx, dice, num, valueStr))
-
-    @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
-    async def tag(self, ctx, *, tag: str):
-        """This can be used to call custom tags
-         The format to call a custom tag is !tag <tag>"""
-        tags = config.getContent('tags')
-        result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
-        if len(result) == 0:
-            await self.bot.say('That tag does not exist!')
-            return
-        await self.bot.say("{}".format(result[0]['result']))
-
-    @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
-    async def add_tag(self, ctx, *, result: str):
-        """Use this to add a new tag that can be used in this server
-        Format to add a tag is !tag add <tag> - <result>"""
-        tag = result[0:result.find('-')].strip()
-        tag_result = result[result.find('-') + 2:].strip()
-        if len(tag) == 0 or len(result) == 0:
-            await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
-            return
-        tags = config.getContent('tags')
-        for t in tags:
-            if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
-                t['result'] = tag_result
-                if config.saveContent('tags', tags):
-                    await self.bot.say("I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
-                else:
-                    await self.bot.say("I was unable to save this data")
-                return
-        tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
-        if config.saveContent('tags', tags):
-            await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
-        else:
-            await self.bot.say("I was unable to save this data")
-
-    @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
-    async def del_tag(self, ctx, *, tag: str):
-        """Use this to remove a tag that from use for this server
-        Format to delete a tag is !tag delete <tag>"""
-        tags = config.getContent('tags')
-        result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
-        if len(result) == 0:
-            await self.bot.say(
-                "The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
-            return
-        for t in tags:
-            if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
-                tags.remove(t)
-                if config.saveContent('tags', tags):
-                    await self.bot.say('I have just removed the tag `{}`'.format(tag))
-                else:
-                    await self.bot.say("I was unable to save this data")
-            
-    @commands.command(pass_context=True)
-    async def tags(self, ctx):
-        tags = config.getContent('tags')
-        fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id']==ctx.message.server.id)
-        await self.bot.say('```{}```'.format(fmt))
-
-    @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
-    async def e621(self, ctx, *, tags: str):
-        """Searches for a random image from e621.net
-        Format for the search terms need to be 'search term 1, search term 2, etc.'
-        If the channel the command is ran in, is registered as a nsfw channel, this image will be explicit"""
-        tags = tags.replace(' ', '_')
-        tags = tags.replace(',_', '%20')
-        url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
-        await self.bot.say("Looking up an image with those tags....")
-
-        if ctx.message.channel.id in config.getContent('nsfw_channels'):
-            url += "%20rating:explicit"
-        else:
-            url += "%20rating:safe"
-        request = urllib.request.Request(url, headers={'User-Agent': 'Bonfire/1.0'})
-        with urllib.request.urlopen(request) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            if len(data) == 0:
-                await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
-                return
-            elif len(data) == 1:
-                rand_image = data[0]['file_url']
-            else:
-                rand_image = data[random.randint(0, len(data)-1)]['file_url']
-            await self.bot.say(rand_image)
 
 
 def setup(bot):
