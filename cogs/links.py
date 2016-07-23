@@ -10,7 +10,7 @@ class Links:
     In other words, all commands here rely on other URL's to complete their requests"""
     
     def __init__(self, bot):
-    self.bot = bot
+        self.bot = bot
 
     @commands.command()
     @checks.customPermsOrRole("send_messages")
