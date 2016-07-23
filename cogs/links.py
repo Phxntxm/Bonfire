@@ -4,6 +4,7 @@ from .utils import checks
 import urllib.parse
 import urllib.request
 import json
+import random
 
 class Links:
     """This class contains all the commands that make HTTP requests
