@@ -6,15 +6,10 @@ import discord
 import random
 
 
-def battlingOff(**kwargs):
-    player1 = kwargs.get('player1')
-    player2 = kwargs.get('player2')
+def battlingOff(player_id):
     battling = config.getContent('battling')
     
-    if player1:
-        del battling[player1]
-    elif player2:
-        battling = {p1:p2 for p1,p2 in battling.items() if not p2 == player2}
+    battling = {p1:p2 for p1,p2 in battling.items() if not p2 == player_id and not p1 == player_id}
     
     config.saveContent('battling',battling)
                 
@@ -83,7 +78,7 @@ class Interaction:
         
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
         await self.bot.say(fmt.format(ctx.message.author, player2))
-        t = Timer(180, battlingOff, 'Thread-battle_off', {'player1':ctx.message.author.id})
+        t = Timer(180, battlingOff, 'Thread-battle_off', [ctx.message.author.id])
         t.start()
 
     @commands.command(pass_context=True, no_pm=True)
@@ -112,7 +107,7 @@ class Interaction:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             updateBattleRecords(battleP2, battleP1)
         
-        battlingOff(player2 = ctx.message.author.id)
+        battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
@@ -132,7 +127,7 @@ class Interaction:
         
         await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
         updateBattleRecords(battleP1, battleP2)
-        battlingOff(player2 = ctx.message.author.id)
+        battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
