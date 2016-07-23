@@ -71,3 +71,6 @@ class Tags:
                     await self.bot.say('I have just removed the tag `{}`'.format(tag))
                 else:
                     await self.bot.say("I was unable to save this data")
+
+def setup(bot):
+    bot.add_cog(Tags(bot))

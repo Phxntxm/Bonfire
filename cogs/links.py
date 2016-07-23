@@ -84,3 +84,6 @@ class Links:
             else:
                 rand_image = data[random.randint(0, len(data)-1)]['file_url']
             await self.bot.say(rand_image)
+
+def setup(bot):
+    bot.add_cog(Links(bot))
