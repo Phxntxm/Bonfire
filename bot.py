@@ -63,7 +63,7 @@ async def on_command_error(error, ctx):
     else:
         fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
         await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
-        with open("/home/phxntx5/public_html/Bonfire/error_log", 'w') as f:
+        with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
             print('In {0.command.qualified_name}:'.format(ctx), file=f)
             traceback.print_tb(error.original.__traceback__, file=f)
             print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
