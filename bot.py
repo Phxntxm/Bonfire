@@ -12,7 +12,9 @@ extensions = ['cogs.interaction',
               'cogs.stats',
               'cogs.playlist',
               'cogs.twitch',
-              'cogs.overwatch']
+              'cogs.overwatch',
+              'cogs.links',
+              'cogs.tags']
 
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 
