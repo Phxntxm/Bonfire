@@ -74,7 +74,7 @@ class Core:
         os.chdir('/home/phxntx5/public_html/Bonfire/images')
         f = glob.glob('doggo*')[random.randint(0, len(glob.glob('doggo*')) - 1)]
         with open(f, 'rb') as f:
-            await self.bot.send_file(ctx.message.channel, f)
+            await self.bot.upload(f)
 
     @commands.command()
     @checks.customPermsOrRole("send_messages")
