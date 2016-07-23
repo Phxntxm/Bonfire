@@ -83,7 +83,7 @@ class Interaction:
         
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
         await self.bot.say(fmt.format(ctx.message.author, player2))
-        t = Timer(180, battlingOff, name='Thread-battle_off', {'player1':ctx.message.author.id})
+        t = Timer(180, battlingOff, 'Thread-battle_off', {'player1':ctx.message.author.id})
         t.start()
 
     @commands.command(pass_context=True, no_pm=True)
