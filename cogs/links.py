@@ -79,7 +79,7 @@ class Links:
             url += "%20rating:explicit"
         else:
             url += "%20rating:safe"
-        request = urllib.request.Request(url, headers={'User-Agent': 'Bonfire/1.0'})
+            
         with aihttp.ClientSession() as s:
                 async with s.get(url) as r:
                     response = await r.text()
