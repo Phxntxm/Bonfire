@@ -12,7 +12,7 @@ async def channelOnline(channel: str):
     url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
     with aiohttp.ClientSession() as s:
         async with s.get(url) as r:
-            response = r.text()
+            response = await r.text()
     data = json.loads(response)
     return data['stream'] is not None
 
@@ -54,15 +54,14 @@ class Twitch:
     async def twitch(self, ctx, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is not None:
-            twitch = config.getContent('twitch')
-            result = twitch.get(ctx.message.author.id)
+            result = config.getContent('twitch').get(ctx.message.author.id)
 
             if result is not None:
                 url = result['twitch_url']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
                 with aiohttp.ClientSession() as s:
                     async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user)) as r:
-                        response = r.text()
+                        response = await r.text()
                 data = json.loads(response)
                 
                 fmt = "Username: {}".format(data['display_name'])
