@@ -1,8 +1,7 @@
 from discord.ext import commands
 from .utils import config
 from .utils import checks
-import urllib.request
-import urllib.parse
+import aiohttp
 import asyncio
 import discord
 import json
@@ -11,8 +10,10 @@ import re
 
 def channelOnline(channel: str):
     url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
-    response = urllib.request.urlopen(url)
-    data = json.loads(response.read().decode('utf-8'))
+    with aiohttp.ClientSession() as s:
+        async with s.get(url) as r:
+            response = r.text()
+    data = json.loads(response)
     return data['stream'] is not None
 
 
@@ -59,8 +60,11 @@ class Twitch:
             if result is not None:
                 url = result['twitch_url']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-                result = urllib.request.urlopen("https://api.twitch.tv/kraken/channels/{}".format(user))
-                data = json.loads(result.read().decode('utf-8'))
+                with aiohttp.ClientSession() as s:
+                    async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user)) as r:
+                        response = r.text()
+                data = json.loads(response)
+                
                 fmt = "Username: {}".format(data['display_name'])
                 fmt += "\nStatus: {}".format(data['status'])
                 fmt += "\nFollowers: {}".format(data['followers'])
@@ -80,12 +84,12 @@ class Twitch:
         else:
             url = "https://www.{}".format(url)
 
-        try:
-            urllib.request.urlopen(url)
-        except urllib.request.HTTPError:
-            await self.bot.say("That twitch user does not exist! "
-                               "What would be the point of adding a nonexistant twitch user? Silly")
-            return
+        with aiohttp.ClientSession() as s:
+            async with s.get(url) as r:
+                if not r.status == 200: 
+                    await self.bot.say("That twitch user does not exist! "
+                                       "What would be the point of adding a nonexistant twitch user? Silly")
+                    return
 
         twitch = config.getContent('twitch')
         result = twitch.get(ctx.message.author.id)
