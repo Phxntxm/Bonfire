@@ -87,11 +87,11 @@ class Core:
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("send_messages")
-    async def roll(self, ctx, notation: str="d6"):
+    async def roll(self, ctx, notation: str="1d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         try:
-            dice = int(re.search("(\d*)d(\d*)", notation).group(1))
+            dice = re.search("(\d*)d(\d*)", notation).group(1)
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
         # This error will be hit if the notation is completely different than #d#
         except AttributeError:
@@ -103,7 +103,8 @@ class Core:
             await self.bot.say("Please provide the die notation in #d#!")
             return
         # Dice will be None if d# was provided, assume this means 1d#
-        dice = dice or '1'
+        dice = dice or 1
+        dice = int(dice)
         if dice > 10:
             await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
             return
@@ -113,7 +114,7 @@ class Core:
 
         valueStr = ", ".join(str(random.randint(1, num)) for i in range(0, int(dice)))
 
-        if int(dice) == 1:
+        if dice == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
         else:
             fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
