@@ -30,6 +30,10 @@ class VoiceState:
         self.songs = asyncio.Queue()
         self.skip_votes = set()  # a set of user_ids that voted
         self.audio_player = self.bot.loop.create_task(self.audio_player_task())
+        self.opts = {
+            'default_search': 'auto',
+            'quiet': True,
+        }
 
     def is_playing(self):
         if self.voice is None or self.current is None:
@@ -48,21 +52,16 @@ class VoiceState:
             self.player.stop()
 
     def toggle_next(self):
-        f = open('/home/phxntx5/public_html/Bonfire/playlist_test','a')
-        print('Toggle command was detected, clearing flag',file=f)
-        f.close()
         self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
 
     async def audio_player_task(self):
         while True:
-            f = open('/home/phxntx5/public_html/Bonfire/playlist_test','a')
-            self.play_next_song.clear()
-            print('Flag was cleared, starting next song',file=f)
+            self.play_next_song.clear()            
             self.current = await self.songs.get()
             await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
+            
+            self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts, after=self.toggle_next)
             self.current.player.start()
-            print('Now awaiting for the flag to be cleared',file=f)
-            f.close()
             await self.play_next_song.wait()
 
 
@@ -139,10 +138,6 @@ class Music:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
         state = self.get_voice_state(ctx.message.server)
-        opts = {
-            'default_search': 'auto',
-            'quiet': True,
-        }
 
         if state.voice is None:
             success = await ctx.invoke(self.summon)
