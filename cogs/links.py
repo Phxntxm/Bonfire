@@ -1,8 +1,7 @@
 from discord.ext import commands
 from .utils import config
 from .utils import checks
-import urllib.parse
-import urllib.request
+import aiohttp
 import json
 import random
 
@@ -19,8 +18,11 @@ class Links:
         """Pulls the top urbandictionary.com definition for a term"""
         try:
             url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
-            response = urllib.request.urlopen(url)
-            data = json.loads(response.read().decode('utf-8'))
+            with aihttp.ClientSession() as s:
+                async with s.get(url) as r:
+                    response = await r.text()
+            data = json.loads(response)
+            
             if len(data['list']) == 0:
                 await self.bot.say("No result with that term!")
             else:
@@ -41,8 +43,11 @@ class Links:
                 url += ",+explicit&filter_id=95938"
 
             # Get the response from derpibooru and parse the 'searc' result from it
-            response = urllib.request.urlopen(url)
-            data = json.loads(response.read().decode('utf-8'))
+            with aihttp.ClientSession() as s:
+                async with s.get(url) as r:
+                    response = await r.text()
+                    
+            data = json.loads(response)
             results = data['search']
 
             # Get the link if it exists, if not return saying no results found
@@ -75,16 +80,19 @@ class Links:
         else:
             url += "%20rating:safe"
         request = urllib.request.Request(url, headers={'User-Agent': 'Bonfire/1.0'})
-        with urllib.request.urlopen(request) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            if len(data) == 0:
-                await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
-                return
-            elif len(data) == 1:
-                rand_image = data[0]['file_url']
-            else:
-                rand_image = data[random.randint(0, len(data)-1)]['file_url']
-            await self.bot.say(rand_image)
+        with aihttp.ClientSession() as s:
+                async with s.get(url) as r:
+                    response = await r.text()
+                    
+        data = json.loads(response)
+        if len(data) == 0:
+            await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
+            return
+        elif len(data) == 1:
+            rand_image = data[0]['file_url']
+        else:
+            rand_image = data[random.randint(0, len(data)-1)]['file_url']
+        await self.bot.say(rand_image)
 
 def setup(bot):
     bot.add_cog(Links(bot))
