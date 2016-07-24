@@ -144,7 +144,7 @@ class Music:
             if not success:
                 return
 
-        player = await state.voice.create_ytdl_player(song, ytdl_options=opts, after=state.toggle_next)
+        player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)
         await self.bot.say('Enqueued ' + str(entry))
