@@ -8,7 +8,7 @@ import json
 import re
 
 
-def channelOnline(channel: str):
+async def channelOnline(channel: str):
     url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
     with aiohttp.ClientSession() as s:
         async with s.get(url) as r:
@@ -36,12 +36,12 @@ class Twitch:
                 live = r['live']
                 notify = r['notifications_on']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-                if not live and notify and channelOnline(user):
+                if not live and notify and await channelOnline(user):
                     twitch[m_id]['live'] = 1
                     await self.bot.send_message(server, "{} has just gone live! "
                                                         "View their stream at {}".format(member.name, url))
                     config.saveContent('twitch',twitch)
-                elif live and not channelOnline(user):
+                elif live and not await channelOnline(user):
                     twitch[m_id]['live'] = 0
                     await self.bot.send_message(server,
                                                 "{} has just gone offline! Catch them next time they stream at {}"
