@@ -52,7 +52,7 @@ class Overwatch:
             await self.bot.say(
                 "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
-            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', '')
+            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
             with aiohttp.ClientSession() as s:
                 async with s.get(url) as r:
                     if r.status == 500
