@@ -16,13 +16,13 @@ class Links:
     @checks.customPermsOrRole("send_messages")
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
-        try:
             url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
             with aiohttp.ClientSession() as s:
                 async with s.get(url) as r:
                     response = await r.text()
             data = json.loads(response)
             
+        try:
             if len(data['list']) == 0:
                 await self.bot.say("No result with that term!")
             else:

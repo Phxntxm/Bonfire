@@ -3,9 +3,7 @@ from .utils import checks
 from discord.ext import commands
 import discord
 
-import urllib.parse
-import urllib.request
-import urllib.error
+import aiohttp
 import json
 import re
 
@@ -41,29 +39,38 @@ class Overwatch:
             return
         await self.bot.say("Searching profile information....")
 
-        try:
-            if hero == "":
-                result = urllib.request.urlopen(base_url + "{}/stats/general".format(bt))
-                data = json.loads(result.read().decode('utf-8'))
-                fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
-                fmt += "\n"
-                fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
-                await self.bot.say(
-                    "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
-            else:
-                result = urllib.request.urlopen(base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', '')))
-                data = json.loads(result.read().decode('utf-8'))
-                fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
-                fmt += "\n"
-                fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
-                await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
-                                   .format(user.name, hero.title(), fmt.title().replace("_", " ")))
-        except urllib.error.HTTPError as error:
-            error_no = int(re.search("\d+", str(error)).group(0))
-            if error_no == 500:
-                await self.bot.say("{} has not used the hero {} before!".format(user.name, hero.title()))
-            elif error_no == 404:
-                await self.bot.say("{} is not an actual hero!".format(hero.title()))
+        
+        if hero == "":
+            await aiohttp.ClientSession() as s:
+                async with s.get(base_url + "{}/stats/general".format(bt)) as r:
+                    result = await r.text()
+            
+            data = json.loads(result)
+            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
+            fmt += "\n"
+            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
+            await self.bot.say(
+                "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
+        else:
+            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', '')
+            await aiohttp.ClientSession() as s:
+                async with s.get(url) as r:
+                    if r.status == 500
+                        fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
+                        await self.bot.say(fmt)
+                        return
+                    elif r.status = 404
+                        fmt = "{} is not an actual hero!".format(hero.title())
+                        await self.bot.say(fmt)
+                        return
+                    result = await r.text() 
+            data = json.loads(result)
+            
+            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
+            fmt += "\n"
+            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
+            await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
+                               .format(user.name, hero.title(), fmt.title().replace("_", " ")))
 
     @ow.command(pass_context=True, name="add", no_pm=True)
     @checks.customPermsOrRole("none")
@@ -72,12 +79,14 @@ class Overwatch:
         bt = bt.replace("#", "-")
         await self.bot.say("Looking up your profile information....")
         url = base_url + "{}/stats/general".format(bt)
-        try:
-            urllib.request.urlopen(url)
-        except urllib.error.HTTPError:
-            await self.bot.say("Profile does not exist! Battletags are picky, "
-                               "format needs to be `user#xxxx`. Capitalization matters")
-            return
+        
+        await aiohttp.ClientSession() as s:
+            async with s.get(url) as r:
+                if not r.status == 200:
+                    await self.bot.say("Profile does not exist! Battletags are picky, "
+                                       "format needs to be `user#xxxx`. Capitalization matters")
+                    return
+        
         ow = config.getContent('overwatch')
         ow[ctx.message.author.id] = bt
         if config.saveContent('overwatch', ow):
