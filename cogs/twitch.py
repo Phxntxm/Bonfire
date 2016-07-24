@@ -8,7 +8,7 @@ import json
 import re
 
 
-async def channelOnline(channel: str):
+async def channel_online(channel: str):
     url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
     with aiohttp.ClientSession() as s:
         async with s.get(url) as r:
@@ -30,22 +30,23 @@ class Twitch:
         while not self.bot.is_closed:
             twitch = config.getContent('twitch')
             for m_id, r in twitch.items():
-                server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
-                member = discord.utils.find(lambda m: m.id == m_id, server.members)
                 url = r['twitch_url']
                 live = r['live']
                 notify = r['notifications_on']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-                if not live and notify and await channelOnline(user):
+                if not live and notify and await channel_online(user):
+                    server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
+                    member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 1
-                    await self.bot.send_message(server, "{} has just gone live! "
-                                                        "View their stream at {}".format(member.name, url))
+                    fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
+                    await self.bot.send_message(server, fmt)
                     config.saveContent('twitch',twitch)
-                elif live and not await channelOnline(user):
+                elif live and not await channel_online(user):
+                    server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
+                    member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 0
-                    await self.bot.send_message(server,
-                                                "{} has just gone offline! Catch them next time they stream at {}"
-                                                .format(member.name, url))
+                    fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.name, url)
+                    await self.bot.send_message(server,fmt)
                     config.saveContent('twitch',twitch)
             await asyncio.sleep(30)
 
@@ -53,24 +54,26 @@ class Twitch:
     @checks.customPermsOrRole("none")
     async def twitch(self, ctx, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
-        if member is not None:
-            result = config.getContent('twitch').get(ctx.message.author.id)
-
-            if result is not None:
-                url = result['twitch_url']
-                user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-                with aiohttp.ClientSession() as s:
-                    async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user)) as r:
-                        response = await r.text()
-                data = json.loads(response)
-                
-                fmt = "Username: {}".format(data['display_name'])
-                fmt += "\nStatus: {}".format(data['status'])
-                fmt += "\nFollowers: {}".format(data['followers'])
-                fmt += "\nURL: {}".format(url)
-                await self.bot.say("```{}```".format(fmt))
-            else:
-                await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
+        if member is None:
+            member = ctx.message.author
+            
+        result = config.getContent('twitch').get(ctx.message.author.id)
+        if result is None:
+            await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
+            return
+        
+        url = result['twitch_url']
+        user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
+        with aiohttp.ClientSession() as s:
+            async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user)) as r:
+                response = await r.text()
+        data = json.loads(response)
+        
+        fmt = "Username: {}".format(data['display_name'])
+        fmt += "\nStatus: {}".format(data['status'])
+        fmt += "\nFollowers: {}".format(data['followers'])
+        fmt += "\nURL: {}".format(url)
+        await self.bot.say("```{}```".format(fmt))
 
     @twitch.command(name='add', pass_context=True, no_pm=True)
     @checks.customPermsOrRole("none")
