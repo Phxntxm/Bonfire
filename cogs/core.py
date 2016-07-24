@@ -87,7 +87,7 @@ class Core:
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("send_messages")
-    async def roll(self, ctx, notation: str="1d6"):
+    async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         try:
