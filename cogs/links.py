@@ -18,7 +18,7 @@ class Links:
         """Pulls the top urbandictionary.com definition for a term"""
         try:
             url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
-            with aihttp.ClientSession() as s:
+            with aiohttp.ClientSession() as s:
                 async with s.get(url) as r:
                     response = await r.text()
             data = json.loads(response)
@@ -43,7 +43,7 @@ class Links:
                 url += ",+explicit&filter_id=95938"
 
             # Get the response from derpibooru and parse the 'searc' result from it
-            with aihttp.ClientSession() as s:
+            with aiohttp.ClientSession() as s:
                 async with s.get(url) as r:
                     response = await r.text()
                     
@@ -80,7 +80,7 @@ class Links:
         else:
             url += "%20rating:safe"
             
-        with aihttp.ClientSession() as s:
+        with aiohttp.ClientSession() as s:
                 async with s.get(url) as r:
                     response = await r.text()
                     
