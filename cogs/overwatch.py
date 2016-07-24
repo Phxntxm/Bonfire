@@ -55,11 +55,11 @@ class Overwatch:
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
             with aiohttp.ClientSession() as s:
                 async with s.get(url) as r:
-                    if r.status == 500
+                    if r.status == 500:
                         fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
                         await self.bot.say(fmt)
                         return
-                    elif r.status = 404
+                    elif r.status = 404:
                         fmt = "{} is not an actual hero!".format(hero.title())
                         await self.bot.say(fmt)
                         return
