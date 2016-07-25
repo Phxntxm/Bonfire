@@ -77,7 +77,7 @@ class Stats:
         member = member or ctx.message.author
         
         all_members = config.getContent('battle_records')
-        if not member in all_members:
+        if not member.id in all_members:
             await self.bot.say("That user has not battled yet!")
             return
              
