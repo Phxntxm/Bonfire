@@ -91,6 +91,7 @@ class Stats:
         rating = server_members[ctx.message.author.id]['rating']
         record = "{}-{}".format(server_members[member.id]['wins'],server_members[member.id]['losses'])
         fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}\n\tOverall Rank: {}\n\tRating: {}'.format(member.display_name,record,server_rank,total_rank,rating)
+        await self.bot.say('```{}```'.format(fmt))
 
 def setup(bot):
     bot.add_cog(Stats(bot))
