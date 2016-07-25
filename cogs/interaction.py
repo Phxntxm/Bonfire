@@ -32,10 +32,10 @@ def updateBattleRecords(winner, loser):
         battles = {winner.id: "1-0", loser.id: "0-1"}
     
     winner_stats = battles.get(winner.id) or {}
-    winner_rating = stats.get('rating') or 1000
+    winner_rating = winner_stats.get('rating') or 1000
     
     loser_stats = battles.get(loser.id) or {}
-    loser_rating = stats.get('rating') or 1000
+    loser_rating = loser_stats.get('rating') or 1000
         
     difference = abs(winner_rating - loser_rating)
     rating_change = 0
