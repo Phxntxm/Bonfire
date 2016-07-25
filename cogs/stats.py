@@ -88,7 +88,7 @@ class Stats:
         
         server_rank = [i for i,x in enumerate(sorted_server_members) if x[0] == member.id][0] + 1
         total_rank = [i for i,x in enumerate(sorted_all_members) if x[0] == member.id][0] + 1
-        rating = server_members[ctx.message.author.id]['rating']
+        rating = server_members[member.id]['rating']
         record = "{}-{}".format(server_members[member.id]['wins'],server_members[member.id]['losses'])
         fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
         fmt = fmt.format(member.display_name,record,server_rank,len(server_members),total_rank,len(all_members),rating)
