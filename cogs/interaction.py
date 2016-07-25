@@ -53,10 +53,12 @@ def updateBattleRecords(winner, loser):
         winner_rating += 16 + rating_change
         loser_rating -= 16 + rating_change
     
-    winner_wins = winner_stats.get('wins') + 1 or 1
+    winner_wins = winner_stats.get('wins') or 0
     winner_losses = winner_stats.get('losses') or 0
     loser_wins = loser_stats.get('wins') or 0
-    loser_losses = loser_stats.get('losses') + 1 or 1
+    loser_losses = loser_stats.get('losses') or 0
+    winner_wins += 1
+    loser_losses += 1
     
     winner_stats = {'wins':winner_wins,'losses':winner_losses,'rating':winner_rating}
     loser_stats = {'wins':loser_wins,'losses':loser_losses,'rating':loser_rating}
