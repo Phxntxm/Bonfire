@@ -1,7 +1,7 @@
 from discord.ext import commands
-from discord.utils import find
 from .utils import config
 from .utils import checks
+import discord
 import re
 import operator
 
@@ -24,12 +24,12 @@ class Stats:
 
         most_boops = 0
         for b_id, amt in boops.get(ctx.message.author.id).items():
-            member = find(lambda m: m.id == b_id, self.bot.get_all_members())
+            member = discord.utils.find(lambda m: m.id == b_id, self.bot.get_all_members())
             if member in members and amt > most_boops:
                 most_boops = amt
                 most_id = b_id
 
-        member = find(lambda m: m.id == most_id, self.bot.get_all_members())
+        member = discord.utils.find(lambda m: m.id == most_id, self.bot.get_all_members())
         await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
             ctx.message.author.mention, member.mention, most_boops))
 
@@ -44,7 +44,7 @@ class Stats:
             return
         output = "You have booped:"
         for b_id, amt in boops.get(ctx.message.author.id).items():
-            member = find(lambda m: m.id == b_id, self.bot.get_all_members())
+            member = discord.utils.find(lambda m: m.id == b_id, self.bot.get_all_members())
             if member in members:
                 output += "\n{0.name}: {1} times".format(member, amt)
         await self.bot.say("```{}```".format(output))
