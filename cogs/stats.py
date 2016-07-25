@@ -3,6 +3,7 @@ from discord.utils import find
 from .utils import config
 from .utils import checks
 import re
+import operator
 
 
 class Stats:
@@ -50,42 +51,20 @@ class Stats:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
-    async def mostwins(self, ctx):
-        """Prints a 'leaderboard' of everyone in the server's battling record"""
-        members = ctx.message.server.members
+    async def leaderboard(self, ctx):
+        """Prints a leaderboard of everyone in the server's battling record"""
         battles = config.getContent('battle_records')
-        count = 0
-        fmt = []
-        if battles is not None:
-            for m_id, record in battles.items():
-                member = find(lambda m: m.id == m_id, self.bot.get_all_members())
-                if member in members:
-                    winAmt = record['wins']
-                    loseAmt = record['losses']
-                    percentage = winAmt / (winAmt + loseAmt)
-
-                    position = count
-
-                    indexPercentage = 0
-                    if count > 0:
-                        indexRecord = re.search('\d+-\d+', fmt[position - 1]).group(0)
-                        indexWin = int(indexRecord.split('-')[0])
-                        indexLose = int(indexRecord.split('-')[1])
-                        indexPercentage = indexWin / (indexWin + indexLose)
-                    while position > 0 and indexPercentage < percentage:
-                        position -= 1
-                        indexRecord = re.search('\d+-\d+', fmt[position - 1]).group(0)
-                        indexWin = int(indexRecord.split('-')[0])
-                        indexLose = int(indexRecord.split('-')[1])
-                        indexPercentage = indexWin / (indexWin + indexLose)
-                    fmt.insert(position, "{0} has a battling record of {1}-{2}".format(member.name, winAmt, loseAmt))
-                    count += 1
-            for index in range(0, len(fmt)):
-                fmt[index] = "{0}) {1}".format(index + 1, fmt[index])
-        if len(fmt) == 0:
-            await self.bot.say("```No battling records found from any members in this server```")
-            return
-        await self.bot.say("```{}```".format("\n".join(fmt)))
+        
+        server_member_ids = [member.id for member in ctx.message.server.members]
+        server_members = {member_id:stats for member_id,stats in battles.items() if member_id in server_member_ids}
+        sorted_members = sorted(server_members.items(), key=operator.itemgetter(1).get('rating'))
+        fmt = ""
+        count = 1
+        for member_id,stats in sorted_members:
+            member = discord.utils.get(ctx.message.server.members,id=member_id)
+            fmt += "#{}) {} - {}".format(count,member.display_name,stats.get('rating')) 
+            count += 1
+        await self.bot.say("```{}```".format(fmt))
 
 
 def setup(bot):
