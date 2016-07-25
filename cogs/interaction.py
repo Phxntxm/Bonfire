@@ -61,7 +61,7 @@ def updateBattleRecords(winner, loser):
     winner_stats = {'wins':winner_wins,'losses':winner_losses,'rating':winner_rating}
     loser_stats = {'wins':loser_wins,'losses':loser_losses,'rating':loser_rating}
     battles[winner.id] = winner_stats
-    battles[loser.id] = loser.stats
+    battles[loser.id] = loser_stats
     
     return config.saveContent('battle_records', battles)
 
