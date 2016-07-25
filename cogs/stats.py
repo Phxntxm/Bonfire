@@ -12,7 +12,7 @@ class Stats:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
         boops = config.getContent('boops')
@@ -33,7 +33,7 @@ class Stats:
             ctx.message.author.mention, member.mention, most_boops))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times"""
         members = ctx.message.server.members
@@ -49,7 +49,7 @@ class Stats:
         await self.bot.say("```{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def mostwins(self, ctx):
         """Prints a 'leaderboard' of everyone in the server's battling record"""
         members = ctx.message.server.members

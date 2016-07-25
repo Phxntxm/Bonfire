@@ -24,7 +24,7 @@ class Overwatch:
         pass
 
     @ow.command(name="stats", pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def ow_stats(self, ctx, user: discord.Member=None, hero: str=""):
         """Command used to lookup information on your own user, or on another's
         When adding your battletag, it is quite picky, use the exact format user#xxxx
@@ -73,7 +73,7 @@ class Overwatch:
                                .format(user.name, hero.title(), fmt.title().replace("_", " ")))
 
     @ow.command(pass_context=True, name="add", no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def add(self, ctx, bt: str):
         """Saves your battletag for looking up information"""
         bt = bt.replace("#", "-")
@@ -95,7 +95,7 @@ class Overwatch:
             await self.bot.say("I was unable to save this data")
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def delete(self, ctx):
         """Removes your battletag from the records"""
         result = config.getContent('overwatch')

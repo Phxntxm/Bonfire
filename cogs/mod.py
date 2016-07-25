@@ -63,7 +63,7 @@ class Mod:
         await self.bot.delete_message(ctx.message)
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def perms(self, ctx, *command: str):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
