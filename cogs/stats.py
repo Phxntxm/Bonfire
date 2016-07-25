@@ -65,7 +65,7 @@ class Stats:
             member_id = x[0]
             stats = x[1]
             member = discord.utils.get(ctx.message.server.members,id=member_id)
-            fmt += "#{}) {} - {}".format(count,member.display_name,stats.get('rating')) 
+            fmt += "#{}) {} (Rating: {})\n".format(count,member.display_name,stats.get('rating')) 
             count += 1
         await self.bot.say("```{}```".format(fmt))
 
