@@ -57,7 +57,7 @@ class Stats:
         
         server_member_ids = [member.id for member in ctx.message.server.members]
         server_members = {member_id:stats for member_id,stats in battles.items() if member_id in server_member_ids}
-        sorted_members = sorted(battles.values(), key = lambda x: x['rating'],reverse=True)
+        sorted_members = sorted(battles.items(), key = lambda x: x[1]['rating'],reverse=True)
         
         fmt = ""
         count = 1
