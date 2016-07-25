@@ -61,7 +61,9 @@ class Stats:
         
         fmt = ""
         count = 1
-        for member_id,stats in sorted_members.items():
+        for x in sorted_members:
+            member_id = x[0]
+            stats = x[1]
             member = discord.utils.get(ctx.message.server.members,id=member_id)
             fmt += "#{}) {} - {}".format(count,member.display_name,stats.get('rating')) 
             count += 1
