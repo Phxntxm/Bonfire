@@ -28,21 +28,41 @@ def userBattling(ctx):
 
 def updateBattleRecords(winner, loser):
     battles = config.getContent('battle_records')
-    if battles is not None:
-        record = battles.get(winner.id)
-        if record is not None:
-            record['wins'] = record['wins'] + 1
-        else:
-            record = {'wins':1,'losses':0}
-        battles[winner.id] = record
-        record = battles.get(loser.id)
-        if record is not None:
-            record['losses'] = record['losses'] + 1
-        else:
-            record = {'wins':0,'losses':1}
-        battles[loser.id] = record
-    else:
+    if battles is None:
         battles = {winner.id: "1-0", loser.id: "0-1"}
+    
+    winner_stats = battles.get(winner.id) or {}
+    winner_rating = stats.get('rating') or 1000
+    
+    loser_stats = battles.get(loser.id) or {}
+    loser_rating = stats.get('rating') or 1000
+        
+    difference = abs(winner_rating - loser_rating)
+    rating_change = 0
+    count = 25
+    while count <= difference:
+        if count > 300:
+            break
+        rating_change += 1
+        count += 25
+    
+    if winner_rating > loser_rating:
+        winner_rating += 16 - rating_change
+        loser_rating -= 16 - rating_change
+    else:
+        winner_rating += 16 + rating_change
+        loser_rating -= 16 + rating_change
+    
+    winner_wins = winner_stats.get('wins') + 1 or 1
+    winner_losses = winner_stats.get('losses') or 0
+    loser_wins = loser_stats.get('wins') or 0
+    loser_losses = loser_stats.get('losses') + 1 or 1
+    
+    winner_stats = {'wins':winner_wins,'losses':winner_losses,'rating':winner_rating}
+    loser_stats = {'wins':loser_wins,'losses':loser_losses,'rating':loser_rating}
+    battles[winner.id] = winner_stats
+    battles[loser.id] = loser.stats
+    
     return config.saveContent('battle_records', battles)
 
 
@@ -53,7 +73,7 @@ class Interaction:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         if len(ctx.message.mentions) == 0:
@@ -81,7 +101,7 @@ class Interaction:
         config.loop.call_later(180,battlingOff,ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def accept(self, ctx):
         """Accepts the battle challenge"""
         if not userBattling(ctx):
@@ -109,7 +129,7 @@ class Interaction:
         battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def decline(self, ctx):
         """Declines the battle challenge"""
         if not userBattling(ctx):
@@ -130,7 +150,7 @@ class Interaction:
 
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1,180,BucketType.user)
-    @checks.customPermsOrRole("none")
+    @checks.customPermsOrRole("send_messages")
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""
         booper = ctx.message.author
