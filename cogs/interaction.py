@@ -102,16 +102,6 @@ class Interaction:
         await self.bot.say(fmt.format(ctx.message.author, player2))
         config.loop.call_later(180,battlingOff,ctx.message.author.id)
 
-    @battle.command(name="stats",pass_context=True)
-    @checks.customPermsOrRole("send_messages")
-    asynf def battle_stats(self, ctx, member: discord.Member=None)
-        """Prints the stats for you, or the user provided"""
-        member = member or ctx.message.author
-        
-        all_members = config.getContent('battle_records')
-        server_member_ids = [member.id for member in ctx.message.server.members]
-        server_members = {member_id:stats for member_id,stats in all_members.items() if member_id in server_member_ids}
-        sorted_members = sorted(all_members.items(), key = lambda x: x[1]['rating'],reverse=True)
         
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
