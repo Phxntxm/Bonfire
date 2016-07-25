@@ -72,7 +72,7 @@ class Stats:
     
     @commands.command(pass_context=True)
     @checks.customPermsOrRole("send_messages")
-    asynf def stats(self, ctx, member: discord.Member=None)
+    asynf def stats(self, ctx, member: discord.Member=None):
         """Prints the battling stats for you, or the user provided"""
         member = member or ctx.message.author
         
