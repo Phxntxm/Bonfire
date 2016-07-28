@@ -57,8 +57,9 @@ class Links:
                 return
         else:
             # If no search term was provided, search for a random image
-            with urllib.request.urlopen('https://derpibooru.org/images/random') as response:
-                imageLink = response.geturl()
+            with aiohttp.ClientSession() as s:
+                async with s.get('https://derpibooru.org/images/random') as r:
+                    imageLink = r.url
         await self.bot.say(imageLink)
     
     

@@ -1,7 +1,6 @@
 from discord.ext import commands
 from .utils import config
 from .utils import checks
-import urllib.request
 import re
 import os
 import glob
