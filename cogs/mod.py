@@ -28,7 +28,7 @@ class Mod:
             await self.bot.say("This channel is already registered as 'nsfw'!")
         else:
             nsfw_channels.append(ctx.message.channel.id)
-            config.saveContent('nsfw_channels', nsfw_channels):
+            config.saveContent('nsfw_channels', nsfw_channels)
             await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
@@ -40,7 +40,7 @@ class Mod:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
         else:
             nsfw_channels.remove(ctx.message.channel.id)
-            config.saveContent('nsfw_channels', nsfw_channels):
+            config.saveContent('nsfw_channels', nsfw_channels)
             await self.bot.say("This channel has just been unregistered as a nsfw channel")
 
     @commands.command(pass_context=True, no_pm=True)
