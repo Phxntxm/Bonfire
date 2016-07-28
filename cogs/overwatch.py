@@ -21,15 +21,17 @@ class Overwatch:
 
     @commands.group(no_pm=True)
     async def ow(self):
+        """Command used to lookup information on your own user, or on another's
+        When adding your battletag, it is quite picky, use the exact format user#xxxx
+        Multiple names with the same username can be used, this is why the numbers are needed
+        Capitalization also matters"""
         pass
 
     @ow.command(name="stats", pass_context=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
     async def ow_stats(self, ctx, user: discord.Member=None, hero: str=""):
-        """Command used to lookup information on your own user, or on another's
-        When adding your battletag, it is quite picky, use the exact format user#xxxx
-        Multiple names with the same username can be used, this is why the numbers are needed
-        Capitalization also matters"""
+        """Prints out a basic overview of a member's stats
+        Provide a hero after the member to get stats for that specific hero"""
         if user is None:
             user = ctx.message.author
         bt = config.getContent('overwatch').get(ctx.message.author.id)
