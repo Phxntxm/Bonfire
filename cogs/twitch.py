@@ -56,8 +56,9 @@ class Twitch:
         """Use this command to check the twitch info of a user"""
         if member is None:
             member = ctx.message.author
-            
-        result = config.getContent('twitch').get(ctx.message.author.id)
+        
+        twitch_channels = config.getContent('twitch') or {}
+        result = twitch_channels.get(ctx.message.author.id)
         if result is None:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
             return
@@ -93,7 +94,7 @@ class Twitch:
                                        "What would be the point of adding a nonexistant twitch user? Silly")
                     return
 
-        twitch = config.getContent('twitch')
+        twitch = config.getContent('twitch') or {}
         result = twitch.get(ctx.message.author.id)
 
         if result is not None:
@@ -101,10 +102,8 @@ class Twitch:
         else:
             twitch[ctx.message.author.id] = {'twitch_url': url, 'server_id': ctx.message.server.id,
                                              'notifications_on': 1, 'live': 0}
-        if config.saveContent('twitch', twitch):
-            await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
-        else:
-            await self.bot.say("I was unable to save this data")
+        config.saveContent('twitch', twitch):
+        await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
@@ -113,10 +112,8 @@ class Twitch:
         twitch = config.getContent('twitch')
         if twitch.get(ctx.message.author.id) is not None:
             del twitch[ctx.message.author.id]
-            if config.saveContent('twitch', twitch):
-                await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
-            else:
-                await self.bot.say("I was unable to save this data")
+            config.saveContent('twitch', twitch):
+            await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
         else:
             await self.bot.say(
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
@@ -144,10 +141,8 @@ class Twitch:
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 1
             if config.saveContent('twitch', twitch):
-                await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
+            await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                     ctx.message.author.mention))
-            else:
-                await self.bot.say("I was unable to save this data")
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
