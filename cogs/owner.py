@@ -23,7 +23,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def restart(self, ctx):
         """Forces the bot to restart"""
-        config.saveContent('restart_server', ctx.message.channel.id):
+        config.saveContent('restart_server', ctx.message.channel.id)
         await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)

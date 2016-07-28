@@ -19,7 +19,7 @@ class Core:
     @commands.command()
     async def test(self):
         await self.bot.say((await self.bot.application_info()).id)
-        
+
     @commands.command()
     @checks.customPermsOrRole("send_messages")
     async def calendar(self, month: str=None, year: int=None):
