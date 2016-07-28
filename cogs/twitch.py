@@ -102,7 +102,7 @@ class Twitch:
         else:
             twitch[ctx.message.author.id] = {'twitch_url': url, 'server_id': ctx.message.server.id,
                                              'notifications_on': 1, 'live': 0}
-        config.saveContent('twitch', twitch):
+        config.saveContent('twitch', twitch)
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
@@ -112,7 +112,7 @@ class Twitch:
         twitch = config.getContent('twitch')
         if twitch.get(ctx.message.author.id) is not None:
             del twitch[ctx.message.author.id]
-            config.saveContent('twitch', twitch):
+            config.saveContent('twitch', twitch)
             await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
         else:
             await self.bot.say(
@@ -140,7 +140,7 @@ class Twitch:
                 ctx.message.author.mention))
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 1
-            if config.saveContent('twitch', twitch):
+            config.saveContent('twitch', twitch)
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                     ctx.message.author.mention))
 

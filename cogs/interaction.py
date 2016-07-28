@@ -187,7 +187,7 @@ class Interaction:
             booper_boops[boopee.id] = amount
             boops[ctx.message.author.id] = booper_boops
 
-        config.saveContent('boops', boops):
+        config.saveContent('boops', boops)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
         await self.bot.delete_message(ctx.message)

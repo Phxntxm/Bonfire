@@ -29,7 +29,7 @@ class Overwatch:
 
     @ow.command(name="stats", pass_context=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
-    async def ow_stats(self, ctx, user: discord.Member=None, hero: str=""):
+    async def ow_stats(self, ctx, user: discord.Member = None, hero: str = ""):
         """Prints out a basic overview of a member's stats
         Provide a hero after the member to get stats for that specific hero"""
         if user is None:
@@ -41,12 +41,11 @@ class Overwatch:
             return
         await self.bot.say("Searching profile information....")
 
-        
         if hero == "":
             with aiohttp.ClientSession() as s:
                 async with s.get(base_url + "{}/stats/general".format(bt)) as r:
                     result = await r.text()
-            
+
             data = json.loads(result)
             fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
             fmt += "\n"
@@ -65,9 +64,9 @@ class Overwatch:
                         fmt = "{} is not an actual hero!".format(hero.title())
                         await self.bot.say(fmt)
                         return
-                    result = await r.text() 
+                    result = await r.text()
             data = json.loads(result)
-            
+
             fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
             fmt += "\n"
             fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
@@ -81,14 +80,14 @@ class Overwatch:
         bt = bt.replace("#", "-")
         await self.bot.say("Looking up your profile information....")
         url = base_url + "{}/stats/general".format(bt)
-        
+
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 if not r.status == 200:
                     await self.bot.say("Profile does not exist! Battletags are picky, "
                                        "format needs to be `user#xxxx`. Capitalization matters")
                     return
-        
+
         ow = config.getContent('overwatch')
         ow[ctx.message.author.id] = bt
         if config.saveContent('overwatch', ow):
