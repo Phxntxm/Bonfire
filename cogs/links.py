@@ -37,12 +37,10 @@ class Links:
         if len(search) > 0:
             # This sets the url as url?q=search+terms
             url = 'https://derpibooru.org/search.json?q={}'.format('+'.join(search))
-
-            nsfw_channels = config.getContent("nsfw_channels")
-            if ctx.message.channel.id in nsfw_channels:
+            if ctx.message.channel.id in config.getContent("nsfw_channels"):
                 url += ",+explicit&filter_id=95938"
 
-            # Get the response from derpibooru and parse the 'searc' result from it
+            # Get the response from derpibooru and parse the 'search' result from it
             with aiohttp.ClientSession() as s:
                 async with s.get(url) as r:
                     response = await r.text()
@@ -88,10 +86,11 @@ class Links:
         if len(data) == 0:
             await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
             return
-        elif len(data) == 1:
-            rand_image = data[0]['file_url']
         else:
-            rand_image = data[random.randint(0, len(data)-1)]['file_url']
+            if len(data) == 1:
+                rand_image = data[0]['file_url']
+            else:
+                rand_image = data[random.randint(0, len(data)-1)]['file_url']
         await self.bot.say(rand_image)
 
 def setup(bot):
