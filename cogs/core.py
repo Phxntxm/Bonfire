@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from .utils import config
 from .utils import checks
 
 import subprocess
@@ -17,7 +16,10 @@ class Core:
 
     def __init__(self, bot):
         self.bot = bot
-
+    @commands.command()
+    async def test(self):
+        await self.bot.say((await self.bot.application_info()).id)
+        
     @commands.command()
     @checks.customPermsOrRole("send_messages")
     async def calendar(self, month: str=None, year: int=None):
