@@ -72,6 +72,7 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
+        self.max_songs = 10
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
@@ -143,7 +144,11 @@ class Music:
             success = await ctx.invoke(self.summon)
             if not success:
                 return
-
+                
+        if len(state.songs) >= self.max_songs:
+            await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
+            return
+            
         player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)

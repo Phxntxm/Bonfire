@@ -28,10 +28,8 @@ class Mod:
             await self.bot.say("This channel is already registered as 'nsfw'!")
         else:
             nsfw_channels.append(ctx.message.channel.id)
-            if config.saveContent('nsfw_channels', nsfw_channels):
-                await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
-            else:
-                await self.bot.say("I was unable to save this data")
+            config.saveContent('nsfw_channels', nsfw_channels):
+            await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
@@ -42,10 +40,8 @@ class Mod:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
         else:
             nsfw_channels.remove(ctx.message.channel.id)
-            if config.saveContent('nsfw_channels', nsfw_channels):
-                await self.bot.say("This channel has just been unregistered as a nsfw channel")
-            else:
-                await self.bot.say("I was unable to save this data")
+            config.saveContent('nsfw_channels', nsfw_channels):
+            await self.bot.say("This channel has just been unregistered as a nsfw channel")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("manage_server")
@@ -56,15 +52,14 @@ class Mod:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("kick_members")
-    async def say(self, ctx, *msg: str):
+    async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say"""
-        msg = ' '.join(msg)
         await self.bot.say(msg)
         await self.bot.delete_message(ctx.message)
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
-    async def perms(self, ctx, *command: str):
+    async def perms(self, ctx, *, command: str):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
         if command is None or len(command) == 0:
@@ -72,14 +67,12 @@ class Mod:
             return
         command = " ".join(command)
 
-        custom_perms = config.getContent('custom_permissions')
-        if custom_perms is None:
-            await self.bot.say("There are no custom permissions setup on this server yet!")
-            return
+        custom_perms = config.getContent('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id)
         if server_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return
+            
         command_perms = server_perms.get(command)
         if command_perms is None:
             await self.bot.say("That command has no custom permissions setup on it!")

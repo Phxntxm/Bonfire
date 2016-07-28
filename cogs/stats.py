@@ -22,13 +22,12 @@ class Stats:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
 
-        most_boops = 0
-        for b_id, amt in boops.get(ctx.message.author.id).items():
-            member = discord.utils.find(lambda m: m.id == b_id, self.bot.get_all_members())
-            if member in members and amt > most_boops:
-                most_boops = amt
-                most_id = b_id
+        server_member_ids = [member.id for member in ctx.message.server.members]
+        sorted_boops = sorted(boops.get(ctx.message.author.id).items(), key=lambda x: x[1], reverse=True)
+        sorted_boops = [x for x in sorted_boops if x[0] in server_member_ids]
 
+        most_boops = sorted_boops[0][1]
+        most_id = sorted_boops[0][0]
         member = discord.utils.find(lambda m: m.id == most_id, self.bot.get_all_members())
         await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
             ctx.message.author.mention, member.mention, most_boops))
@@ -38,16 +37,17 @@ class Stats:
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times"""
         members = ctx.message.server.members
-        boops = config.getContent('boops')
-        if boops is None or boops.get(ctx.message.author.id) is None:
+        boops = config.getContent('boops') or {}
+        booped_members = boops.get(ctx.message.author.id)
+        if booped_members is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
-        output = "You have booped:"
-        for b_id, amt in boops.get(ctx.message.author.id).items():
-            member = discord.utils.find(lambda m: m.id == b_id, self.bot.get_all_members())
-            if member in members:
-                output += "\n{0.name}: {1} times".format(member, amt)
-        await self.bot.say("```{}```".format(output))
+            
+        server_member_ids = [member.id for member in ctx.message.server.members]
+        booped_members = {m_id:amt for m_id,amt in booped_members.items() if m_id in server_member_ids]
+        
+        output = "\n".join("{0.display_name}: {1} times".format(discord.utils.get(self.bot.get_all_members(),id=m_id),amt) for m_id,amt in booped_members)
+        await self.bot.say("You have booped:```{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole("send_messages")
@@ -67,7 +67,7 @@ class Stats:
             member = discord.utils.get(ctx.message.server.members,id=member_id)
             fmt += "#{}) {} (Rating: {})\n".format(count,member.display_name,stats.get('rating')) 
             count += 1
-        await self.bot.say("```{}```".format(fmt))
+        await self.bot.say("You have booped:```{}```".format(fmt))
         
     
     @commands.command(pass_context=True)
