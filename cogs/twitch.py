@@ -34,14 +34,15 @@ class Twitch:
                 live = r['live']
                 notify = r['notifications_on']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-                if not live and notify and await channel_online(user):
+                online = await channel_online(user)
+                if not live and notify and online:
                     server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 1
                     fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
                     await self.bot.send_message(server, fmt)
                     config.saveContent('twitch',twitch)
-                elif live and not await channel_online(user):
+                elif live and not online:
                     server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 0
