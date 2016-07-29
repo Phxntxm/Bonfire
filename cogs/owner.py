@@ -56,7 +56,7 @@ class Owner:
             await self.bot.say("```{0}```".format(result))
         elif match_single:
             def r(v):
-                config.loop.create_task(self.bot.say("```{0}```".format(v)))
+                self.bot.loop.create_task(self.bot.say("```{}```".format(v)))
             exec(match_multi[0])
 
     @commands.command(pass_context=True)
