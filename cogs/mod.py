@@ -199,6 +199,7 @@ class Mod:
             del server_rules[rule-1]
             rules[ctx.message.server.id] = server_rules
             config.saveContent('rules',rules)
+            await self.bot.say("I have just removed that rule from your list of rules!")
         except IndexError:
             await self.bot.say("That is not a valid rule number, try running the command again. Your current rules are:\n```{}```".format(list_rules))
             
