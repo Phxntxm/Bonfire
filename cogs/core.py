@@ -65,7 +65,7 @@ class Core:
     @checks.customPermsOrRole(send_messages=True)
     async def uptime(self):
         """Provides a printout of the current bot's uptime"""
-        await self.bot.say("Uptime = ```{}```".format(self.get_bot_uptime()))
+        await self.bot.say("Uptime: ```{}```".format(self.get_bot_uptime()))
 
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)

@@ -27,7 +27,7 @@ class VoiceState:
         self.voice = None
         self.bot = bot
         self.play_next_song = asyncio.Event()
-        self.songs = asyncio.Queue()
+        self.songs = asyncio.Queue(maxsize=10)
         self.skip_votes = set()  # a set of user_ids that voted
         self.audio_player = self.bot.loop.create_task(self.audio_player_task())
         self.opts = {
