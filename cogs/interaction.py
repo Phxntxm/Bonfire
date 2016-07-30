@@ -75,6 +75,7 @@ class Interaction:
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True,invoke_without_command=True)
+    @commands.cooldown(1,180,BucketType.user)
     @checks.customPermsOrRole(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
