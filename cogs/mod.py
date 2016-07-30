@@ -149,7 +149,59 @@ class Mod:
         del custom_perms[ctx.message.server.id][cmd]
         config.saveContent('custom_permissions', custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
-
-
+    
+    @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def rules(self, ctx):
+        """This command can be used to view the current rules on the server"""
+        rules = config.getContent('rules') or {}
+        server_rules = rules.get(ctx.message.server.id)
+        if server_rules is None:
+            await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
+            return
+        fmt = "\n".join("{}) {}".format(num+1,rule) for num,rule in enumerate(server_rules))
+        await self.bot.say('```{}```'.format(fmt))
+            
+    @rules.command(name='add', aliases=['create'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(manage_server=True)
+    async def rules_add(self, ctx, *, rule: str)
+        """Adds a rule to this server's rules"""
+        rules = config.getContent('rules') or {}
+        server_rules = rules.get(ctx.message.server.id) or []
+        server_rules.append(rule)
+        rules[ctx.message.server.id] = server_rules
+        config.saveContent('rules',rules)
+        await self.bot.say("I have just saved your new rule, use the rules command to view this server's current rules")
+        
+    @rules.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(manage_server=True)
+    async def rules_delete(self, ctx, rule: int=None)
+        """Removes one of the rules from the list of this server's rules"""
+        rules = config.getContent('rules') or {}
+        server_rules = rules.get(ctx.message.server.id)
+        if server_rules is None:
+            await self.bot.say("This server currently has no rules on it! Can't remove something that doesn't exist bro")
+            return
+        list_rules = "\n".join("{}) {}".format(num+1,rule) for num,rule in enumerate(server_rules))
+        
+        if rule is None:
+            await self.bot.say("Your rules are:\n```{}```".format(list_rules))
+            for i in range(3):
+                msg = await self.bot.await_for_message(timeout=60.0, author=ctx.message.author, channel = ctx.message.channel, check = lambda m: m.content.isdigit())
+                if msg is None:
+                    await self.bot.say("You took too long...it's just a number, seriously? Try typing a bit quicker")
+                    return
+                del server_rules[int(msg)-1]
+                rules[ctx.message.server.id] = server_rules
+                config.saveContent('rules',rules)
+        
+        try:
+            del server_rules[rule-1]
+            rules[ctx.message.server.id] = server_rules
+            config.saveContent('rules',rules)
+        except IndexError:
+            await self.bot.say"That is not a valid rule number! Your current rules are:\n```{}```".format(list_rules)
+            
+        
 def setup(bot):
     bot.add_cog(Mod(bot))
