@@ -200,7 +200,7 @@ class Mod:
             rules[ctx.message.server.id] = server_rules
             config.saveContent('rules',rules)
         except IndexError:
-            await self.bot.say"That is not a valid rule number! Your current rules are:\n```{}```".format(list_rules)
+            await self.bot.say("That is not a valid rule number! Your current rules are:\n```{}```".format(list_rules))
             
         
 def setup(bot):
