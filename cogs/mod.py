@@ -65,7 +65,6 @@ class Mod:
         if command is None or len(command) == 0:
             await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
-        command = " ".join(command)
 
         custom_perms = config.getContent('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id)
@@ -74,6 +73,7 @@ class Mod:
             return
             
         command_perms = server_perms.get(command)
+        await self.bot.say("`{}` is type `{}`".format(command,type(command)))
         if command_perms is None:
             await self.bot.say("That command has no custom permissions setup on it!")
         else:
