@@ -42,7 +42,12 @@ class Owner:
         await self.bot.say(
             "Just saved a new doggo image! I now have {} doggo images!".format(len(glob.glob('doggo*'))))
 
-    @commands.command(pass_context=True)
+    @commands.group()
+    @commands.check(checks.isOwner)
+    async def test(self):
+        pass
+
+    @test.command(pass_context=True)
     @commands.check(checks.isOwner)
     async def debug(self, ctx):
         """Executes code"""

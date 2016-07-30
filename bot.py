@@ -48,6 +48,9 @@ async def on_member_remove(member):
     await bot.send_message(member.server,
                            "{0} has left the server, I hope it wasn't because of something I said :c".format(member))
 
+@bot.event
+async def on_command_completion(ctx):
+    await bot.send_message("In on_command_completion, ctx.invoked_subcommand is {}".format(ctx.invoked_subcommand))
 
 @bot.event
 async def on_command_error(error, ctx):
