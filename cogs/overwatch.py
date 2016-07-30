@@ -42,7 +42,7 @@ class Overwatch:
         await self.bot.say("Searching profile information....")
 
         if hero == "":
-            with aiohttp.ClientSession() as s:
+            with aiohttp.ClientSession(headers={"User-Agent":"Bonfire/1.0.0"}) as s:
                 async with s.get(base_url + "{}/stats/general".format(bt)) as r:
                     result = await r.text()
 
@@ -54,7 +54,7 @@ class Overwatch:
                 "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
-            with aiohttp.ClientSession() as s:
+            with aiohttp.ClientSession(headers={"User-Agent":"Bonfire/1.0.0"}) as s:
                 async with s.get(url) as r:
                     if r.status == 500:
                         fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
@@ -81,7 +81,7 @@ class Overwatch:
         await self.bot.say("Looking up your profile information....")
         url = base_url + "{}/stats/general".format(bt)
 
-        with aiohttp.ClientSession() as s:
+        with aiohttp.ClientSession(headers={"User-Agent":"Bonfire/1.0.0"}) as s:
             async with s.get(url) as r:
                 if not r.status == 200:
                     await self.bot.say("Profile does not exist! Battletags are picky, "
