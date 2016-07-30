@@ -52,7 +52,7 @@ class Twitch:
             await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def twitch(self, ctx, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is None:
@@ -78,7 +78,7 @@ class Twitch:
         await self.bot.say("```{}```".format(fmt))
 
     @twitch.command(name='add', pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def add_twitch_url(self, ctx, url: str):
         """Saves your user's twitch URL"""
         try:
@@ -107,7 +107,7 @@ class Twitch:
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
         twitch = config.getContent('twitch')
@@ -121,13 +121,13 @@ class Twitch:
                     ctx.message.author.mention))
 
     @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def notify(self, ctx):
         """This can be used to turn notifications on or off"""
         pass
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on"""
         twitch = config.getContent('twitch')
@@ -146,7 +146,7 @@ class Twitch:
                     ctx.message.author.mention))
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def notify_off(self, ctx):
         """Turns twitch notifications off"""
         twitch = config.getContent('twitch')

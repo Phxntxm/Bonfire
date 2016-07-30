@@ -27,7 +27,7 @@ class VoiceState:
         self.voice = None
         self.bot = bot
         self.play_next_song = asyncio.Event()
-        self.songs = asyncio.Queue()
+        self.songs = asyncio.Queue(maxsize=10)
         self.skip_votes = set()  # a set of user_ids that voted
         self.audio_player = self.bot.loop.create_task(self.audio_player_task())
         self.opts = {
@@ -72,7 +72,6 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
-        self.max_songs = 10
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
@@ -97,7 +96,7 @@ class Music:
                 pass
 
     @commands.command(no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def join(self, *, channel: discord.Channel):
         """Joins a voice channel."""
         try:
@@ -113,7 +112,7 @@ class Music:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def summon(self, ctx):
         """Summons the bot to join your voice channel."""
         summoned_channel = ctx.message.author.voice_channel
@@ -129,7 +128,7 @@ class Music:
         return True
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def play(self, ctx, *, song: str):
         """Plays a song.
         If there is a song currently in the queue, then it is
@@ -145,7 +144,7 @@ class Music:
             if not success:
                 return
                 
-        if len(state.songs) >= self.max_songs:
+        if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
             
@@ -156,7 +155,7 @@ class Music:
         await state.songs.put(entry)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def volume(self, ctx, value: int):
         """Sets the volume of the currently playing song."""
 
@@ -167,7 +166,7 @@ class Music:
             await self.bot.say('Set the volume to {:.0%}'.format(player.volume))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def pause(self, ctx):
         """Pauses the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -176,7 +175,7 @@ class Music:
             player.pause()
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -185,7 +184,7 @@ class Music:
             player.resume()
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
         This also clears the queue.
@@ -205,14 +204,14 @@ class Music:
             pass
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
         await self.bot.say("There are a total of {} songs in the queue"
                            .format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
         
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
         3 skip votes are needed for the song to be skipped.
@@ -239,7 +238,7 @@ class Music:
             await self.bot.say('You have already voted to skip this song.')
             
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
         state = self.get_voice_state(ctx.message.server)
@@ -251,7 +250,7 @@ class Music:
         await self.bot.say('Song has just been skipped.')
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def playing(self, ctx):
         """Shows info about the currently played song."""
 

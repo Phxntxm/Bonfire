@@ -9,7 +9,7 @@ class Tags:
         self.bot = bot
     
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has"""
         tags = config.getContent('tags')
@@ -17,7 +17,7 @@ class Tags:
         await self.bot.say('```{}```'.format(fmt))
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
@@ -29,7 +29,7 @@ class Tags:
         await self.bot.say("{}".format(result[0]['result']))
 
     @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def add_tag(self, ctx, *, result: str):
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
@@ -54,7 +54,7 @@ class Tags:
             await self.bot.say("I was unable to save this data")
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
