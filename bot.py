@@ -2,6 +2,8 @@
 
 import discord
 import traceback
+import logging
+import datetime
 from discord.ext import commands
 from cogs.utils import config
 
@@ -17,7 +19,13 @@ extensions = ['cogs.interaction',
               'cogs.tags']
 
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.WARNING)
 
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+handler = logging.FileHandler(filename='bonfire.log', encoding='utf-8', mode='a')
+log.addHandler(handler)
 
 # Bot event overrides
 @bot.event
@@ -29,6 +37,8 @@ async def on_ready():
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
         config.saveContent('restart_server', 0)
+    if not hasattr(bot, 'uptime'):
+        bot.uptime = datetime.datetime.utcnow()
 
 
 @bot.event

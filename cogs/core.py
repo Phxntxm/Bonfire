@@ -16,9 +16,19 @@ class Core:
 
     def __init__(self, bot):
         self.bot = bot
-    @commands.command()
-    async def test(self):
-        await self.bot.say((await self.bot.application_info()).id)
+    
+    def get_bot_uptime(self):
+        now = datetime.datetime.utcnow()
+        delta = now - self.bot.uptime
+        hours, remainder = divmod(int(delta.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+        if days:
+            fmt = '{d} days, {h} hours, {m} minutes, and {s} seconds'
+        else:
+            fmt = '{h} hours, {m} minutes, and {s} seconds'
+
+        return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)
@@ -50,6 +60,12 @@ class Core:
             year = datetime.datetime.today().year
         cal = calendar.TextCalendar().formatmonth(year, month)
         await self.bot.say("```{}```".format(cal))
+        
+    @commands.command()
+    @checks.customPermsOrRole(send_messages=True)
+    async def uptime(self):
+        """Provides a printout of the current bot's uptime"""
+        awayt self.bot.say("Uptime = ```{}```".format(get_bot_uptime()))
 
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)
