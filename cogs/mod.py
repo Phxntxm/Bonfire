@@ -156,7 +156,7 @@ class Mod:
         """This command can be used to view the current rules on the server"""
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
-        if server_rules is None:
+        if server_rules is None or len(server_rules) == 0:
             await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
             return
         fmt = "\n".join("{}) {}".format(num+1,rule) for num,rule in enumerate(server_rules))
@@ -179,7 +179,7 @@ class Mod:
         """Removes one of the rules from the list of this server's rules"""
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
-        if server_rules is None:
+        if server_rules is None or len(server_rules) == 0:
             await self.bot.say("This server currently has no rules on it! Can't remove something that doesn't exist bro")
             return
         list_rules = "\n".join("{}) {}".format(num+1,rule) for num,rule in enumerate(server_rules))
