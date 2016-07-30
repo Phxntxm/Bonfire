@@ -72,13 +72,14 @@ class Mod:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return
             
-        command_perms = server_perms.get(command)
-        await self.bot.say("`{}` is type `{}`".format(command,type(command)))
-        if command_perms is None:
+        perms_value = server_perms.get(command)
+        if perms_value is None:
             await self.bot.say("That command has no custom permissions setup on it!")
         else:
+            permissions = discord.Permissions(perms_value)
+            needed_perm = [perm[0] for perm in permissions._perm_iterator() if perm[1]][0]
             await self.bot.say("You need to have the permission `{}` "
-                               "to use the command `{}` in this server".format(command_perms, command))
+                               "to use the command `{}` in this server".format(needed_perm, command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
