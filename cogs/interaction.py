@@ -18,10 +18,10 @@ def userBattling(ctx):
     battling = config.getContent('battling')
     if battling is None:
         return False
-    if ctx.message.author.id in battling or ctx.message.author.id in battling.values():
+    if ctx.message.author.id in battling.values() or ctx.message.author.id in battling.keys():
         return True
     if str(ctx.command) == 'battle':
-        return ctx.message.mentions[0].id in battling.values()
+        return ctx.message.mentions[0].id in battling.values() or ctx.message.mentions[0].id in battling.keys():
         
     return False
 
@@ -75,7 +75,7 @@ class Interaction:
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True,invoke_without_command=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         if len(ctx.message.mentions) == 0:
@@ -105,7 +105,7 @@ class Interaction:
 
         
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def accept(self, ctx):
         """Accepts the battle challenge"""
         if not userBattling(ctx):
@@ -134,7 +134,7 @@ class Interaction:
         battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def decline(self, ctx):
         """Declines the battle challenge"""
         if not userBattling(ctx):
@@ -156,7 +156,7 @@ class Interaction:
 
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1,180,BucketType.user)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""
         booper = ctx.message.author

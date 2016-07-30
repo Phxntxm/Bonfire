@@ -13,7 +13,7 @@ class Stats:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
         boops = config.getContent('boops')
@@ -33,7 +33,7 @@ class Stats:
             ctx.message.author.mention, member.mention, most_boops))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times"""
         members = ctx.message.server.members
@@ -50,7 +50,7 @@ class Stats:
         await self.bot.say("You have booped:```{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record"""
         battles = config.getContent('battle_records')
@@ -71,7 +71,7 @@ class Stats:
         
     
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def stats(self, ctx, member: discord.Member=None):
         """Prints the battling stats for you, or the user provided"""
         member = member or ctx.message.author

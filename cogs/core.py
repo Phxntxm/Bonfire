@@ -21,7 +21,7 @@ class Core:
         await self.bot.say((await self.bot.application_info()).id)
 
     @commands.command()
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def calendar(self, month: str=None, year: int=None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
@@ -52,7 +52,7 @@ class Core:
         await self.bot.say("```{}```".format(cal))
 
     @commands.command()
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def addbot(self):
         """Provides a link that you can use to add me to a server"""
         perms = discord.Permissions.none()
@@ -69,7 +69,7 @@ class Core:
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
@@ -79,7 +79,7 @@ class Core:
             await self.bot.upload(f)
 
     @commands.command()
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def joke(self):
         """Prints a random riddle"""
         fortuneCommand = "/usr/bin/fortune riddles"
@@ -88,7 +88,7 @@ class Core:
 
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""

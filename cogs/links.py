@@ -13,7 +13,7 @@ class Links:
         self.bot = bot
 
     @commands.command()
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
@@ -31,7 +31,7 @@ class Links:
             await self.bot.say('```Error: Definition is too long for me to send```')
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term"""
         if len(search) > 0:
@@ -64,7 +64,7 @@ class Links:
     
     
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def e621(self, ctx, *, tags: str):
         """Searches for a random image from e621.net
         Format for the search terms need to be 'search term 1, search term 2, etc.'

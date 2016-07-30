@@ -20,7 +20,7 @@ class Mod:
             await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
 
     @nsfw.command(name="add", pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
         nsfw_channels = config.getContent('nsfw_channels')
@@ -32,7 +32,7 @@ class Mod:
             await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
         nsfw_channels = config.getContent('nsfw_channels')
@@ -44,21 +44,21 @@ class Mod:
             await self.bot.say("This channel has just been unregistered as a nsfw channel")
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("manage_server")
+    @checks.customPermsOrRole(manage_server=True)
     async def leave(self, ctx):
         """Forces the bot to leave the server"""
         await self.bot.say('Why must I leave? Hopefully I can come back :c')
         await self.bot.leave_server(ctx.message.server)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole("kick_members")
+    @checks.customPermsOrRole(kick_members=True)
     async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say"""
         await self.bot.say(msg)
         await self.bot.delete_message(ctx.message)
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
-    @checks.customPermsOrRole("send_messages")
+    @checks.customPermsOrRole(send_messages=True)
     async def perms(self, ctx, *, command: str):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
