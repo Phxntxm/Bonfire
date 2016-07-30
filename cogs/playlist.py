@@ -145,7 +145,7 @@ class Music:
             if not success:
                 return
                 
-        if len(state.songs) >= self.max_songs:
+        if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
             
