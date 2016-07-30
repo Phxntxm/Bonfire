@@ -1,4 +1,5 @@
 from discord.ext import commands
+import discord
 from . import config
 
 
@@ -21,6 +22,25 @@ def customPermsOrRole(perm):
             return getattr(ctx.message.author.permissions_in(ctx.message.channel), perm)
         else:
             return getattr(ctx.message.author.permissions_in(ctx.message.channel), _perm)
+
+    return commands.check(predicate)
+    
+def customPermsOrRole(**perms):
+    def predicate(ctx):
+        if ctx.message.channel.is_private:
+            return False
+        
+        member_perms = ctx.message.author.permissions_in(ctx.message.channel)
+        default_perms = discord.Permissions.none()
+        for perm,setting in perms.items():
+            setattr(default_perms,perm,setting)
+        
+        try:
+            required_perm = config.getContent('custom_permissions')[ctx.message.server.id][ctx.command.qualified_name]
+        except KeyError:
+            required_perm = default_perms
+        return member_perms >= required_perm
+        
 
     return commands.check(predicate)
 

@@ -88,52 +88,55 @@ class Mod:
         If you want to open the command to everyone, provide 'none' as the permission"""
         command = " ".join(msg[0:len(msg) - 1])
         permissions = msg[len(msg) - 1]
+        
+        #If a user can run the command, they have to have send_messages permissions; so use this as the base
         if permissions.lower() == "none":
             permissions = "send_messages"
-        msg = msg[0:len(msg) - 1]
-        count = 0
-        cmd = self.bot.commands.get(msg[count])
-        while isinstance(cmd, commands.Group):
-            count += 1
+        
+        #Convert the string to an int value of the permissions obj, based on the required permission
+        perm_obj = discord.Permissions.none()
+        setattr(perm_obj,permissions,True)
+        perm_value = perm_obj.value
+        
+        cmd = None
+        for part in permissions:
             try:
-                cmd = cmd.commands.get(msg[count])
-            except:
+                if cmd is None:
+                    cmd = self.bot.commands.get(part)
+                else:
+                    cmd = cmd.commands.get(part)
+            except AttributeError:
                 break
+        
+        if cmd is None:
+            await self.bot.say("That command does not exist! You can't have custom permissions on a non-existant command....")
+            return
 
         for check in cmd.checks:
             if "isOwner" == check.__name__ or re.search("has_permissions", str(check)) is not None:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
 
-        if getattr(discord.Permissions, permissions, None) is None and not permissions.lower() == "none":
+        if getattr(discord.Permissions, permissions, None) is None:
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
                                .format(permissions, "\n".join(valid_perms)))
             return
 
-        custom_perms = config.getContent('custom_permissions')
-        if custom_perms is None:
-            custom_perms = {}
-        server_perms = custom_perms.get(ctx.message.server.id)
-        if server_perms is None:
-            custom_perms[ctx.message.server.id] = {command: permissions}
-        else:
-            server_perms[command] = permissions
-            custom_perms[ctx.message.server.id] = server_perms
-        if config.saveContent('custom_permissions', custom_perms):
-            await self.bot.say("I have just added your custom permissions; "
-                               "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
-        else:
-            await self.bot.say("I was unable to save this data")
+        custom_perms = config.getContent('custom_permissions') or {}
+        server_perms = custom_perms.get(ctx.message.server.id) or {}
+        server_perms[command] = perm_value
+        custom_perms[ctx.message.server.id] = server_perms
+        
+        config.saveContent('custom_permissions', custom_perms)
+        await self.bot.say("I have just added your custom permissions; "
+                           "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
 
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
     async def remove_perms(self, ctx, *command: str):
         """Removes the custom permissions setup on the command specified"""
         cmd = " ".join(command)
-        custom_perms = config.getContent('custom_permissions')
-        if custom_perms is None:
-            await self.bot.say("You do not have custom permissions setup on this server yet!")
-            return
+        custom_perms = config.getContent('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id)
         if server_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
@@ -143,10 +146,8 @@ class Mod:
             await self.bot.say("You do not have custom permissions setup on this command yet!")
             return
         del custom_perms[ctx.message.server.id][cmd]
-        if config.saveContent('custom_permissions', custom_perms):
-            await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
-        else:
-            await self.bot.say("I was unable to save this data")
+        config.saveContent('custom_permissions', custom_perms)
+        await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
 
 
 def setup(bot):
