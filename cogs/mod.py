@@ -176,7 +176,9 @@ class Mod:
     @rules.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
     async def rules_delete(self, ctx, rule: int=None):
-        """Removes one of the rules from the list of this server's rules"""
+        """Removes one of the rules from the list of this server's rules
+        Provide a number to delete that rule; if no number is provided
+        I'll print your current rules and ask for a number"""
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         if server_rules is None or len(server_rules) == 0:
