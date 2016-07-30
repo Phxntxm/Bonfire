@@ -185,13 +185,13 @@ class Mod:
         list_rules = "\n".join("{}) {}".format(num+1,rule) for num,rule in enumerate(server_rules))
         
         if rule is None:
-            await self.bot.say("Your rules are:\n```{}```".format(list_rules))
+            await self.bot.say("Your rules are:\n```{}```Please provide the rule number you would like to remove (just the number)".format(list_rules))
             for i in range(3):
                 msg = await self.bot.wait_for_message(timeout=60.0, author=ctx.message.author, channel = ctx.message.channel, check = lambda m: m.content.isdigit())
                 if msg is None:
                     await self.bot.say("You took too long...it's just a number, seriously? Try typing a bit quicker")
                     return
-                del server_rules[int(msg)-1]
+                del server_rules[int(msg.content)-1]
                 rules[ctx.message.server.id] = server_rules
                 config.saveContent('rules',rules)
         
