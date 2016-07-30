@@ -99,7 +99,7 @@ class Mod:
         perm_value = perm_obj.value
         
         cmd = None
-        for part in permissions:
+        for part in msg[0:len(msg) - 1]:
             try:
                 if cmd is None:
                     cmd = self.bot.commands.get(part)
