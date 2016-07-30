@@ -21,7 +21,7 @@ def userBattling(ctx):
     if ctx.message.author.id in battling.values() or ctx.message.author.id in battling.keys():
         return True
     if str(ctx.command) == 'battle':
-        return ctx.message.mentions[0].id in battling.values() or ctx.message.mentions[0].id in battling.keys():
+        return ctx.message.mentions[0].id in battling.values() or ctx.message.mentions[0].id in battling.keys()
         
     return False
 
