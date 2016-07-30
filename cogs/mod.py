@@ -164,7 +164,7 @@ class Mod:
             
     @rules.command(name='add', aliases=['create'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
-    async def rules_add(self, ctx, *, rule: str)
+    async def rules_add(self, ctx, *, rule: str):
         """Adds a rule to this server's rules"""
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id) or []
@@ -175,7 +175,7 @@ class Mod:
         
     @rules.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
-    async def rules_delete(self, ctx, rule: int=None)
+    async def rules_delete(self, ctx, rule: int=None):
         """Removes one of the rules from the list of this server's rules"""
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
