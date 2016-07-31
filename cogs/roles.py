@@ -15,7 +15,40 @@ class Roles:
     async def role(self):
         pass
     
-    
+    @role.command(name='add', pass_context=True)
+    @checks.customPermsOrRole(manage_server=True)
+    async def add_role(self, ctx, *members: discord.Member=None):
+        """Use this to add a role to multiple members.
+        Provide the list of members, and I'll ask for the role
+        If no members are provided, I'll first ask for them"""
+        server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
+        
+        if members is None:
+            await self.bot.say("Please provide the list of members you want to add a role to")
+            msg = await self.bot.wait_for_message(author=ctx.message.author,channel=ctx.message.channel)
+            if msg is None:
+                await self.bot.say("You took too long. I'm impatient, don't make me wait")
+                return
+            if len(msg.mentions) == 0:
+                await self.bot.say("I cannot add a role to someone if you don't provide someone...")
+                return
+            members = msg.mentions
+        
+        await self.bot.say("Alright, please provide the roles you would like to add to this member. "
+                            "Make sure the roles, if more than one is provided, are separate by commas. "
+                            "Here is a list of this server's roles:"
+                            "```\n{}```".format("\n".join([r.name for r in server_roles])))
+        
+        msg = await self.bot.wait_for_message(author=ctx.message.author,channel=ctx.message.channel,check=check)
+        if msg is None:
+            await self.bot.say("You took too long. I'm impatient, don't make me wait")
+            return
+        roles = re.split(', ?',msg.content)
+        for role in roles:
+            _role = discord.utils.get(server_roles, name=role)
+            if _role is not None:
+                await self.bot.add_role()
+            
     @role.command(name='delete', aliases=['remove'], pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
     async def remove_role(self, ctx, *, role: discord.Role=None):
@@ -35,7 +68,7 @@ class Roles:
         await self.bot.delete_role(ctx.message.server,role)
         await self.bot.say("I have just removed the role {} from this server".format(role.name))            
     
-    @role.command(name='create', aliases=['add'], pass_context=True)
+    @role.command(name='create', pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server
