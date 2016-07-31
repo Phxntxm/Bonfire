@@ -38,7 +38,7 @@ class Roles:
             
         # Print a list of all the permissions available, then ask for which ones need to be active on this new role
         all_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions,p),property)]
-        fmt = "\n".join("{}) {}".format(i,perm) for i,perm in enumerate(all_perms)))
+        fmt = "\n".join("{}) {}".format(i,perm) for i,perm in enumerate(all_perms))
         await self.bot.say("Sounds fancy! Here is a list of all the permissions available. Please respond with just "
                             "the numbers, seperated by commas, of the permissions you want this role to have.\n```{}```".format(fmt))
         msg = await self.bot.wait_for_message(timeout=60.0, author=author, channel=channel, check=num_separated_check)
