@@ -59,10 +59,10 @@ class Mod:
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def perms(self, ctx, *, command: str):
+    async def perms(self, ctx, *, command: str=None):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
-        if command is None or len(command) == 0:
+        if command is None:
             await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
 
