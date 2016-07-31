@@ -53,7 +53,7 @@ class Owner:
 
             if inspect.isawaitable(result):
                 result = await result
-            await self.bot.say("```{0}```".format(result))
+            await self.bot.say("{0}".format(result))
         elif match_multi:
             def r(v):
                 self.bot.loop.create_task(self.bot.say("```{}```".format(v)))
