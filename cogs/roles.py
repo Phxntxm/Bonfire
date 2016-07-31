@@ -14,6 +14,24 @@ class Roles:
     @checks.customPermsOrRole(manage_server=True)
     async def role(self):
         pass
+    @role.command(name='delete', aliases=['remove'], pass_contex=True)
+    @checks.customPermsOrRole(manage_server=True)
+    async def remove_role(self, ctx, role: discord.Role=None):
+        """This command can be used to remove one of the roles from the server"""
+        if role is None:
+            server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
+            fmt = "\n".join(server_roles)
+            
+            await self.bot.say("Which role would you like to remove from the server? Here is a list of this server's roles:{}".format(fmt))
+            check = lambda m: len(role for role in server_roles if role.name == msg.content) > 0
+            msg = await self.bot.wait_for_message(author=ctx.message.author,channel=ctx.message.channel,check=check)
+            if msg is None:
+                await self.bot.say("You took too long. I'm impatient, don't make me wait")
+                return
+            role = discord.utils.get(server_roles, name=msg)
+        
+        await self.bot.delete_role(ctx.message.server,role)
+        await self.bot.say("I have just removed the role {} from this server".format(role.name))            
     
     @role.command(name='create', aliases=['add'], pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
