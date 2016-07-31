@@ -9,8 +9,13 @@ class Roles:
     
     def __init__(self, bot):
         self.bot = bot
-        
-    @commands.command(name='create role', aliases=['add role'], pass_context=True)
+    
+    @commands.group(aliases='roles')
+    @checks.customPermsOrRole(manage_server=True)
+    async def role(self):
+        pass
+    
+    @role.command(name='create', aliases=['add'], pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server"""
