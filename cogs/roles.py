@@ -80,7 +80,7 @@ class Roles:
         
         payload = {
         'name': name,
-        'permissions': perms.value,
+        'permissions': perms,
         'hoist': hoist,
         'mentionable': mentionable
         }
