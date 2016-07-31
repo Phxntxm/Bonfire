@@ -18,17 +18,6 @@ class Roles:
         server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
         await self.bot.say("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
 
-    @role.command(name='delete', pass_context=True)
-    @checks.customPermsOrRole(manage_server=True)
-    async def delete_role(self, ctx):
-        """This command can be used to delete a role from the server."""
-        role = discord.utils.get(ctx.message.server.roles, name=ctx.message.content)
-        if role is not None:
-            await self.bot.say("Please provide a valid role to delete!")
-        else:
-            await self.bot.delete_role(ctx.message.server, role)
-            await self.bot.say("I have just removed the {} role from this server".format(role.name))
-
     @role.command(name='remove', pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
     async def remove_role(self, ctx):
