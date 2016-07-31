@@ -14,7 +14,10 @@ async def channel_online(channel: str):
         async with s.get(url) as r:
             response = await r.text()
     data = json.loads(response)
-    return data['stream'] is not None
+    try:
+        return data['stream'] is not None
+    except KeyError:
+        return False
 
 
 class Twitch:
