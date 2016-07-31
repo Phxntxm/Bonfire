@@ -22,7 +22,7 @@ class Roles:
         A prompt will follow asking what settings you would like for this new role
         I'll then ask if you'd like to set anyone to use this role"""
         # No use in running through everything if the bot cannot create the role
-        if not ctx.message.server.me.permissions_in(channel).manage_roles:
+        if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't create roles in this server, do you not trust  me? :c")
             return
         
