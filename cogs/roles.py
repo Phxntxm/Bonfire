@@ -10,7 +10,7 @@ class Roles:
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.group(aliases='roles')
+    @commands.group(aliases=['roles'])
     @checks.customPermsOrRole(manage_server=True)
     async def role(self):
         pass
@@ -52,7 +52,7 @@ class Roles:
             return
         
         # Check if any integer's were provided that are within the length of the list of permissions
-        num_permissions = [int(i) for i in re.split(' ?,?',msg) if i.isdigit() and int(i) < len(all_perms)]
+        num_permissions = [int(i) for i in re.split(' ?,?',msg.content) if i.isdigit() and int(i) < len(all_perms)]
         if len(num_permissions) == 0:
             await self.bot.say("You did not provide any valid numbers! Try better next time.")
             return
