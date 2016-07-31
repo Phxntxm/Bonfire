@@ -93,10 +93,10 @@ class Roles:
         msg = await self.bot.wait_for_message(timeout=60.0, author=author, channel=channel, check=members_check)
         if msg is None:
             return
-        for member in ctx.message.mentions:
+        for member in msg.mentions:
             await self.bot.add_roles(member, role)
         
-        fmt = "\n".join(m.display_name for m in ctx.message.mentions)
+        fmt = "\n".join(m.display_name for m in msg.mentions)
         await self.bot.say("I have just added the role {} to: ```{}```".format(role.name,fmt))
         
         
