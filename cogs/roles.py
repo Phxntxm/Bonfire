@@ -23,8 +23,8 @@ class Roles:
         if role is None:
             server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
             
-            await self.bot.say("Which role would you like to remove from the server? "
-                                "Here is a list of this server's roles:```\n{}```".format("\n".join(server_roles)))
+            await self.bot.say("Which role would you like to remove from the server? Here is a list of this server's roles:"
+                                "```\n{}```".format("\n".join([r.name for r in server_roles])))
             check = lambda m: discord.utils.get(server_roles,name=m.content) > 0
             msg = await self.bot.wait_for_message(author=ctx.message.author,channel=ctx.message.channel,check=check)
             if msg is None:
