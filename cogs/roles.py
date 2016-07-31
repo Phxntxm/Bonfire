@@ -10,10 +10,11 @@ class Roles:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(aliases=['roles'])
+    @commands.group(aliases=['roles'], invoke_without_command=True, no_pm=True, pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
-    async def role(self):
-        pass
+    async def role(self, ctx):
+        server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
+        await self.bot.say("Your server's roles are: ```\n{}```".format(fmt="\n".join(server_roles)))
 
     @role.command(name='add', pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
@@ -51,7 +52,7 @@ class Roles:
                 roles.append(_role)
 
         for member in members:
-            await self.bot.add_roles(member, roles)
+            await self.bot.add_roles(member, *roles)
         await self.bot.say("I have just added the following roles:```\n{}``` to the following members:"
                            "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
