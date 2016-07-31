@@ -13,8 +13,56 @@ class Roles:
     @commands.group(aliases=['roles'], invoke_without_command=True, no_pm=True, pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
     async def role(self, ctx):
+        """This command can be used to modify the roles on the server.
+        Pass no subcommands and this will print the roles currently available on this server"""
         server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
-        await self.bot.say("Your server's roles are: ```\n{}```".format(fmt="\n".join(server_roles)))
+        await self.bot.say("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
+
+    @role.command(name='delete', pass_context=True)
+    @checks.customPermsOrRole(manage_server=True)
+    async def delete_role(self, ctx):
+        """This command can be used to delete a role from the server."""
+        role = discord.utils.get(ctx.message.server.roles, name=ctx.message.content)
+        if role is not None:
+            await self.bot.say("Please provide a valid role to delete!")
+        else:
+            await self.bot.delete_role(ctx.message.server, role)
+            await self.bot.say("I have just removed the {} role from this server".format(role.name))
+
+    @role.command(name='remove', pass_context=True)
+    @checks.customPermsOrRole(manage_server=True)
+    async def remove_role(self, ctx):
+        """Use this to remove roles from a number of members"""
+        server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
+        members = ctx.message.mentions
+        if len(members) == 0:
+            await self.bot.say("Please provide the list of members you want to remove a role to")
+            msg = await self.bot.wait_for_message(author=ctx.message.author, channel=ctx.message.channel)
+            if msg is None:
+                await self.bot.say("You took too long. I'm impatient, don't make me wait")
+                return
+            if len(msg.mentions) == 0:
+                await self.bot.say("I cannot remove a role from someone if you don't provide someone...")
+                return
+            members = msg.mentions
+
+        await self.bot.say("Alright, please provide the roles you would like to remove from this member. "
+                           "Make sure the roles, if more than one is provided, are separate by commas. "
+                           "Here is a list of this server's roles:"
+                           "```\n{}```".format("\n".join([r.name for r in server_roles])))
+        msg = await self.bot.wait_for_message(author=ctx.message.author, channel=ctx.message.channel)
+        if msg is None:
+            await self.bot.say("You took too long. I'm impatient, don't make me wait")
+            return
+        role_names = re.split(', ?', msg.content)
+        roles = []
+        for role in role_names:
+            _role = discord.utils.get(server_roles, name=role)
+            if _role is not None:
+                roles.append(_role)
+
+        for member in members:
+            await self.bot.add_roles(member, *roles)
 
     @role.command(name='add', pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
