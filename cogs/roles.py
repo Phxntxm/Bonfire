@@ -18,22 +18,25 @@ class Roles:
     @role.command(name='create', aliases=['add'], pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
     async def create_role(self, ctx):
-        """This command can be used to create a new role for this server"""
+        """This command can be used to create a new role for this server
+        A prompt will follow asking what settings you would like for this new role
+        I'll then ask if you'd like to set anyone to use this role"""
+        # No use in running through everything if the bot cannot create the role
+        if not server.me.permissions_in(channel).manage_roles:
+            await self.bot.say("I can't create roles in this server, do you not trust  me? :c")
+            return
+        
         # Save a couple variables that will be used repeatedly
         author = ctx.message.author
         server = ctx.message.server
         channel = ctx.message.channel
         
         # A couple checks that will be used in the wait_for_message's
-        num_separated_check = lambda m: re.search("(\d,? ?)+",m.content) is not None
+        num_separated_check = lambda m: re.search("\d(,| )",m.content) is not None
         yes_no_check = lambda m: re.search("(yes|no)",m.content.lower()) is not None
+        members_check = lambda m: len(m.mentions) > 0
         
-        # No use in running through everything if the bot cannot create the role
-        if not server.me.permissions_in(channel).manage_roles:
-            await self.bot.say("I can't create roles in this server, do you not trust  me? :c")
-            return
-            
-        # Start the checks for 
+        # Start the checks for the role, get the name of the command first
         await self.bot.say("Alright! I'm ready to create a new role, please respond with the name of the role you want to create")
         msg = await self.bot.wait_for_message(timeout=60.0, author=author, channel=channel)
         if msg is None:
@@ -85,7 +88,18 @@ class Roles:
         'mentionable': mentionable
         }
         role = await self.bot.create_role(server, **payload)
-        await self.bot.say("We did it! You just created the new role {}".format(role.name))
+        await self.bot.say("We did it! You just created the new role {}\nIf you want to add this role"
+                            " to some people, mention them now".format(role.name))
+        msg = await self.bot.wait_for_message(timeout=60.0, author=author, channel=channel, check=members_check)
+        if msg is None:
+            return
+        for member in ctx.message.mentions:
+            await self.bot.add_roles(member, role)
+        
+        fmt = "\n".join(m.display_name for m in ctx.message.mentions)
+        await self.bot.say("I have just added the role {} to: ```{}```".format(role.name,fmt))
+        
+        
         
 def setup(bot):
     bot.add_cog(Roles(bot))
