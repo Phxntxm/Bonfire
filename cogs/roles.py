@@ -56,6 +56,8 @@ class Roles:
 
         for member in members:
             await self.bot.remove_roles(member, *roles)
+        await self.bot.say("I have just removed the following roles:```\n{}``` from the following members:"
+                           "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
     @role.command(name='add', pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
