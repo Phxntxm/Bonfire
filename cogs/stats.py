@@ -45,7 +45,7 @@ class Stats:
         output = "\n".join(
             "{0.display_name}: {1} times".format(discord.utils.get(self.bot.get_all_members(), id=m_id), amt) for
             m_id, amt in booped_members)
-        await self.bot.say("You have booped:```{}```".format(output))
+        await self.bot.say("You have booped:```\n{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -65,7 +65,7 @@ class Stats:
             member = discord.utils.get(ctx.message.server.members, id=member_id)
             fmt += "#{}) {} (Rating: {})\n".format(count, member.display_name, stats.get('rating'))
             count += 1
-        await self.bot.say("Battling leaderboard for this server:```{}```".format(fmt))
+        await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -91,7 +91,7 @@ class Stats:
         fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
         fmt = fmt.format(member.display_name, record, server_rank, len(server_members), total_rank, len(all_members),
                          rating)
-        await self.bot.say('```{}```'.format(fmt))
+        await self.bot.say('```\n{}```'.format(fmt))
 
 
 def setup(bot):

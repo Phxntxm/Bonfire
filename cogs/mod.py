@@ -63,7 +63,7 @@ class Mod:
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
         if command is None:
-            await self.bot.say("Valid permissions are: ```{}```".format("\n".join("{}".format(i) for i in valid_perms)))
+            await self.bot.say("Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
 
         custom_perms = config.getContent('custom_permissions') or {}
@@ -120,7 +120,7 @@ class Mod:
                 return
 
         if getattr(discord.Permissions, permissions, None) is None:
-            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```{}```"
+            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```\n{}```"
                                .format(permissions, "\n".join(valid_perms)))
             return
 
@@ -161,7 +161,7 @@ class Mod:
             await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
             return
         fmt = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(server_rules))
-        await self.bot.say('```{}```'.format(fmt))
+        await self.bot.say('```\n{}```'.format(fmt))
 
     @rules.command(name='add', aliases=['create'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
@@ -189,7 +189,7 @@ class Mod:
         list_rules = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(server_rules))
 
         if rule is None:
-            await self.bot.say("Your rules are:\n```{}```Please provide the rule number"
+            await self.bot.say("Your rules are:\n```\n{}```Please provide the rule number"
                                "you would like to remove (just the number)".format(list_rules))
 
             msg = await self.bot.wait_for_message(timeout=60.0, author=ctx.message.author, channel=ctx.message.channel,
@@ -208,7 +208,7 @@ class Mod:
             await self.bot.say("I have just removed that rule from your list of rules!")
         except IndexError:
             await self.bot.say("That is not a valid rule number, try running the command again. "
-                               "Your current rules are:\n```{}```".format(list_rules))
+                               "Your current rules are:\n```\n{}```".format(list_rules))
 
 
 def setup(bot):

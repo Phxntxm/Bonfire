@@ -15,7 +15,7 @@ class Tags:
         """Prints all the custom tags that this server currently has"""
         tags = config.getContent('tags')
         fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id'] == ctx.message.server.id)
-        await self.bot.say('```{}```'.format(fmt))
+        await self.bot.say('```\n{}```'.format(fmt))
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)

@@ -48,7 +48,7 @@ class Roles:
         all_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions,p),property)]
         fmt = "\n".join("{}) {}".format(i,perm) for i,perm in enumerate(all_perms))
         await self.bot.say("Sounds fancy! Here is a list of all the permissions available. Please respond with just "
-                            "the numbers, seperated by commas, of the permissions you want this role to have.\n```{}```".format(fmt))
+                            "the numbers, seperated by commas, of the permissions you want this role to have.\n```\n{}```".format(fmt))
         msg = await self.bot.wait_for_message(timeout=60.0, author=author, channel=channel, check=num_separated_check)
         if msg is None:
             await self.bot.say("You took too long. I'm impatient, don't make me wait")
@@ -97,7 +97,7 @@ class Roles:
             await self.bot.add_roles(member, role)
         
         fmt = "\n".join(m.display_name for m in msg.mentions)
-        await self.bot.say("I have just added the role {} to: ```{}\n```".format(name,fmt))
+        await self.bot.say("I have just added the role {} to: ```\n{}```".format(name,fmt))
         
         
         

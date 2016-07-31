@@ -78,7 +78,7 @@ class Twitch:
         fmt += "\nStatus: {}".format(data['status'])
         fmt += "\nFollowers: {}".format(data['followers'])
         fmt += "\nURL: {}".format(url)
-        await self.bot.say("```{}```".format(fmt))
+        await self.bot.say("```\n{}```".format(fmt))
 
     @twitch.command(name='add', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
