@@ -18,7 +18,7 @@ class Roles:
 
     @role.command(name='add', pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
-    async def add_role(self, ctx, members: discord.Member = None):
+    async def add_role(self, ctx, *members: discord.Member = None):
         """Use this to add a role to multiple members.
         Provide the list of members, and I'll ask for the role
         If no members are provided, I'll first ask for them"""
