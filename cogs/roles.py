@@ -25,7 +25,7 @@ class Roles:
         server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
         members = ctx.message.mentions
         if len(members) == 0:
-            await self.bot.say("Please provide the list of members you want to remove a role to")
+            await self.bot.say("Please provide the list of members you want to remove a role from")
             msg = await self.bot.wait_for_message(author=ctx.message.author, channel=ctx.message.channel)
             if msg is None:
                 await self.bot.say("You took too long. I'm impatient, don't make me wait")
@@ -50,8 +50,12 @@ class Roles:
             if _role is not None:
                 roles.append(_role)
 
+        if len(roles) == 0:
+            await self.bot.say("Please provide a valid role next time!")
+            return
+
         for member in members:
-            await self.bot.add_roles(member, *roles)
+            await self.bot.remove_roles(member, *roles)
 
     @role.command(name='add', pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
@@ -87,6 +91,10 @@ class Roles:
             _role = discord.utils.get(server_roles, name=role)
             if _role is not None:
                 roles.append(_role)
+
+        if len(roles) == 0:
+            await self.bot.say("Please provide a valid role next time!")
+            return
 
         for member in members:
             await self.bot.add_roles(member, *roles)
