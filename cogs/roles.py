@@ -84,7 +84,7 @@ class Roles:
         'hoist': hoist,
         'mentionable': mentionable
         }
-        role = await self.bot.create_role(server, payload)
+        role = await self.bot.create_role(server, **payload)
         await self.bot.say("We did it! You just created the new role {}".format(role.name))
         
 def setup(bot):
