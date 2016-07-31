@@ -14,7 +14,7 @@ class Roles:
     @checks.customPermsOrRole(manage_server=True)
     async def role(self):
         pass
-    @role.command(name='delete', aliases=['remove'], pass_contex=True)
+    @role.command(name='delete', aliases=['remove'], pass_context=True)
     @checks.customPermsOrRole(manage_server=True)
     async def remove_role(self, ctx, role: discord.Role=None):
         """This command can be used to remove one of the roles from the server"""
