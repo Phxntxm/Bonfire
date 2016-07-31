@@ -5,7 +5,7 @@ from .utils import checks
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
-        
+
 
 class VoiceEntry:
     def __init__(self, message, player):
@@ -56,11 +56,12 @@ class VoiceState:
 
     async def audio_player_task(self):
         while True:
-            self.play_next_song.clear()            
+            self.play_next_song.clear()
             self.current = await self.songs.get()
             await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
-            
-            self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts, after=self.toggle_next)
+
+            self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts,
+                                                                      after=self.toggle_next)
             self.current.player.start()
             await self.play_next_song.wait()
 
@@ -69,6 +70,7 @@ class Music:
     """Voice related commands.
     Works in multiple servers at once.
     """
+
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
@@ -143,11 +145,11 @@ class Music:
             success = await ctx.invoke(self.summon)
             if not success:
                 return
-                
+
         if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
-            
+
         player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)
@@ -209,7 +211,7 @@ class Music:
         """Prints the length of the queue"""
         await self.bot.say("There are a total of {} songs in the queue"
                            .format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
-        
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def skip(self, ctx):
@@ -236,7 +238,7 @@ class Music:
                 await self.bot.say('Skip vote added, currently at [{}/3]'.format(total_votes))
         else:
             await self.bot.say('You have already voted to skip this song.')
-            
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
     async def modskip(self, ctx):
@@ -245,7 +247,7 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-        
+
         state.skip()
         await self.bot.say('Song has just been skipped.')
 

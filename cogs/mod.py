@@ -71,13 +71,13 @@ class Mod:
         if server_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return
-            
+
         perms_value = server_perms.get(command)
         if perms_value is None:
             await self.bot.say("That command has no custom permissions setup on it!")
         else:
             permissions = discord.Permissions(perms_value)
-            needed_perm = [perm[0] for perm in permissions._perm_iterator() if perm[1]][0]
+            needed_perm = [perm[0] for perm in permissions if perm[1]][0]
             await self.bot.say("You need to have the permission `{}` "
                                "to use the command `{}` in this server".format(needed_perm, command))
 
@@ -89,16 +89,16 @@ class Mod:
         If you want to open the command to everyone, provide 'none' as the permission"""
         command = " ".join(msg[0:len(msg) - 1])
         permissions = msg[len(msg) - 1]
-        
-        #If a user can run the command, they have to have send_messages permissions; so use this as the base
+
+        # If a user can run the command, they have to have send_messages permissions; so use this as the base
         if permissions.lower() == "none":
             permissions = "send_messages"
-        
-        #Convert the string to an int value of the permissions obj, based on the required permission
+
+        # Convert the string to an int value of the permissions obj, based on the required permission
         perm_obj = discord.Permissions.none()
-        setattr(perm_obj,permissions,True)
+        setattr(perm_obj, permissions, True)
         perm_value = perm_obj.value
-        
+
         cmd = None
         for part in msg[0:len(msg) - 1]:
             try:
@@ -108,9 +108,10 @@ class Mod:
                     cmd = cmd.commands.get(part)
             except AttributeError:
                 break
-        
+
         if cmd is None:
-            await self.bot.say("That command does not exist! You can't have custom permissions on a non-existant command....")
+            await self.bot.say(
+                "That command does not exist! You can't have custom permissions on a non-existant command....")
             return
 
         for check in cmd.checks:
@@ -127,7 +128,7 @@ class Mod:
         server_perms = custom_perms.get(ctx.message.server.id) or {}
         server_perms[command] = perm_value
         custom_perms[ctx.message.server.id] = server_perms
-        
+
         config.saveContent('custom_permissions', custom_perms)
         await self.bot.say("I have just added your custom permissions; "
                            "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
@@ -149,7 +150,7 @@ class Mod:
         del custom_perms[ctx.message.server.id][cmd]
         config.saveContent('custom_permissions', custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
-    
+
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
     async def rules(self, ctx):
@@ -159,9 +160,9 @@ class Mod:
         if server_rules is None or len(server_rules) == 0:
             await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
             return
-        fmt = "\n".join("{}) {}".format(num+1,rule) for num,rule in enumerate(server_rules))
+        fmt = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(server_rules))
         await self.bot.say('```{}```'.format(fmt))
-            
+
     @rules.command(name='add', aliases=['create'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
     async def rules_add(self, ctx, *, rule: str):
@@ -170,9 +171,9 @@ class Mod:
         server_rules = rules.get(ctx.message.server.id) or []
         server_rules.append(rule)
         rules[ctx.message.server.id] = server_rules
-        config.saveContent('rules',rules)
+        config.saveContent('rules', rules)
         await self.bot.say("I have just saved your new rule, use the rules command to view this server's current rules")
-        
+
     @rules.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
     async def rules_delete(self, ctx, rule: int=None):
@@ -182,29 +183,33 @@ class Mod:
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         if server_rules is None or len(server_rules) == 0:
-            await self.bot.say("This server currently has no rules on it! Can't remove something that doesn't exist bro")
+            await self.bot.say(
+                "This server currently has no rules on it! Can't remove something that doesn't exist bro")
             return
-        list_rules = "\n".join("{}) {}".format(num+1,rule) for num,rule in enumerate(server_rules))
-        
+        list_rules = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(server_rules))
+
         if rule is None:
-            await self.bot.say("Your rules are:\n```{}```Please provide the rule number you would like to remove (just the number)".format(list_rules))
-            
-            msg = await self.bot.wait_for_message(timeout=60.0, author=ctx.message.author, channel = ctx.message.channel, check = lambda m: m.content.isdigit())
+            await self.bot.say("Your rules are:\n```{}```Please provide the rule number"
+                               "you would like to remove (just the number)".format(list_rules))
+
+            msg = await self.bot.wait_for_message(timeout=60.0, author=ctx.message.author, channel=ctx.message.channel,
+                                                  check=lambda m: m.content.isdigit())
             if msg is None:
                 await self.bot.say("You took too long...it's just a number, seriously? Try typing a bit quicker")
                 return
-            del server_rules[int(msg.content)-1]
+            del server_rules[int(msg.content) - 1]
             rules[ctx.message.server.id] = server_rules
-            config.saveContent('rules',rules)
-        
+            config.saveContent('rules', rules)
+
         try:
-            del server_rules[rule-1]
+            del server_rules[rule - 1]
             rules[ctx.message.server.id] = server_rules
-            config.saveContent('rules',rules)
+            config.saveContent('rules', rules)
             await self.bot.say("I have just removed that rule from your list of rules!")
         except IndexError:
-            await self.bot.say("That is not a valid rule number, try running the command again. Your current rules are:\n```{}```".format(list_rules))
-            
-        
+            await self.bot.say("That is not a valid rule number, try running the command again. "
+                               "Your current rules are:\n```{}```".format(list_rules))
+
+
 def setup(bot):
     bot.add_cog(Mod(bot))

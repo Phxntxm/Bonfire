@@ -5,7 +5,6 @@ import discord
 
 import aiohttp
 import json
-import re
 
 base_url = "https://owapi.net/api/v2/u/"
 check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
@@ -29,7 +28,7 @@ class Overwatch:
 
     @ow.command(name="stats", pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def ow_stats(self, ctx, user: discord.Member = None, hero: str = ""):
+    async def ow_stats(self, ctx, user: discord.Member=None, hero: str=""):
         """Prints out a basic overview of a member's stats
         Provide a hero after the member to get stats for that specific hero"""
         if user is None:
@@ -42,7 +41,7 @@ class Overwatch:
         await self.bot.say("Searching profile information....")
 
         if hero == "":
-            with aiohttp.ClientSession(headers={"User-Agent":"Bonfire/1.0.0"}) as s:
+            with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
                 async with s.get(base_url + "{}/stats/general".format(bt)) as r:
                     result = await r.text()
 
@@ -54,7 +53,7 @@ class Overwatch:
                 "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
-            with aiohttp.ClientSession(headers={"User-Agent":"Bonfire/1.0.0"}) as s:
+            with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
                 async with s.get(url) as r:
                     if r.status == 500:
                         fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
@@ -81,7 +80,7 @@ class Overwatch:
         await self.bot.say("Looking up your profile information....")
         url = base_url + "{}/stats/general".format(bt)
 
-        with aiohttp.ClientSession(headers={"User-Agent":"Bonfire/1.0.0"}) as s:
+        with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
             async with s.get(url) as r:
                 if not r.status == 200:
                     await self.bot.say("Profile does not exist! Battletags are picky, "

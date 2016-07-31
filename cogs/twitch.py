@@ -41,14 +41,14 @@ class Twitch:
                     twitch[m_id]['live'] = 1
                     fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
                     await self.bot.send_message(server, fmt)
-                    config.saveContent('twitch',twitch)
+                    config.saveContent('twitch', twitch)
                 elif live and not online:
                     server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 0
                     fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.name, url)
-                    await self.bot.send_message(server,fmt)
-                    config.saveContent('twitch',twitch)
+                    await self.bot.send_message(server, fmt)
+                    config.saveContent('twitch', twitch)
             await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
@@ -57,20 +57,20 @@ class Twitch:
         """Use this command to check the twitch info of a user"""
         if member is None:
             member = ctx.message.author
-        
+
         twitch_channels = config.getContent('twitch') or {}
         result = twitch_channels.get(ctx.message.author.id)
         if result is None:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
             return
-        
+
         url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
         with aiohttp.ClientSession() as s:
             async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user)) as r:
                 response = await r.text()
         data = json.loads(response)
-        
+
         fmt = "Username: {}".format(data['display_name'])
         fmt += "\nStatus: {}".format(data['status'])
         fmt += "\nFollowers: {}".format(data['followers'])
@@ -90,7 +90,7 @@ class Twitch:
 
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
-                if not r.status == 200: 
+                if not r.status == 200:
                     await self.bot.say("That twitch user does not exist! "
                                        "What would be the point of adding a nonexistant twitch user? Silly")
                     return
@@ -143,7 +143,7 @@ class Twitch:
             twitch[ctx.message.author.id]['notifications_on'] = 1
             config.saveContent('twitch', twitch)
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
-                    ctx.message.author.mention))
+                ctx.message.author.mention))
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)

@@ -2,18 +2,19 @@ from discord.ext import commands
 from .utils import config
 from .utils import checks
 
+
 class Tags:
     """This class contains all the commands for custom tags"""
 
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command(pass_context=True)
     @checks.customPermsOrRole(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has"""
         tags = config.getContent('tags')
-        fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id']==ctx.message.server.id)
+        fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id'] == ctx.message.server.id)
         await self.bot.say('```{}```'.format(fmt))
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
@@ -43,13 +44,15 @@ class Tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 t['result'] = tag_result
                 if config.saveContent('tags', tags):
-                    await self.bot.say("I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+                    await self.bot.say(
+                        "I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
                 else:
                     await self.bot.say("I was unable to save this data")
                 return
         tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
         if config.saveContent('tags', tags):
-            await self.bot.say("I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+            await self.bot.say(
+                "I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
         else:
             await self.bot.say("I was unable to save this data")
 
@@ -71,6 +74,7 @@ class Tags:
                     await self.bot.say('I have just removed the tag `{}`'.format(tag))
                 else:
                     await self.bot.say("I was unable to save this data")
+
 
 def setup(bot):
     bot.add_cog(Tags(bot))

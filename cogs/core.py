@@ -102,7 +102,6 @@ class Core:
         fortune = subprocess.check_output(fortuneCommand.split()).decode("utf-8")
         await self.bot.say(fortune)
 
-
     @commands.command(pass_context=True)
     @checks.customPermsOrRole(send_messages=True)
     async def roll(self, ctx, notation: str="d6"):

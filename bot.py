@@ -27,6 +27,7 @@ log.setLevel(logging.INFO)
 handler = logging.FileHandler(filename='bonfire.log', encoding='utf-8', mode='a')
 log.addHandler(handler)
 
+
 # Bot event overrides
 @bot.event
 async def on_ready():
@@ -80,7 +81,7 @@ async def on_command_error(error, ctx):
             print('In {0.command.qualified_name}:'.format(ctx), file=f)
             traceback.print_tb(error.original.__traceback__, file=f)
             print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
-        
+
 
 if __name__ == '__main__':
     for e in extensions:
