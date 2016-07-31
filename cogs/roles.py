@@ -21,16 +21,16 @@ class Roles:
     async def remove_role(self, ctx, role: discord.Role=None):
         """This command can be used to remove one of the roles from the server"""
         if role is None:
-            server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
-            fmt = "\n".join(server_roles)
+            server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
             
-            await self.bot.say("Which role would you like to remove from the server? Here is a list of this server's roles:{}".format(fmt))
+            await self.bot.say("Which role would you like to remove from the server? "
+                                "Here is a list of this server's roles:```\n{}```".format("\n".join(server_roles)))
             check = lambda m: discord.utils.get(server_roles,name=m.content) > 0
             msg = await self.bot.wait_for_message(author=ctx.message.author,channel=ctx.message.channel,check=check)
             if msg is None:
                 await self.bot.say("You took too long. I'm impatient, don't make me wait")
                 return
-            role = discord.utils.get(server_roles, name=msg)
+            role = discord.utils.get(server_roles, name=msg.content)
         
         await self.bot.delete_role(ctx.message.server,role)
         await self.bot.say("I have just removed the role {} from this server".format(role.name))            
