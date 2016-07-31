@@ -97,7 +97,7 @@ class Roles:
             await self.bot.add_roles(member, role)
         
         fmt = "\n".join(m.display_name for m in msg.mentions)
-        await self.bot.say("I have just added the role {} to: ```{}```".format(name,fmt))
+        await self.bot.say("I have just added the role {} to: ```{}\n```".format(name,fmt))
         
         
         
