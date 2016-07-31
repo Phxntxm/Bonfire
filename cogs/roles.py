@@ -25,7 +25,7 @@ class Roles:
             
             await self.bot.say("Which role would you like to remove from the server? Here is a list of this server's roles:"
                                 "```\n{}```".format("\n".join([r.name for r in server_roles])))
-            check = lambda m: discord.utils.get(server_roles,name=m.content) > 0
+            check = lambda m: discord.utils.get(server_roles,name=m.content)
             msg = await self.bot.wait_for_message(author=ctx.message.author,channel=ctx.message.channel,check=check)
             if msg is None:
                 await self.bot.say("You took too long. I'm impatient, don't make me wait")
