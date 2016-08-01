@@ -17,7 +17,8 @@ extensions = ['cogs.interaction',
               'cogs.overwatch',
               'cogs.links',
               'cogs.tags',
-              'cogs.roles']
+              'cogs.roles',
+              'cogs.statsupdate']
 
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 discord_logger = logging.getLogger('discord')
