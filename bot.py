@@ -49,18 +49,6 @@ async def on_message(message):
         return
     await bot.process_commands(message)
 
-
-@bot.event
-async def on_member_join(member):
-    await bot.send_message(member.server, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
-
-
-@bot.event
-async def on_member_remove(member):
-    await bot.send_message(member.server,
-                           "{0} has left the server, I hope it wasn't because of something I said :c".format(member))
-
-
 @bot.event
 async def on_command_error(error, ctx):
     if isinstance(error, commands.BadArgument):
@@ -72,13 +60,12 @@ async def on_command_error(error, ctx):
     elif isinstance(error, commands.CommandOnCooldown):
         fmt = "This command is on cooldown! Hold your horses! >:c"
         await bot.send_message(ctx.message.channel, fmt)
-    #else:
-        #fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-        #await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
-        #with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
-            #print('In {0.command.qualified_name}:'.format(ctx), file=f)
-            #traceback.print_tb(error.original.__traceback__, file=f)
-            #print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
+    elif not isinstance(error, commands.CommandNotFound):
+        fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+        with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
+            print('In {0.command.qualified_name}:'.format(ctx), file=f)
+            traceback.print_tb(error.original.__traceback__, file=f)
+            print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
 
 
 if __name__ == '__main__':
