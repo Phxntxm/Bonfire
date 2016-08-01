@@ -63,7 +63,7 @@ async def on_member_remove(member):
         
     channel = discord.utils.get(member.server.channels,id=server_notifications)
     await bot.send_message(channel,
-                           "{0} has left the server, I hope it wasn't because of something I said :c".format(member))
+                           "{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
 
 
 @bot.event

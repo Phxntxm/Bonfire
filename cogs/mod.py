@@ -13,6 +13,7 @@ class Mod:
     def __init__(self, bot):
         self.bot = bot
     @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(kick_members=True)
     async def usernotify(self, ctx, on_off:str):
         """This command can be used to set whether or not you want user notificaitons to show
         This will save what channel you run this command in, that will be the channel used to send the notification to
