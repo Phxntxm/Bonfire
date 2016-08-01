@@ -43,6 +43,24 @@ async def on_ready():
     if not hasattr(bot, 'uptime'):
         bot.uptime = datetime.datetime.utcnow()
 
+@bot.event
+async def on_member_join(member):
+    notifications = config.getContent('user_notifications') or {}
+    server_notifications = notifications.get(member.server.id)
+    if not server_notifications:
+        return
+    await bot.send_message(member.server, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
+
+
+@bot.event
+async def on_member_remove(member):
+    notifications = config.getContent('user_notifications') or {}
+    server_notifications = notifications.get(member.server.id)
+    if not server_notifications:
+        return
+    await bot.send_message(member.server,
+                           "{0} has left the server, I hope it wasn't because of something I said :c".format(member))
+
 
 @bot.event
 async def on_message(message):
