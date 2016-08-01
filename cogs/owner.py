@@ -46,18 +46,21 @@ class Owner:
     @commands.check(checks.isOwner)
     async def debug(self, ctx):
         """Executes code"""
-        match_single = getter.findall(ctx.message.content)
-        match_multi = multi.findall(ctx.message.content)
-        if not match_multi:
-            result = eval(match_single[0])
+        try:
+            match_single = getter.findall(ctx.message.content)
+            match_multi = multi.findall(ctx.message.content)
+            if not match_multi:
+                result = eval(match_single[0])
 
-            if inspect.isawaitable(result):
-                result = await result
-            await self.bot.say("```\n{0}```".format(result))
-        elif match_multi:
-            def r(v):
-                self.bot.loop.create_task(self.bot.say("```\n{}```".format(v)))
-            exec(match_multi[0])
+                if inspect.isawaitable(result):
+                    result = await result
+                await self.bot.say("```\n{0}```".format(result))
+            elif match_multi:
+                def r(v):
+                    self.bot.loop.create_task(self.bot.say("```\n{}```".format(v)))
+                exec(match_multi[0])
+        except Exception as error:
+            await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
 
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
