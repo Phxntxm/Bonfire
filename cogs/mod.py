@@ -12,7 +12,18 @@ class Mod:
 
     def __init__(self, bot):
         self.bot = bot
-
+    @commands.command(pass_context=True, no_pm=True)
+    async def usernotify(self, ctx, on_off:str):
+        """This command can be used to set whether or not you want user notificaitons to show
+        This will save what channel you run this command in, that will be the channel used to send the notification to
+        Provide on, yes, or true to set it on; otherwise it will be turned off"""
+        on_off = ctx.message.channel.id if re.search("(on|yes|true)",on_off.lower()) else None
+        notifications = config.getContent('user_notifications') or {}
+        notifications[ctx.message.server.id] = on_off
+        config.saveContent('user_notifications',notifications)
+        fmt = "notify, in this channel" if on_off else "not notify"
+        await self.bot.say("This server will now {} if someone has joined or left".format(fmt))
+        
     @commands.group(pass_context=True, no_pm=True)
     async def nsfw(self, ctx):
         """Handles adding or removing a channel as a nsfw channel"""

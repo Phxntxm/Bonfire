@@ -49,7 +49,9 @@ async def on_member_join(member):
     server_notifications = notifications.get(member.server.id)
     if not server_notifications:
         return
-    await bot.send_message(member.server, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
+        
+    channel = discord.utils.get(member.server.channels,id=server_notifications)
+    await bot.send_message(channel, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
 
 
 @bot.event
@@ -58,7 +60,9 @@ async def on_member_remove(member):
     server_notifications = notifications.get(member.server.id)
     if not server_notifications:
         return
-    await bot.send_message(member.server,
+        
+    channel = discord.utils.get(member.server.channels,id=server_notifications)
+    await bot.send_message(channel,
                            "{0} has left the server, I hope it wasn't because of something I said :c".format(member))
 
 
