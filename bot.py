@@ -65,7 +65,7 @@ async def on_member_remove(member):
 async def on_command_error(error, ctx):
     if isinstance(error, commands.CommandNotFound):
         fmt = "That is not a valid command! There's a help command for a reason, learn to use it."
-        await bot.send_message(ctx.message.channel, fmt)
+        #await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.BadArgument):
         fmt = "Please provide a valid argument to pass to the command: {}".format(error)
         await bot.send_message(ctx.message.channel, fmt)
