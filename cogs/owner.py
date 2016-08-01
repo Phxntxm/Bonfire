@@ -60,7 +60,8 @@ class Owner:
                     self.bot.loop.create_task(self.bot.say("```\n{}```".format(v)))
                 exec(match_multi[0])
         except Exception as error:
-            await bot.send_message(ctx.message.channel, fmt.format(type(error).__name__, error))
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
