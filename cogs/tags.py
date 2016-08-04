@@ -9,7 +9,7 @@ class Tags:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has"""

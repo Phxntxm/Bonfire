@@ -18,7 +18,7 @@ class Roles:
         server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
         await self.bot.say("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
 
-    @role.command(name='remove', pass_context=True)
+    @role.command(name='remove', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
     async def remove_role(self, ctx):
         """Use this to remove roles from a number of members"""
@@ -59,7 +59,7 @@ class Roles:
         await self.bot.say("I have just removed the following roles:```\n{}``` from the following members:"
                            "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
-    @role.command(name='add', pass_context=True)
+    @role.command(name='add', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
     async def add_role(self, ctx):
         """Use this to add a role to multiple members.
@@ -103,7 +103,7 @@ class Roles:
         await self.bot.say("I have just added the following roles:```\n{}``` to the following members:"
                            "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
-    @role.command(name='delete', pass_context=True)
+    @role.command(name='delete', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
     async def delete_role(self, ctx, *, role: discord.Role = None):
         """This command can be used to delete one of the roles from the server"""
@@ -123,7 +123,7 @@ class Roles:
         await self.bot.delete_role(ctx.message.server, role)
         await self.bot.say("I have just removed the role {} from this server".format(role.name))
 
-    @role.command(name='create', pass_context=True)
+    @role.command(name='create', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server

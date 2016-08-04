@@ -67,7 +67,7 @@ class Stats:
             count += 1
         await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def stats(self, ctx, member: discord.Member=None):
         """Prints the battling stats for you, or the user provided"""
