@@ -2,6 +2,7 @@ import asyncio
 import discord
 from discord.ext import commands
 from .utils import checks
+import youtube_dl
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -149,8 +150,11 @@ class Music:
         if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
-
-        player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
+        try:
+            player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
+        except youtube_dl.DownloadError:
+            await self.bot.say("Sorry, that's not a supported URL!")
+            return
         player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)
         await self.bot.say('Enqueued ' + str(entry))
