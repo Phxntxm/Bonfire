@@ -97,13 +97,12 @@ class Interaction:
             
         battling = config.getContent('battling') or {}
         battling[ctx.message.author.id] = ctx.message.mentions[0].id
-        config.saveContent('battling',battling)
+        config.saveContent('battling', battling)
         
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
         await self.bot.say(fmt.format(ctx.message.author, player2))
         await self.bot.delete_message(ctx.message)
         config.loop.call_later(180,battlingOff,ctx.message.author.id)
-
         
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -156,7 +155,7 @@ class Interaction:
         battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.cooldown(1,180,BucketType.user)
+    @commands.cooldown(1, 180, BucketType.user)
     @checks.customPermsOrRole(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""

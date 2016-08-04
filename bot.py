@@ -43,14 +43,15 @@ async def on_ready():
     if not hasattr(bot, 'uptime'):
         bot.uptime = datetime.datetime.utcnow()
 
+
 @bot.event
 async def on_member_join(member):
     notifications = config.getContent('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
     if not server_notifications:
         return
-        
-    channel = discord.utils.get(member.server.channels,id=server_notifications)
+
+    channel = discord.utils.get(member.server.channels, id=server_notifications)
     await bot.send_message(channel, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
 
 
@@ -60,10 +61,11 @@ async def on_member_remove(member):
     server_notifications = notifications.get(member.server.id)
     if not server_notifications:
         return
-        
-    channel = discord.utils.get(member.server.channels,id=server_notifications)
+
+    channel = discord.utils.get(member.server.channels, id=server_notifications)
     await bot.send_message(channel,
-                           "{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
+                           "{0} has left the server, I hope it wasn't because of something I said :c".format(
+                               member.display_name))
 
 
 @bot.event
@@ -71,6 +73,7 @@ async def on_message(message):
     if message.author.bot:
         return
     await bot.process_commands(message)
+
 
 @bot.event
 async def on_command_error(error, ctx):
@@ -81,10 +84,9 @@ async def on_command_error(error, ctx):
         fmt = "You can't tell me what to do!"
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CommandOnCooldown):
-        fmt = "This command is on cooldown! Hold your horses! >:c"
+        fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {}".format(error.retry_after)
         await bot.send_message(ctx.message.channel, fmt)
     elif not isinstance(error, commands.CommandNotFound):
-        fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
             print('In {0.command.qualified_name}:'.format(ctx), file=f)
             traceback.print_tb(error.original.__traceback__, file=f)
