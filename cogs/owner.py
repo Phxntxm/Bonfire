@@ -105,10 +105,10 @@ class Owner:
             module = "cogs.{}".format(module)
         try:
             self.bot.load_extension(module)
+            await self.bot.say("I have just loaded the {} module".format(module))
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
-        await self.bot.say("I have just loaded the {} module".format(module))
 
     @commands.command()
     @commands.check(checks.isOwner)
@@ -119,10 +119,10 @@ class Owner:
             module = "cogs.{}".format(module)
         try:
             self.bot.unload_extension(module)
+            await self.bot.say("I have just unloaded the {} module".format(module))
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
-        await self.bot.say("I have just unloaded the {} module".format(module))
 
     @commands.command()
     @commands.check(checks.isOwner)
@@ -134,10 +134,10 @@ class Owner:
         self.bot.unload_extension(module)
         try:
             self.bot.load_extension(module)
+            await self.bot.say("I have just reloaded the {} module".format(module))
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
-        await self.bot.say("I have just reloaded the {} module".format(module))
 
 
 def setup(bot):
