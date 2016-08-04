@@ -34,11 +34,16 @@ class Tags:
     async def add_tag(self, ctx, *, result: str):
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
-        tag = result[0:result.find('-')].strip()
-        tag_result = result[result.find('-') + 2:].strip()
-        if len(tag) == 0 or len(result) == 0:
+        try:
+            tag = re.search("(.*) - (.*)",result).group(1).strip()
+            tag_result = "(.*) - (.*)",result).group(2).strip()
+        except AttributeError:
             await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
             return
+        if len(tag) == 0 or len(tag_result) == 0:
+            await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
+            return
+            
         tags = config.getContent('tags')
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
