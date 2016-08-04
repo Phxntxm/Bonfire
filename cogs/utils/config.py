@@ -10,13 +10,13 @@ with open("/home/phxntx5/public_html/Bonfire/config.yml", "r") as f:
 connection = None
 
 botDescription = global_config.get("description")
-commandPrefix = global_config.get("command_prefix")
+commandPrefix = global_config.get("command_prefix", "!")
 discord_bots_key = global_config.get('discord_bots_key')
 
 battleWins = global_config.get("battleWins", [])
 defaultStatus = global_config.get("default_status", "")
 botToken = global_config.get("bot_token", "")
-ownerID = global_config.get("owner_id", "")
+owner_ids = global_config.get("owner_id", [])
 
 
 def saveContent(key: str, content):

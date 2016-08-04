@@ -4,7 +4,7 @@ from . import config
 
 
 def isOwner(ctx):
-    return ctx.message.author.id == config.ownerID
+    return ctx.message.author.id in config.owner_ids
 
 
 def customPermsOrRole(**perms):
