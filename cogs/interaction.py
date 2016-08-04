@@ -149,8 +149,7 @@ class Interaction:
         battleP1 = discord.utils.find(lambda m: m.id == p1[0],ctx.message.server.members)
         battleP2 = ctx.message.author
         
-        await self.bot.say("{0} has chickened out! {1} wins by default!".format(battleP2.mention, battleP1.mention))
-        updateBattleRecords(battleP1, battleP2)
+        await self.bot.say("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
         await self.bot.delete_message(ctx.message)
         battlingOff(ctx.message.author.id)
 
