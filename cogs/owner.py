@@ -103,7 +103,11 @@ class Owner:
         module = module.lower()
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
-        self.bot.load_extension(module)
+        try:
+            self.bot.load_extension(module)
+        except Exception as error:
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(error).__name__, error))
         await self.bot.say("I have just loaded the {} module".format(module))
 
     @commands.command()
@@ -113,7 +117,11 @@ class Owner:
         module = module.lower()
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
-        self.bot.unload_extension(module)
+        try:
+            self.bot.unload_extension(module)
+        except Exception as error:
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(error).__name__, error))
         await self.bot.say("I have just unloaded the {} module".format(module))
 
     @commands.command()
@@ -124,7 +132,11 @@ class Owner:
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
         self.bot.unload_extension(module)
-        self.bot.load_extension(module)
+        try:
+            self.bot.load_extension(module)
+        except Exception as error:
+            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            await self.bot.say(fmt.format(type(error).__name__, error))
         await self.bot.say("I have just reloaded the {} module".format(module))
 
 
