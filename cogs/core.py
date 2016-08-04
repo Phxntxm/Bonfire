@@ -67,7 +67,7 @@ class Core:
         """Provides a printout of the current bot's uptime"""
         await self.bot.say("Uptime: ```\n{}```".format(self.get_bot_uptime()))
 
-    @commands.command()
+    @commands.command(aliases=['join'])
     @checks.customPermsOrRole(send_messages=True)
     async def addbot(self):
         """Provides a link that you can use to add me to a server"""
