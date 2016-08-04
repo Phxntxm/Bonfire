@@ -84,7 +84,9 @@ async def on_command_error(error, ctx):
         fmt = "You can't tell me what to do!"
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CommandOnCooldown):
-        fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {}".format(error.retry_after)
+        m, s = divmod(error.retry_after, 60)
+        fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds"\
+            .format(round(m), round(s))
         await bot.send_message(ctx.message.channel, fmt)
     elif not isinstance(error, commands.CommandNotFound):
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
