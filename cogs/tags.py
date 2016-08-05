@@ -1,6 +1,7 @@
 from discord.ext import commands
 from .utils import config
 from .utils import checks
+import re
 
 
 class Tags:
@@ -35,8 +36,8 @@ class Tags:
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
         try:
-            tag = re.search("(.*) - (.*)",result).group(1).strip()
-            tag_result = re.search("(.*) - (.*)",result).group(2).strip()
+            tag = re.search("(.*) - (.*)", result).group(1).strip()
+            tag_result = re.search("(.*) - (.*)", result).group(2).strip()
         except AttributeError:
             await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
             return
