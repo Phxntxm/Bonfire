@@ -33,7 +33,7 @@ class Overwatch:
         Provide a hero after the member to get stats for that specific hero"""
         if user is None:
             user = ctx.message.author
-        bt = config.getContent('overwatch').get(ctx.message.author.id)
+        bt = config.getContent('overwatch').get(user.id)
 
         if bt is None:
             await self.bot.say("I do not have this user's battletag saved!")
@@ -56,7 +56,7 @@ class Overwatch:
             with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
                 async with s.get(url) as r:
                     result = await r.text()
-                    msg = json.loads(result)['msg']
+                    msg = json.loads(result).get('msg')
                     if msg == 'hero data not found':
                         fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
                         await self.bot.say(fmt)
