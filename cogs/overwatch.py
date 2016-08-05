@@ -57,7 +57,7 @@ class Overwatch:
                 async with s.get(url) as r:
                     result = await r.text()
                     msg = json.loads(result)['msg']
-                    if msg = 'hero data not found':
+                    if msg == 'hero data not found':
                         fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
                         await self.bot.say(fmt)
                         return
