@@ -58,6 +58,8 @@ class VoiceState:
     async def audio_player_task(self):
         while True:
             self.play_next_song.clear()
+            self.skip_votes.clear()
+            self.current = None
             self.current = await self.songs.get()
             await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
 
@@ -208,6 +210,17 @@ class Music:
             await state.voice.disconnect()
         except:
             pass
+    
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def queue(self, ctx):
+        """Provides a printout of the songs that are in the queue"""
+        state = self.get_voice_state(ctx.message.server)
+        if not state.is_playing():
+            await self.bot.say('Not playing any music right now...')
+            return
+        fmt = "\n".join(x for x in state.songs._queue)
+        await self.bot.say("Current songs in the queue:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -261,7 +274,7 @@ class Music:
         """Shows info about the currently played song."""
 
         state = self.get_voice_state(ctx.message.server)
-        if state.current is None:
+        if not state.is_playing:
             await self.bot.say('Not playing anything.')
         else:
             skip_count = len(state.skip_votes)
