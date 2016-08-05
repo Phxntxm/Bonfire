@@ -6,7 +6,7 @@ import discord
 import aiohttp
 import json
 
-base_url = "https://owapi.net/api/v2/u/"
+base_url = "https://api.owapi.net/api/v2/u/"
 check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
                  'cards', 'damage_done', 'healing_done', 'multikills']
 check_o_stats = ['wins', 'losses']
