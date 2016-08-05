@@ -55,11 +55,13 @@ class Overwatch:
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
             with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
                 async with s.get(url) as r:
-                    if r.status == 500:
+                    result = await r.text()
+                    msg = json.loads(result)['msg']
+                    if msg = 'hero data not found'
                         fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
                         await self.bot.say(fmt)
                         return
-                    elif r.status == 404:
+                    elif msg == 'bad hero name':
                         fmt = "{} is not an actual hero!".format(hero.title())
                         await self.bot.say(fmt)
                         return
