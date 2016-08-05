@@ -69,6 +69,8 @@ class Overwatch:
             data = json.loads(result)
 
             fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
+            if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
+                fmt += "\nKill Death Ratio: {0:.2f}".format(data['general_stats'].get('eliminations')/data['general_stats'].get('deaths'))
             fmt += "\n"
             fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
             await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
