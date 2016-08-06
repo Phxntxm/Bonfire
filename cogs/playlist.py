@@ -231,14 +231,14 @@ class Music:
             await self.bot.say("Nothing currently in the queue")
             return
         
-        count = state.current.duration
+        count = state.current.player.duration
         found = False
         for song in state.songs._queue:
             if song.requester == author:
                 found = True
                 break
             count += song.player.duration
-        if count == state.current.duration:
+        if count == state.current.player.duration:
             await self.bot.say("You are next in the queue!")
             return
         if not found:
