@@ -4,6 +4,7 @@ import discord
 import traceback
 import logging
 import datetime
+import pendulum
 from discord.ext import commands
 from cogs.utils import config
 
@@ -41,7 +42,7 @@ async def on_ready():
         await bot.send_message(destination, "I have just finished restarting!")
         config.saveContent('restart_server', 0)
     if not hasattr(bot, 'uptime'):
-        bot.uptime = datetime.datetime.utcnow()
+        bot.uptime = pendulum.utcnow()
 
 
 @bot.event
@@ -85,13 +86,14 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CommandOnCooldown):
         m, s = divmod(error.retry_after, 60)
-        fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds"\
+        fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
             .format(round(m), round(s))
         await bot.send_message(ctx.message.channel, fmt)
     elif not isinstance(error, commands.CommandNotFound):
         now = datetime.datetime.now()
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
-            print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx,str(now)), file=f)
+            print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
+                  file=f)
             traceback.print_tb(error.original.__traceback__, file=f)
             print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
 

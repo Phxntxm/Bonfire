@@ -8,6 +8,7 @@ import glob
 import random
 import re
 import calendar
+import pendulum
 import datetime
 
 
@@ -16,19 +17,6 @@ class Core:
 
     def __init__(self, bot):
         self.bot = bot
-    
-    def get_bot_uptime(self):
-        now = datetime.datetime.utcnow()
-        delta = now - self.bot.uptime
-        hours, remainder = divmod(int(delta.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60)
-        days, hours = divmod(hours, 24)
-        if days:
-            fmt = '{d} days, {h} hours, {m} minutes, and {s} seconds'
-        else:
-            fmt = '{h} hours, {m} minutes, and {s} seconds'
-
-        return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)
@@ -65,7 +53,7 @@ class Core:
     @checks.customPermsOrRole(send_messages=True)
     async def uptime(self):
         """Provides a printout of the current bot's uptime"""
-        await self.bot.say("Uptime: ```\n{}```".format(self.get_bot_uptime()))
+        await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
 
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)
