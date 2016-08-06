@@ -257,7 +257,7 @@ class Music:
         if len(state.songs._queue) == 0:
             fmt = "Nothing currently in the queue"
         else:
-            fmt = "\n".join(str(x) for x in state.songs._queue)
+            fmt = "\n\n".join(str(x) for x in state.songs._queue)
         await self.bot.say("Current songs in the queue:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)
