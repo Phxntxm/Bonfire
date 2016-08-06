@@ -56,13 +56,6 @@ class Mod:
             await self.bot.say("This channel has just been unregistered as a nsfw channel")
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(manage_server=True)
-    async def leave(self, ctx):
-        """Forces the bot to leave the server"""
-        await self.bot.say('Why must I leave? Hopefully I can come back :c')
-        await self.bot.leave_server(ctx.message.server)
-
-    @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
     async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say"""
