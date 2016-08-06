@@ -13,10 +13,12 @@ async def channel_online(channel: str):
     with aiohttp.ClientSession() as s:
         async with s.get(url) as r:
             response = await r.text()
-    data = json.loads(response)
     try:
+        data = json.loads(response)
         return data['stream'] is not None
     except KeyError:
+        return False
+    except json.JSONDecodeError:
         return False
 
 
