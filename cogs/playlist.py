@@ -155,7 +155,7 @@ class Music:
         try:
             player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         except youtube_dl.DownloadError:
-            await self.bot.say("Sorry, that's not a supported URL!")
+            await self.bot.send_message(ctx.message.channel,"Sorry, that's not a supported URL!")
             return
         player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)
