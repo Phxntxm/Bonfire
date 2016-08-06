@@ -91,7 +91,7 @@ async def on_command_error(error, ctx):
     elif not isinstance(error, commands.CommandNotFound):
         now = datetime.datetime.now()
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
-            print('In server '{0.message.server}' command '{0.command.qualified_name}' on {1} :'.format(ctx,str(now)), file=f)
+            print("In server '{0.message.server}' command '{0.command.qualified_name}' on {1}".format(ctx,str(now)), file=f)
             traceback.print_tb(error.original.__traceback__, file=f)
             print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
 
