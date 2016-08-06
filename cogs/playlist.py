@@ -143,7 +143,6 @@ class Music:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
         state = self.get_voice_state(ctx.message.server)
-
         if state.voice is None:
             success = await ctx.invoke(self.summon)
             if not success:
@@ -152,6 +151,14 @@ class Music:
         if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
+            
+        author_channel = ctx.message.author.voice.voice_channel
+        my_channel = ctx.message.server.me.voice.voice_channel
+        
+        if my_channel != author_channel:
+            await self.bot.say("You are not currently in the channel; please join before trying to request a song.")
+            return
+        
         try:
             player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         except youtube_dl.DownloadError:
