@@ -219,7 +219,7 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-        fmt = "\n".join(x for x in state.songs._queue)
+        fmt = "\n".join(str(x) for x in state.songs._queue)
         await self.bot.say("Current songs in the queue:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)
