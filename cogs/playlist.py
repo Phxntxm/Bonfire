@@ -244,7 +244,7 @@ class Music:
         if not found:
             await self.bot.say("You are not in the queue!")
             return
-        await self.bot.say("ETA till your next play is: {0[0]}m {0[1]}s]".format(divmod(round(count, 0), 60)))
+        await self.bot.say("ETA till your next play is: {0[0]}m {0[1]}s".format(divmod(round(count, 0), 60)))
     
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
