@@ -100,9 +100,9 @@ class Interaction:
         config.saveContent('battling', battling)
 
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
+        config.loop.call_later(180, battlingOff, ctx.message.author.id)
         await self.bot.say(fmt.format(ctx.message.author, player2))
         await self.bot.delete_message(ctx.message)
-        config.loop.call_later(180, battlingOff, ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
