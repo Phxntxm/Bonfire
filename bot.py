@@ -96,9 +96,9 @@ async def on_command_error(error, ctx):
                   file=f)
             try:
                 traceback.print_tb(error.original.__traceback__, file=f)
+                print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
             except:
-                pass
-            print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
+                print('{0.__class__.__name__}: {0}'.format(error), file=f)
 
 
 if __name__ == '__main__':
