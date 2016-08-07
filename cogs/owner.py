@@ -41,6 +41,20 @@ class Owner:
                     f.write(val)
         await self.bot.say(
             "Just saved a new doggo image! I now have {} doggo images!".format(len(glob.glob('doggo*'))))
+            
+    @commands.command()
+    @commands.check(checks.isOwner)
+    async def addsnek(self, url: str):
+        """Saves a URL as an image to add for the snek command"""
+        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        local_path = 'snek{}.jpg'.format(len(glob.glob('snek*')))
+        with aiohttp.ClientSession() as s:
+            async with s.get(url) as r:
+                val = await r.read()
+                with open(local_path, "wb") as f:
+                    f.write(val)
+        await self.bot.say(
+            "Just saved a new snek image! I now have {} snek images!".format(len(glob.glob('snek*'))))
 
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)

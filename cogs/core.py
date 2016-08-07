@@ -81,6 +81,16 @@ class Core:
         f = glob.glob('doggo*')[random.randint(0, len(glob.glob('doggo*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
+            
+    @commands.command(pass_context=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def snek(self, ctx):
+        """Use this to print a random snek image.
+        Sneks are o3o"""
+        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        f = glob.glob('snek*')[random.randint(0, len(glob.glob('snek*')) - 1)]
+        with open(f, 'rb') as f:
+            await self.bot.upload(f)
 
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)
