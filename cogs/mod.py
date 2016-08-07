@@ -155,6 +155,12 @@ class Mod:
         del custom_perms[ctx.message.server.id][cmd]
         config.saveContent('custom_permissions', custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
+    
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(manage_messages=True)
+    async def purge(self, ctx, limit: int=100):
+        """This command is used to a purge a number of messages from the channel"""
+        await self.bot.purge_from(ctx.message.channel,limit=limit)
 
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
