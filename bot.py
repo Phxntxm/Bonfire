@@ -89,6 +89,9 @@ async def on_command_error(error, ctx):
         fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
             .format(round(m), round(s))
         await bot.send_message(ctx.message.channel, fmt)
+    elif isinstance(error, commands.NoPrivateMessage, fmt):
+        fmt = "This command cannot be used in a private message"
+        await bot.send_message(ctx.message.channel, fmt)
     elif not isinstance(error, commands.CommandNotFound):
         now = datetime.datetime.now()
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
@@ -98,6 +101,7 @@ async def on_command_error(error, ctx):
                 traceback.print_tb(error.original.__traceback__, file=f)
                 print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
             except:
+                traceback.print_tb(error.__traceback__, file=f)
                 print('{0.__class__.__name__}: {0}'.format(error), file=f)
 
 
