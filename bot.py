@@ -94,7 +94,10 @@ async def on_command_error(error, ctx):
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
             print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
                   file=f)
-            traceback.print_tb(error.original.__traceback__, file=f)
+            try:
+                traceback.print_tb(error.original.__traceback__, file=f)
+            except:
+                pass
             print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
 
 
