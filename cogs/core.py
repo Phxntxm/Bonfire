@@ -55,8 +55,8 @@ class Core:
         """Provides a printout of the current bot's uptime"""
         await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
 
-    @commands.command()
-    @checks.customPermsOrRole(aliases=['invite'], send_messages=True)
+    @commands.command(aliases=['invite'])
+    @checks.customPermsOrRole(send_messages=True)
     async def addbot(self):
         """Provides a link that you can use to add me to a server"""
         perms = discord.Permissions.none()
