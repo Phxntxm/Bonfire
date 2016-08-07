@@ -89,7 +89,7 @@ async def on_command_error(error, ctx):
         fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
             .format(round(m), round(s))
         await bot.send_message(ctx.message.channel, fmt)
-    elif isinstance(error, commands.NoPrivateMessage, fmt):
+    elif isinstance(error, commands.NoPrivateMessage):
         fmt = "This command cannot be used in a private message"
         await bot.send_message(ctx.message.channel, fmt)
     elif not isinstance(error, commands.CommandNotFound):
