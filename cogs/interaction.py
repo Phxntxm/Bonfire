@@ -122,6 +122,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
+        battlingOff(ctx.message.author.id)
 
         if random.randint(1, 100) < 50:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
@@ -129,9 +130,8 @@ class Interaction:
         else:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             updateBattleRecords(battleP2, battleP1)
-
+        
         await self.bot.delete_message(ctx.message)
-        battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -149,9 +149,9 @@ class Interaction:
         battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.server.members)
         battleP2 = ctx.message.author
 
+        battlingOff(ctx.message.author.id)
         await self.bot.say("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
         await self.bot.delete_message(ctx.message)
-        battlingOff(ctx.message.author.id)
 
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 180, BucketType.user)
