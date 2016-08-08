@@ -31,44 +31,40 @@ class Picarto:
         self.bot = bot
 
     async def check_channels(self):
-        try:
-            await self.bot.wait_until_ready()
-            while not self.bot.is_closed:
-                picarto = config.getContent('picarto') or {}
-                for m_id, r in picarto.items():
-                    url = r['picarto_url']
-                    live = r['live']
-                    notify = r['notifications_on']
-                    channel_id = r.get('channel_id') or None
-                    user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                    online = await check_online(user)
+        await self.bot.wait_until_ready()
+        while not self.bot.is_closed:
+            picarto = config.getContent('picarto') or {}
+            for m_id, r in picarto.items():
+                url = r['picarto_url']
+                live = r['live']
+                notify = r['notifications_on']
+                channel_id = r.get('channel_id') or None
+                user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
+                online = await check_online(user)
 
-                    if not live and notify and online:
-                        server = self.bot.get_server(r['server_id'])
-                        member = discord.utils.find(lambda m: m.id == m_id, server.members)
-                        channel_id = channel_id or server.id
-                        channel = self.bot.get_channel(channel_id)
+                if not live and notify and online:
+                    server = self.bot.get_server(r['server_id'])
+                    member = discord.utils.find(lambda m: m.id == m_id, server.members)
+                    channel_id = channel_id or server.id
+                    channel = self.bot.get_channel(channel_id)
 
-                        picarto[m_id]['live'] = 1
-                        fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
-                        await self.bot.send_message(channel, fmt)
-                        config.saveContent('picarto', picarto)
-                    elif live and not online:
-                        server = self.bot.get_server(r['server_id'])
-                        member = discord.utils.find(lambda m: m.id == m_id, server.members)
-                        channel_id = channel_id or server.id
-                        channel = self.bot.get_channel(channel_id)
+                    picarto[m_id]['live'] = 1
+                    fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
+                    await self.bot.send_message(channel, fmt)
+                    config.saveContent('picarto', picarto)
+                elif live and not online:
+                    server = self.bot.get_server(r['server_id'])
+                    member = discord.utils.find(lambda m: m.id == m_id, server.members)
+                    channel_id = channel_id or server.id
+                    channel = self.bot.get_channel(channel_id)
 
-                        picarto[m_id]['live'] = 0
-                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.name, url)
-                        await self.bot.send_message(channel, fmt)
-                        config.saveContent('picarto', picarto)
-                pass
-                await asyncio.sleep(30)
-        except Exception as error:
-            with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
-                traceback.print_tb(error.original.__traceback__, file=f)
-                print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
+                    picarto[m_id]['live'] = 0
+                    fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.display_name,
+                                                                                                    url)
+                    await self.bot.send_message(channel, fmt)
+                    config.saveContent('picarto', picarto)
+            pass
+            await asyncio.sleep(30)
 
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
