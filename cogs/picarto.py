@@ -46,7 +46,7 @@ class Picarto:
             return
         member_url = member_url['picarto_url']
         
-        stream = re.search("(?<=picarto.tv/)(.*)", url).group(1)
+        stream = re.search("(?<=picarto.tv/)(.*)", member_url).group(1)
         url = '{}/channel/{}?key={}'.format(base_url,stream,key)
         with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
             async with s.get(url) as r:
