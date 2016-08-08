@@ -46,7 +46,11 @@ class Links:
                     response = await r.text()
                     
             data = json.loads(response)
-            results = data['search']
+            try:
+                results = data['search']
+            except KeyError:
+                await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
+                return
 
             # Get the link if it exists, if not return saying no results found
             if len(results) > 0:
