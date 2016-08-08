@@ -118,7 +118,7 @@ class Picarto:
             picarto_urls[ctx.message.author.id] = {'picarto_url': url, 'server_id': ctx.message.server.id,
                                              'channel_id': ctx.message.channel.id, 'notifications_on': 1, 'live': 0}
         config.saveContent('picarto', picarto_urls)
-        await self.bot.say("I have just saved your Picarto url {}".format(ctx.message.author.mention))
+        await self.bot.say("I have just saved your Picarto url {}, this channel will now send a notification when you go live".format(ctx.message.author.mention))
         
     @picarto.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
