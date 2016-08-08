@@ -96,7 +96,7 @@ class Picarto:
     @checks.customPermsOrRole(send_messages=True)
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
-        picarto = config.getContent('twitch')
+        picarto = config.getContent('picarto')
         if picarto.get(ctx.message.author.id) is not None:
             del picarto[ctx.message.author.id]
             config.saveContent('picarto', picarto)
@@ -116,7 +116,7 @@ class Picarto:
     @checks.customPermsOrRole(send_messages=True)
     async def notify_on(self, ctx):
         """Turns picarto notifications on"""
-        picarto = config.getContent('twitch')
+        picarto = config.getContent('picarto')
         result = picarto.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
@@ -135,7 +135,7 @@ class Picarto:
     @checks.customPermsOrRole(send_messages=True)
     async def notify_off(self, ctx):
         """Turns picarto notifications off"""
-        picarto = config.getContent('twitch')
+        picarto = config.getContent('picarto')
         if picarto.get(ctx.message.author.id) is None:
             await self.bot.say(
                 "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
