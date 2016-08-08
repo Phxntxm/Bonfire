@@ -93,6 +93,8 @@ async def on_command_error(error, ctx):
     elif isinstance(error, commands.NoPrivateMessage):
         fmt = "This command cannot be used in a private message"
         await bot.send_message(ctx.message.channel, fmt)
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await bot.send_message(ctx.message.channel, error)
     elif not isinstance(error, commands.CommandNotFound):
         now = datetime.datetime.now()
         with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
