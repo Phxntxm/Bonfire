@@ -35,7 +35,7 @@ class Picarto:
     
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def picarto(self, ctx, member = discord.Member):
+    async def picarto(self, ctx, member: discord.Member=None):
         """This command can be used to view Picarto stats about a certain member"""
         member = member or ctx.message.author
         picarto_urls = config.getContent('picarto') or {}
