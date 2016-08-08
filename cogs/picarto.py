@@ -145,6 +145,7 @@ class Picarto:
                 ctx.message.author.mention))
         else:
             picarto[ctx.message.author.id]['notifications_on'] = 0
+            config.saveContent('picarto', picarto)
             await self.bot.say(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(
