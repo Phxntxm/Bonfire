@@ -30,7 +30,7 @@ class Picarto:
     async def check_channels(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
-            picarto = config.getContent('picarto')
+            picarto = config.getContent('picarto') or {}
             for m_id, r in picarto.items():
                 url = r['picarto_url']
                 live = r['live']
@@ -108,7 +108,7 @@ class Picarto:
             picarto_urls[ctx.message.author.id]['picarto_url'] = url
         else:
             picarto_urls[ctx.message.author.id] = {'picarto_url': url, 'server_id': ctx.message.server.id,
-                                             'notifications_on': 1, 'live': 0}
+                                             'channel_id': ctx.message.channel.id, 'notifications_on': 1, 'live': 0}
         config.saveContent('picarto', picarto_urls)
         await self.bot.say("I have just saved your Picarto url {}".format(ctx.message.author.mention))
         
@@ -116,7 +116,7 @@ class Picarto:
     @checks.customPermsOrRole(send_messages=True)
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
-        picarto = config.getContent('picarto')
+        picarto = config.getContent('picarto') or {}
         if picarto.get(ctx.message.author.id) is not None:
             del picarto[ctx.message.author.id]
             config.saveContent('picarto', picarto)
@@ -128,15 +128,28 @@ class Picarto:
     
     @picarto.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def notify(self, ctx):
+    async def notify(self, ctx, channel: discord.channel=None):
         """This can be used to turn picarto notifications on or off"""
-        pass
+        channel = channel or ctx.message.channel
+        server = ctx.message.server
+        member = ctx.message.author
+        
+        picarto = config.getContent('picarto') or {}
+        result = picarto.get(member.id)
+        if result is None:
+            await self.bot.say(
+                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
+                    member.mention))
+        
+        picarto[member.id]['channel_id'] = channel.id
+        config.saveContent('picarto', picarto)
+        await self.bot.say("I have just changed which channel will be notified when you go live, to {}".format(channel.name))
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def notify_on(self, ctx):
         """Turns picarto notifications on"""
-        picarto = config.getContent('picarto')
+        picarto = config.getContent('picarto') or {}
         result = picarto.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
@@ -155,7 +168,7 @@ class Picarto:
     @checks.customPermsOrRole(send_messages=True)
     async def notify_off(self, ctx):
         """Turns picarto notifications off"""
-        picarto = config.getContent('picarto')
+        picarto = config.getContent('picarto') or {}
         if picarto.get(ctx.message.author.id) is None:
             await self.bot.say(
                 "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
