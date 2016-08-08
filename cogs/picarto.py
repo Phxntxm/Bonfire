@@ -46,9 +46,12 @@ class Picarto:
             return
         member_url = member_url['picarto_url']
         
+        stream = re.search("(?<=picarto.tv/)(.*)", url).group(1)
+        url = '{}/channel/{}?key={}'.format(base_url,stream,key)
         with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
-            async with s.get(member_url) as r:
+            async with s.get(url) as r:
                 response = await r.text()
+        
         data = json.loads(response)
         things_to_print = ['channel','commissions_enabled','is_nsfw','program','tablet','followers','content_type']
         fmt = "\n".join("{}: {}".format(i, r) for i,r in data.items() if i in things_to_print)
