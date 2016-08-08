@@ -10,12 +10,13 @@ from .utils import checks
 
 base_url = 'https://ptvappapi.picarto.tv'
 
-#This is a public key for use, I don't care if this is seen
+# This is a public key for use, I don't care if this is seen
 key = '03e26294-b793-11e5-9a41-005056984bd4'
+
 
 async def check_online(stream):
     try:
-        url = '{}/channel/{}?key={}'.format(base_url,stream,key)
+        url = '{}/channel/{}?key={}'.format(base_url, stream, key)
         with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
             async with s.get(url) as r:
                 response = await r.text()
@@ -23,10 +24,11 @@ async def check_online(stream):
     except:
         return False
 
+
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
-    
+
     async def check_channels(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
@@ -37,14 +39,14 @@ class Picarto:
                 notify = r['notifications_on']
                 channel_id = r.get('channel_id') or None
                 user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                online = await channel_online(user)
-                
+                online = await check_online(user)
+
                 if not live and notify and online:
                     server = self.bot.get_server(r['server_id'])
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     channel_id = channel_id or server.id
                     channel = self.bot.get_channel(channel_id)
-                    
+
                     picarto[m_id]['live'] = 1
                     fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
                     await self.bot.send_message(channel, fmt)
@@ -54,17 +56,17 @@ class Picarto:
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     channel_id = channel_id or server.id
                     channel = self.bot.get_channel(channel_id)
-                    
+
                     picarto[m_id]['live'] = 0
                     fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.name, url)
                     await self.bot.send_message(channel, fmt)
                     config.saveContent('picarto', picarto)
             pass
             await asyncio.sleep(30)
-    
+
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def picarto(self, ctx, member: discord.Member=None):
+    async def picarto(self, ctx, member: discord.Member = None):
         """This command can be used to view Picarto stats about a certain member"""
         member = member or ctx.message.author
         picarto_urls = config.getContent('picarto') or {}
@@ -73,22 +75,24 @@ class Picarto:
             await self.bot.say("That user does not have a picarto url setup!")
             return
         member_url = member_url['picarto_url']
-        
+
         stream = re.search("(?<=picarto.tv/)(.*)", member_url).group(1)
-        url = '{}/channel/{}?key={}'.format(base_url,stream,key)
+        url = '{}/channel/{}?key={}'.format(base_url, stream, key)
         with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
             async with s.get(url) as r:
                 response = await r.text()
-        
+
         data = json.loads(response)
-        things_to_print = ['channel','commissions_enabled','is_nsfw','program','tablet','followers','content_type']
-        fmt = "\n".join("{}: {}".format(i.title().replace("_", " "), r) for i,r in data.items() if i in things_to_print)
+        things_to_print = ['channel', 'commissions_enabled', 'is_nsfw', 'program', 'tablet', 'followers',
+                           'content_type']
+        fmt = "\n".join(
+            "{}: {}".format(i.title().replace("_", " "), r) for i, r in data.items() if i in things_to_print)
         social_links = data.get('social_urls')
         if social_links:
-            fmt2 = "\n".join("\t{}: {}".format(i.title().replace("_", " "), r) for i,r in social_links.items())
+            fmt2 = "\n".join("\t{}: {}".format(i.title().replace("_", " "), r) for i, r in social_links.items())
             fmt = "{}\nSocial Links:\n{}".format(fmt, fmt2)
         await self.bot.say("Picarto stats for {}: ```\n{}```".format(member.display_name, fmt))
-        
+
     @picarto.command(name='add', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def add_picarto_url(self, ctx, url: str):
@@ -99,9 +103,9 @@ class Picarto:
             url = "https://www.picarto.tv/{}".format(url)
         else:
             url = "https://www.{}".format(url)
-        
-        api_url = '{}/channel/{}?key={}'.format(base_url,re.search("https://www.picarto.tv/(.*)",url).group(1),key)
-        
+
+        api_url = '{}/channel/{}?key={}'.format(base_url, re.search("https://www.picarto.tv/(.*)", url).group(1), key)
+
         with aiohttp.ClientSession() as s:
             async with s.get(api_url) as r:
                 if not r.status == 200:
@@ -116,10 +120,13 @@ class Picarto:
             picarto_urls[ctx.message.author.id]['picarto_url'] = url
         else:
             picarto_urls[ctx.message.author.id] = {'picarto_url': url, 'server_id': ctx.message.server.id,
-                                             'channel_id': ctx.message.channel.id, 'notifications_on': 1, 'live': 0}
+                                                   'channel_id': ctx.message.channel.id, 'notifications_on': 1,
+                                                   'live': 0}
         config.saveContent('picarto', picarto_urls)
-        await self.bot.say("I have just saved your Picarto url {}, this channel will now send a notification when you go live".format(ctx.message.author.mention))
-        
+        await self.bot.say(
+            "I have just saved your Picarto url {}, this channel will now send a notification when you go live".format(
+                ctx.message.author.mention))
+
     @picarto.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def remove_picarto_url(self, ctx):
@@ -133,26 +140,26 @@ class Picarto:
             await self.bot.say(
                 "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
                     ctx.message.author.mention))
-    
+
     @picarto.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def notify(self, ctx, channel: discord.Channel=None):
+    async def notify(self, ctx, channel: discord.Channel = None):
         """This can be used to turn picarto notifications on or off
         Call this command by itself, with a channel name, to change which one has the notification sent to it"""
         channel = channel or ctx.message.channel
-        server = ctx.message.server
         member = ctx.message.author
-        
+
         picarto = config.getContent('picarto') or {}
         result = picarto.get(member.id)
         if result is None:
             await self.bot.say(
                 "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
                     member.mention))
-        
+
         picarto[member.id]['channel_id'] = channel.id
         config.saveContent('picarto', picarto)
-        await self.bot.say("I have just changed which channel will be notified when you go live, to {}".format(channel.name))
+        await self.bot.say(
+            "I have just changed which channel will be notified when you go live, to {}".format(channel.name))
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -192,6 +199,8 @@ class Picarto:
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(
                     ctx.message.author.mention))
+
+
 def setup(bot):
     p = Picarto(bot)
     config.loop.create_task(p.check_channels())
