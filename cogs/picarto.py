@@ -194,5 +194,5 @@ class Picarto:
                     ctx.message.author.mention))
 def setup(bot):
     p = Picarto(bot)
-    #config.loop.create_task(p.check_channels())
+    config.loop.create_task(p.check_channels())
     bot.add_cog(Picarto(bot))
