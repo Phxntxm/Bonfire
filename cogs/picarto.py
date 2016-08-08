@@ -55,7 +55,11 @@ class Picarto:
         data = json.loads(response)
         things_to_print = ['channel','commissions_enabled','is_nsfw','program','tablet','followers','content_type']
         fmt = "\n".join("{}: {}".format(i, r) for i,r in data.items() if i in things_to_print)
-        await self.bot.say("Picarto stats for {}: ```\n{}```".format(member.display_name, fmt))
+        social_links = data.get('social_urls')
+        if social_links:
+            fmt2 = "\n".join("\t{}: {}".format(i, r) for i,r in social_links.items())
+            fmt = "{}\nSocial Links:\n{}".format(fmt, fmt2)
+        await self.bot.say("Picarto stats for {}: ```\n{}```".format(member.display_name, fmt.title().replace("_", " ")))
         
     @picarto.command(name='add', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
