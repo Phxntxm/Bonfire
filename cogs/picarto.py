@@ -44,6 +44,7 @@ class Picarto:
         if not member_url:
             await self.bot.say("That user does not have a picarto url setup!")
             return
+        member_url = member_url['picarto_url']
         
         with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
             async with s.get(member_url) as r:
