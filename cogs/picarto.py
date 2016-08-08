@@ -35,21 +35,29 @@ class Picarto:
                 url = r['picarto_url']
                 live = r['live']
                 notify = r['notifications_on']
+                channel_id = r.get('channel_id') or None
                 user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
                 online = await channel_online(user)
+                
                 if not live and notify and online:
-                    server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
+                    server = self.bot.get_server(r['server_id'])
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
+                    channel_id = channel_id or server.id
+                    channel = self.bot.get_channel(channel_id)
+                    
                     picarto[m_id]['live'] = 1
                     fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
-                    await self.bot.send_message(server, fmt)
+                    await self.bot.send_message(channel, fmt)
                     config.saveContent('picarto', picarto)
                 elif live and not online:
-                    server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
+                    server = self.bot.get_server(r['server_id'])
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
+                    channel_id = channel_id or server.id
+                    channel = self.bot.get_channel(channel_id)
+                    
                     picarto[m_id]['live'] = 0
                     fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.name, url)
-                    await self.bot.send_message(server, fmt)
+                    await self.bot.send_message(channel, fmt)
                     config.saveContent('picarto', picarto)
             pass
             await asyncio.sleep(30)
