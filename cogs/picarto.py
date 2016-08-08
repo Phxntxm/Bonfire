@@ -128,8 +128,9 @@ class Picarto:
     
     @picarto.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def notify(self, ctx, channel: discord.channel=None):
-        """This can be used to turn picarto notifications on or off"""
+    async def notify(self, ctx, channel: discord.Channel=None):
+        """This can be used to turn picarto notifications on or off
+        Call this command by itself, with a channel name, to change which one has the notification sent to it"""
         channel = channel or ctx.message.channel
         server = ctx.message.server
         member = ctx.message.author
