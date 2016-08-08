@@ -92,6 +92,63 @@ class Picarto:
         config.saveContent('picarto', picarto_urls)
         await self.bot.say("I have just saved your Picarto url {}".format(ctx.message.author.mention))
         
+    @picarto.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def remove_picarto_url(self, ctx):
+        """Removes your picarto URL"""
+        picarto = config.getContent('twitch')
+        if picarto.get(ctx.message.author.id) is not None:
+            del picarto[ctx.message.author.id]
+            config.saveContent('picarto', picarto)
+            await self.bot.say("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
+        else:
+            await self.bot.say(
+                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
+                    ctx.message.author.mention))
+    
+    @picarto.group(pass_context=True, no_pm=True, invoke_without_command=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def notify(self, ctx):
+        """This can be used to turn picarto notifications on or off"""
+        pass
+
+    @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def notify_on(self, ctx):
+        """Turns picarto notifications on"""
+        picarto = config.getContent('twitch')
+        result = picarto.get(ctx.message.author.id)
+        if result is None:
+            await self.bot.say(
+                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
+                    ctx.message.author.mention))
+        elif result['notifications_on']:
+            await self.bot.say("What do you want me to do, send two notifications? Not gonna happen {}".format(
+                ctx.message.author.mention))
+        else:
+            picarto[ctx.message.author.id]['notifications_on'] = 1
+            config.saveContent('picarto', picarto)
+            await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
+                ctx.message.author.mention))
+
+    @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def notify_off(self, ctx):
+        """Turns picarto notifications off"""
+        picarto = config.getContent('twitch')
+        if picarto.get(ctx.message.author.id) is None:
+            await self.bot.say(
+                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
+                    ctx.message.author.mention))
+        elif not picarto.get(ctx.message.author.id)['notifications_on']:
+            await self.bot.say("I am already set to not notify if you go live! Pay attention brah {}".format(
+                ctx.message.author.mention))
+        else:
+            picarto[ctx.message.author.id]['notifications_on'] = 0
+            await self.bot.say(
+                "I will not notify if you go live anymore {}, "
+                "are you going to stream some lewd stuff you don't want people to see?~".format(
+                    ctx.message.author.mention))
 def setup(bot):
     p = Picarto(bot)
     #config.loop.create_task(p.check_channels())
