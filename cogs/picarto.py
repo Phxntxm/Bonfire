@@ -52,7 +52,7 @@ class Picarto:
                         await self.bot.send_message(channel, fmt)
                 elif live and not online:
                     for server_id, channel_id in r['servers'].items():
-                        server = self.bot.get_server(r['server_id'])
+                        server = self.bot.get_server(server_id)
                         channel = self.bot.get_channel(channel_id)
                         member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
