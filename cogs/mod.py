@@ -35,7 +35,7 @@ class Mod:
     @checks.customPermsOrRole(kick_members=True)
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
-        nsfw_channels = config.getContent('nsfw_channels')
+        nsfw_channels = config.getContent('nsfw_channels') or {}
         if ctx.message.channel.id in nsfw_channels:
             await self.bot.say("This channel is already registered as 'nsfw'!")
         else:
@@ -47,7 +47,7 @@ class Mod:
     @checks.customPermsOrRole(kick_members=True)
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
-        nsfw_channels = config.getContent('nsfw_channels')
+        nsfw_channels = config.getContent('nsfw_channels') or {}
         if ctx.message.channel.id not in nsfw_channels:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
         else:
@@ -144,7 +144,7 @@ class Mod:
         """Removes the custom permissions setup on the command specified"""
         cmd = " ".join(command)
         custom_perms = config.getContent('custom_permissions') or {}
-        server_perms = custom_perms.get(ctx.message.server.id)
+        server_perms = custom_perms.get(ctx.message.server.id) or {}
         if server_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return

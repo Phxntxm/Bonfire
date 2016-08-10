@@ -23,6 +23,8 @@ def customPermsOrRole(**perms):
             required_perm = discord.Permissions(required_perm_value)
         except KeyError:
             required_perm = default_perms
+        except TypeError:
+            required_perm = default_perms
         return member_perms >= required_perm
 
     return commands.check(predicate)

@@ -14,7 +14,7 @@ class Tags:
     @checks.customPermsOrRole(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has"""
-        tags = config.getContent('tags')
+        tags = config.getContent('tags') or {}
         fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id'] == ctx.message.server.id)
         await self.bot.say('```\n{}```'.format(fmt))
 
@@ -23,7 +23,7 @@ class Tags:
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
-        tags = config.getContent('tags')
+        tags = config.getContent('tags') or {}
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
             await self.bot.say('That tag does not exist!')
@@ -45,7 +45,7 @@ class Tags:
             await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
             return
             
-        tags = config.getContent('tags')
+        tags = config.getContent('tags') or {}
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 t['result'] = tag_result
@@ -67,7 +67,7 @@ class Tags:
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
-        tags = config.getContent('tags')
+        tags = config.getContent('tags') or {}
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
             await self.bot.say(

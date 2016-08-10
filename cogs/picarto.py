@@ -3,7 +3,6 @@ import json
 import asyncio
 import discord
 import re
-import traceback
 
 from discord.ext import commands
 from .utils import config

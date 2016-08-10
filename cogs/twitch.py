@@ -33,7 +33,7 @@ class Twitch:
     async def checkChannels(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
-            twitch = config.getContent('twitch')
+            twitch = config.getContent('twitch') or {}
             for m_id, r in twitch.items():
                 url = r['twitch_url']
                 live = r['live']
@@ -115,7 +115,7 @@ class Twitch:
     @checks.customPermsOrRole(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
-        twitch = config.getContent('twitch')
+        twitch = config.getContent('twitch') or {}
         if twitch.get(ctx.message.author.id) is not None:
             del twitch[ctx.message.author.id]
             config.saveContent('twitch', twitch)
@@ -135,7 +135,7 @@ class Twitch:
     @checks.customPermsOrRole(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on"""
-        twitch = config.getContent('twitch')
+        twitch = config.getContent('twitch') or {}
         result = twitch.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
@@ -154,7 +154,7 @@ class Twitch:
     @checks.customPermsOrRole(send_messages=True)
     async def notify_off(self, ctx):
         """Turns twitch notifications off"""
-        twitch = config.getContent('twitch')
+        twitch = config.getContent('twitch') or {}
         if twitch.get(ctx.message.author.id) is None:
             await self.bot.say(
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(

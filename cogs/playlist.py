@@ -151,18 +151,18 @@ class Music:
         if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
-            
+
         author_channel = ctx.message.author.voice.voice_channel
         my_channel = ctx.message.server.me.voice.voice_channel
-        
+
         if my_channel != author_channel:
             await self.bot.say("You are not currently in the channel; please join before trying to request a song.")
             return
-        
+
         try:
             player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         except youtube_dl.DownloadError:
-            await self.bot.send_message(ctx.message.channel,"Sorry, that's not a supported URL!")
+            await self.bot.send_message(ctx.message.channel, "Sorry, that's not a supported URL!")
             return
         player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)
@@ -217,20 +217,21 @@ class Music:
             await state.voice.disconnect()
         except:
             pass
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def eta(self, ctx):
         """Provides an ETA on when your next song will play"""
         state = self.get_voice_state(ctx.message.server)
         author = ctx.message.author
-        
+
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
         if len(state.songs._queue) == 0:
             await self.bot.say("Nothing currently in the queue")
             return
-        
+
         count = state.current.player.duration
         found = False
         for song in state.songs._queue:
@@ -245,7 +246,7 @@ class Music:
             await self.bot.say("You are not in the queue!")
             return
         await self.bot.say("ETA till your next play is: {0[0]}m {0[1]}s".format(divmod(round(count, 0), 60)))
-    
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def queue(self, ctx):
