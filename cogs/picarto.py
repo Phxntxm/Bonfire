@@ -37,31 +37,31 @@ class Picarto:
                 url = r['picarto_url']
                 live = r['live']
                 notify = r['notifications_on']
-                channel_id = r.get('channel_id') or None
                 user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
                 online = await check_online(user)
 
                 if not live and notify and online:
-                    server = self.bot.get_server(r['server_id'])
-                    member = discord.utils.find(lambda m: m.id == m_id, server.members)
-                    channel_id = channel_id or server.id
-                    channel = self.bot.get_channel(channel_id)
+                    for server_id, channel_id in r['servers'].items():
+                        server = self.bot.get_server(server_id)
+                        channel = self.bot.get_channel(channel_id)
+                        member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
-                    picarto[m_id]['live'] = 1
-                    fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
-                    await self.bot.send_message(channel, fmt)
-                    config.saveContent('picarto', picarto)
+                        picarto[m_id]['live'] = 1
+                        fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
+                        await self.bot.send_message(channel, fmt)
+                        config.saveContent('picarto', picarto)
                 elif live and not online:
-                    server = self.bot.get_server(r['server_id'])
-                    member = discord.utils.find(lambda m: m.id == m_id, server.members)
-                    channel_id = channel_id or server.id
-                    channel = self.bot.get_channel(channel_id)
+                    for server_id, channel_id in r['servers'].items():
+                        server = self.bot.get_server(r['server_id'])
+                        channel = self.bot.get_channel(channel_id)
+                        member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
-                    picarto[m_id]['live'] = 0
-                    fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.display_name,
-                                                                                                    url)
-                    await self.bot.send_message(channel, fmt)
-                    config.saveContent('picarto', picarto)
+                        picarto[m_id]['live'] = 0
+                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
+                            member.display_name,
+                            url)
+                        await self.bot.send_message(channel, fmt)
+                        config.saveContent('picarto', picarto)
             pass
             await asyncio.sleep(30)
 
@@ -120,9 +120,9 @@ class Picarto:
         if result is not None:
             picarto_urls[ctx.message.author.id]['picarto_url'] = url
         else:
-            picarto_urls[ctx.message.author.id] = {'picarto_url': url, 'server_id': ctx.message.server.id,
-                                                   'channel_id': ctx.message.channel.id, 'notifications_on': 1,
-                                                   'live': 0}
+            picarto_urls[ctx.message.author.id] = {'picarto_url': url,
+                                                   'servers': {ctx.message.server.id: ctx.message.channel.id},
+                                                   'notifications_on': 1, 'live': 0}
         config.saveContent('picarto', picarto_urls)
         await self.bot.say(
             "I have just saved your Picarto url {}, this channel will now send a notification when you go live".format(
@@ -157,10 +157,10 @@ class Picarto:
                 "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
                     member.mention))
 
-        picarto[member.id]['channel_id'] = channel.id
+        picarto[member.id]['servers'][ctx.message.server.id] = channel.id
         config.saveContent('picarto', picarto)
         await self.bot.say(
-            "I have just changed which channel will be notified when you go live, to {}".format(channel.name))
+            "I have just changed which channel will be notified when you go live, to `{}`".format(channel.name))
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
