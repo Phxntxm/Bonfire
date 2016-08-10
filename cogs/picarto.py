@@ -48,8 +48,8 @@ class Picarto:
 
                         picarto[m_id]['live'] = 1
                         fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
-                        await self.bot.send_message(channel, fmt)
                         config.saveContent('picarto', picarto)
+                        await self.bot.send_message(channel, fmt)
                 elif live and not online:
                     for server_id, channel_id in r['servers'].items():
                         server = self.bot.get_server(r['server_id'])
@@ -60,9 +60,8 @@ class Picarto:
                         fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
                             member.display_name,
                             url)
-                        await self.bot.send_message(channel, fmt)
                         config.saveContent('picarto', picarto)
-            pass
+                        await self.bot.send_message(channel, fmt)
             await asyncio.sleep(30)
 
     @commands.group(pass_context=True, invoke_without_command=True)
