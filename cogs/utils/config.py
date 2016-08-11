@@ -12,6 +12,7 @@ with open("phrases.yml", "r") as f:
 
 connection = None
 
+botName = global_config.get("bot_name")
 botDescription = global_config.get("description")
 commandPrefix = global_config.get("command_prefix", "!")
 discord_bots_key = global_config.get('discord_bots_key')

@@ -6,6 +6,7 @@ import re
 
 from discord.ext import commands
 from .utils import config
+from .utils.config import getPhrase
 from .utils import checks
 
 base_url = 'https://ptvappapi.picarto.tv'
@@ -17,7 +18,7 @@ key = '03e26294-b793-11e5-9a41-005056984bd4'
 async def check_online(stream):
     try:
         url = '{}/channel/{}?key={}'.format(base_url, stream, key)
-        with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
+        with aiohttp.ClientSession(headers={"User-Agent": config.botName+"/1.0.0"}) as s:
             async with s.get(url) as r:
                 response = await r.text()
         return json.loads(response).get('is_online')
@@ -47,7 +48,7 @@ class Picarto:
                         member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
                         picarto[m_id]['live'] = 1
-                        fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
+                        fmt = getPhrase("LIVESTREAM:USER_ONLINE").format(member.mention, url)
                         config.saveContent('picarto', picarto)
                         await self.bot.send_message(channel, fmt)
                 elif live and not online:
@@ -57,9 +58,7 @@ class Picarto:
                         member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
                         picarto[m_id]['live'] = 0
-                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
-                            member.display_name,
-                            url)
+                        fmt = getPhrase("LIVESTREAM:USER_OFFLINE").format(member.mention, url)
                         config.saveContent('picarto', picarto)
                         await self.bot.send_message(channel, fmt)
             await asyncio.sleep(30)
@@ -72,13 +71,13 @@ class Picarto:
         picarto_urls = config.getContent('picarto') or {}
         member_url = picarto_urls.get(member.id)
         if not member_url:
-            await self.bot.say("That user does not have a picarto url setup!")
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:PICARTO")))
             return
         member_url = member_url['picarto_url']
 
         stream = re.search("(?<=picarto.tv/)(.*)", member_url).group(1)
         url = '{}/channel/{}?key={}'.format(base_url, stream, key)
-        with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
+        with aiohttp.ClientSession(headers={"User-Agent": config.botName+"1.0.0"}) as s:
             async with s.get(url) as r:
                 response = await r.text()
 
@@ -91,7 +90,7 @@ class Picarto:
         if social_links:
             fmt2 = "\n".join("\t{}: {}".format(i.title().replace("_", " "), r) for i, r in social_links.items())
             fmt = "{}\nSocial Links:\n{}".format(fmt, fmt2)
-        await self.bot.say("Picarto stats for {}: ```\n{}```".format(member.display_name, fmt))
+        await self.bot.say((getPhrase("LIVESTREAM:STATS")+" ```\n{2}```").format(getPhrase("LIVESTREAM:PICARTO"), member.display_name, fmt))
 
     @picarto.command(name='add', pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -109,8 +108,7 @@ class Picarto:
         with aiohttp.ClientSession() as s:
             async with s.get(api_url) as r:
                 if not r.status == 200:
-                    await self.bot.say("That Picarto user does not exist! "
-                                       "What would be the point of adding a nonexistant Picarto user? Silly")
+                    await self.bot.say(getPhrase("LIVESTREAM:ERROR_INVALID_STREAM_NAME").format(getPhrase("LIVESTREAM:PICARTO")))
                     return
 
         picarto_urls = config.getContent('picarto') or {}
@@ -118,14 +116,18 @@ class Picarto:
 
         if result is not None:
             picarto_urls[ctx.message.author.id]['picarto_url'] = url
+            channel = picarto_urls[ctx.message.author.id]['servers']
         else:
+            channel = discord.utils.get(ctx.message.server.channels, name='livestream_announcements', type=discord.ChannelType.text).id or discord.utils.get(ctx.message.server.channels, name='announcements', type=discord.ChannelType.text).id
+            ac = True
+            if not channel:
+                channel = ctx.message.channel.id
+                ac = True
             picarto_urls[ctx.message.author.id] = {'picarto_url': url,
-                                                   'servers': {ctx.message.server.id: discord.utils.get(ctx.message.server.channels, name='livestream_announcements', type=discord.ChannelType.text) or ctx.message.channel.id},
+                                                   'servers': {ctx.message.server.id: channel},
                                                    'notifications_on': 1, 'live': 0}
         config.saveContent('picarto', picarto_urls)
-        await self.bot.say(
-            "I have just saved your Picarto url {}, this channel will now send a notification when you go live".format(
-                ctx.message.author.mention))
+        await self.bot.say(getPhrase("LIVESTREAM:URL_SAVED").format(getPhrase("LIVESTREAM:PICARTO"), ctx.message.author.mention, getPhrase("LIVESTREAM:DEDICATED_ANNOUNCEMENT") if ac else getPhrase("THIS")))
 
     @picarto.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -135,11 +137,9 @@ class Picarto:
         if picarto.get(ctx.message.author.id) is not None:
             del picarto[ctx.message.author.id]
             config.saveContent('picarto', picarto)
-            await self.bot.say("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:URL_REMOVED").format(getPhrase("LIVESTREAM:PICARTO"), ctx.message.author.mention))
         else:
-            await self.bot.say(
-                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
-                    ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:PICARTO")))
 
     @picarto.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -152,14 +152,11 @@ class Picarto:
         picarto = config.getContent('picarto') or {}
         result = picarto.get(member.id)
         if result is None:
-            await self.bot.say(
-                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
-                    member.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:PICARTO")))
 
         picarto[member.id]['servers'][ctx.message.server.id] = channel.id
         config.saveContent('picarto', picarto)
-        await self.bot.say(
-            "I have just changed which channel will be notified when you go live, to `{}`".format(channel.name))
+        await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATION_CHANNEL_CHANGED").format(channel.name))
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -168,17 +165,13 @@ class Picarto:
         picarto = config.getContent('picarto') or {}
         result = picarto.get(ctx.message.author.id)
         if result is None:
-            await self.bot.say(
-                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
-                    ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:PICARTO")))
         elif result['notifications_on']:
-            await self.bot.say("What do you want me to do, send two notifications? Not gonna happen {}".format(
-                ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_ALREADY_NOTIFYING").format(ctx.message.author.mention))
         else:
             picarto[ctx.message.author.id]['notifications_on'] = 1
             config.saveContent('picarto', picarto)
-            await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
-                ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATIONS_ON").format(ctx.message.author.mention))
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -186,19 +179,13 @@ class Picarto:
         """Turns picarto notifications off"""
         picarto = config.getContent('picarto') or {}
         if picarto.get(ctx.message.author.id) is None:
-            await self.bot.say(
-                "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
-                    ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:PICARTO")))
         elif not picarto.get(ctx.message.author.id)['notifications_on']:
-            await self.bot.say("I am already set to not notify if you go live! Pay attention brah {}".format(
-                ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_ALREADY_NOT_NOTIFYING").format(ctx.message.author.mention))
         else:
             picarto[ctx.message.author.id]['notifications_on'] = 0
             config.saveContent('picarto', picarto)
-            await self.bot.say(
-                "I will not notify if you go live anymore {}, "
-                "are you going to stream some lewd stuff you don't want people to see?~".format(
-                    ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATIONS_OFF").format(ctx.message.author.mention))
 
 
 def setup(bot):
