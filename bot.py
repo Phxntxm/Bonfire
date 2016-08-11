@@ -38,7 +38,10 @@ async def on_ready():
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.defaultStatus, type=0))
     channel_id = config.getContent('restart_server')
-    config.saveContent('battling',{})
+
+    # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
+    config.saveContent('battling', {})
+    # Check if the bot was restarted, if so 
     if channel_id != 0:
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
@@ -98,7 +101,7 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, error)
     elif not isinstance(error, commands.CommandNotFound):
         now = datetime.datetime.now()
-        with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
+        with open("{}/error_log".format(config.base_path), 'a') as f:
             print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
                   file=f)
             try:
