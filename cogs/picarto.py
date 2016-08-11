@@ -41,8 +41,10 @@ class Picarto:
                 online = await check_online(user)
 
                 if not live and notify and online:
-                    for server_id, channel_id in r['servers'].items():
+                    for server_id in r['servers'].items():
                         server = self.bot.get_server(server_id)
+                        server_alerts = config.getContent('server_alerts') or {}
+                        channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
@@ -53,6 +55,8 @@ class Picarto:
                 elif live and not online:
                     for server_id, channel_id in r['servers'].items():
                         server = self.bot.get_server(server_id)
+                        server_alerts = config.getContent('server_alerts') or {}
+                        channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
