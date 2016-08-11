@@ -55,7 +55,7 @@ async def on_member_join(member):
         return
 
     channel = discord.utils.get(member.server.channels, id=server_notifications)
-    await bot.send_message(channel, getPhrase("MEMBER_JOIN").format(member))
+    await bot.send_message(channel, getPhrase("MEMBER_JOIN").format(member.server.name, member.mention))
 
 
 @bot.event

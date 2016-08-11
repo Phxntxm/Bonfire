@@ -28,7 +28,7 @@ class Links:
             else:
                 await self.bot.say(data['list'][0]['definition'])
         except discord.HTTPException:
-            await self.bot.say('```Error: Definition is too long for me to send```')
+            await self.bot.say(getPhrase("LINKS:ERROR_DEFINITION_LENGTH_EXCEEDED"))
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -40,6 +40,7 @@ class Links:
             nsfw_channels = config.getContent("nsfw_channels") or []
             if ctx.message.channel.id in nsfw_channels:
                 url += ",+explicit&filter_id=95938"
+            await self.bot.say(getPhrase("LINKS:LOOK_UP_INIT").format(getPhrase("LINKS:DERPIBOORU")))
 
             # Get the response from derpibooru and parse the 'search' result from it
             with aiohttp.ClientSession() as s:
@@ -50,7 +51,7 @@ class Links:
             try:
                 results = data['search']
             except KeyError:
-                await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
+                await self.bot.say(getPhrase("LINKS:ERROR_NO_SEARCH_RESULTS").format(ctx.message.author.mention))
                 return
 
             # Get the link if it exists, if not return saying no results found
@@ -58,7 +59,7 @@ class Links:
                 index = random.randint(0, len(results) - 1)
                 imageLink = 'http://{}'.format(results[index].get('representations').get('full')[2:].strip())
             else:
-                await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
+                await self.bot.say(getPhrase("LINKS:ERROR_NO_SEARCH_RESULTS").format(ctx.message.author.mention))
                 return
         else:
             # If no search term was provided, search for a random image
@@ -77,7 +78,7 @@ class Links:
         tags = tags.replace(' ', '_')
         tags = tags.replace(',_', '%20')
         url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
-        await self.bot.say("Looking up an image with those tags....")
+        await self.bot.say(getPhrase("LINKS:LOOK_UP_INIT").format(getPhrase("LINKS:e621")))
         
         nsfw_channels = config.getContent('nsfw_channels') or []
         if ctx.message.channel.id in nsfw_channels:
@@ -91,7 +92,7 @@ class Links:
                     
         data = json.loads(response)
         if len(data) == 0:
-            await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
+            await self.bot.say(getPhrase("LINKS:ERROR_NO_SEARCH_RESULTS").format(ctx.message.author.mention))
             return
         else:
             if len(data) == 1:
