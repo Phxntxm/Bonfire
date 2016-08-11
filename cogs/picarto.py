@@ -14,16 +14,19 @@ base_url = 'https://ptvappapi.picarto.tv'
 key = '03e26294-b793-11e5-9a41-005056984bd4'
 
 
-async def check_online(stream):
+async def online_users():
     try:
-        url = '{}/channel/{}?key={}'.format(base_url, stream, key)
+        url = '{}/online/all?key={}'.format(base_url, key)
         with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
             async with s.get(url) as r:
                 response = await r.text()
-        return json.loads(response).get('is_online')
+        return json.loads(response)
     except:
-        return False
+        return {}
 
+def check_online(online_channels, channel):
+    matches = [stream for stream in online_channels if stream['channel_name'].lower() == channel.lower()]
+    return len(matches) > 0
 
 class Picarto:
     def __init__(self, bot):
@@ -33,12 +36,13 @@ class Picarto:
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
             picarto = config.getContent('picarto') or {}
+            online_users = await online_users()
             for m_id, r in picarto.items():
                 url = r['picarto_url']
                 live = r['live']
                 notify = r['notifications_on']
                 user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                online = await check_online(user)
+                online = check_online(online_users, user)
 
                 if not live and notify and online:
                     for server_id in r['servers'].items():

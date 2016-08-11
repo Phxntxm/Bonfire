@@ -21,7 +21,7 @@ class Mod:
         server_alerts = config.getContent('server_alerts') or {}
         server_alerts[ctx.message.server.id] = channel.id
         await self.bot.say("I have just changed this server's 'notifications' channel"
-                           "All notifications will now go to {}".format(channel))
+                           "\nAll notifications will now go to `{}`".format(channel))
         
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
@@ -33,7 +33,7 @@ class Mod:
         notifications = config.getContent('user_notifications') or {}
         notifications[ctx.message.server.id] = on_off
         config.saveContent('user_notifications',notifications)
-        fmt = "notify, in this channel" if on_off else "not notify"
+        fmt = "notify" if on_off else "not notify"
         await self.bot.say("This server will now {} if someone has joined or left".format(fmt))
         
     @commands.group(pass_context=True, no_pm=True)
