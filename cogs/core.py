@@ -129,7 +129,7 @@ class Core:
             fmt = getPhrase("CORE:DICE_ROLL")
         else:
             fmt = getPhrase("CORE:DICE_ROLL_PLURAL")
-        await self.bot.say(fmt.format(ctx, dice, num, valueStr))
+        await self.bot.say(fmt.format(ctx.message.author.mention, dice, num, valueStr))
 
 
 def setup(bot):
