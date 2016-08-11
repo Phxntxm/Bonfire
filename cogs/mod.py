@@ -19,7 +19,9 @@ class Mod:
         """This command is used to set a channel as the server's 'notifications' channel
         Any notifications (like someone going live on Twitch, or Picarto) will go to that channel"""
         server_alerts = config.getContent('server_alerts') or {}
-        server_alerts[ctx.message.server.id] = ctx.message.channel.id
+        server_alerts[ctx.message.server.id] = channel.id
+        await self.bot.say("I have just changed this server's 'notifications' channel"
+                           "All notifications will now go to {}".format(channel))
         
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
