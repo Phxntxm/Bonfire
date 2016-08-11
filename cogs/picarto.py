@@ -120,7 +120,7 @@ class Picarto:
             picarto_urls[ctx.message.author.id]['picarto_url'] = url
         else:
             picarto_urls[ctx.message.author.id] = {'picarto_url': url,
-                                                   'servers': {ctx.message.server.id: ctx.message.channel.id},
+                                                   'servers': {ctx.message.server.id: discord.utils.get(ctx.message.server.channels, name='livestream_announcements', type=discord.ChannelType.text) or ctx.message.channel.id},
                                                    'notifications_on': 1, 'live': 0}
         config.saveContent('picarto', picarto_urls)
         await self.bot.say(

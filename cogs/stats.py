@@ -14,7 +14,7 @@ class Stats:
     @checks.customPermsOrRole(send_messages=True)
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
-        boops = config.getContent('boops') or {}
+        boops = config.getContent('boops')
         if not boops.get(ctx.message.author.id):
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -51,7 +51,7 @@ class Stats:
     @checks.customPermsOrRole(send_messages=True)
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record"""
-        battles = config.getContent('battle_records') or {}
+        battles = config.getContent('battle_records')
 
         server_member_ids = [member.id for member in ctx.message.server.members]
         server_members = {member_id: stats for member_id, stats in battles.items() if member_id in server_member_ids}
@@ -73,7 +73,7 @@ class Stats:
         """Prints the battling stats for you, or the user provided"""
         member = member or ctx.message.author
 
-        all_members = config.getContent('battle_records') or {}
+        all_members = config.getContent('battle_records')
         if member.id not in all_members:
             await self.bot.say("That user has not battled yet!")
             return

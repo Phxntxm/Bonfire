@@ -32,7 +32,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def adddoggo(self, url: str):
         """Saves a URL as an image to add for the doggo command"""
-        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        os.chdir('images')
         local_path = 'doggo{}.jpg'.format(len(glob.glob('doggo*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
@@ -46,7 +46,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def addsnek(self, url: str):
         """Saves a URL as an image to add for the snek command"""
-        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        os.chdir('images')
         local_path = 'snek{}.jpg'.format(len(glob.glob('snek*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:

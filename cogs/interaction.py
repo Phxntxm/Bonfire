@@ -2,6 +2,7 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 from .utils import config
 from .utils import checks
+from .utils.config import getPhrase
 import discord
 import random
 
@@ -75,33 +76,33 @@ class Interaction:
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    @commands.cooldown(1, 180, BucketType.user)
+    @commands.cooldown(1, 60, BucketType.user)
     @checks.customPermsOrRole(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         if len(ctx.message.mentions) == 0:
-            await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_NO_USER_MENTIONED").format(ctx.message.author.mention))
             return
         if len(ctx.message.mentions) > 1:
-            await self.bot.say("You cannot battle more than one person at once!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_MULTIPLE_MENTIONS").format(ctx.message.author.mention, getPhrase("INTERACTION:BATTLE")))
             return
         if ctx.message.author.id == player2.id:
-            await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_PREVENT_SUICIDE").format(ctx.message.author.mention))
             return
         if self.bot.user.id == player2.id:
-            await self.bot.say("I always win, don't even try it.")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_GODBOT").format(ctx.message.author.mention))
             return
         if userBattling(ctx):
-            await self.bot.say("You or the person you are trying to battle is already in a battle!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_IN_BATTLE").format(ctx.message.author.mention, player2.mention))
             return
 
         battling = config.getContent('battling') or {}
         battling[ctx.message.author.id] = ctx.message.mentions[0].id
         config.saveContent('battling', battling)
 
-        fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
+        fmt = getPhrase("INTERACTION:BATTLE_REQUEST")
         config.loop.call_later(180, battlingOff, ctx.message.author.id)
-        await self.bot.say(fmt.format(ctx.message.author, player2))
+        await self.bot.say(fmt.format(ctx.message.author, player2, config.commandPrefix))
         await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
@@ -109,13 +110,13 @@ class Interaction:
     async def accept(self, ctx):
         """Accepts the battle challenge"""
         if not userBattling(ctx):
-            await self.bot.say("You are not currently in a battle!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_NOT_IN_BATTLE").format(ctx.message.author.mention))
             return
 
         battling = config.getContent('battling') or {}
         p1 = [p1_id for p1_id, p2_id in battling.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
-            await self.bot.say("You are not currently being challenged to a battle!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_NO_BATTLE_REQUEST").format(ctx.message.author.mention))
             return
 
         battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.server.members)
@@ -138,38 +139,38 @@ class Interaction:
     async def decline(self, ctx):
         """Declines the battle challenge"""
         if not userBattling(ctx):
-            await self.bot.say("You are not currently in a battle!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_NOT_IN_BATTLE").format(ctx.message.author.mention))
             return
 
         battling = config.getContent('battling') or {}
         p1 = [p1_id for p1_id, p2_id in battling.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
-            await self.bot.say("You are not currently being challenged to a battle!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_NO_BATTLE_REQUEST").format(ctx.message.author.mention))
             return
         battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.server.members)
         battleP2 = ctx.message.author
 
         battlingOff(ctx.message.author.id)
-        await self.bot.say("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
+        await self.bot.say(getPhrase("INTERACTION:BATTLE_DECLINE").format(battleP2.mention, battleP1.mention))
         await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.cooldown(1, 180, BucketType.user)
+    @commands.cooldown(3, 30, BucketType.user)
     @checks.customPermsOrRole(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""
         booper = ctx.message.author
         if len(ctx.message.mentions) == 0:
-            await self.bot.say("You must mention someone in the room " + ctx.message.author.mention + "!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_NO_USER_MENTIONED").format(ctx.message.author.mention))
             return
         if len(ctx.message.mentions) > 1:
-            await self.bot.say("You cannot boop more than one person at once!")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_MULTIPLE_MENTIONS").format(ctx.message.author.mention, getPhrase("INTERACTION:BOOP")))
             return
         if boopee.id == booper.id:
-            await self.bot.say("You can't boop yourself! Silly...")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_SELF_BOOP").format(ctx.message.author.mention))
             return
         if boopee.id == self.bot.user.id:
-            await self.bot.say("Why the heck are you booping me? Get away from me >:c")
+            await self.bot.say(getPhrase("INTERACTION:ERROR_BOT_BOOP").format(ctx.message.author.mention))
             return
 
         boops = config.getContent('boops') or {}
@@ -187,8 +188,8 @@ class Interaction:
             boops[ctx.message.author.id] = booper_boops
 
         config.saveContent('boops', boops)
-        fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
-        await self.bot.say(fmt.format(booper, boopee, amount))
+        fmt = getPhrase("INTERACTION:BOOPED")
+        await self.bot.say(fmt.format(booper, boopee, amount, "s" if amount > 1 else ""))
         await self.bot.delete_message(ctx.message)
 
 

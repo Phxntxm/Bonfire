@@ -4,8 +4,11 @@ import json
 
 loop = asyncio.get_event_loop()
 
-with open("/home/phxntx5/public_html/Bonfire/config.yml", "r") as f:
+with open("config.yml", "r") as f:
     global_config = yaml.load(f)
+
+with open("phrases.yml", "r") as f:
+    global_phrases = yaml.load(f)
 
 connection = None
 
@@ -20,7 +23,7 @@ owner_ids = global_config.get("owner_id", [])
 
 
 def saveContent(key: str, content):
-    with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
+    with open("config.json", "r+") as jf:
         data = json.load(jf)
         jf.seek(0)
         data[key] = content
@@ -36,7 +39,10 @@ def saveContent(key: str, content):
 
 def getContent(key: str):
     try:
-        with open("/home/phxntx5/public_html/Bonfire/config.json", "r+") as jf:
+        with open("config.json", "r+") as jf:
             return json.load(jf)[key]
     except KeyError:
         return None
+
+def getPhrase(key: str):
+    return global_phrases.get(key, key)

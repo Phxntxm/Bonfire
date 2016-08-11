@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from .utils import checks
+from .utils.config import getPhrase
 
 import subprocess
 import os
@@ -10,7 +11,6 @@ import re
 import calendar
 import pendulum
 import datetime
-
 
 class Core:
     """Core commands, these are the miscallaneous commands that don't fit into other categories'"""
@@ -42,7 +42,7 @@ class Core:
         else:
             month = months.get(month.lower())
             if month is None:
-                await self.bot.say("Please provide a valid Month!")
+                await self.bot.say(getPhrase("CORE:ERROR_INVALID_MONTH"))
                 return
         if year is None:
             year = datetime.datetime.today().year
@@ -53,7 +53,7 @@ class Core:
     @checks.customPermsOrRole(send_messages=True)
     async def uptime(self):
         """Provides a printout of the current bot's uptime"""
-        await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
+        await self.bot.say("%s ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()) %getPhrase("CORE:UPTIME"))
 
     @commands.command(aliases=['invite'])
     @checks.customPermsOrRole(send_messages=True)
@@ -69,15 +69,15 @@ class Core:
         perms.embed_links = True
         perms.read_message_history = True
         perms.attach_files = True
-        await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
-                           .format(discord.utils.oauth_url('183748889814237186', perms)))
+        await self.bot.say("%s\n{}"
+                           .format(discord.utils.oauth_url('183748889814237186', perms)) %getPhrase("CORE:ADDBOT"))
 
     @commands.command(pass_context=True)
     @checks.customPermsOrRole(send_messages=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
-        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        os.chdir('images')
         f = glob.glob('doggo*')[random.randint(0, len(glob.glob('doggo*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
@@ -87,7 +87,7 @@ class Core:
     async def snek(self, ctx):
         """Use this to print a random snek image.
         Sneks are o3o"""
-        os.chdir('/home/phxntx5/public_html/Bonfire/images')
+        os.chdir('images')
         f = glob.glob('snek*')[random.randint(0, len(glob.glob('snek*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
@@ -96,6 +96,7 @@ class Core:
     @checks.customPermsOrRole(send_messages=True)
     async def joke(self):
         """Prints a random riddle"""
+        # XXX Only works on Linux with "fortune" installed!
         fortuneCommand = "/usr/bin/fortune riddles"
         fortune = subprocess.check_output(fortuneCommand.split()).decode("utf-8")
         await self.bot.say(fortune)
@@ -109,30 +110,25 @@ class Core:
             dice = re.search("(\d*)d(\d*)", notation).group(1)
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
         # This error will be hit if the notation is completely different than #d#
-        except AttributeError:
-            await self.bot.say("Please provide the die notation in #d#!")
-            return
-        # This error will be hit if there was an issue converting to an int
-        # This means the notation was still given wrong
-        except ValueError:
-            await self.bot.say("Please provide the die notation in #d#!")
+        except (AttributeError, ValueError):
+            await self.bot.say(getPhrase("CORE:ERROR_DICE_NOTATION_MISMATCH"))
             return
         # Dice will be None if d# was provided, assume this means 1d#
         dice = dice or 1
         dice = int(dice)
         if dice > 10:
-            await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
+            await self.bot.say(getPhrase("CORE:ERROR_DICE_MAX_COUNT"))
             return
         if num > 100:
-            await self.bot.say("What die has more than 100 sides? Please, calm down")
+            await self.bot.say(getPhrase("CORE:ERROR_DICE_MAX_SIDES"))
             return
 
         valueStr = ", ".join(str(random.randint(1, num)) for i in range(0, int(dice)))
 
         if dice == 1:
-            fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
+            fmt = getPhrase("CORE:DICE_ROLL")
         else:
-            fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
+            fmt = getPhrase("CORE:DICE_ROLL_PLURAL")
         await self.bot.say(fmt.format(ctx, dice, num, valueStr))
 
 

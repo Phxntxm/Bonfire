@@ -7,6 +7,7 @@ import datetime
 import pendulum
 from discord.ext import commands
 from cogs.utils import config
+from cogs.utils.config import getPhrase
 
 extensions = ['cogs.interaction',
               'cogs.core',
@@ -14,9 +15,8 @@ extensions = ['cogs.interaction',
               'cogs.owner',
               'cogs.stats',
               'cogs.playlist',
-              'cogs.twitch',
               'cogs.picarto',
-              'cogs.overwatch',
+              'cogs.twitch',
               'cogs.links',
               'cogs.tags',
               'cogs.roles',
@@ -28,7 +28,7 @@ discord_logger.setLevel(logging.WARNING)
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='bonfire.log', encoding='utf-8', mode='a')
+handler = logging.FileHandler(filename='bot.log', encoding='utf-8', mode='a')
 log.addHandler(handler)
 
 
@@ -41,7 +41,7 @@ async def on_ready():
     config.saveContent('battling',{})
     if channel_id != 0:
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
-        await bot.send_message(destination, "I have just finished restarting!")
+        await bot.send_message(destination, getPhrase("RESTART_COMPLETE"))
         config.saveContent('restart_server', 0)
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
@@ -55,7 +55,7 @@ async def on_member_join(member):
         return
 
     channel = discord.utils.get(member.server.channels, id=server_notifications)
-    await bot.send_message(channel, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
+    await bot.send_message(channel, getPhrase("MEMBER_JOIN").format(member))
 
 
 @bot.event
@@ -67,7 +67,7 @@ async def on_member_remove(member):
 
     channel = discord.utils.get(member.server.channels, id=server_notifications)
     await bot.send_message(channel,
-                           "{0} has left the server, I hope it wasn't because of something I said :c".format(
+                           getPhrase("MEMBER_LEAVE").format(
                                member.display_name))
 
 
@@ -81,24 +81,23 @@ async def on_message(message):
 @bot.event
 async def on_command_error(error, ctx):
     if isinstance(error, commands.BadArgument):
-        fmt = "Please provide a valid argument to pass to the command: {}".format(error)
+        fmt = getPhrase("ERROR_BAD_ARGUMENT").format(error)
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CheckFailure):
-        fmt = "You can't tell me what to do!"
+        fmt = getPhrase("ERROR_NO_PERMISSIONS")
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.CommandOnCooldown):
         m, s = divmod(error.retry_after, 60)
-        fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
-            .format(round(m), round(s))
+        fmt = getPhrase("ERROR_COOLDOWN").format(round(m), round(s))
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.NoPrivateMessage):
-        fmt = "This command cannot be used in a private message"
+        fmt = getPhrase("ERROR_NOPM")
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.MissingRequiredArgument):
         await bot.send_message(ctx.message.channel, error)
     elif not isinstance(error, commands.CommandNotFound):
         now = datetime.datetime.now()
-        with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
+        with open("error.log", 'a') as f:
             print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
                   file=f)
             try:
@@ -107,6 +106,8 @@ async def on_command_error(error, ctx):
             except:
                 traceback.print_tb(error.__traceback__, file=f)
                 print('{0.__class__.__name__}: {0}'.format(error), file=f)
+        fmt = getPhrase("ERROR_INTERNAL").format(discord.utils.get(ctx.message.server.members, id=config.owner_ids))
+        await bot.send_message(ctx.message.channel, fmt)
 
 
 if __name__ == '__main__':

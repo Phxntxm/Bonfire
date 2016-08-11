@@ -1,104 +1,16 @@
+# XXX Make me!
+
 import asyncio
 import discord
 from discord.ext import commands
+from .utils import config
 from .utils import checks
-import youtube_dl
 
-if not discord.opus.is_loaded():
-    discord.opus.load_opus('/usr/lib64/libopus.so.0')
-
-
-class VoiceEntry:
-    def __init__(self, message, player):
-        self.requester = message.author
-        self.channel = message.channel
-        self.player = player
-
-    def __str__(self):
-        fmt = '*{0.title}* uploaded by {0.uploader} and requested by {1.display_name}'
-        duration = self.player.duration
-        if duration:
-            fmt += ' [length: {0[0]}m {0[1]}s]'.format(divmod(round(duration, 0), 60))
-        return fmt.format(self.player, self.requester)
-
-
-class VoiceState:
-    def __init__(self, bot):
-        self.current = None
-        self.voice = None
-        self.bot = bot
-        self.play_next_song = asyncio.Event()
-        self.songs = asyncio.Queue(maxsize=10)
-        self.skip_votes = set()  # a set of user_ids that voted
-        self.audio_player = self.bot.loop.create_task(self.audio_player_task())
-        self.opts = {
-            'default_search': 'auto',
-            'quiet': True,
-        }
-
-    def is_playing(self):
-        if self.voice is None or self.current is None:
-            return False
-
-        player = self.current.player
-        return not player.is_done()
-
-    @property
-    def player(self):
-        return self.current.player
-
-    def skip(self):
-        self.skip_votes.clear()
-        if self.is_playing():
-            self.player.stop()
-
-    def toggle_next(self):
-        self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
-
-    async def audio_player_task(self):
-        while True:
-            self.play_next_song.clear()
-            self.skip_votes.clear()
-            self.current = None
-            self.current = await self.songs.get()
-            await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
-
-            self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts,
-                                                                      after=self.toggle_next)
-            self.current.player.start()
-            await self.play_next_song.wait()
-
-
-class Music:
-    """Voice related commands.
-    Works in multiple servers at once.
-    """
+class Vote:
+    """Voting made simple!"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.voice_states = {}
-
-    def get_voice_state(self, server):
-        state = self.voice_states.get(server.id)
-        if state is None:
-            state = VoiceState(self.bot)
-            self.voice_states[server.id] = state
-
-        return state
-
-    async def create_voice_client(self, channel):
-        voice = await self.bot.join_voice_channel(channel)
-        state = self.get_voice_state(channel.server)
-        state.voice = voice
-
-    def __unload(self):
-        for state in self.voice_states.values():
-            try:
-                state.audio_player.cancel()
-                if state.voice:
-                    self.bot.loop.create_task(state.voice.disconnect())
-            except:
-                pass
 
     @commands.command(no_pm=True)
     @checks.customPermsOrRole(send_messages=True)

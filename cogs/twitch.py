@@ -33,7 +33,7 @@ class Twitch:
     async def checkChannels(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
-            twitch = config.getContent('twitch') or {}
+            twitch = config.getContent('twitch')
             for m_id, r in twitch.items():
                 url = r['twitch_url']
                 live = r['live']
@@ -115,32 +115,46 @@ class Twitch:
     @checks.customPermsOrRole(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
-        twitch = config.getContent('twitch') or {}
+        twitch = config.getContent('twitch')
         if twitch.get(ctx.message.author.id) is not None:
             del twitch[ctx.message.author.id]
             config.saveContent('twitch', twitch)
             await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
         else:
             await self.bot.say(
-                "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
-                    ctx.message.author.mention))
+                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
+                    ctx.message.author.mention) %config.commandPrefix)
 
     @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def notify(self, ctx):
-        """This can be used to turn notifications on or off"""
-        pass
+    async def notify(self, ctx, channel: discord.Channel = None):
+        """This can be used to turn twitch notifications on or off
+        Call this command by itself, with a channel name, to change which one has the notification sent to it"""
+        channel = channel or ctx.message.channel
+        member = ctx.message.author
+
+        twitch = config.getContent('twitch') or {}
+        result = twitch.get(member.id)
+        if result is None:
+            await self.bot.say(
+                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
+                    member.mention) %config.commandPrefix)
+        else:
+            twitch[member.id]['channel_id'] = channel.id
+            config.saveContent('twitch', twitch)
+            await self.bot.say(
+                "I have just changed which channel will be notified when you go live, to {}".format(channel.name))
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on"""
-        twitch = config.getContent('twitch') or {}
+        twitch = config.getContent('twitch')
         result = twitch.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
-                "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
-                    ctx.message.author.mention))
+                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
+                    ctx.message.author.mention) %config.commandPrefix)
         elif result['notifications_on']:
             await self.bot.say("What do you want me to do, send two notifications? Not gonna happen {}".format(
                 ctx.message.author.mention))
@@ -154,11 +168,11 @@ class Twitch:
     @checks.customPermsOrRole(send_messages=True)
     async def notify_off(self, ctx):
         """Turns twitch notifications off"""
-        twitch = config.getContent('twitch') or {}
+        twitch = config.getContent('twitch')
         if twitch.get(ctx.message.author.id) is None:
             await self.bot.say(
-                "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
-                    ctx.message.author.mention))
+                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
+                    ctx.message.author.mention) %config.commandPrefix)
         elif not twitch.get(ctx.message.author.id)['notifications_on']:
             await self.bot.say("I am already set to not notify if you go live! Pay attention brah {}".format(
                 ctx.message.author.mention))

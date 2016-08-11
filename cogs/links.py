@@ -37,7 +37,8 @@ class Links:
         if len(search) > 0:
             # This sets the url as url?q=search+terms
             url = 'https://derpibooru.org/search.json?q={}'.format('+'.join(search))
-            if ctx.message.channel.id in config.getContent("nsfw_channels"):
+            nsfw_channels = config.getContent("nsfw_channels") or []
+            if ctx.message.channel.id in nsfw_channels:
                 url += ",+explicit&filter_id=95938"
 
             # Get the response from derpibooru and parse the 'search' result from it
@@ -77,8 +78,9 @@ class Links:
         tags = tags.replace(',_', '%20')
         url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
         await self.bot.say("Looking up an image with those tags....")
-
-        if ctx.message.channel.id in config.getContent('nsfw_channels'):
+        
+        nsfw_channels = config.getContent('nsfw_channels') or []
+        if ctx.message.channel.id in nsfw_channels:
             url += "%20rating:explicit"
         else:
             url += "%20rating:safe"
