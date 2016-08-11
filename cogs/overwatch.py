@@ -1,4 +1,5 @@
 from .utils import config
+from .utils.config import getPhrase
 from .utils import checks
 from discord.ext import commands
 import discord
