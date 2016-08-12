@@ -33,27 +33,25 @@ class Owner:
     @commands.check(checks.isOwner)
     async def adddoggo(self, url: str):
         """Saves a URL as an image to add for the doggo command"""
-        os.chdir('images')
-        local_path = 'doggo{}.jpg'.format(len(glob.glob('doggo*')))
+        local_path = 'images/doggo{}.jpg'.format(len(glob.glob('images/doggo*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 val = await r.read()
                 with open(local_path, "wb") as f:
                     f.write(val)
-        await self.bot.say(getPhrase("IMAGE_SAVED").format(len(glob.glob('doggo*')), getPhrase("DOGGO")))
+        await self.bot.say(getPhrase("IMAGE_SAVED").format(len(glob.glob('images/doggo*')), getPhrase("DOGGO")))
             
     @commands.command()
     @commands.check(checks.isOwner)
     async def addsnek(self, url: str):
         """Saves a URL as an image to add for the snek command"""
-        os.chdir('images')
-        local_path = 'snek{}.jpg'.format(len(glob.glob('snek*')))
+        local_path = 'images/snek{}.jpg'.format(len(glob.glob('images/snek*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 val = await r.read()
                 with open(local_path, "wb") as f:
                     f.write(val)
-        await self.bot.say(getPhrase("IMAGE_SAVED").format(len(glob.glob('snek*')), getPhrase("SNEK")))
+        await self.bot.say(getPhrase("IMAGE_SAVED").format(len(glob.glob('images/snek*')), getPhrase("SNEK")))
 
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
