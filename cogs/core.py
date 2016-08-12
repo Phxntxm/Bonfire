@@ -107,14 +107,10 @@ class Core:
             dice = re.search("(\d*)d(\d*)", notation).group(1)
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
         # This error will be hit if the notation is completely different than #d#
-        except AttributeError:
+        except (AttributeError, ValueError):
             await self.bot.say("Please provide the die notation in #d#!")
             return
-        # This error will be hit if there was an issue converting to an int
-        # This means the notation was still given wrong
-        except ValueError:
-            await self.bot.say("Please provide the die notation in #d#!")
-            return
+        
         # Dice will be None if d# was provided, assume this means 1d#
         dice = dice or 1
         dice = int(dice)
