@@ -5,6 +5,8 @@ import traceback
 import logging
 import datetime
 import pendulum
+import os
+
 from discord.ext import commands
 from cogs.utils import config
 
@@ -25,6 +27,7 @@ extensions = ['cogs.interaction',
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.WARNING)
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
@@ -98,7 +101,7 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, error)
     elif not isinstance(error, commands.CommandNotFound):
         now = datetime.datetime.now()
-        with open("/home/phxntx5/public_html/Bonfire/error_log", 'a') as f:
+        with open("error_log", 'a') as f:
             print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
                   file=f)
             try:
