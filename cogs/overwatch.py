@@ -1,4 +1,5 @@
 from .utils import config
+from .utils.config import getPhrase
 from .utils import checks
 from discord.ext import commands
 import discord
@@ -33,9 +34,7 @@ class Overwatch:
         Provide a hero after the member to get stats for that specific hero"""
         if user is None:
             user = ctx.message.author
-
-        ow_stats = config.getContent('overwatch') or {}
-        bt = ow_stats.get(user.id)
+        bt = config.getContent('overwatch').get(user.id)
 
         if bt is None:
             await self.bot.say("I do not have this user's battletag saved!")
@@ -93,7 +92,7 @@ class Overwatch:
                                        "format needs to be `user#xxxx`. Capitalization matters")
                     return
 
-        ow = config.getContent('overwatch') or {}
+        ow = config.getContent('overwatch')
         ow[ctx.message.author.id] = bt
         if config.saveContent('overwatch', ow):
             await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
@@ -104,7 +103,7 @@ class Overwatch:
     @checks.customPermsOrRole(send_messages=True)
     async def delete(self, ctx):
         """Removes your battletag from the records"""
-        result = config.getContent('overwatch') or {}
+        result = config.getContent('overwatch')
         if result.get(ctx.message.author.id):
             del result[ctx.message.author.id]
             if config.saveContent('overwatch', result):

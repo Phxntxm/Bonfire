@@ -1,4 +1,5 @@
 from .utils import config
+from .utils.config import getPhrase
 import aiohttp
 import logging
 import json
@@ -30,7 +31,7 @@ class StatsUpdate:
 
         url = '{0}/bots/{1.user.id}/stats'.format(discord_bots_url, self.bot)
         async with self.session.post(url, data=payload, headers=headers) as resp:
-            log.info('bots.discord.pw statistics returned {0.status} for {1}'.format(resp, payload))
+            log.info(getPhrase("STATS:RETURN_STATUS").format(resp.status, payload))
 
     async def on_server_join(self, server):
         await self.update()

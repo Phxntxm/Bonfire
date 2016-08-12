@@ -1,5 +1,6 @@
 from discord.ext import commands
 from .utils import config
+from .utils.config import getPhrase
 from .utils import checks
 import re
 import os
@@ -24,7 +25,7 @@ class Owner:
     async def restart(self, ctx):
         """Forces the bot to restart"""
         config.saveContent('restart_server', ctx.message.channel.id)
-        await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
+        await self.bot.say(getPhrase("RESTART_INIT").format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)
 
@@ -32,27 +33,25 @@ class Owner:
     @commands.check(checks.isOwner)
     async def adddoggo(self, url: str):
         """Saves a URL as an image to add for the doggo command"""
-        local_path = 'images/doggo{}.jpg'.format(len(glob.glob('doggo*')))
+        local_path = 'images/doggo{}.jpg'.format(len(glob.glob('images/doggo*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 val = await r.read()
                 with open(local_path, "wb") as f:
                     f.write(val)
-        await self.bot.say(
-            "Just saved a new doggo image! I now have {} doggo images!".format(len(glob.glob('doggo*'))))
+        await self.bot.say(getPhrase("IMAGE_SAVED").format(len(glob.glob('images/doggo*')), getPhrase("DOGGO")))
             
     @commands.command()
     @commands.check(checks.isOwner)
     async def addsnek(self, url: str):
         """Saves a URL as an image to add for the snek command"""
-        local_path = 'images/snek{}.jpg'.format(len(glob.glob('snek*')))
+        local_path = 'images/snek{}.jpg'.format(len(glob.glob('images/snek*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 val = await r.read()
                 with open(local_path, "wb") as f:
                     f.write(val)
-        await self.bot.say(
-            "Just saved a new snek image! I now have {} snek images!".format(len(glob.glob('snek*'))))
+        await self.bot.say(getPhrase("IMAGE_SAVED").format(len(glob.glob('images/snek*')), getPhrase("SNEK")))
 
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
@@ -72,17 +71,25 @@ class Owner:
                     self.bot.loop.create_task(self.bot.say("```\n{}```".format(v)))
                 exec(match_multi[0])
         except Exception as error:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            fmt = getPhrase("ERROR_DEBUG_COMMAND_FAIL") + '```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command(pass_context=True)
     @commands.check(checks.isOwner)
     async def shutdown(self, ctx):
         """Shuts the bot down"""
-        fmt = 'Shutting down, I will miss you {0.author.name}'
-        await self.bot.say(fmt.format(ctx.message))
+        fmt = getPhrase("SHUTDOWN")
+        await self.bot.say(fmt.format(ctx.message.author.mention))
         await self.bot.logout()
         await self.bot.close()
+
+    @commands.command(pass_context=True)
+    @commands.check(checks.isOwner)
+    async def reloadconfig(self, ctx):
+        """Reloads the configuration"""
+        config.loadConfig(False)
+        fmt = getPhrase("RELOAD_CONFIG")
+        await self.bot.say(fmt.format(ctx.message.author.mention))
 
     @commands.command()
     @commands.check(checks.isOwner)
@@ -97,7 +104,7 @@ class Owner:
     async def name(self, newNick: str):
         """Changes the bot's name"""
         await self.bot.edit_profile(username=newNick)
-        await self.bot.say('Changed username to ' + newNick)
+        await self.bot.say(getPhrase("NICKNAME_CHANGE").format(newNick))
 
     @commands.command()
     @commands.check(checks.isOwner)
@@ -106,7 +113,7 @@ class Owner:
         newStatus = ' '.join(stat)
         game = discord.Game(name=newStatus, type=0)
         await self.bot.change_status(game)
-        await self.bot.say("Just changed my status to '{0}'!".format(newStatus))
+        await self.bot.say(getPhrase("STATUS_CHANGE").format(newStatus))
 
     @commands.command()
     @commands.check(checks.isOwner)
@@ -117,9 +124,9 @@ class Owner:
             module = "cogs.{}".format(module)
         try:
             self.bot.load_extension(module)
-            await self.bot.say("I have just loaded the {} module".format(module))
+            await self.bot.say(getPhrase("MODULE_LOAD").format(module, getPhrase("LOADED")))
         except Exception as error:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            fmt = getPhrase("ERROR_DEBUG_COMMAND_FAIL") + '```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command()
@@ -131,9 +138,9 @@ class Owner:
             module = "cogs.{}".format(module)
         try:
             self.bot.unload_extension(module)
-            await self.bot.say("I have just unloaded the {} module".format(module))
+            await self.bot.say(getPhrase("MODULE_LOAD").format(module, getPhrase("UNLOADED")))
         except Exception as error:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            fmt = getPhrase("ERROR_DEBUG_COMMAND_FAIL") + '```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command()
@@ -146,9 +153,9 @@ class Owner:
         self.bot.unload_extension(module)
         try:
             self.bot.load_extension(module)
-            await self.bot.say("I have just reloaded the {} module".format(module))
+            await self.bot.say(getPhrase("MODULE_LOAD").format(module, getPhrase("RELOADED")))
         except Exception as error:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
+            fmt = getPhrase("ERROR_DEBUG_COMMAND_FAIL") + '```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
 
 

@@ -1,5 +1,6 @@
 from discord.ext import commands
 from .utils import checks
+from .utils.config import getPhrase
 from .utils import config
 import discord
 import re
@@ -20,8 +21,7 @@ class Mod:
         Any notifications (like someone going live on Twitch, or Picarto) will go to that channel"""
         server_alerts = config.getContent('server_alerts') or {}
         server_alerts[ctx.message.server.id] = channel.id
-        await self.bot.say("I have just changed this server's 'notifications' channel"
-                           "\nAll notifications will now go to `{}`".format(channel))
+        await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATION_CHANNEL_CHANGED").format(channel))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
@@ -32,39 +32,40 @@ class Mod:
         on_off = ctx.message.channel.id if re.search("(on|yes|true)", on_off.lower()) else None
         notifications = config.getContent('user_notifications') or {}
         notifications[ctx.message.server.id] = on_off
+
         config.saveContent('user_notifications', notifications)
-        fmt = "notify" if on_off else "not notify"
-        await self.bot.say("This server will now {} if someone has joined or left".format(fmt))
+        fmt = getPhrase("USER_NOTIFICATIONS_ON") if on_off else getPhrase("USER_NOTIFICATIONS_OFF")
+        await self.bot.say(getPhrase("USER_NOTIFICATIONS").format(fmt))
 
     @commands.group(pass_context=True, no_pm=True)
     async def nsfw(self, ctx):
         """Handles adding or removing a channel as a nsfw channel"""
         if ctx.invoked_subcommand is None:
-            await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
+            await self.bot.say(getPhrase("ERROR_INVALID_SUBCOMMAND").format(ctx.subcommand_passed))
 
     @nsfw.command(name="add", pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
-        nsfw_channels = config.getContent('nsfw_channels') or {}
+        nsfw_channels = config.getContent('nsfw_channels') or []
         if ctx.message.channel.id in nsfw_channels:
-            await self.bot.say("This channel is already registered as 'nsfw'!")
+            await self.bot.say(getPhrase("ERROR_NSFW_REGISTERED"))
         else:
             nsfw_channels.append(ctx.message.channel.id)
             config.saveContent('nsfw_channels', nsfw_channels)
-            await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
+            await self.bot.say(getPhrase("NSFW_REGISTERED"))
 
     @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
-        nsfw_channels = config.getContent('nsfw_channels') or {}
+        nsfw_channels = config.getContent('nsfw_channels') or []
         if ctx.message.channel.id not in nsfw_channels:
-            await self.bot.say("This channel is not registered as a ''nsfw' channel!")
+            await self.bot.say(getPhrase("ERROR_NSFW_NOT_REGISTERED"))
         else:
             nsfw_channels.remove(ctx.message.channel.id)
             config.saveContent('nsfw_channels', nsfw_channels)
-            await self.bot.say("This channel has just been unregistered as a nsfw channel")
+            await self.bot.say(getPhrase("NSFW_DEREGISTERED"))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
@@ -79,24 +80,22 @@ class Mod:
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
         if command is None:
-            await self.bot.say(
-                "Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
+            await self.bot.say(getPhrase("VALID_PERMISSION_LIST") + " ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
 
         custom_perms = config.getContent('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id)
         if server_perms is None:
-            await self.bot.say("There are no custom permissions setup on this server yet!")
+            await self.bot.say(getPhrase("ERROR_NO_CUSTOMPERMS_SERVER"))
             return
 
         perms_value = server_perms.get(command)
         if perms_value is None:
-            await self.bot.say("That command has no custom permissions setup on it!")
+            await self.bot.say(getPhrase("ERROR_NO_CUSTOMPERMS_COMMAND"))
         else:
             permissions = discord.Permissions(perms_value)
             needed_perm = [perm[0] for perm in permissions if perm[1]][0]
-            await self.bot.say("You need to have the permission `{}` "
-                               "to use the command `{}` in this server".format(needed_perm, command))
+            await self.bot.say(getPhrase("ERROR_NEED_CUSTOM_PERM").format(needed_perm, command))
 
     @perms.command(name="add", aliases=["setup,create"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
@@ -127,18 +126,16 @@ class Mod:
                 break
 
         if cmd is None:
-            await self.bot.say(
-                "That command does not exist! You can't have custom permissions on a non-existant command....")
+            await self.bot.say(getPhrase("ERROR_CUSTOMPERMS_NOCOMMAND"))
             return
 
         for check in cmd.checks:
             if "isOwner" == check.__name__ or re.search("has_permissions", str(check)) is not None:
-                await self.bot.say("This command cannot have custom permissions setup!")
+                await self.bot.say(getPhrase("ERROR_CUSTOMPERMS_INVALIDCOMMAND"))
                 return
 
         if getattr(discord.Permissions, permissions, None) is None:
-            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```\n{}```"
-                               .format(permissions, "\n".join(valid_perms)))
+            await self.bot.say(getPhrase("VALID_PERMISSION_LIST") + " ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
 
         custom_perms = config.getContent('custom_permissions') or {}
@@ -147,8 +144,7 @@ class Mod:
         custom_perms[ctx.message.server.id] = server_perms
 
         config.saveContent('custom_permissions', custom_perms)
-        await self.bot.say("I have just added your custom permissions; "
-                           "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
+        await self.bot.say(getPhrase("CUSTOMPERM_ADDED").format(permissions, command))
 
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
@@ -156,18 +152,18 @@ class Mod:
         """Removes the custom permissions setup on the command specified"""
         cmd = " ".join(command)
         custom_perms = config.getContent('custom_permissions') or {}
-        server_perms = custom_perms.get(ctx.message.server.id) or {}
+        server_perms = custom_perms.get(ctx.message.server.id)
         if server_perms is None:
-            await self.bot.say("There are no custom permissions setup on this server yet!")
+            await self.bot.say(getPhrase("ERROR_NO_CUSTOMPERMS_SERVER"))
             return
         command_perms = server_perms.get(cmd)
         if command_perms is None:
-            await self.bot.say("You do not have custom permissions setup on this command yet!")
+            await self.bot.say(getPhrase("ERROR_NO_CUSTOMPERMS_COMMAND"))
             return
         del custom_perms[ctx.message.server.id][cmd]
         config.saveContent('custom_permissions', custom_perms)
-        await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
-
+        await self.bot.say(getPhrase("CUSTOMPERM_REMOVED").format(cmd))
+        
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_messages=True)
     async def purge(self, ctx, limit: int = 100):
@@ -181,7 +177,7 @@ class Mod:
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         if server_rules is None or len(server_rules) == 0:
-            await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
+            await self.bot.say(getPhrase("ERROR_NO_RULES"))
             return
         fmt = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(server_rules))
         await self.bot.say('```\n{}```'.format(fmt))
@@ -195,7 +191,7 @@ class Mod:
         server_rules.append(rule)
         rules[ctx.message.server.id] = server_rules
         config.saveContent('rules', rules)
-        await self.bot.say("I have just saved your new rule, use the rules command to view this server's current rules")
+        await self.bot.say(getPhrase("RULE_ADDED"))
 
     @rules.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
@@ -206,19 +202,17 @@ class Mod:
         rules = config.getContent('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         if server_rules is None or len(server_rules) == 0:
-            await self.bot.say(
-                "This server currently has no rules on it! Can't remove something that doesn't exist bro")
+            await self.bot.say(getPhrase("ERROR_NO_RULES"))
             return
         list_rules = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(server_rules))
 
         if rule is None:
-            await self.bot.say("Your rules are:\n```\n{}```Please provide the rule number"
-                               "you would like to remove (just the number)".format(list_rules))
+            await self.bot.say(getPhrase("RULE_REMOVE_INIT").format(list_rules))
 
             msg = await self.bot.wait_for_message(timeout=60.0, author=ctx.message.author, channel=ctx.message.channel,
                                                   check=lambda m: m.content.isdigit())
             if msg is None:
-                await self.bot.say("You took too long...it's just a number, seriously? Try typing a bit quicker")
+                await self.bot.say(getPhrase("ERROR_RULE_REMOVE_TIMEOUT"))
                 return
             del server_rules[int(msg.content) - 1]
             rules[ctx.message.server.id] = server_rules
@@ -228,10 +222,9 @@ class Mod:
             del server_rules[rule - 1]
             rules[ctx.message.server.id] = server_rules
             config.saveContent('rules', rules)
-            await self.bot.say("I have just removed that rule from your list of rules!")
+            await self.bot.say(getPhrase("RULE_REMOVE_COMPLETE"))
         except IndexError:
-            await self.bot.say("That is not a valid rule number, try running the command again. "
-                               "Your current rules are:\n```\n{}```".format(list_rules))
+            await self.bot.say(getPhrase("ERROR_RULE_REMOVE_NAN").format(list_rules))
 
 
 def setup(bot):

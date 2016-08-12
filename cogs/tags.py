@@ -1,5 +1,6 @@
 from discord.ext import commands
 from .utils import config
+from .utils.config import getPhrase
 from .utils import checks
 import re
 
@@ -14,7 +15,7 @@ class Tags:
     @checks.customPermsOrRole(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has"""
-        tags = config.getContent('tags') or {}
+        tags = config.getContent('tags')
         fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id'] == ctx.message.server.id)
         await self.bot.say('```\n{}```'.format(fmt))
 
@@ -23,10 +24,10 @@ class Tags:
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
-        tags = config.getContent('tags') or {}
+        tags = config.getContent('tags')
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
-            await self.bot.say('That tag does not exist!')
+            await self.bot.say(getPhrase("TAGS:ERROR_NONEXISTANT_TAG").format(tag))
             return
         await self.bot.say("{}".format(result[0]['result']))
 
@@ -39,26 +40,24 @@ class Tags:
             tag = re.search("(.*) - (.*)", result).group(1).strip()
             tag_result = re.search("(.*) - (.*)", result).group(2).strip()
         except AttributeError:
-            await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
+            await self.bot.say(getPhrase("TAGS:ERROR_INCORRECT_FORMAT").format(config.commandPrefix))
             return
         if len(tag) == 0 or len(tag_result) == 0:
-            await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
+            await self.bot.say(getPhrase("TAGS:ERROR_INCORRECT_FORMAT").format(config.commandPrefix))
             return
             
-        tags = config.getContent('tags') or {}
+        tags = config.getContent('tags')
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 t['result'] = tag_result
                 if config.saveContent('tags', tags):
-                    await self.bot.say(
-                        "I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+                    await self.bot.say(getPhrase("TAGS:TAG_UPDATED").format(tag, config.commandPrefix))
                 else:
-                    await self.bot.say("I was unable to save this data")
+                    await self.bot.say(getPhrase("ERROR_UNABLE_TO_SAVE"))
                 return
         tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
         if config.saveContent('tags', tags):
-            await self.bot.say(
-                "I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+            await self.bot.say(getPhrase("TAGS:TAG_ADDED").format(tag, config.commandPrefix))
         else:
             await self.bot.say("I was unable to save this data")
 
@@ -67,19 +66,18 @@ class Tags:
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
-        tags = config.getContent('tags') or {}
+        tags = config.getContent('tags')
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
-            await self.bot.say(
-                "The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
+            await self.bot.say(getPhrase("TAGS:ERROR_NONEXISTANT_TAG_REMOVAL").format(tag))
             return
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 tags.remove(t)
                 if config.saveContent('tags', tags):
-                    await self.bot.say('I have just removed the tag `{}`'.format(tag))
+                    await self.bot.say(getPhrase("TAGS:TAG_REMOVED").format(tag))
                 else:
-                    await self.bot.say("I was unable to save this data")
+                    await self.bot.say(getPhrase("ERROR_UNABLE_TO_SAVE"))
 
 
 def setup(bot):

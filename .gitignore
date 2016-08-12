@@ -7,7 +7,9 @@ restartcron.sh
 GitAutoDeploy.conf.json
 .htaccess
 autoupdate.php
-error_log
+error.log
+bot.log
 images/*
 .ftpquota
 bonfire.log
+phrases.yml

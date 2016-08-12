@@ -1,17 +1,40 @@
 import yaml
 import asyncio
 import json
+import shutil
 
 loop = asyncio.get_event_loop()
 
-try:
-    with open("config.yml", "r") as f:
-        global_config = yaml.load(f)
-except FileNotFoundError:
-    print("You have no config file setup! Please use config.yml.sample to setup a valid config file")
-    quit()
+def loadConfig(shouldQuit = True):
+    global global_config, global_phrases
+    try:
+        with open("config.yml", "r") as f:
+            global_config = yaml.load(f)
+    except FileNotFoundError:
+        print("You have no config file setup! Please use config.yml.sample to setup a valid config file.")
+        if shouldQuit: quit()
+        else: return False
 
-botDescription = global_config.get("description")
+    try:
+        with open("phrases.yml", "r") as f:
+            global_phrases = yaml.load(f)
+    except FileNotFoundError:
+        try:
+            with open("phrases.yml.sample", "r") as f:
+                shutil.copyfile("phrases.yml.sample", "phrases.yml")
+                global_phrases = yaml.load(f)
+        except FileNotFoundError:
+            print("All phrases are missing!  I can't exactly talk to the members without these, can I?  Please download phrases.yml.sample from the GitHub repository!")
+            if shouldQuit: quit()
+            else: return False
+
+    return True
+loadConfig()
+
+connection = None
+
+botName = global_config.get("bot_name", "Bonfire")
+botDescription = global_config.get("description", "")
 commandPrefix = global_config.get("command_prefix", "!")
 discord_bots_key = global_config.get('discord_bots_key', "")
 
@@ -21,14 +44,16 @@ try:
     botToken = global_config["bot_token"]
 except KeyError:
     print("You have no bot_token saved, this is a requirement for running a bot.")
-    print("Please use config.yml.sample to setup a valid config file")
-    quit()
+    botToken = None
     
 try:
     owner_ids = global_config["owner_id"]
 except KeyError:
     print("You have no owner_id saved! You're not going to be able to run certain commands without this.")
-    print("Please use config.yml.sample to setup a valid config file")
+    owner_ids = None
+
+if not (botToken and owner_ids):
+    print("Please use config.yml.sample to setup a valid config file.")
     quit()
 
 
@@ -51,5 +76,6 @@ def getContent(key: str):
             return json.load(jf)[key]
     except KeyError:
         return None
-    except FileNotFoundError:
-        return None
+
+def getPhrase(key: str):
+    return global_phrases.get(key, key)
