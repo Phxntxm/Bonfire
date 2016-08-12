@@ -77,7 +77,7 @@ class Core:
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
-        f = glob.glob('images/doggo*')[random.randint(0, len(glob.glob('doggo*')) - 1)]
+        f = glob.glob('images/doggo*')[random.randint(0, len(glob.glob('images/doggo*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
             
@@ -86,7 +86,7 @@ class Core:
     async def snek(self, ctx):
         """Use this to print a random snek image.
         Sneks are o3o"""
-        f = glob.glob('images/snek*')[random.randint(0, len(glob.glob('snek*')) - 1)]
+        f = glob.glob('images/snek*')[random.randint(0, len(glob.glob('images/snek*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
