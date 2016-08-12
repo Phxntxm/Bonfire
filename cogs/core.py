@@ -106,7 +106,6 @@ class Core:
         try:
             dice = re.search("(\d*)d(\d*)", notation).group(1)
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
-        # This error will be hit if the notation is completely different than #d#
         except (AttributeError, ValueError):
             await self.bot.say("Please provide the die notation in #d#!")
             return

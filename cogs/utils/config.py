@@ -34,10 +34,7 @@ except KeyError:
 
 def saveContent(key: str, content):
     with open("config.json", "a+") as jf:
-        try:
-            data = json.load(jf)
-        except json.JSONDecodeError:
-            data = {}
+        data = json.load(jf)
         data[key] = content
         jf.seek(0)
         jf.truncate()
