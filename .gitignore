@@ -11,3 +11,4 @@ error.log
 bot.log
 images/*
 .ftpquota
+bonfire.log

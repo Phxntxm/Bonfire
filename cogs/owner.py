@@ -87,7 +87,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def avatar(self, content: str):
         """Changes the avatar for the bot to the filename following the command"""
-        file = '/home/phxntx5/public_html/bot/images/' + content
+        file = 'images/' + content
         with open(file, 'rb') as fp:
             await self.bot.edit_profile(avatar=fp.read())
 

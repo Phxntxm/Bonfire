@@ -6,6 +6,8 @@ import logging
 import datetime
 import os
 import pendulum
+import os
+
 from discord.ext import commands
 from cogs.utils import config
 from cogs.utils.config import getPhrase
@@ -28,6 +30,7 @@ extensions = ['cogs.interaction',
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.WARNING)
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
@@ -41,7 +44,10 @@ async def on_ready():
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.defaultStatus, type=0))
     channel_id = config.getContent('restart_server')
-    config.saveContent('battling',{})
+
+    # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
+    config.saveContent('battling', {})
+    # Check if the bot was restarted, if so 
     if channel_id != 0:
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, getPhrase("RESTART_COMPLETE"))
