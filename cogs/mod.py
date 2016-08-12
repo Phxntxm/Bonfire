@@ -4,7 +4,7 @@ from .utils import config
 import discord
 import re
 
-valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions,p),property)]
+valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
 
 
 class Mod:
@@ -12,7 +12,7 @@ class Mod:
 
     def __init__(self, bot):
         self.bot = bot
-        
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
     async def alerts(self, ctx, channel: discord.Channel):
@@ -22,20 +22,20 @@ class Mod:
         server_alerts[ctx.message.server.id] = channel.id
         await self.bot.say("I have just changed this server's 'notifications' channel"
                            "\nAll notifications will now go to `{}`".format(channel))
-        
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
-    async def usernotify(self, ctx, on_off:str):
+    async def usernotify(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
         This will save what channel you run this command in, that will be the channel used to send the notification to
         Provide on, yes, or true to set it on; otherwise it will be turned off"""
-        on_off = ctx.message.channel.id if re.search("(on|yes|true)",on_off.lower()) else None
+        on_off = ctx.message.channel.id if re.search("(on|yes|true)", on_off.lower()) else None
         notifications = config.getContent('user_notifications') or {}
         notifications[ctx.message.server.id] = on_off
-        config.saveContent('user_notifications',notifications)
+        config.saveContent('user_notifications', notifications)
         fmt = "notify" if on_off else "not notify"
         await self.bot.say("This server will now {} if someone has joined or left".format(fmt))
-        
+
     @commands.group(pass_context=True, no_pm=True)
     async def nsfw(self, ctx):
         """Handles adding or removing a channel as a nsfw channel"""
@@ -75,11 +75,12 @@ class Mod:
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def perms(self, ctx, *, command: str=None):
+    async def perms(self, ctx, *, command: str = None):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
         if command is None:
-            await self.bot.say("Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
+            await self.bot.say(
+                "Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
 
         custom_perms = config.getContent('custom_permissions') or {}
@@ -166,12 +167,12 @@ class Mod:
         del custom_perms[ctx.message.server.id][cmd]
         config.saveContent('custom_permissions', custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
-    
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_messages=True)
-    async def purge(self, ctx, limit: int=100):
+    async def purge(self, ctx, limit: int = 100):
         """This command is used to a purge a number of messages from the channel"""
-        await self.bot.purge_from(ctx.message.channel,limit=limit)
+        await self.bot.purge_from(ctx.message.channel, limit=limit)
 
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -198,7 +199,7 @@ class Mod:
 
     @rules.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(manage_server=True)
-    async def rules_delete(self, ctx, rule: int=None):
+    async def rules_delete(self, ctx, rule: int = None):
         """Removes one of the rules from the list of this server's rules
         Provide a number to delete that rule; if no number is provided
         I'll print your current rules and ask for a number"""
