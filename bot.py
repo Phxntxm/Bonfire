@@ -4,10 +4,13 @@ import discord
 import traceback
 import logging
 import datetime
+import os
 import pendulum
 from discord.ext import commands
 from cogs.utils import config
 from cogs.utils.config import getPhrase
+
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 extensions = ['cogs.interaction',
               'cogs.core',
