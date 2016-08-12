@@ -32,8 +32,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def adddoggo(self, url: str):
         """Saves a URL as an image to add for the doggo command"""
-        os.chdir('{}/images'.format(config.base_path))
-        local_path = 'doggo{}.jpg'.format(len(glob.glob('doggo*')))
+        local_path = 'images/doggo{}.jpg'.format(len(glob.glob('doggo*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 val = await r.read()
@@ -46,8 +45,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def addsnek(self, url: str):
         """Saves a URL as an image to add for the snek command"""
-        os.chdir('{}/images'.format(config.base_path))
-        local_path = 'snek{}.jpg'.format(len(glob.glob('snek*')))
+        local_path = 'images/snek{}.jpg'.format(len(glob.glob('snek*')))
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 val = await r.read()
@@ -90,7 +88,7 @@ class Owner:
     @commands.check(checks.isOwner)
     async def avatar(self, content: str):
         """Changes the avatar for the bot to the filename following the command"""
-        file = '{}/images/{}'.format(config.base_path, content)
+        file = 'images/' + content
         with open(file, 'rb') as fp:
             await self.bot.edit_profile(avatar=fp.read())
 

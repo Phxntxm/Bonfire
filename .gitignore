@@ -10,3 +10,4 @@ autoupdate.php
 error_log
 images/*
 .ftpquota
+bonfire.log

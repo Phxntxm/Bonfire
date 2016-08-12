@@ -12,6 +12,17 @@ class Mod:
 
     def __init__(self, bot):
         self.bot = bot
+        
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(kick_members=True)
+    async def alerts(self, ctx, channel: discord.Channel):
+        """This command is used to set a channel as the server's 'notifications' channel
+        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel"""
+        server_alerts = config.getContent('server_alerts') or {}
+        server_alerts[ctx.message.server.id] = channel.id
+        await self.bot.say("I have just changed this server's 'notifications' channel"
+                           "\nAll notifications will now go to `{}`".format(channel))
+        
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
     async def usernotify(self, ctx, on_off:str):
@@ -22,7 +33,7 @@ class Mod:
         notifications = config.getContent('user_notifications') or {}
         notifications[ctx.message.server.id] = on_off
         config.saveContent('user_notifications',notifications)
-        fmt = "notify, in this channel" if on_off else "not notify"
+        fmt = "notify" if on_off else "not notify"
         await self.bot.say("This server will now {} if someone has joined or left".format(fmt))
         
     @commands.group(pass_context=True, no_pm=True)
