@@ -12,3 +12,4 @@ bot.log
 images/*
 .ftpquota
 bonfire.log
+phrases.yml

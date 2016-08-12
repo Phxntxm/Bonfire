@@ -83,6 +83,14 @@ class Owner:
         await self.bot.logout()
         await self.bot.close()
 
+    @commands.command(pass_context=True)
+    @commands.check(checks.isOwner)
+    async def reloadconfig(self, ctx):
+        """Reloads the configuration"""
+        config.loadConfig(False)
+        fmt = getPhrase("RELOAD_CONFIG")
+        await self.bot.say(fmt.format(ctx.message.author.mention))
+
     @commands.command()
     @commands.check(checks.isOwner)
     async def avatar(self, content: str):

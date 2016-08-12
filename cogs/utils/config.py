@@ -1,22 +1,35 @@
 import yaml
 import asyncio
 import json
+import shutil
 
 loop = asyncio.get_event_loop()
 
-try:
-    with open("config.yml", "r") as f:
-        global_config = yaml.load(f)
-except FileNotFoundError:
-    print("You have no config file setup! Please use config.yml.sample to setup a valid config file.")
-    quit()
+def loadConfig(shouldQuit = True):
+    global global_config, global_phrases
+    try:
+        with open("config.yml", "r") as f:
+            global_config = yaml.load(f)
+    except FileNotFoundError:
+        print("You have no config file setup! Please use config.yml.sample to setup a valid config file.")
+        if shouldQuit: quit()
+        else: return False
 
-try:
-    with open("phrases.yml", "r") as f:
-        global_phrases = yaml.load(f)
-except FileNotFoundError:
-    print("All phrases are missing!  I can't exactly talk to the members without these, can I?")
-    quit()
+    try:
+        with open("phrases.yml", "r") as f:
+            global_phrases = yaml.load(f)
+    except FileNotFoundError:
+        try:
+            with open("phrases.yml.sample", "r") as f:
+                shutil.copyfile("phrases.yml.sample", "phrases.yml")
+                global_phrases = yaml.load(f)
+        except FileNotFoundError:
+            print("All phrases are missing!  I can't exactly talk to the members without these, can I?  Please download phrases.yml.sample from the GitHub repository!")
+            if shouldQuit: quit()
+            else: return False
+
+    return True
+loadConfig()
 
 connection = None
 

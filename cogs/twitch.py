@@ -45,14 +45,14 @@ class Twitch:
                     server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 1
-                    fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
+                    fmt = getPhrase("LIVESTREAM:USER_ONLINE").format(member.mention, url)
                     await self.bot.send_message(server, fmt)
                     config.saveContent('twitch', twitch)
                 elif live and not online:
                     server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 0
-                    fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.name, url)
+                    fmt = getPhrase("LIVESTREAM:USER_OFFLINE").format(member.mention, url)
                     await self.bot.send_message(server, fmt)
                     config.saveContent('twitch', twitch)
             await asyncio.sleep(30)
@@ -67,7 +67,7 @@ class Twitch:
         twitch_channels = config.getContent('twitch') or {}
         result = twitch_channels.get(ctx.message.author.id)
         if result is None:
-            await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:TWITCH")))
             return
 
         url = result['twitch_url']
@@ -97,8 +97,7 @@ class Twitch:
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 if not r.status == 200:
-                    await self.bot.say("That twitch user does not exist! "
-                                       "What would be the point of adding a nonexistant twitch user? Silly")
+                    await self.bot.say(getPhrase("LIVESTREAM:ERROR_INVALID_STREAM_NAME").format(getPhrase("LIVESTREAM:TWITCH")))
                     return
 
         twitch = config.getContent('twitch') or {}
@@ -106,11 +105,17 @@ class Twitch:
 
         if result is not None:
             twitch[ctx.message.author.id]['twitch_url'] = url
+            channel = picarto_urls[ctx.message.author.id]['servers']
         else:
+            channel = discord.utils.get(ctx.message.server.channels, name='livestream_announcements', type=discord.ChannelType.text).id or discord.utils.get(ctx.message.server.channels, name='announcements', type=discord.ChannelType.text).id
+            ac = True
+            if not channel:
+                channel = ctx.message.channel.id
+                ac = True
             twitch[ctx.message.author.id] = {'twitch_url': url, 'server_id': ctx.message.server.id,
                                              'notifications_on': 1, 'live': 0}
         config.saveContent('twitch', twitch)
-        await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
+        await self.bot.say(getPhrase("LIVESTREAM:URL_SAVED").format(getPhrase("LIVESTREAM:TWITCH"), ctx.message.author.mention, getPhrase("LIVESTREAM:DEDICATED_ANNOUNCEMENT") if ac else getPhrase("THIS")))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -120,11 +125,9 @@ class Twitch:
         if twitch.get(ctx.message.author.id) is not None:
             del twitch[ctx.message.author.id]
             config.saveContent('twitch', twitch)
-            await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:URL_REMOVED").format(getPhrase("LIVESTREAM:TWITCH"), ctx.message.author.mention))
         else:
-            await self.bot.say(
-                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
-                    ctx.message.author.mention) %config.commandPrefix)
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:TWITCH")))
 
     @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -137,14 +140,11 @@ class Twitch:
         twitch = config.getContent('twitch') or {}
         result = twitch.get(member.id)
         if result is None:
-            await self.bot.say(
-                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
-                    member.mention) %config.commandPrefix)
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:TWITCH")))
         else:
             twitch[member.id]['channel_id'] = channel.id
             config.saveContent('twitch', twitch)
-            await self.bot.say(
-                "I have just changed which channel will be notified when you go live, to {}".format(channel.name))
+            await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATION_CHANNEL_CHANGED").format(channel.name))
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -153,17 +153,13 @@ class Twitch:
         twitch = config.getContent('twitch')
         result = twitch.get(ctx.message.author.id)
         if result is None:
-            await self.bot.say(
-                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
-                    ctx.message.author.mention) %config.commandPrefix)
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:TWITCH")))
         elif result['notifications_on']:
-            await self.bot.say("What do you want me to do, send two notifications? Not gonna happen {}".format(
-                ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_ALREADY_NOTIFYING").format(ctx.message.author.mention))
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 1
             config.saveContent('twitch', twitch)
-            await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
-                ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATIONS_ON").format(ctx.message.author.mention))
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
@@ -171,21 +167,15 @@ class Twitch:
         """Turns twitch notifications off"""
         twitch = config.getContent('twitch')
         if twitch.get(ctx.message.author.id) is None:
-            await self.bot.say(
-                "I do not have your twitch URL added {}. You can save your twitch url with %stwitch add".format(
-                    ctx.message.author.mention) %config.commandPrefix)
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_NO_URL").format(ctx.message.author.mention, config.commandPrefix, getPhrase("LIVESTREAM:TWITCH")))
         elif not twitch.get(ctx.message.author.id)['notifications_on']:
-            await self.bot.say("I am already set to not notify if you go live! Pay attention brah {}".format(
-                ctx.message.author.mention))
+            await self.bot.say(getPhrase("LIVESTREAM:ERROR_ALREADY_NOT_NOTIFYING").format(ctx.message.author.mention))
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 0
             if config.saveContent('twitch', twitch):
-                await self.bot.say(
-                    "I will not notify if you go live anymore {}, "
-                    "are you going to stream some lewd stuff you don't want people to see?~".format(
-                        ctx.message.author.mention))
+                await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATIONS_OFF").format(ctx.message.author.mention))
             else:
-                await self.bot.say("I was unable to save this data")
+                await self.bot.say(getPhrase("ERROR_UNABLE_TO_SAVE"))
 
 
 def setup(bot):

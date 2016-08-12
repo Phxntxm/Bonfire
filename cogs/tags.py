@@ -53,7 +53,7 @@ class Tags:
                 if config.saveContent('tags', tags):
                     await self.bot.say(getPhrase("TAGS:TAG_UPDATED").format(tag, config.commandPrefix))
                 else:
-                    await self.bot.say(getPhrase("TAGS:ERROR_UNABLE_TO_SAVE"))
+                    await self.bot.say(getPhrase("ERROR_UNABLE_TO_SAVE"))
                 return
         tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
         if config.saveContent('tags', tags):
@@ -77,7 +77,7 @@ class Tags:
                 if config.saveContent('tags', tags):
                     await self.bot.say(getPhrase("TAGS:TAG_REMOVED").format(tag))
                 else:
-                    await self.bot.say(getPhrase("TAGS:ERROR_UNABLE_TO_SAVE"))
+                    await self.bot.say(getPhrase("ERROR_UNABLE_TO_SAVE"))
 
 
 def setup(bot):
