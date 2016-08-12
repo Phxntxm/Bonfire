@@ -12,6 +12,16 @@ class Mod:
 
     def __init__(self, bot):
         self.bot = bot
+        
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(kick_members=True)
+    async def alerts(self, ctx, channel: discord.Channel):
+        """This command is used to set a channel as the server's 'notifications' channel
+        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel"""
+        server_alerts = config.getContent('server_alerts') or {}
+        server_alerts[ctx.message.server.id] = channel.id
+        await self.bot.say(getPhrase("LIVESTREAM:NOTIFICATION_CHANNEL_CHANGED").format(channel))
+        
     @commands.command(pass_context=True, no_pm=True)
     @checks.customPermsOrRole(kick_members=True)
     async def usernotify(self, ctx, on_off:str):
