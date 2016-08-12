@@ -111,6 +111,7 @@ class Core:
         except (AttributeError, ValueError):
             await self.bot.say(getPhrase("CORE:ERROR_DICE_NOTATION_MISMATCH"))
             return
+        
         # Dice will be None if d# was provided, assume this means 1d#
         dice = dice or 1
         dice = int(dice)

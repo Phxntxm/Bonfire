@@ -37,7 +37,7 @@ class Links:
         if len(search) > 0:
             # This sets the url as url?q=search+terms
             url = 'https://derpibooru.org/search.json?q={}'.format('+'.join(search))
-            nsfw_channels = config.getContent("nsfw_channels") or []
+            nsfw_channels = config.getContent("nsfw_channels") or {}
             if ctx.message.channel.id in nsfw_channels:
                 url += ",+explicit&filter_id=95938"
             await self.bot.say(getPhrase("LINKS:LOOK_UP_INIT").format(getPhrase("LINKS:DERPIBOORU")))
@@ -80,7 +80,7 @@ class Links:
         url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
         await self.bot.say(getPhrase("LINKS:LOOK_UP_INIT").format(getPhrase("LINKS:e621")))
         
-        nsfw_channels = config.getContent('nsfw_channels') or []
+        nsfw_channels = config.getContent('nsfw_channels') or {}
         if ctx.message.channel.id in nsfw_channels:
             url += "%20rating:explicit"
         else:
