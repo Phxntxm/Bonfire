@@ -33,12 +33,16 @@ except KeyError:
 
 
 def saveContent(key: str, content):
-    with open("config.json", "a+") as jf:
-        data = json.load(jf)
-        data[key] = content
-        jf.seek(0)
-        jf.truncate()
-        json.dump(data, jf, indent=4)
+    try:
+        with open("config.json", "r+") as jf:
+            data = json.load(jf)
+            data[key] = content
+            jf.seek(0)
+            jf.truncate()
+            json.dump(data, jf, indent=4)
+    except FileNotFoundError:
+        with open("config.json", "w+") as jf:
+            json.dump({key: content}, jf, indent=4)
 
 
 def getContent(key: str):
