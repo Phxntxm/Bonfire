@@ -51,6 +51,31 @@ class Core:
         
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)
+    async def info(self):
+        """This command can be used to print out some of my information"""
+        fmt = {}
+        
+        all_members = []
+        for member in self.bot.get_all_members():
+            all_members.append(member)
+        
+        fmt['Official Bot Server'] = "https://discord.gg/f6uzJEj"
+        authors = []
+        for author_id in config.owner_ids:
+            authors.append(discord.utils.get(all_members, id=author_id))
+        
+        
+        fmt['Author'] = ", ".join(authors)
+        fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
+        fmt['Total Servers'] = len(self.bot.servers)
+        fmt['Total Members'] = len(all_members)
+        fmt['Description'] = self.bot.description
+        
+        information = "\n".join("{}: {}".format(key, result) for key, result in fmt.items())
+        self.bot.say("```\n{}```".format(information))
+        
+    @commands.command()
+    @checks.customPermsOrRole(send_messages=True)
     async def uptime(self):
         """Provides a printout of the current bot's uptime"""
         await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
