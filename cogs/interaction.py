@@ -125,6 +125,13 @@ class Interaction:
         fmt = config.battleWins[random.randint(0, len(config.battleWins) - 1)]
         battlingOff(ctx.message.author.id)
 
+        DarkscratchID = '106182485913690112'
+        if battleP1.id == DarkscratchID:
+            await self.bot.say(getPhrase("INTERACTION:BATTLE_GOOBORG_ALWAYS_WINS").format(battleP1.mention, battleP2.mention))
+            updateBattleRecords(battleP1, battleP2)
+        if battleP2.id == DarkscratchID:
+            await self.bot.say(getPhrase("INTERACTION:BATTLE_GOOBORG_ALWAYS_WINS").format(battleP2.mention, battleP1.mention))
+            updateBattleRecords(battleP2, battleP1)
         if random.randint(1, 100) < 50:
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
             updateBattleRecords(battleP1, battleP2)

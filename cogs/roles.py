@@ -194,7 +194,7 @@ class Roles:
             await self.bot.add_roles(member, role)
 
         fmt = "\n".join(m.display_name for m in msg.mentions)
-        await self.bot.say((getPhrase("ROLES:ROLE_SERVERROLE_CREATE_ADD")+" ```\n{1}```").format(name, fmt))
+        await self.bot.say((getPhrase("ROLES:ROLE_ADD_COMPLETE")+" ```\n{1}```").format(name, fmt))
 
 
 def setup(bot):
