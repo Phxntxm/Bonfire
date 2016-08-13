@@ -63,7 +63,7 @@ class Core:
         fmt['Official Bot Server'] = "https://discord.gg/f6uzJEj"
         authors = []
         for author_id in config.owner_ids:
-            authors.append(discord.utils.get(all_members, id=author_id))
+            authors.append(discord.utils.get(all_members, id=author_id).name)
         
         
         fmt['Author'] = ", ".join(authors)
