@@ -164,13 +164,10 @@ class Twitch:
                 ctx.message.author.mention))
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 0
-            if config.saveContent('twitch', twitch):
-                await self.bot.say(
-                    "I will not notify if you go live anymore {}, "
-                    "are you going to stream some lewd stuff you don't want people to see?~".format(
-                        ctx.message.author.mention))
-            else:
-                await self.bot.say("I was unable to save this data")
+            await self.bot.say(
+                "I will not notify if you go live anymore {}, "
+                "are you going to stream some lewd stuff you don't want people to see?~".format(
+                    ctx.message.author.mention))
 
 
 def setup(bot):
