@@ -77,7 +77,7 @@ class Core:
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
-        f = glob.glob('images/doggo*')[random.randint(0, len(glob.glob('images/doggo*')) - 1)]
+        f = glob.glob('images/doggo*')[random.SystemRandom().randint(0, len(glob.glob('images/doggo*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
             
@@ -86,7 +86,7 @@ class Core:
     async def snek(self, ctx):
         """Use this to print a random snek image.
         Sneks are o3o"""
-        f = glob.glob('images/snek*')[random.randint(0, len(glob.glob('images/snek*')) - 1)]
+        f = glob.glob('images/snek*')[random.SystemRandom().randint(0, len(glob.glob('images/snek*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
@@ -120,7 +120,7 @@ class Core:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
 
-        valueStr = ", ".join(str(random.randint(1, num)) for i in range(0, int(dice)))
+        valueStr = ", ".join(str(random.SystemRandom().randint(1, num)) for i in range(0, int(dice)))
 
         if dice == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'

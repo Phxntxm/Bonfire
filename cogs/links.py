@@ -55,7 +55,7 @@ class Links:
 
             # Get the link if it exists, if not return saying no results found
             if len(results) > 0:
-                index = random.randint(0, len(results) - 1)
+                index = random.SystemRandom().randint(0, len(results) - 1)
                 imageLink = 'http://{}'.format(results[index].get('representations').get('full')[2:].strip())
             else:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
@@ -97,7 +97,7 @@ class Links:
             if len(data) == 1:
                 rand_image = data[0]['file_url']
             else:
-                rand_image = data[random.randint(0, len(data)-1)]['file_url']
+                rand_image = data[random.SystemRandom().randint(0, len(data)-1)]['file_url']
         await self.bot.say(rand_image)
 
 def setup(bot):
