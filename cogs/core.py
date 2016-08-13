@@ -73,7 +73,7 @@ class Core:
         fmt['Description'] = self.bot.description
         
         information = "\n".join("{}: {}".format(key, result) for key, result in fmt.items())
-        self.bot.say("```\n{}```".format(information))
+        await self.bot.say("```\n{}```".format(information))
         
     @commands.command()
     @checks.customPermsOrRole(send_messages=True)
