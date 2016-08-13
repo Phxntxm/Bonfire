@@ -36,13 +36,13 @@ class Picarto:
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
             picarto = config.getContent('picarto') or {}
-            online_users = await online_users()
+            online_users_list = await online_users()
             for m_id, r in picarto.items():
                 url = r['picarto_url']
                 live = r['live']
                 notify = r['notifications_on']
                 user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                online = check_online(online_users, user)
+                online = check_online(online_users_list, user)
 
                 if not live and notify and online:
                     for server_id in r['servers'].items():
