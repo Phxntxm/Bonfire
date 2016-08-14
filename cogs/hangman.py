@@ -40,14 +40,14 @@ class Game:
         
     
     def __str__(self):
-        man = "     ——"
-        man += "    |  |"
-        man += "    {}  |".format("o" if self.fails > 0 else " ")
-        man += "   {}{}{} |".format("/" if self.fails > 1 else " ", "|" if self.fails > 2 else " ", "\\" if self.fails > 3 else " ")
-        man += "    {}  |".format("|" if self.fails > 4 else " ")
-        man += "   {} {} |".format("/" if self.fails > 5 else " ", "\\" if self.fails > 6 else " ")
-        man += "       |"
-        man += "    ———————"
+        man = "     ——\n"
+        man += "    |  |\n"
+        man += "    {}  |\n".format("o" if self.fails > 0 else " ")
+        man += "   {}{}{} |\n".format("/" if self.fails > 1 else " ", "|" if self.fails > 2 else " ", "\\" if self.fails > 3 else " ")
+        man += "    {}  |\n".format("|" if self.fails > 4 else " ")
+        man += "   {} {} |\n".format("/" if self.fails > 5 else " ", "\\" if self.fails > 6 else " ")
+        man += "       |\n"
+        man += "    ———————\n"
         fmt = "```\n{}```".format(man)
         fmt += "```\nGuesses: {}\nWord: {}```".format(", ".join(self.guessed_letters), " ".join(self.blanks))
         return fmt
@@ -73,7 +73,7 @@ class Hangman:
             await self.bot.say("There are currently no hangman games running!")
             return
         if ctx.message.author == game.creator:
-            await self.bot.say("You can't guess at your own hangman gam! :S")
+            await self.bot.say("You can't guess at your own hangman game! :S")
             return
             
         if len(guess) == 1:
