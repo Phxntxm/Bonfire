@@ -27,8 +27,13 @@ class Board:
             return player == self.challengers['o']
     
     def update(self, x, y):
-        self.board[x][y] = 'x' if self.X_turn else 'o'
+        letter = 'x' if self.X_turn else 'o'
+        if self.board[x][y] == ' ':
+            self.board[x][y] == letter
+        else:
+            return False
         self.X_turn = not self.X_turn
+        return True
     
     def check(self):
         # Checking all possiblities will be fun...
@@ -144,7 +149,7 @@ class TicTacToe:
         if right:
             y = 2
         
-        # Here's where things get tricky
+        # Here's where things get tricky, due to the 'you can't fuck up' funcionality I want it to have...
         if middle:
             # We need this try/except to check if x has been defined yet
             # If x has been defined, we need y to be 1
@@ -163,9 +168,9 @@ class TicTacToe:
                     x = 1
                     y = 1
         else:
-            if top or bottom:
+            if (top or bottom) and not (left or right):
                 y = 1
-            elif left or right:
+            elif (left or right) and not (top or bottom):
                 x = 1
                 
                     
