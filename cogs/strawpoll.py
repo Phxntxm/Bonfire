@@ -50,8 +50,8 @@ class Strawpoll:
             fmt_options = "\n\t".join(
                 "{}: {}".format(r, data['votes'][i]) for i, r in enumerate(data['options']))
             author = discord.utils.get(self.bot.get_all_members(), id=poll['author'])
-            created_ago = (pendulum.parse(poll['date']) - pendulum.utcnow()).in_words()
-            link = "https://strawpoll.me{}".format(str(poll_id))
+            created_ago = (pendulum.utcnow() - pendulum.parse(poll['date'])).in_words()
+            link = "https://strawpoll.me/{}".format(str(poll_id))
             fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {}\nOptions:\n\t{}".format(link, data['title'],
                                                                                         author.display_name,
                                                                                         created_ago, fmt_options)
