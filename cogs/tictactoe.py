@@ -79,19 +79,8 @@ class TicTacToe:
         
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers['x']
-    
-    @commands.command(name='tictactoe start', aliases= ['tictactoe challenge'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
-    async def start_game(self, ctx, player2: discord.Member):
-        """Starts a game of tictactoe with another player"""
-        player1 = ctx.message.author
-        x_player = self.create(ctx.message.server.id, player1, player2)
-        fmt = "A tictactoe game has just started between {} and {}".format(player1.display_name, player2.display_name)
-        fmt += str(self.boards[ctx.message.server.id])
-        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!".format(x_player.display_name)
-        await self.bot.say(fmt)
         
-    @commands.command(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True)
+    @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
         player = ctx.message.author
@@ -158,6 +147,17 @@ class TicTacToe:
             await self.bot.say("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name, loser.display_name))
         else:
             await self.bot.say(str(board))
+    
+    @tictactoe.command(name='start', aliases= ['challenge'], pass_context=True, no_pm=True)
+    @checks.customPermsOrRole(send_messages=True)
+    async def start_game(self, ctx, player2: discord.Member):
+        """Starts a game of tictactoe with another player"""
+        player1 = ctx.message.author
+        x_player = self.create(ctx.message.server.id, player1, player2)
+        fmt = "A tictactoe game has just started between {} and {}".format(player1.display_name, player2.display_name)
+        fmt += str(self.boards[ctx.message.server.id])
+        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!".format(x_player.display_name)
+        await self.bot.say(fmt)
 
 def setup(bot):
     bot.add_cog(TicTacToe(bot))
