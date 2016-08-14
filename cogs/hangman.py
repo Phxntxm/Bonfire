@@ -126,3 +126,6 @@ class Hangman:
         else:
             game = self.create(msg.content, ctx)
         await self.bot.say("Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
+
+def setup(bot):
+    bot.add_cog(Hangman(bot))
