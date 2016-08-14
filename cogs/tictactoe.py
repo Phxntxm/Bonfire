@@ -115,6 +115,48 @@ class TicTacToe:
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers['x']
         
+    
+    def update_records(winner, loser):
+        matches = config.getContent('tictactoe')
+        if matches is None:
+            matches = {winner.id: "1-0", loser.id: "0-1"}
+
+        winner_stats = matches.get(winner.id) or {}
+        winner_rating = winner_stats.get('rating') or 1000
+
+        loser_stats = matches.get(loser.id) or {}
+        loser_rating = loser_stats.get('rating') or 1000
+
+        difference = abs(winner_rating - loser_rating)
+        rating_change = 0
+        count = 25
+        while count <= difference:
+            if count > 300:
+                break
+            rating_change += 1
+            count += 25
+
+        if winner_rating > loser_rating:
+            winner_rating += 16 - rating_change
+            loser_rating -= 16 - rating_change
+        else:
+            winner_rating += 16 + rating_change
+            loser_rating -= 16 + rating_change
+
+        winner_wins = winner_stats.get('wins') or 0
+        winner_losses = winner_stats.get('losses') or 0
+        loser_wins = loser_stats.get('wins') or 0
+        loser_losses = loser_stats.get('losses') or 0
+        winner_wins += 1
+        loser_losses += 1
+
+        winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
+        loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
+        matches[winner.id] = winner_stats
+        matches[loser.id] = loser_stats
+
+        return config.saveContent('tictactoe', battles)
+        
     @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
@@ -175,6 +217,8 @@ class TicTacToe:
         if winner:
             loser = board.challengers['x'] if board.challengers['x'] != winner else board.challengers['o']
             await self.bot.say("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name, loser.display_name))
+            
+            update_records(winner, loser)
             del self.boards[ctx.message.server.id]
         else:
             if board.full():
@@ -183,7 +227,7 @@ class TicTacToe:
             else:
                 await self.bot.say(str(board))
     
-    @tictactoe.command(name='start', aliases= ['challenge'], pass_context=True, no_pm=True)
+    @tictactoe.command(name='start', aliases= ['challenge','create'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def start_game(self, ctx, player2: discord.Member):
         """Starts a game of tictactoe with another player"""
