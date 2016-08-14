@@ -109,6 +109,7 @@ class Strawpoll:
                 del server_polls[poll_id]
                 all_polls[ctx.message.server.id] = server_polls
                 config.saveContent('strawpolls', all_polls)
+                await self.bot.say("I have just removed the poll with the ID {}".format(poll_id))
         else:
             fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls)
             await self.bot.say("Here is a list of the polls on this server:\n```\n{}```".format(fmt))
