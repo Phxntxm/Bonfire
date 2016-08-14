@@ -18,7 +18,7 @@ class Game:
     
     def guess_letter(self, letter):
         if letter in self.word:
-            self.blanks = "".join(letter if letter == word_letter else self.blanks[i] for i, word_letter in enumerate(self.word))
+            self.blanks = "".join(word_letter if letter.lower() == word_letter.lower() else self.blanks[i] for i, word_letter in enumerate(self.word))
             return True
         else:
             self.fails += 1
@@ -26,7 +26,7 @@ class Game:
             return False
     
     def guess_word(self, word):
-        if word == self.word:
+        if word.lower() == self.word.lower():
             return True
         else:
             self.fails += 1
@@ -89,10 +89,10 @@ class Hangman:
         
         if game.win:
             fmt += " You guys got it! The word was `{}`".format(game.word)
-            del server.games[ctx.message.server.id]
+            del self.games[ctx.message.server.id]
         elif game.failed:
             fmt += " Sorry, you guys failed...the word was `{}`".format(game.word)
-            del server.games[ctx.message.server.id]
+            del self.games[ctx.message.server.id]
         else:
             fmt += str(game)
         
