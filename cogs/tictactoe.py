@@ -20,6 +20,12 @@ class Board:
         # X's always go first
         self.X_turn = True
     
+    def full(self):
+        for row in self.board:
+            if ' ' in row:
+                return False
+        return True
+    
     def can_play(self, player):
         if self.X_turn:
             return player == self.challengers['x']
@@ -180,8 +186,13 @@ class TicTacToe:
         if winner:
             loser = board.challengers['x'] if board.challengers['x'] != winner else board.challengers['o']
             await self.bot.say("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name, loser.display_name))
+            del self.boards[ctx.message.server.id]
         else:
-            await self.bot.say(str(board))
+            if board.full():
+                await self.bot.say("This game has ended in a tie!")
+                del self.boards[ctx.message.server.id]
+            else:
+                await self.bot.say(str(board))
     
     @tictactoe.command(name='start', aliases= ['challenge'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
