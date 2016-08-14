@@ -42,7 +42,7 @@ class Strawpoll:
             fmt = "\n".join("{}: https://strawpoll.me/{}".format(data['title'], id) for id, data in server_polls.items())
             await self.bot.say("```\n{}```".format(fmt))
         elif str(poll_id) in server_polls.keys():
-            poll = server_polls[poll_id]
+            poll = server_polls[str(poll_id)]
             
             async with self.session.get("{}/{}".format(self.url, str(poll_id)), headers=self.headers) as response:
                 data = await response.json()
