@@ -30,7 +30,7 @@ class Strawpoll:
 
     @commands.group(aliases=['strawpoll', 'poll', 'polls'], pass_context=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def strawpolls(self, ctx, poll_id: int = None):
+    async def strawpolls(self, ctx, poll_id: str = None):
         """This command can be used to show a strawpoll setup on this server"""
         all_polls = config.getContent('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
@@ -39,19 +39,19 @@ class Strawpoll:
             return
         if not poll_id:
             fmt = "\n".join(
-                "{}: https://strawpoll.me/{}".format(data['title'], id) for id, data in server_polls.items())
+                "{}: https://strawpoll.me/{}".format(data['title'], _id) for _id, data in server_polls.items())
             await self.bot.say("```\n{}```".format(fmt))
-        elif str(poll_id) in server_polls.keys():
-            poll = server_polls[str(poll_id)]
+        elif poll_id in server_polls.keys():
+            poll = server_polls[poll_id]
 
-            async with self.session.get("{}/{}".format(self.url, str(poll_id))) as response:
+            async with self.session.get("{}/{}".format(self.url, poll_id)) as response:
                 data = await response.json()
 
             fmt_options = "\n\t".join(
                 "{}: {}".format(r, data['votes'][i]) for i, r in enumerate(data['options']))
             author = discord.utils.get(self.bot.get_all_members(), id=poll['author'])
             created_ago = (pendulum.utcnow() - pendulum.parse(poll['date'])).in_words()
-            link = "https://strawpoll.me/{}".format(str(poll_id))
+            link = "https://strawpoll.me/{}".format(poll_id)
             fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {}\nOptions:\n\t{}".format(link, data['title'],
                                                                                         author.display_name,
                                                                                         created_ago, fmt_options)
@@ -89,3 +89,26 @@ class Strawpoll:
         config.saveContent('strawpolls', all_polls)
 
         await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(data['id']))
+
+    @strawpolls.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
+    @checks.customPermsOrRole(kick_members=True)
+    async def remove_strawpoll(self, ctx, poll_id: str = None):
+        """This command can be used to delete one of the existing strawpolls
+        If you don't provide an ID it will print the list of polls available"""
+
+        all_polls = config.getContent('strawpolls') or {}
+        server_polls = all_polls.get(ctx.message.server.id) or {}
+
+        if poll_id:
+            poll = server_polls.get(poll_id)
+            if not poll:
+                fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls)
+                await self.bot.say(
+                    "There is no poll setup with that ID! Here is a list of the current polls```\n{}```".format(fmt))
+            else:
+                del server_polls[poll_id]
+                all_polls[ctx.message.server.id] = server_polls
+                config.saveContent('strawpolls', all_polls)
+        else:
+            fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls)
+            await self.bot.say("Here is a list of the polls on this server:\n```\n{}```".format(fmt))
