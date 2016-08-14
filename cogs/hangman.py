@@ -90,7 +90,7 @@ class Hangman:
         if game.win():
             fmt += " You guys got it! The word was `{}`".format(game.word)
             del self.games[ctx.message.server.id]
-        elif game.failed:
+        elif game.failed():
             fmt += " Sorry, you guys failed...the word was `{}`".format(game.word)
             del self.games[ctx.message.server.id]
         else:
