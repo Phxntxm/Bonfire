@@ -33,29 +33,53 @@ class Board:
     def check(self):
         # Checking all possiblities will be fun...
         # First base off the top-left corner, see if any possiblities with that match
-        if self.board[0][0] == self.board[0][1] and self.board[0][0] == self.board[0][2]:
-            return self.board[0][0]
-        if self.board[0][0] == self.board[1][0] and self.board[0][0] == self.board[2][0]:
-            return self.board[0][0]
-        if self.board[0][0] == self.board[1][1] and self.board[0][0] == self.board[2][2]:
-            return self.board[0][0]
+        if self.board[0][0] == self.board[0][1] and self.board[0][0] == self.board[0][2] and self.board[0][0] != ' ':
+            if self.board[0][0] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
+        if self.board[0][0] == self.board[1][0] and self.board[0][0] == self.board[2][0] and self.board[0][0] != ' ':
+            if self.board[0][0] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
+        if self.board[0][0] == self.board[1][1] and self.board[0][0] == self.board[2][2] and self.board[0][0] != ' ':
+            if self.board[0][0] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
             
         # Next check the top-right corner, not re-checking the last possiblity that included it
-        if self.board[0][2] == self.board[1][2] and self.board[0][2] == self.board[2][2]:
-            return self.board[0][2]
-        if self.board[0][2] == self.board[1][1] and self.board[0][2] == self.board[3][0]:
-            return self.board[0][2]
+        if self.board[0][2] == self.board[1][2] and self.board[0][2] == self.board[2][2] and self.board[0][2] != ' ':
+            if self.board[0][2] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
+        if self.board[0][2] == self.board[1][1] and self.board[0][2] == self.board[3][0] and self.board[0][2] != ' ':
+            if self.board[0][2] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
             
         # Next up, bottom-right corner, only one possiblity to check here, other two have been checked
-        if self.board[2][2] == self.board[2][1] and self.board[2][2] == self.board[2][0]:
-            return self.board[2][2]
+        if self.board[2][2] == self.board[2][1] and self.board[2][2] == self.board[2][0] and self.board[2][2] != ' ':
+            if self.board[2][2] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
         
         # No need to check the bottom-left, all posiblities have been checked now
         # Base things off the middle now, as we only need the two 'middle' possiblites that aren't diagonal
-        if self.board[1][1] == self.board[0][1] and self.board[1][1] == self.board[2][1]:
-            return self.board[1][1]
-        if self.board[1][1] == self.board[1][0] and self.board[1][1] == self.board[1][2]:
-            return self.board[1][1]
+        if self.board[1][1] == self.board[0][1] and self.board[1][1] == self.board[2][1] and self.board[1][1] != ' ':
+            if self.board[1][1] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
+        if self.board[1][1] == self.board[1][0] and self.board[1][1] == self.board[1][2] and self.board[1][1] != ' ':
+            if self.board[1][1] == 'x':
+                return self.challengers['x']
+            else:
+                return self.challengers['o']
             
         # Otherwise nothing has been found, return None
         return None
