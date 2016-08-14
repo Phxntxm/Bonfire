@@ -102,7 +102,7 @@ class Strawpoll:
         if poll_id:
             poll = server_polls.get(poll_id)
             if not poll:
-                fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls)
+                fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls.items())
                 await self.bot.say(
                     "There is no poll setup with that ID! Here is a list of the current polls```\n{}```".format(fmt))
             else:
@@ -111,5 +111,5 @@ class Strawpoll:
                 config.saveContent('strawpolls', all_polls)
                 await self.bot.say("I have just removed the poll with the ID {}".format(poll_id))
         else:
-            fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls)
+            fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls.items())
             await self.bot.say("Here is a list of the polls on this server:\n```\n{}```".format(fmt))
