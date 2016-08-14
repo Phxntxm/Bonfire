@@ -42,10 +42,10 @@ class Game:
     def __str__(self):
         man = "     ——"
         man += "    |  |"
-        man += "    {}  |".format("o" if fails > 0 else " ")
-        man += "   {}{}{} |".format("/" if fails > 1 else " ", "|" if fails > 2 else " ", "\\" if fails > 3 else " ")
-        man += "    {}  |".format("|" if fails > 4 else " ")
-        man += "   {} {} |".format("/" if fails > 5 else " ", "\\" if fails > 6 else " ")
+        man += "    {}  |".format("o" if self.fails > 0 else " ")
+        man += "   {}{}{} |".format("/" if self.fails > 1 else " ", "|" if self.fails > 2 else " ", "\\" if fails > 3 else " ")
+        man += "    {}  |".format("|" if self.fails > 4 else " ")
+        man += "   {} {} |".format("/" if self.fails > 5 else " ", "\\" if self.fails > 6 else " ")
         man += "       |"
         man += "    ———————"
         fmt = "```\n{}```".format(man)
@@ -114,7 +114,7 @@ class Hangman:
         # Doing this so that while we wait for the phrase, another one cannot be started.
         self.games[ctx.message.server.id] = "placeholder"
         
-        await self.bot.say("I have just PM'd you {}, please respond there with the phrase you want to start a new hangman game with")
+        await self.bot.say("I have just PM'd you {}, please respond there with the phrase you want to start a new hangman game with".format(ctx.message.author.display_name))
         _msg = await self.bot.whisper("Please respond with the phrase you would like to use for your new hangman game\n"
                                         "Please note that it must be under 30 characters long")
         msg = await self.bot.wait_for_message(timeout=60.0, channel=_msg.channel, check=check)
