@@ -6,12 +6,12 @@ from .utils import checks
 import re
 import json
 
+def setup(bot):
+    bot.add_cog(Strawpoll(bot))
+
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```', re.DOTALL)
 
-
-def setup(bot):
-    bot.add_cog(Strawpoll(bot))
 
 class Strawpoll:
     """This class is used to create new strawpoll """
