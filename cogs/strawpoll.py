@@ -80,7 +80,7 @@ class Strawpoll:
             
         all_polls = config.getContent('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
-        server_polls[data['id']] = {'author': ctx.message.author.id,'date': pendulum.utcnow()}
+        server_polls[data['id']] = {'author': ctx.message.author.id,'date': str(pendulum.utcnow())}
         all_polls[ctx.message.server.id] = server_polls
         config.saveContent('strawpolls',all_polls)
         
