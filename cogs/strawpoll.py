@@ -9,6 +9,7 @@ import json
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```', re.DOTALL)
 
+
 def setup(bot):
     bot.add_cog(Strawpoll(bot))
 
