@@ -3,6 +3,7 @@ from discord.ext import commands
 from .utils import config
 from .utils import checks
 
+import aiohttp
 import re
 import json
 
