@@ -118,6 +118,10 @@ class TicTacToe:
     @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
+        """Updates the current server's tic-tac-toe board
+        You obviously need to be one of the players to use this
+        It also needs to be your turn
+        Provide top, left, bottom, right, middle as you want to mark where to play on the board"""
         player = ctx.message.author
         board = self.boards.get(ctx.message.server.id)
         if not board:
@@ -145,7 +149,7 @@ class TicTacToe:
             await self.bot.say("Please provide a valid location to play!")
             return
         
-        # Simple assignments for the first part
+        # Simple assignments
         if top:
             x = 0
         if bottom:
@@ -154,30 +158,13 @@ class TicTacToe:
             y = 0
         if right:
             y = 2
-        
-        # Here's where things get tricky, due to the 'you can't fuck up' funcionality I want it to have...
-        if middle:
-            # We need this try/except to check if x has been defined yet
-            # If x has been defined, we need y to be 1
-            # If it has not, we need to check if y has been defined
-            # If y has been defined, x needs to be set as 1
-            # If both fail, x and y both need to be set to 1
-            # All these checks are made, to make sure the correct x, y coordinate is not overwritten from the previous checks
-            try:
-                if x:
-                    y = 1
-            except NameError:
-                try:
-                    if y:
-                        x = 1
-                except NameError:
-                    x = 1
-                    y = 1
-        else:
-            if (top or bottom) and not (left or right):
-                y = 1
-            elif (left or right) and not (top or bottom):
-                x = 1
+        if middle and not (top or bottom or left or right):
+            x = 1
+            y = 1
+        if (top or bottom) and not (left or right):
+            y = 1
+        elif (left or right) and not (top or bottom):
+            x = 1
                 
                     
         # If all checks have been made, x and y should now be defined correctly based on the matches, and we can go ahead and:
