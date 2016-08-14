@@ -22,7 +22,7 @@ class Strawpoll:
         self.url = 'https://strawpoll.me/api/v2/polls'
         self.headers = {'User-Agent': 'Bonfire/1.0.0',
                         'Content-Type': 'application/json'}
-        self.session = aiohttp.ClientSession(headers=headers)
+        self.session = aiohttp.ClientSession()
         
     def __unload(self):
         self.bot.loop.create_task(self.session.close())
