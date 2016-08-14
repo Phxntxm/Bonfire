@@ -34,7 +34,7 @@ class Strawpoll:
     async def strawpolls(self, ctx, poll_id: int=None):
         """This command can be used to show a strawpoll setup on this server"""
         all_polls = config.getContent('strawpolls') or {}
-        server_polls = all_polls.get(ctx.message.server.id)
+        server_polls = all_polls.get(ctx.message.server.id) or {}
         if not server_polls:
             await self.bot.say("There are currently no strawpolls running on this server!")
             return
@@ -77,9 +77,10 @@ class Strawpoll:
             data = await response.json()
             
         all_polls = config.getContent('strawpolls') or {}
-        server_polls = all_polls.get(ctx.message.server.id)
+        server_polls = all_polls.get(ctx.message.server.id) or {}
         server_polls[data['id']] = {'author': ctx.message.author,'date': pendulum.utcnow()}
         all_polls[ctx.message.server.id] = server_polls
         config.saveContent('strawpolls',all_polls)
+        
         await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(data['id']))
 
