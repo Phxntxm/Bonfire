@@ -80,7 +80,7 @@ class TicTacToe:
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers['x']
         
-    @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True)
+    @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
         player = ctx.message.author
