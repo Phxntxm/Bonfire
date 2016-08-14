@@ -48,8 +48,10 @@ class Strawpoll:
                 data = await response.json()
                 
             fmt_options = "\n\t".join("{}: {}".format(data['options'][i], data['votes'][i]) for i in range(data['options']))
+            author = self.bot.get_member(poll['author'])
+            created_ago = (pendulum.parse(poll['date'])-pendulum.utcnow()).in_words()
             fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {}\nOptions:\n\t{}".format("https://strawpoll.me{}".format(
-                    str(poll_id)), data['title'], poll['author'],(pendulum.parse(poll['date'])-pendulum.utcnow()).in_words(),fmt_options)
+                    str(poll_id)), data['title'], author,created_ago,fmt_options)
             await self.bot.say("```\n{}```".format(fmt))
             
     
@@ -78,7 +80,7 @@ class Strawpoll:
             
         all_polls = config.getContent('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
-        server_polls[data['id']] = {'author': ctx.message.author,'date': pendulum.utcnow()}
+        server_polls[data['id']] = {'author': ctx.message.author.id,'date': pendulum.utcnow()}
         all_polls[ctx.message.server.id] = server_polls
         config.saveContent('strawpolls',all_polls)
         
