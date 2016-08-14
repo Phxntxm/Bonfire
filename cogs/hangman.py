@@ -86,7 +86,7 @@ class Hangman:
                 fmt = "That's correct!"
             else:
                 fmt = "Sorry that's not the correct phrase..."
-        
+        fmt += str(game)
         if game.win:
             fmt += " You guys got it! The word was `{}`".format(game.word)
             del self.games[ctx.message.server.id]
