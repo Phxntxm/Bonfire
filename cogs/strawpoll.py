@@ -50,8 +50,8 @@ class Strawpoll:
             fmt_options = "\n\t".join("{}: {}".format(data['options'][i], data['votes'][i]) for i in range(data['options']))
             author = self.bot.get_member(poll['author'])
             created_ago = (pendulum.parse(poll['date'])-pendulum.utcnow()).in_words()
-            fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {}\nOptions:\n\t{}".format("https://strawpoll.me{}".format(
-                    str(poll_id)), data['title'], author,created_ago,fmt_options)
+            link = "https://strawpoll.me{}".format(str(poll_id))
+            fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {}\nOptions:\n\t{}".format(link, data['title'], author.display_name, created_ago, fmt_options)
             await self.bot.say("```\n{}```".format(fmt))
             
     
