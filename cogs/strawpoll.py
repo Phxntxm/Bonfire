@@ -59,8 +59,10 @@ class Strawpoll:
         match_multi = multi.findall(options)
         if match_single:
             options = match_single
+            options = [option for option in options if option]
         elif match_multi:
             options = match_multi[0].splitlines()
+            options = [option for option in options if option]
         else:
             await self.bot.say("Please provide options for a new strawpoll! Use {}help if you do not know the format".format(ctx.prefix))
             return
