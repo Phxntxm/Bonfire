@@ -41,7 +41,7 @@ class Strawpoll:
         if not poll_id:
             fmt = "\n".join("{}: https://strawpoll.me/{}".format(data['title'], id) for id, data in server_polls.items())
             await self.bot.say("```\n{}```".format(fmt))
-        elif poll_id in server_polls.keys():
+        elif str(poll_id) in server_polls.keys():
             poll = server_polls[poll_id]
             
             async with self.session.get("{}/{}".format(self.url, str(poll_id)), headers=self.headers) as response:
