@@ -82,7 +82,7 @@ class TicTacToe:
     
     @commands.command(name='tictactoe start', aliases= ['tictactoe challenge'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def start_game(self, player2: discord.Member):
+    async def start_game(self, ctx, player2: discord.Member):
         """Starts a game of tictactoe with another player"""
         player1 = ctx.message.author
         x_player = self.create(ctx.message.server.id, player1, player2)
@@ -93,7 +93,7 @@ class TicTacToe:
         
     @commands.command(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
-    async def tictactoe(self, *, option: str):
+    async def tictactoe(self, ctx, *, option: str):
         player = ctx.message.author
         board = self.boards.get(ctx.message.server.id)
         if not board:
