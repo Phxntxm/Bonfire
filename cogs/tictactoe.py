@@ -232,6 +232,9 @@ class TicTacToe:
     async def start_game(self, ctx, player2: discord.Member):
         """Starts a game of tictactoe with another player"""
         player1 = ctx.message.author
+        if self.boards.get(ctx.message.server.id) != None:
+            await self.bot.say("Sorry but only one Tic-Tac-Toe game can be running per server!")
+            return
         x_player = self.create(ctx.message.server.id, player1, player2)
         fmt = "A tictactoe game has just started between {} and {}".format(player1.display_name, player2.display_name)
         fmt += str(self.boards[ctx.message.server.id])
