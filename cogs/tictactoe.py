@@ -181,7 +181,9 @@ class TicTacToe:
                 
                     
         # If all checks have been made, x and y should now be defined correctly based on the matches, and we can go ahead and:
-        board.update(x, y)
+        if not board.update(x, y):
+            await self.bot.say("Someone has already played there!")
+            return
         winner = board.check()
         if winner:
             loser = board.challengers['x'] if board.challengers['x'] != winner else board.challengers['o']
