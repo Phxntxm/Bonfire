@@ -24,9 +24,6 @@ class Strawpoll:
         self.headers = {'User-Agent': 'Bonfire/1.0.0',
                         'Content-Type': 'application/json'}
         self.session = aiohttp.ClientSession()
-        
-    def __unload(self):
-        self.bot.loop.create_task(self.session.close())
 
     
     @commands.group(aliases=['strawpoll','poll','polls'], pass_context=True, invoke_without_command=True)
