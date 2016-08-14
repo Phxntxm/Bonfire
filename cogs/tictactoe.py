@@ -55,7 +55,7 @@ class Board:
                 return self.challengers['x']
             else:
                 return self.challengers['o']
-        if self.board[0][2] == self.board[1][1] and self.board[0][2] == self.board[3][0] and self.board[0][2] != ' ':
+        if self.board[0][2] == self.board[1][1] and self.board[0][2] == self.board[2][0] and self.board[0][2] != ' ':
             if self.board[0][2] == 'x':
                 return self.challengers['x']
             else:
