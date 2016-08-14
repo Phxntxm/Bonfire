@@ -29,7 +29,7 @@ class Board:
     def update(self, x, y):
         letter = 'x' if self.X_turn else 'o'
         if self.board[x][y] == ' ':
-            self.board[x][y] == letter
+            self.board[x][y] = letter
         else:
             return False
         self.X_turn = not self.X_turn
