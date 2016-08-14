@@ -6,6 +6,7 @@ from .utils import checks
 import aiohttp
 import re
 import json
+import pendulum
 
 def setup(bot):
     bot.add_cog(Strawpoll(bot))
@@ -41,10 +42,14 @@ class Strawpoll:
             fmt = "\n".join("{}: https://strawpoll.me/{}".format(title, id) for id, title in server_polls.items())
             await self.bot.say("```\n{}```".format(fmt))
         elif poll_id in server_polls.keys():
+            poll = server_polls[poll_id]
+            
             async with self.session.get("{}/{}".format(self.url, str(poll_id)), headers=self.headers) as response:
                 data = await response.json()
+                
             fmt_options = "\n\t".join("{}: {}".format(data['options'][i], data['votes'][i]) for i in range(data['options']))
-            fmt = "Link: {}\nTitle: {}\nOptions:\n\t{}".format("https://strawpoll.me{}".format(str(poll_id)), data['title'], fmt_options)
+            fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {}\nOptions:\n\t{}".format("https://strawpoll.me{}".format(
+                    str(poll_id)), data['title'], poll['author'],(pendulum.parse(poll['date'])-pendulum.utcnow()).in_words(),fmt_options)
             await self.bot.say("```\n{}```".format(fmt))
             
     
@@ -70,5 +75,11 @@ class Strawpoll:
                     'options': options}
         async with self.session.post(self.url, data=json.dumps(payload), headers=self.headers) as response:
             data = await response.json()
+            
+        all_polls = config.getContent('strawpolls') or {}
+        server_polls = all_polls.get(ctx.message.server.id)
+        server_polls[data['id']] = {'author': ctx.message.author,'date': pendulum.utcnow()}
+        all_polls[ctx.message.server.id] = server_polls
+        config.saveContent('strawpolls',all_polls)
         await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(data['id']))
 
