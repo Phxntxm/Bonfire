@@ -27,7 +27,7 @@ class Board:
             return player == self.challengers['o']
     
     def update(self, x, y):
-        self.board[x][y] = 'x' if X_turn else 'o'
+        self.board[x][y] = 'x' if self.X_turn else 'o'
         self.X_turn = not self.X_turn
     
     def check(self):
