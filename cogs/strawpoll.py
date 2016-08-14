@@ -9,6 +9,9 @@ import json
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```', re.DOTALL)
 
+def setup(bot):
+    bot.add_cog(Strawpoll(bot))
+
 class Strawpoll:
     """This class is used to create new strawpoll """
     
@@ -65,6 +68,3 @@ class Strawpoll:
             data = await response.json()
         await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(data['id']))
 
-
-def setup(bot):
-    bot.add_cog(Strawpoll(bot))
