@@ -232,6 +232,12 @@ class Mod:
         except IndexError:
             await self.bot.say("That is not a valid rule number, try running the command again. "
                                "Your current rules are:\n```\n{}```".format(list_rules))
+    
+    @commands.command()
+    @checks.customPermsOrRole(manage_server=True)
+    async def test(self, arg1, arg2, *arg3):
+        fmt = "First argument: {}\nSecond Argument: {}\nThird Argument: {}".format(arg1, arg2, arg3)
+        await self.bot.say("```\n{}```".format(fmt))
 
 
 def setup(bot):
