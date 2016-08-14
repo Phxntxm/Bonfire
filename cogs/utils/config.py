@@ -38,6 +38,7 @@ def saveContent(key: str, content):
             data = json.load(jf)
             data[key] = content
             jf.seek(0)
+            json.dumps(data)
             jf.truncate()
             json.dump(data, jf, indent=4)
     except FileNotFoundError:
