@@ -91,7 +91,7 @@ class TicTacToe:
         fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!".format(x_player.display_name)
         await self.bot.say(fmt)
         
-    @commands.command(pass_context=True, aliases['tic', 'tac', 'toe'], no_pm=True)
+    @commands.command(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def tictactoe(self, *, option: str):
         player = ctx.message.author
