@@ -158,3 +158,6 @@ class TicTacToe:
             await self.bot.say("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name, loser.display_name))
         else:
             await self.bot.say(str(board))
+
+def setup(bot):
+    bot.add_cog(TicTacToe(bot))
