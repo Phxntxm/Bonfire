@@ -62,3 +62,6 @@ class Strawpoll:
         async with self.session.post(self.url, data=json.dumps(payload), headers=self.headers) as response:
             data = await response.json()
         await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(data['id']))
+
+def setup(bot)
+    bot.add_cog(Strawpoll(bot))
