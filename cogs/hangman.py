@@ -72,7 +72,7 @@ class Hangman:
         if not game:
             await self.bot.say("There are currently no hangman games running!")
             return
-        if ctx.message.author = game.creator:
+        if ctx.message.author == game.creator:
             await self.bot.say("You can't guess at your own hangman gam! :S")
             return
             
