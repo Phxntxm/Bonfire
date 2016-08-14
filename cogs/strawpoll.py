@@ -47,7 +47,7 @@ class Strawpoll:
                 data = await response.json()
 
             fmt_options = "\n\t".join(
-                "{}: {}".format(data['options'][i], data['votes'][i]) for i in range(data['options']))
+                "{}: {}".format(r, data['votes'][i]) for i, r in enumerate(data['options']))
             author = self.bot.get_member(poll['author'])
             created_ago = (pendulum.parse(poll['date']) - pendulum.utcnow()).in_words()
             link = "https://strawpoll.me{}".format(str(poll_id))
