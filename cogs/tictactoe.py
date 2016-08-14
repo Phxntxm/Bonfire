@@ -61,11 +61,11 @@ class Board:
         return None
     
     def __str__(self):
-        _board = " {}  |  {}  |  {}".format(self.board[0][0], self.board[0][1], self.board[0][2])
-        _board += "———————————————"
-        _board += " {}  |  {}  |  {}".format(self.board[1][0], self.board[1][1], self.board[1][2])
-        _board += "———————————————"
-        _board += " {}  |  {}  |  {}".format(self.board[2][0], self.board[2][1], self.board[2][2])
+        _board = " {}  |  {}  |  {}\n".format(self.board[0][0], self.board[0][1], self.board[0][2])
+        _board += "———————————————\n"
+        _board += " {}  |  {}  |  {}\n".format(self.board[1][0], self.board[1][1], self.board[1][2])
+        _board += "———————————————\n"
+        _board += " {}  |  {}  |  {}\n".format(self.board[2][0], self.board[2][1], self.board[2][2])
         return "```\n{}```".format(_board)
         
         
@@ -138,6 +138,12 @@ class TicTacToe:
                 except NameError:
                     x = 1
                     y = 1
+        else:
+            if top or bottom:
+                y = 1
+            elif left or right:
+                x = 1
+                
                     
         # If all checks have been made, x and y should now be defined correctly based on the matches, and we can go ahead and:
         board.update(x, y)
