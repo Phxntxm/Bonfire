@@ -140,10 +140,11 @@ class Mod:
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```\n{}```"
                                .format(permissions, "\n".join(valid_perms)))
             return
-
+        
+        
         custom_perms = config.getContent('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id) or {}
-        server_perms[command] = perm_value
+        server_perms[cmd.qualified_name] = perm_value
         custom_perms[ctx.message.server.id] = server_perms
 
         config.saveContent('custom_permissions', custom_perms)
