@@ -121,7 +121,6 @@ class Owner:
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
-            await self.bot.say(error.original.__traceback__)
             await self.bot.say(error.__traceback__)
 
     @commands.command()
