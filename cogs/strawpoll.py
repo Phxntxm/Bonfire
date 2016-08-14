@@ -21,7 +21,7 @@ class Strawpoll:
         self.bot.loop.create_task(self.session.close())
 
     
-    @commands.group(aliases=['strawpoll','poll','polls']pass_context=True, invoke_without_command=True)
+    @commands.group(aliases=['strawpoll','poll','polls'], pass_context=True, invoke_without_command=True)
     @checks.customPermsOrRole(send_messages=True)
     async def strawpolls(self, ctx, poll_id: int=None):
         """This command can be used to show a strawpoll setup on this server"""
