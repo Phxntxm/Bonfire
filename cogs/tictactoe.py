@@ -80,7 +80,7 @@ class TicTacToe:
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers['x']
     
-    @commands.command(name='tictactoe start', aliases['tictactoe challenge'], pass_context=True, no_pm=True)
+    @commands.command(name='tictactoe start', aliases= ['tictactoe challenge'], pass_context=True, no_pm=True)
     @checks.customPermsOrRole(send_messages=True)
     async def start_game(self, player2: discord.Member):
         """Starts a game of tictactoe with another player"""
