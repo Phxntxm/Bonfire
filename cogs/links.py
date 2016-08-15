@@ -22,7 +22,7 @@ class Links:
         base_url = "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch="
         async with self.session.get("{}/{}".format(base_url, query), headers=self.headers) as r:
             data = await r.json()
-            if len(data['query']['search'] == 0):
+            if len(data['query']['search']) == 0:
                 await self.bot.say("I could not find any results with that term, I tried my best :c")
                 return
             url = "https://en.wikipedia.org/wiki/{}".format(data['query']['search'][0]['title'].replace(' ', '%20'))
