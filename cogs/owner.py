@@ -18,7 +18,20 @@ class Owner:
 
     def __init__(self, bot):
         self.bot = bot
-
+    
+    @commands.command(pass_context=True)
+    @commands.check(checks.is_owner)
+    async def saferestart(self, ctx):
+        """This commands is used to check if there is anything playing in any servers at the moment
+        If there is, I'll tell you not to restart, if not I'll just go ahead and restart"""
+        voice_states = self.bot.get_cog('Music').voice_states
+        for server_id, state in voice_states.items():
+            if state.is_playing:
+                server = self.bot.get_server(server_id)
+                await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on the {} server".format(server.name))
+                return
+        #ctx.invoke(self.bot.commands.get('restart'))
+        
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
     async def restart(self, ctx):
