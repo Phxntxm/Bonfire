@@ -4,6 +4,7 @@ from .utils import checks
 import aiohttp
 import json
 import random
+import re
 
 class Links:
     """This class contains all the commands that make HTTP requests
@@ -11,15 +12,33 @@ class Links:
     
     def __init__(self, bot):
         self.bot = bot
+        self.headers = {"User-Agent": "Bonfire/1.0.0"}
+        self.session = aiohttp.ClientSession()
 
+    @commands.command()
+    @checks.custom_perms(send_messages=True)
+    async def wiki(self, *, query: str):
+        """Pulls the top match for a specific term, and returns the definition"""
+        base_url = "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch="
+        async with self.session.get("{}/{}".format(base_url, query), headers=self.headers) as r:
+            data = await r.json()
+            if len(data['query']['search'] == 0):
+                await self.bot.say("I could not find any results with that term, I tried my best :c")
+                return
+            url = "https://en.wikipedia.org/wiki/{}".format(data['query']['search'][0]['title'].replace(' ', '%20'))
+            snippet = data['query']['search'][0]['snippet']
+            snippet = re.sub('<span class=\\"searchmatch\\">','', snippet)
+            snippet = re.sub('</span>','',snippet)
+            snippet = re.sub('&quot;','"',snippet)
+        await self.bot.say("Here is the best match I found with the query `{}`:\n```\nURL: {}\nSnippet: {}```".format(query, url, snippet))
+        
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
-        with aiohttp.ClientSession() as s:
-            async with s.get(url) as r:
-                response = await r.text()
+        async with self.session.get(url, headers=self.headers) as r:
+            response = await r.text()
         data = json.loads(response)
             
         try:
@@ -42,9 +61,8 @@ class Links:
                 url += ",+explicit&filter_id=95938"
 
             # Get the response from derpibooru and parse the 'search' result from it
-            with aiohttp.ClientSession() as s:
-                async with s.get(url) as r:
-                    response = await r.text()
+            async with self.session.get(url, headers=self.headers) as r:
+                response = await r.text()
                     
             data = json.loads(response)
             try:
@@ -62,9 +80,8 @@ class Links:
                 return
         else:
             # If no search term was provided, search for a random image
-            with aiohttp.ClientSession() as s:
-                async with s.get('https://derpibooru.org/images/random') as r:
-                    imageLink = r.url
+            async with self.session.get('https://derpibooru.org/images/random') as r:
+                imageLink = r.url
         await self.bot.say(imageLink)
     
     
@@ -85,9 +102,8 @@ class Links:
         else:
             url += "%20rating:safe"
             
-        with aiohttp.ClientSession() as s:
-                async with s.get(url) as r:
-                    response = await r.text()
+        async with self.session.get(url, headers=self.headers) as r:
+            response = await r.text()
                     
         data = json.loads(response)
         if len(data) == 0:

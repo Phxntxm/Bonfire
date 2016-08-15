@@ -38,7 +38,6 @@ handler = logging.FileHandler(filename='bonfire.log', encoding='utf-8', mode='a'
 log.addHandler(handler)
 
 
-# Bot event overrides
 @bot.event
 async def on_ready():
     # Change the status upon connection to the default status
@@ -47,7 +46,7 @@ async def on_ready():
 
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
     config.save_content('battling', {})
-    # Check if the bot was restarted, if so 
+    # Check if the bot was restarted, if so send a message to the channel the bot was restarted from
     if channel_id != 0:
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
@@ -60,6 +59,8 @@ async def on_ready():
 async def on_member_join(member):
     notifications = config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
+    
+    # By default, notifications should be off unless explicitly turned on
     if not server_notifications:
         return
 
@@ -71,6 +72,8 @@ async def on_member_join(member):
 async def on_member_remove(member):
     notifications = config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
+    
+    # By default, notifications should be off unless explicitly turned on
     if not server_notifications:
         return
 

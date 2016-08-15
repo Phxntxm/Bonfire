@@ -56,9 +56,7 @@ class Core:
         """This command can be used to print out some of my information"""
         fmt = {}
         
-        all_members = []
-        for member in self.bot.get_all_members():
-            all_members.append(member)
+        all_members = list(self.bot.get_all_members())
         
         fmt['Official Bot Server'] = "https://discord.gg/f6uzJEj"
         authors = []
