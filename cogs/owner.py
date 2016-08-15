@@ -30,7 +30,7 @@ class Owner:
                 server = self.bot.get_server(server_id)
                 await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on the {} server".format(server.name))
                 return
-        #ctx.invoke(self.bot.commands.get('restart'))
+        ctx.invoke(self.bot.commands.get('restart'))
         
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
