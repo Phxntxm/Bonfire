@@ -30,7 +30,7 @@ class Links:
             snippet = re.sub('<span class=\\"searchmatch\\">','', snippet)
             snippet = re.sub('</span>','',snippet)
             snippet = re.sub('&quot;','"',snippet)
-        await self.bot.say("Here is the best match I found with the query `{}`:\nURL: {}```\nSnippet: {}```".format(query, url, snippet))
+        await self.bot.say("Here is the best match I found with the query `{}`:\nURL: {}\n```\nSnippet: {}```".format(query, url, snippet))
         
     @commands.command()
     @checks.custom_perms(send_messages=True)
