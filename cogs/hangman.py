@@ -13,20 +13,23 @@ class Game:
         self.word = word
         self.creator = creator
         self.blanks = "".join(" " if letter == " " else "_" for letter in word)
+        self.failed_letters = []
         self.guessed_letters = []
         self.fails = 0
     
     def guess_letter(self, letter):
+        self.guessed_letters.append(letter)
         if letter in self.word:
             self.blanks = "".join(word_letter if letter.lower() == word_letter.lower() else self.blanks[i] for i, word_letter in enumerate(self.word))
             return True
         else:
             self.fails += 1
-            self.guessed_letters.append(letter)
+            self.failed_letters.append(letter)
             return False
     
     def guess_word(self, word):
         if word.lower() == self.word.lower():
+            self.blanks = self.word
             return True
         else:
             self.fails += 1
@@ -49,7 +52,7 @@ class Game:
         man += "       |\n"
         man += "    ———————\n"
         fmt = "```\n{}```".format(man)
-        fmt += "```\nGuesses: {}\nWord: {}```".format(", ".join(self.guessed_letters), " ".join(self.blanks))
+        fmt += "```\nGuesses: {}\nWord: {}```".format(", ".join(self.failed_letters), " ".join(self.blanks))
         return fmt
     
 class Hangman:
@@ -77,6 +80,9 @@ class Hangman:
             return
             
         if len(guess) == 1:
+            if guess in game.guessed_letters:
+                await self.bot.say("That letter has already been guessed!")
+                return
             if game.guess_letter(guess):
                 fmt = "That's correct!"
             else:
