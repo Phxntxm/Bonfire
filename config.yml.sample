@@ -1,15 +1,8 @@
 bot_token: 'token'
-owner_id: '1234546789'
-description: Blah
+owner_id: ['1234546789']
+description: 'Blah'
 command_prefix: '!'
 default_status: '!help for a list of commands'
-nsfw_channel: ['123','456']
-
-db_host: 'localhost'
-db_user_pass: 'password'
-db_user:  'user'
-
-db_default: 'db1'
-db_boops: 'db2'
+discord_bots_key: 'key'
 
 battleWins: ["{0} wins, {1} loses"]
