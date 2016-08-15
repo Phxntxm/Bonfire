@@ -32,7 +32,7 @@ except KeyError:
     quit()
 
 
-def saveContent(key: str, content):
+def save_content(key: str, content):
     try:
         with open("config.json", "r+") as jf:
             data = json.load(jf)
@@ -46,7 +46,7 @@ def saveContent(key: str, content):
             json.dump({key: content}, jf, indent=4)
 
 
-def getContent(key: str):
+def get_content(key: str):
     try:
         with open("config.json", "r+") as jf:
             return json.load(jf)[key]

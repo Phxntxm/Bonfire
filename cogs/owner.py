@@ -20,16 +20,16 @@ class Owner:
         self.bot = bot
 
     @commands.command(pass_context=True)
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def restart(self, ctx):
         """Forces the bot to restart"""
-        config.saveContent('restart_server', ctx.message.channel.id)
+        config.save_content('restart_server', ctx.message.channel.id)
         await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)
 
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def adddoggo(self, url: str):
         """Saves a URL as an image to add for the doggo command"""
         local_path = 'images/doggo{}.jpg'.format(len(glob.glob('doggo*')))
@@ -42,7 +42,7 @@ class Owner:
             "Just saved a new doggo image! I now have {} doggo images!".format(len(glob.glob('doggo*'))))
             
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def addsnek(self, url: str):
         """Saves a URL as an image to add for the snek command"""
         local_path = 'images/snek{}.jpg'.format(len(glob.glob('snek*')))
@@ -55,7 +55,7 @@ class Owner:
             "Just saved a new snek image! I now have {} snek images!".format(len(glob.glob('snek*'))))
 
     @commands.command(pass_context=True)
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def debug(self, ctx):
         """Executes code"""
         try:
@@ -76,7 +76,7 @@ class Owner:
             await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command(pass_context=True)
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def shutdown(self, ctx):
         """Shuts the bot down"""
         fmt = 'Shutting down, I will miss you {0.author.name}'
@@ -85,7 +85,7 @@ class Owner:
         await self.bot.close()
 
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def avatar(self, content: str):
         """Changes the avatar for the bot to the filename following the command"""
         file = 'images/' + content
@@ -93,14 +93,14 @@ class Owner:
             await self.bot.edit_profile(avatar=fp.read())
 
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def name(self, newNick: str):
         """Changes the bot's name"""
         await self.bot.edit_profile(username=newNick)
         await self.bot.say('Changed username to ' + newNick)
 
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def status(self, *stat: str):
         """Changes the bot's 'playing' status"""
         newStatus = ' '.join(stat)
@@ -109,7 +109,7 @@ class Owner:
         await self.bot.say("Just changed my status to '{0}'!".format(newStatus))
 
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def load(self, *, module: str):
         """Loads a module"""
         module = module.lower()
@@ -123,7 +123,7 @@ class Owner:
             await self.bot.say(fmt.format(type(error).__name__, error))
             
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def unload(self, *, module: str):
         """Unloads a module"""
         module = module.lower()
@@ -137,7 +137,7 @@ class Owner:
             await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command()
-    @commands.check(checks.isOwner)
+    @commands.check(checks.is_owner)
     async def reload(self, *, module: str):
         """Reloads a module"""
         module = module.lower()

@@ -68,7 +68,7 @@ class Hangman:
     
     @commands.group(aliases=['hm'], pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 30, BucketType.user)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def hangman(self, ctx, *, guess):
         """Makes a guess towards the server's currently running hangman game"""
         game = self.games.get(ctx.message.server.id)
@@ -105,7 +105,7 @@ class Hangman:
         await self.bot.say(fmt)
     
     @hangman.command(name='create', aliases=['start'], no_pm=True, pass_context=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def create_hangman(self, ctx):
         """This is used to create a new hangman game
         Due to the fact that I might not be able to delete a message, I will PM you and ask for the phrase you want.

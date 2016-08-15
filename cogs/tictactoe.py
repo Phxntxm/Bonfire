@@ -117,7 +117,7 @@ class TicTacToe:
         
     
     def update_records(winner, loser):
-        matches = config.getContent('tictactoe')
+        matches = config.get_content('tictactoe')
         if matches is None:
             matches = {winner.id: "1-0", loser.id: "0-1"}
 
@@ -155,10 +155,10 @@ class TicTacToe:
         matches[winner.id] = winner_stats
         matches[loser.id] = loser_stats
 
-        return config.saveContent('tictactoe', battles)
+        return config.save_content('tictactoe', battles)
         
     @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True, invoke_without_command=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
         """Updates the current server's tic-tac-toe board
         You obviously need to be one of the players to use this
@@ -228,7 +228,7 @@ class TicTacToe:
                 await self.bot.say(str(board))
     
     @tictactoe.command(name='start', aliases= ['challenge','create'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def start_game(self, ctx, player2: discord.Member):
         """Starts a game of tictactoe with another player"""
         player1 = ctx.message.author

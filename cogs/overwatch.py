@@ -27,14 +27,14 @@ class Overwatch:
         pass
 
     @ow.command(name="stats", pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def ow_stats(self, ctx, user: discord.Member=None, hero: str=""):
         """Prints out a basic overview of a member's stats
         Provide a hero after the member to get stats for that specific hero"""
         if user is None:
             user = ctx.message.author
 
-        ow_stats = config.getContent('overwatch') or {}
+        ow_stats = config.get_content('overwatch') or {}
         bt = ow_stats.get(user.id)
 
         if bt is None:
@@ -79,7 +79,7 @@ class Overwatch:
                                .format(user.name, hero.title(), fmt.title().replace("_", " ")))
 
     @ow.command(pass_context=True, name="add", no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def add(self, ctx, bt: str):
         """Saves your battletag for looking up information"""
         bt = bt.replace("#", "-")
@@ -93,15 +93,15 @@ class Overwatch:
                                        "format needs to be `user#xxxx`. Capitalization matters")
                     return
 
-        ow = config.getContent('overwatch') or {}
+        ow = config.get_content('overwatch') or {}
         ow[ctx.message.author.id] = bt
         await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def delete(self, ctx):
         """Removes your battletag from the records"""
-        result = config.getContent('overwatch') or {}
+        result = config.get_content('overwatch') or {}
         if result.get(ctx.message.author.id):
             del result[ctx.message.author.id]
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))

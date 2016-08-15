@@ -11,19 +11,19 @@ class Tags:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has"""
-        tags = config.getContent('tags') or {}
+        tags = config.get_content('tags') or {}
         fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id'] == ctx.message.server.id)
         await self.bot.say('```\n{}```'.format(fmt))
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
-        tags = config.getContent('tags') or {}
+        tags = config.get_content('tags') or {}
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
             await self.bot.say('That tag does not exist!')
@@ -31,7 +31,7 @@ class Tags:
         await self.bot.say("{}".format(result[0]['result']))
 
     @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(kick_members=True)
+    @checks.custom_perms(kick_members=True)
     async def add_tag(self, ctx, *, result: str):
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>"""
@@ -45,7 +45,7 @@ class Tags:
             await self.bot.say("Please provide the format for the tag in: !tag add <tag> - <result>")
             return
             
-        tags = config.getContent('tags') or {}
+        tags = config.get_content('tags') or {}
         for t in tags:
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
                 t['result'] = tag_result
@@ -57,11 +57,11 @@ class Tags:
             "I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(kick_members=True)
+    @checks.custom_perms(kick_members=True)
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
-        tags = config.getContent('tags') or {}
+        tags = config.get_content('tags') or {}
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
             await self.bot.say(

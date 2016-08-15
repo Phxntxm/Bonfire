@@ -30,10 +30,10 @@ class Twitch:
     def __init__(self, bot):
         self.bot = bot
 
-    async def checkChannels(self):
+    async def check_channels(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
-            twitch = config.getContent('twitch') or {}
+            twitch = config.get_content('twitch') or {}
             for m_id, r in twitch.items():
                 url = r['twitch_url']
                 live = r['live']
@@ -46,24 +46,24 @@ class Twitch:
                     twitch[m_id]['live'] = 1
                     fmt = "{} has just gone live! View their stream at {}".format(member.name, url)
                     await self.bot.send_message(server, fmt)
-                    config.saveContent('twitch', twitch)
+                    config.save_content('twitch', twitch)
                 elif live and not online:
                     server = discord.utils.find(lambda s: s.id == r['server_id'], self.bot.servers)
                     member = discord.utils.find(lambda m: m.id == m_id, server.members)
                     twitch[m_id]['live'] = 0
                     fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.name, url)
                     await self.bot.send_message(server, fmt)
-                    config.saveContent('twitch', twitch)
+                    config.save_content('twitch', twitch)
             await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def twitch(self, ctx, *, member: discord.Member=None):
         """Use this command to check the twitch info of a user"""
         if member is None:
             member = ctx.message.author
 
-        twitch_channels = config.getContent('twitch') or {}
+        twitch_channels = config.get_content('twitch') or {}
         result = twitch_channels.get(ctx.message.author.id)
         if result is None:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
@@ -83,7 +83,7 @@ class Twitch:
         await self.bot.say("```\n{}```".format(fmt))
 
     @twitch.command(name='add', pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def add_twitch_url(self, ctx, url: str):
         """Saves your user's twitch URL"""
         try:
@@ -100,7 +100,7 @@ class Twitch:
                                        "What would be the point of adding a nonexistant twitch user? Silly")
                     return
 
-        twitch = config.getContent('twitch') or {}
+        twitch = config.get_content('twitch') or {}
         result = twitch.get(ctx.message.author.id)
 
         if result is not None:
@@ -108,17 +108,17 @@ class Twitch:
         else:
             twitch[ctx.message.author.id] = {'twitch_url': url, 'server_id': ctx.message.server.id,
                                              'notifications_on': 1, 'live': 0}
-        config.saveContent('twitch', twitch)
+        config.save_content('twitch', twitch)
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
-        twitch = config.getContent('twitch') or {}
+        twitch = config.get_content('twitch') or {}
         if twitch.get(ctx.message.author.id) is not None:
             del twitch[ctx.message.author.id]
-            config.saveContent('twitch', twitch)
+            config.save_content('twitch', twitch)
             await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
         else:
             await self.bot.say(
@@ -126,16 +126,16 @@ class Twitch:
                     ctx.message.author.mention))
 
     @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to turn notifications on or off"""
         pass
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on"""
-        twitch = config.getContent('twitch') or {}
+        twitch = config.get_content('twitch') or {}
         result = twitch.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
@@ -146,15 +146,15 @@ class Twitch:
                 ctx.message.author.mention))
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 1
-            config.saveContent('twitch', twitch)
+            config.save_content('twitch', twitch)
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
         """Turns twitch notifications off"""
-        twitch = config.getContent('twitch') or {}
+        twitch = config.get_content('twitch') or {}
         if twitch.get(ctx.message.author.id) is None:
             await self.bot.say(
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
@@ -172,5 +172,5 @@ class Twitch:
 
 def setup(bot):
     t = Twitch(bot)
-    config.loop.create_task(t.checkChannels())
+    config.loop.create_task(t.check_channels())
     bot.add_cog(Twitch(bot))

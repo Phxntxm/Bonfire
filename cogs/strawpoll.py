@@ -29,10 +29,10 @@ class Strawpoll:
         self.session = aiohttp.ClientSession()
 
     @commands.group(aliases=['strawpoll', 'poll', 'polls'], pass_context=True, invoke_without_command=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def strawpolls(self, ctx, poll_id: str = None):
         """This command can be used to show a strawpoll setup on this server"""
-        all_polls = config.getContent('strawpolls') or {}
+        all_polls = config.get_content('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
         if not server_polls:
             await self.bot.say("There are currently no strawpolls running on this server!")
@@ -58,7 +58,7 @@ class Strawpoll:
             await self.bot.say("```\n{}```".format(fmt))
 
     @strawpolls.command(name='create', aliases=['setup', 'add'], pass_context=True)
-    @checks.customPermsOrRole(kick_members=True)
+    @checks.custom_perms(kick_members=True)
     async def create_strawpoll(self, ctx, title, *, options):
         """This command is used to setup a new strawpoll
         The format needs to be: poll create "title here" all options here
@@ -82,21 +82,21 @@ class Strawpoll:
         async with self.session.post(self.url, data=json.dumps(payload), headers=self.headers) as response:
             data = await response.json()
 
-        all_polls = config.getContent('strawpolls') or {}
+        all_polls = config.get_content('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
         server_polls[data['id']] = {'author': ctx.message.author.id, 'date': str(pendulum.utcnow()), 'title': title}
         all_polls[ctx.message.server.id] = server_polls
-        config.saveContent('strawpolls', all_polls)
+        config.save_content('strawpolls', all_polls)
 
         await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(data['id']))
 
     @strawpolls.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
-    @checks.customPermsOrRole(kick_members=True)
+    @checks.custom_perms(kick_members=True)
     async def remove_strawpoll(self, ctx, poll_id: str = None):
         """This command can be used to delete one of the existing strawpolls
         If you don't provide an ID it will print the list of polls available"""
 
-        all_polls = config.getContent('strawpolls') or {}
+        all_polls = config.get_content('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
 
         if poll_id:
@@ -108,7 +108,7 @@ class Strawpoll:
             else:
                 del server_polls[poll_id]
                 all_polls[ctx.message.server.id] = server_polls
-                config.saveContent('strawpolls', all_polls)
+                config.save_content('strawpolls', all_polls)
                 await self.bot.say("I have just removed the poll with the ID {}".format(poll_id))
         else:
             fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls.items())

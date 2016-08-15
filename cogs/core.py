@@ -20,7 +20,7 @@ class Core:
         self.bot = bot
 
     @commands.command()
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def calendar(self, month: str=None, year: int=None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
@@ -51,7 +51,7 @@ class Core:
         await self.bot.say("```\n{}```".format(cal))
         
     @commands.command()
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def info(self):
         """This command can be used to print out some of my information"""
         fmt = {}
@@ -76,13 +76,13 @@ class Core:
         await self.bot.say("```\n{}```".format(information))
         
     @commands.command()
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def uptime(self):
         """Provides a printout of the current bot's uptime"""
         await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
 
     @commands.command(aliases=['invite'])
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def addbot(self):
         """Provides a link that you can use to add me to a server"""
         perms = discord.Permissions.none()
@@ -99,7 +99,7 @@ class Core:
                            .format(discord.utils.oauth_url('183748889814237186', perms)))
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
@@ -108,7 +108,7 @@ class Core:
             await self.bot.upload(f)
             
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def snek(self, ctx):
         """Use this to print a random snek image.
         Sneks are o3o"""
@@ -117,15 +117,15 @@ class Core:
             await self.bot.upload(f)
 
     @commands.command()
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def joke(self):
         """Prints a random riddle"""
-        fortuneCommand = "/usr/bin/fortune riddles"
-        fortune = subprocess.check_output(fortuneCommand.split()).decode("utf-8")
+        fortune_command = "/usr/bin/fortune riddles"
+        fortune = subprocess.check_output(fortune_command.split()).decode("utf-8")
         await self.bot.say(fortune)
 
     @commands.command(pass_context=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
@@ -146,13 +146,13 @@ class Core:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
 
-        valueStr = ", ".join(str(random.SystemRandom().randint(1, num)) for i in range(0, int(dice)))
+        value_str = ", ".join(str(random.SystemRandom().randint(1, num)) for i in range(0, int(dice)))
 
         if dice == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
         else:
             fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
-        await self.bot.say(fmt.format(ctx, dice, num, valueStr))
+        await self.bot.say(fmt.format(ctx, dice, num, value_str))
 
 
 def setup(bot):

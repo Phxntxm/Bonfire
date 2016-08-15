@@ -22,7 +22,10 @@ extensions = ['cogs.interaction',
               'cogs.links',
               'cogs.tags',
               'cogs.roles',
-              'cogs.statsupdate']
+              'cogs.statsupdate',
+              'cogs.strawpoll',
+              'cogs.tictactoe',
+              'cogs.hangman']
 
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 discord_logger = logging.getLogger('discord')
@@ -40,22 +43,22 @@ log.addHandler(handler)
 async def on_ready():
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.defaultStatus, type=0))
-    channel_id = config.getContent('restart_server')
+    channel_id = config.get_content('restart_server')
 
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
-    config.saveContent('battling', {})
+    config.save_content('battling', {})
     # Check if the bot was restarted, if so 
     if channel_id != 0:
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
-        config.saveContent('restart_server', 0)
+        config.save_content('restart_server', 0)
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
 
 
 @bot.event
 async def on_member_join(member):
-    notifications = config.getContent('user_notifications') or {}
+    notifications = config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
     if not server_notifications:
         return
@@ -66,7 +69,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-    notifications = config.getContent('user_notifications') or {}
+    notifications = config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
     if not server_notifications:
         return

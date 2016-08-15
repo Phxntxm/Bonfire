@@ -3,11 +3,11 @@ import discord
 from . import config
 
 
-def isOwner(ctx):
+def is_owner(ctx):
     return ctx.message.author.id in config.owner_ids
 
 
-def customPermsOrRole(**perms):
+def custom_perms(**perms):
     def predicate(ctx):
         if ctx.message.channel.is_private:
             return False
@@ -18,7 +18,7 @@ def customPermsOrRole(**perms):
             setattr(default_perms, perm, setting)
 
         try:
-            required_perm_value = config.getContent('custom_permissions')[ctx.message.server.id][
+            required_perm_value = config.get_content('custom_permissions')[ctx.message.server.id][
                 ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
         except KeyError:
@@ -30,7 +30,7 @@ def customPermsOrRole(**perms):
     return commands.check(predicate)
 
 
-def isPM():
+def is_pm():
     def predicate(ctx):
         return ctx.message.channel.is_private
 

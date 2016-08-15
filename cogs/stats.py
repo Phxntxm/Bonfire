@@ -11,10 +11,10 @@ class Stats:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
-        boops = config.getContent('boops') or {}
+        boops = config.get_content('boops') or {}
         if not boops.get(ctx.message.author.id):
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -30,10 +30,10 @@ class Stats:
             ctx.message.author.mention, member.mention, most_boops))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times"""
-        boops = config.getContent('boops') or {}
+        boops = config.get_content('boops') or {}
         booped_members = boops.get(ctx.message.author.id)
         if booped_members is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
@@ -48,10 +48,10 @@ class Stats:
         await self.bot.say("You have booped:```\n{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record"""
-        battles = config.getContent('battle_records') or {}
+        battles = config.get_content('battle_records') or {}
 
         server_member_ids = [member.id for member in ctx.message.server.members]
         server_members = {member_id: stats for member_id, stats in battles.items() if member_id in server_member_ids}
@@ -68,12 +68,12 @@ class Stats:
         await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def stats(self, ctx, member: discord.Member=None):
         """Prints the battling stats for you, or the user provided"""
         member = member or ctx.message.author
 
-        all_members = config.getContent('battle_records') or {}
+        all_members = config.get_content('battle_records') or {}
         if member.id not in all_members:
             await self.bot.say("That user has not battled yet!")
             return

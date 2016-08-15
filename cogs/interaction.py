@@ -6,16 +6,16 @@ import discord
 import random
 
 
-def battlingOff(player_id):
-    battling = config.getContent('battling')
+def battling_off(player_id):
+    battling = config.get_content('battling')
 
     battling = {p1: p2 for p1, p2 in battling.items() if not p2 == player_id and not p1 == player_id}
 
-    config.saveContent('battling', battling)
+    config.save_content('battling', battling)
 
 
-def userBattling(ctx):
-    battling = config.getContent('battling')
+def user_battling(ctx):
+    battling = config.get_content('battling')
     if battling is None:
         return False
     if ctx.message.author.id in battling.values() or ctx.message.author.id in battling.keys():
@@ -26,8 +26,8 @@ def userBattling(ctx):
     return False
 
 
-def updateBattleRecords(winner, loser):
-    battles = config.getContent('battle_records')
+def update_battle_records(winner, loser):
+    battles = config.get_content('battle_records')
     if battles is None:
         battles = {winner.id: "1-0", loser.id: "0-1"}
 
@@ -65,7 +65,7 @@ def updateBattleRecords(winner, loser):
     battles[winner.id] = winner_stats
     battles[loser.id] = loser_stats
 
-    return config.saveContent('battle_records', battles)
+    return config.save_content('battle_records', battles)
 
 
 class Interaction:
@@ -76,7 +76,7 @@ class Interaction:
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         if len(ctx.message.mentions) == 0:
@@ -91,28 +91,28 @@ class Interaction:
         if self.bot.user.id == player2.id:
             await self.bot.say("I always win, don't even try it.")
             return
-        if userBattling(ctx):
+        if user_battling(ctx):
             await self.bot.say("You or the person you are trying to battle is already in a battle!")
             return
 
-        battling = config.getContent('battling') or {}
+        battling = config.get_content('battling') or {}
         battling[ctx.message.author.id] = ctx.message.mentions[0].id
-        config.saveContent('battling', battling)
+        config.save_content('battling', battling)
 
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
-        config.loop.call_later(180, battlingOff, ctx.message.author.id)
+        config.loop.call_later(180, battling_off, ctx.message.author.id)
         await self.bot.say(fmt.format(ctx.message.author, player2))
         await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def accept(self, ctx):
         """Accepts the battle challenge"""
-        if not userBattling(ctx):
+        if not user_battling(ctx):
             await self.bot.say("You are not currently in a battle!")
             return
 
-        battling = config.getContent('battling') or {}
+        battling = config.get_content('battling') or {}
         p1 = [p1_id for p1_id, p2_id in battling.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
             await self.bot.say("You are not currently being challenged to a battle!")
@@ -122,26 +122,26 @@ class Interaction:
         battleP2 = ctx.message.author
 
         fmt = config.battleWins[random.SystemRandom().randint(0, len(config.battleWins) - 1)]
-        battlingOff(ctx.message.author.id)
+        battling_off(ctx.message.author.id)
         
         if random.SystemRandom().randint(0, 1):
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
-            updateBattleRecords(battleP1, battleP2)
+            update_battle_records(battleP1, battleP2)
         else:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
-            updateBattleRecords(battleP2, battleP1)
+            update_battle_records(battleP2, battleP1)
         
         await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def decline(self, ctx):
         """Declines the battle challenge"""
-        if not userBattling(ctx):
+        if not user_battling(ctx):
             await self.bot.say("You are not currently in a battle!")
             return
 
-        battling = config.getContent('battling') or {}
+        battling = config.get_content('battling') or {}
         p1 = [p1_id for p1_id, p2_id in battling.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
             await self.bot.say("You are not currently being challenged to a battle!")
@@ -149,13 +149,13 @@ class Interaction:
         battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.server.members)
         battleP2 = ctx.message.author
 
-        battlingOff(ctx.message.author.id)
+        battling_off(ctx.message.author.id)
         await self.bot.say("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
         await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 180, BucketType.user)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member):
         """Boops the mentioned person"""
         booper = ctx.message.author
@@ -172,7 +172,7 @@ class Interaction:
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
             return
 
-        boops = config.getContent('boops') or {}
+        boops = config.get_content('boops') or {}
 
         amount = 1
         booper_boops = boops.get(ctx.message.author.id)
@@ -186,7 +186,7 @@ class Interaction:
             booper_boops[boopee.id] = amount
             boops[ctx.message.author.id] = booper_boops
 
-        config.saveContent('boops', boops)
+        config.save_content('boops', boops)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
         await self.bot.delete_message(ctx.message)

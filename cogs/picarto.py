@@ -35,7 +35,7 @@ class Picarto:
     async def check_channels(self):
         await self.bot.wait_until_ready()
         while not self.bot.is_closed:
-            picarto = config.getContent('picarto') or {}
+            picarto = config.get_content('picarto') or {}
             online_users_list = await online_users()
             for m_id, r in picarto.items():
                 url = r['picarto_url']
@@ -47,19 +47,19 @@ class Picarto:
                 if not live and notify and online:
                     for server_id in r['servers'].items():
                         server = self.bot.get_server(server_id)
-                        server_alerts = config.getContent('server_alerts') or {}
+                        server_alerts = config.get_content('server_alerts') or {}
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         member = discord.utils.find(lambda m: m.id == m_id, server.members)
 
                         picarto[m_id]['live'] = 1
                         fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
-                        config.saveContent('picarto', picarto)
+                        config.save_content('picarto', picarto)
                         await self.bot.send_message(channel, fmt)
                 elif live and not online:
                     for server_id, channel_id in r['servers'].items():
                         server = self.bot.get_server(server_id)
-                        server_alerts = config.getContent('server_alerts') or {}
+                        server_alerts = config.get_content('server_alerts') or {}
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         member = discord.utils.find(lambda m: m.id == m_id, server.members)
@@ -68,16 +68,16 @@ class Picarto:
                         fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
                             member.display_name,
                             url)
-                        config.saveContent('picarto', picarto)
+                        config.save_content('picarto', picarto)
                         await self.bot.send_message(channel, fmt)
             await asyncio.sleep(30)
 
     @commands.group(pass_context=True, invoke_without_command=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def picarto(self, ctx, member: discord.Member = None):
         """This command can be used to view Picarto stats about a certain member"""
         member = member or ctx.message.author
-        picarto_urls = config.getContent('picarto') or {}
+        picarto_urls = config.get_content('picarto') or {}
         member_url = picarto_urls.get(member.id)
         if not member_url:
             await self.bot.say("That user does not have a picarto url setup!")
@@ -102,7 +102,7 @@ class Picarto:
         await self.bot.say("Picarto stats for {}: ```\n{}```".format(member.display_name, fmt))
 
     @picarto.command(name='add', pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def add_picarto_url(self, ctx, url: str):
         """Saves your user's picarto URL"""
         try:
@@ -121,7 +121,7 @@ class Picarto:
                                        "What would be the point of adding a nonexistant Picarto user? Silly")
                     return
 
-        picarto_urls = config.getContent('picarto') or {}
+        picarto_urls = config.get_content('picarto') or {}
         result = picarto_urls.get(ctx.message.author.id)
 
         if result is not None:
@@ -130,19 +130,19 @@ class Picarto:
             picarto_urls[ctx.message.author.id] = {'picarto_url': url,
                                                    'servers': {ctx.message.server.id: ctx.message.channel.id},
                                                    'notifications_on': 1, 'live': 0}
-        config.saveContent('picarto', picarto_urls)
+        config.save_content('picarto', picarto_urls)
         await self.bot.say(
             "I have just saved your Picarto url {}, this channel will now send a notification when you go live".format(
                 ctx.message.author.mention))
 
     @picarto.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
-        picarto = config.getContent('picarto') or {}
+        picarto = config.get_content('picarto') or {}
         if picarto.get(ctx.message.author.id) is not None:
             del picarto[ctx.message.author.id]
-            config.saveContent('picarto', picarto)
+            config.save_content('picarto', picarto)
             await self.bot.say("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
         else:
             await self.bot.say(
@@ -150,14 +150,14 @@ class Picarto:
                     ctx.message.author.mention))
 
     @picarto.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def notify(self, ctx, channel: discord.Channel = None):
         """This can be used to turn picarto notifications on or off
         Call this command by itself, with a channel name, to change which one has the notification sent to it"""
         channel = channel or ctx.message.channel
         member = ctx.message.author
 
-        picarto = config.getContent('picarto') or {}
+        picarto = config.get_content('picarto') or {}
         result = picarto.get(member.id)
         if result is None:
             await self.bot.say(
@@ -165,15 +165,15 @@ class Picarto:
                     member.mention))
 
         picarto[member.id]['servers'][ctx.message.server.id] = channel.id
-        config.saveContent('picarto', picarto)
+        config.save_content('picarto', picarto)
         await self.bot.say(
             "I have just changed which channel will be notified when you go live, to `{}`".format(channel.name))
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns picarto notifications on"""
-        picarto = config.getContent('picarto') or {}
+        picarto = config.get_content('picarto') or {}
         result = picarto.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
@@ -184,15 +184,15 @@ class Picarto:
                 ctx.message.author.mention))
         else:
             picarto[ctx.message.author.id]['notifications_on'] = 1
-            config.saveContent('picarto', picarto)
+            config.save_content('picarto', picarto)
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
-    @checks.customPermsOrRole(send_messages=True)
+    @checks.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
         """Turns picarto notifications off"""
-        picarto = config.getContent('picarto') or {}
+        picarto = config.get_content('picarto') or {}
         if picarto.get(ctx.message.author.id) is None:
             await self.bot.say(
                 "I do not have your picarto URL added {}. You can save your picarto url with !picarto add".format(
@@ -202,7 +202,7 @@ class Picarto:
                 ctx.message.author.mention))
         else:
             picarto[ctx.message.author.id]['notifications_on'] = 0
-            config.saveContent('picarto', picarto)
+            config.save_content('picarto', picarto)
             await self.bot.say(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(
