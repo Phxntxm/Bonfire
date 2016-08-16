@@ -50,9 +50,10 @@ class Strawpoll:
         elif poll_id in server_polls.keys():
             poll = server_polls[poll_id]
 
-            async with self.session.get("{}/{}".format(self.url, poll_id), headers={'User-Agent': 'Bonfire/1.0.0') as response:
+            async with self.session.get("{}/{}".format(self.url, poll_id),
+                                        headers={'User-Agent': 'Bonfire/1.0.0'}) as response:
                 data = await response.json()
-            
+
             # The response for votes and options is provided as two separate lists
             # We are enumarting the list of options, to print r (the option) and the votes to match it, based on the index of the option
             # The rest is simple formatting
@@ -62,8 +63,8 @@ class Strawpoll:
             created_ago = (pendulum.utcnow() - pendulum.parse(poll['date'])).in_words()
             link = "https://strawpoll.me/{}".format(poll_id)
             fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {} ago\nOptions:\n\t{}".format(link, data['title'],
-                                                                                        author.display_name,
-                                                                                        created_ago, fmt_options)
+                                                                                            author.display_name,
+                                                                                            created_ago, fmt_options)
             await self.bot.say("```\n{}```".format(fmt))
 
     @strawpolls.command(name='create', aliases=['setup', 'add'], pass_context=True)
@@ -97,7 +98,7 @@ class Strawpoll:
                    'options': options}
         async with self.session.post(self.url, data=json.dumps(payload), headers=self.headers) as response:
             data = await response.json()
-        
+
         # Save this strawpoll in the list of running strawpolls for a server
         all_polls = config.get_content('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
@@ -115,7 +116,7 @@ class Strawpoll:
 
         all_polls = config.get_content('strawpolls') or {}
         server_polls = all_polls.get(ctx.message.server.id) or {}
-        
+
         # Check if a poll_id was provided, if it is then we can continue, if not print the list of current polls
         if poll_id:
             poll = server_polls.get(poll_id)
