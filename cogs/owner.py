@@ -18,7 +18,7 @@ class Owner:
 
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
     async def saferestart(self, ctx):
@@ -27,10 +27,12 @@ class Owner:
         # I do not want to restart the bot if someone is playing music 
         # This gets all the exiting VoiceStates that are playing music right now
         # If we are, say which server it 
-        servers_playing_music = [server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if state.is_playing()]
-        await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on {} servers".format(len(servers_playing_music)))
+        servers_playing_music = [server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
+                                 state.is_playing()]
+        await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on {} servers".format(
+            len(servers_playing_music)))
         ctx.invoke(self.bot.commands.get('restart'))
-        
+
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
     async def restart(self, ctx):
@@ -47,7 +49,7 @@ class Owner:
         """Saves a URL as an image to add for the doggo command"""
         # Save the local path based on how many images there currently are
         local_path = 'images/doggo{}.jpg'.format(len(glob.glob('images/doggo*')))
-        
+
         # "read" the image and save as bytes
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
@@ -56,14 +58,14 @@ class Owner:
                     f.write(val)
         await self.bot.say(
             "Just saved a new doggo image! I now have {} doggo images!".format(len(glob.glob('images/doggo*'))))
-            
+
     @commands.command()
     @commands.check(checks.is_owner)
     async def addsnek(self, url: str):
         """Saves a URL as an image to add for the snek command"""
         # Save the local path based on how many images there currently are
         local_path = 'images/snek{}.jpg'.format(len(glob.glob('images/snek*')))
-        
+
         # "read" the image and save as bytes
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
@@ -79,16 +81,15 @@ class Owner:
         """Executes code"""
         # Eval and exec have different useful purposes, so use both
         try:
-            
+
             # `Get all content in this format`
             match_single = getter.findall(ctx.message.content)
             # ```\nGet all content in this format```
             match_multi = multi.findall(ctx.message.content)
-            
-            
+
             if match_single:
                 result = eval(match_single[0])
-                
+
                 # In case the result needs to be awaited, handle that
                 if inspect.isawaitable(result):
                     result = await result
@@ -97,6 +98,7 @@ class Owner:
                 # Internal method to send the message to the channel, of whatever is passed
                 def r(v):
                     self.bot.loop.create_task(self.bot.say("```\n{}```".format(v)))
+
                 exec(match_multi[0])
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
@@ -131,18 +133,18 @@ class Owner:
     async def status(self, *, status: str):
         """Changes the bot's 'playing' status"""
         await self.bot.change_status(discord.Game(name=status, type=0))
-        await self.bot.say("Just changed my status to '{0}'!".format(newStatus))
+        await self.bot.say("Just changed my status to '{0}'!".format(status))
 
     @commands.command()
     @commands.check(checks.is_owner)
     async def load(self, *, module: str):
         """Loads a module"""
-        
+
         # Do this because I'm too lazy to type cogs.module
         module = module.lower()
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
-            
+
         # This try catch will catch errors such as syntax errors in the module we are loading
         try:
             self.bot.load_extension(module)
@@ -150,17 +152,17 @@ class Owner:
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
             await self.bot.say(fmt.format(type(error).__name__, error))
-            
+
     @commands.command()
     @commands.check(checks.is_owner)
     async def unload(self, *, module: str):
         """Unloads a module"""
-        
+
         # Do this because I'm too lazy to type cogs.module
         module = module.lower()
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
-            
+
         self.bot.unload_extension(module)
         await self.bot.say("I have just unloaded the {} module".format(module))
 
@@ -168,13 +170,13 @@ class Owner:
     @commands.check(checks.is_owner)
     async def reload(self, *, module: str):
         """Reloads a module"""
-        
+
         # Do this because I'm too lazy to type cogs.module
         module = module.lower()
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
         self.bot.unload_extension(module)
-        
+
         # This try block will catch errors such as syntax errors in the module we are loading
         try:
             self.bot.load_extension(module)

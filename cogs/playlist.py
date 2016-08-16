@@ -28,9 +28,12 @@ class VoiceState:
         self.voice = None
         self.bot = bot
         self.play_next_song = asyncio.Event()
-        self.songs = asyncio.Queue(maxsize=10) # This is the queue that holds all VoiceEntry's
-        self.skip_votes = set()  # a set of user_ids that voted
-        self.audio_player = self.bot.loop.create_task(self.audio_player_task()) # Our actual task that handles the queue system
+        # This is the queue that holds all VoiceEntry's
+        self.songs = asyncio.Queue(maxsize=10)
+        # a set of user_ids that voted
+        self.skip_votes = set()
+        # Our actual task that handles the queue system
+        self.audio_player = self.bot.loop.create_task(self.audio_player_task())
         self.opts = {
             'default_search': 'auto',
             'quiet': True,
@@ -67,7 +70,8 @@ class VoiceState:
             # Clear the votes skip that were for the last song
             self.skip_votes.clear()
             # Set current to none while we are waiting for the next song in the queue
-            # If we don't do this and we hit the end of the queue, our current song will remain the song that just finished
+            # If we don't do this and we hit the end of the queue
+            # our current song will remain the song that just finished
             self.current = None
             # Now wait for the next song in the queue
             self.current = await self.songs.get()
@@ -95,7 +99,8 @@ class Music:
         state = self.voice_states.get(server.id)
         
         # Internally handle creating a voice state if there isn't a current state
-        # This can be used for example, in case something is skipped when not being connected, we create the voice state when checked
+        # This can be used for example, in case something is skipped when not being connected
+        # We create the voice state when checked
         # This only creates the state, we are still not playing anything, which can then be handled separately
         if state is None:
             state = VoiceState(self.bot)
@@ -196,7 +201,7 @@ class Music:
             player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         except youtube_dl.DownloadError:
             fmt = "Sorry, either I had an issue downloading that video, or that's not a supported URL!"
-            await self.bot.say(fmt)
+            await self.bot.send_message(ctx.message.channel, fmt)
             return
         
         # Now we can create a VoiceEntry and queue it
@@ -308,7 +313,7 @@ class Music:
         if len(queue) == 0:
             fmt = "Nothing currently in the queue"
         else:
-            fmt = "\n\n".join(str(x) for x in state.songs._queue)
+            fmt = "\n\n".join(str(x) for x in queue)
         await self.bot.say("Current songs in the queue:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)

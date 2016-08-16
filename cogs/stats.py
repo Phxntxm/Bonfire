@@ -24,7 +24,7 @@ class Stats:
         # Then get a sorted list, based on the amount of times they've booped the member
         # Reverse needs to be true, as we want it to go from highest to lowest
         sorted_boops = sorted(boops.get(ctx.message.author.id).items(), key=lambda x: x[1], reverse=True)
-        # Then override the same list, checking if the member they've booped is in this server, using our previous list comprehension
+        # Then override the same list, checking if the member they've booped is in this server
         sorted_boops = [x for x in sorted_boops if x[0] in server_member_ids]
         
         # Since this is sorted, we just need to get the following information on the first user in the list
@@ -94,7 +94,8 @@ class Stats:
         sorted_server_members = sorted(server_members.items(), key=lambda x: x[1]['rating'], reverse=True)
         sorted_all_members = sorted(all_members.items(), key=lambda x: x[1]['rating'], reverse=True)
         
-        # Enumurate the list so that we can go through, find the user's place in the list, and get just that for the rank
+        # Enumurate the list so that we can go through, find the user's place in the list
+        # and get just that for the rank
         server_rank = [i for i, x in enumerate(sorted_server_members) if x[0] == member.id][0] + 1
         total_rank = [i for i, x in enumerate(sorted_all_members) if x[0] == member.id][0] + 1
         # The rest of this is straight forward, just formatting

@@ -55,7 +55,8 @@ class Strawpoll:
                 data = await response.json()
 
             # The response for votes and options is provided as two separate lists
-            # We are enumarting the list of options, to print r (the option) and the votes to match it, based on the index of the option
+            # We are enumarting the list of options, to print r (the option)
+            # And the votes to match it, based on the index of the option
             # The rest is simple formatting
             fmt_options = "\n\t".join(
                 "{}: {}".format(r, data['votes'][i]) for i, r in enumerate(data['options']))
@@ -78,11 +79,13 @@ class Strawpoll:
         # We're using this instead of other things, to allow most used puncation inside the options
         match_single = getter.findall(options)
         match_multi = multi.findall(options)
-        # Since match_single is already going to be a list, we just set the options to match_single and remove any blank entries
+        # Since match_single is already going to be a list, we just set
+        # The options to match_single and remove any blank entries
         if match_single:
             options = match_single
             options = [option for option in options if option]
-        # Otherwise, options need to be set based on the list, split by lines. Then remove blank entries like the last one
+        # Otherwise, options need to be set based on the list, split by lines.
+        # Then remove blank entries like the last one
         elif match_multi:
             options = match_multi[0].splitlines()
             options = [option for option in options if option]
