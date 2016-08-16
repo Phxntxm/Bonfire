@@ -28,18 +28,20 @@ class VoiceState:
         self.voice = None
         self.bot = bot
         self.play_next_song = asyncio.Event()
-        self.songs = asyncio.Queue(maxsize=10)
+        self.songs = asyncio.Queue(maxsize=10) # This is the queue that holds all VoiceEntry's
         self.skip_votes = set()  # a set of user_ids that voted
-        self.audio_player = self.bot.loop.create_task(self.audio_player_task())
+        self.audio_player = self.bot.loop.create_task(self.audio_player_task()) # Our actual task that handles the queue system
         self.opts = {
             'default_search': 'auto',
             'quiet': True,
         }
 
     def is_playing(self):
+        # If our VoiceClient or current VoiceEntry do not exist, then we are not playing a song
         if self.voice is None or self.current is None:
             return False
-
+        
+        # If they do exist, check if the current player has finished
         player = self.current.player
         return not player.is_done()
 
@@ -48,24 +50,35 @@ class VoiceState:
         return self.current.player
 
     def skip(self):
+        # Make sure we clear the votes, before stopping the player
+        # When the player is stopped, our toggle_next method is called, so the next song can be played
         self.skip_votes.clear()
         if self.is_playing():
             self.player.stop()
 
     def toggle_next(self):
+        # Set the Event so that the next song in the queue can be played
         self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
 
     async def audio_player_task(self):
         while True:
+            # At the start of our task, clear the Event, so we can wait till it is next set
             self.play_next_song.clear()
+            # Clear the votes skip that were for the last song
             self.skip_votes.clear()
+            # Set current to none while we are waiting for the next song in the queue
+            # If we don't do this and we hit the end of the queue, our current song will remain the song that just finished
             self.current = None
+            # Now wait for the next song in the queue
             self.current = await self.songs.get()
+            # Tell the channel that requested the new song that we are now playing
             await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
-
+            # Recreate the player; depending on how long the song has been in the queue, the URL may have expired
             self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts,
                                                                       after=self.toggle_next)
+            # Now we can start actually playing the song
             self.current.player.start()
+            # Wait till the Event has been set, before doing our task again
             await self.play_next_song.wait()
 
 
@@ -80,6 +93,10 @@ class Music:
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
+        
+        # Internally handle creating a voice state if there isn't a current state
+        # This can be used for example, in case something is skipped when not being connected, we create the voice state when checked
+        # This only creates the state, we are still not playing anything, which can then be handled separately
         if state is None:
             state = VoiceState(self.bot)
             self.voice_states[server.id] = state
@@ -87,11 +104,13 @@ class Music:
         return state
 
     async def create_voice_client(self, channel):
+        # First join the channel and get the VoiceClient that we'll use to save per server
         voice = await self.bot.join_voice_channel(channel)
         state = self.get_voice_state(channel.server)
         state.voice = voice
 
     def __unload(self):
+        # If this is unloaded, cancel all players and disconnect from all channels
         for state in self.voice_states.values():
             try:
                 state.audio_player.cancel()
@@ -100,19 +119,21 @@ class Music:
             except:
                 pass
 
-    @commands.command(no_pm=True)
+    @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
-    async def join(self, *, channel: discord.Channel):
+    async def join(self, ctx, *, channel: discord.Channel):
         """Joins a voice channel."""
         try:
             await self.create_voice_client(channel)
+        # Check if the channel given was an actual voice channel
         except discord.InvalidArgument:
             await self.bot.say('This is not a voice channel...')
+        # Check if we failed to join a channel, which means we are already in a channel. 
+        # move_channel needs to be used if we are already in a channel
         except discord.ClientException:
-            await self.bot.say('Already in a voice channel...')
-        except Exception as e:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(e).__name__, e))
+            state = self.get_voice_state(ctx.message.server)
+            await state.voice.move_to(channel)
+            await self.bot.say('Ready to play audio in ' + channel.name)
         else:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
@@ -120,16 +141,21 @@ class Music:
     @checks.custom_perms(send_messages=True)
     async def summon(self, ctx):
         """Summons the bot to join your voice channel."""
+        
+        # First check if the author is even in a voice_channel
         summoned_channel = ctx.message.author.voice_channel
         if summoned_channel is None:
             await self.bot.say('You are not in a voice channel.')
             return False
-
+        
+        # Check if we're in a channel already, if we are then we just need to move channels
+        # Otherwse, we need to create an actual voice state
         state = self.get_voice_state(ctx.message.server)
         if state.voice is None:
             state.voice = await self.bot.join_voice_channel(summoned_channel)
         else:
             await state.voice.move_to(summoned_channel)
+        # Return true so that we can invoke this, and ensure we succeeded
         return True
 
     @commands.command(pass_context=True, no_pm=True)
@@ -142,28 +168,38 @@ class Music:
         The list of supported sites can be found here:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
+        
         state = self.get_voice_state(ctx.message.server)
+        
+        # First check if we are connected to a voice channel at all, if not summon to the channel the author is in
+        # Since summon checks if the author is in a channel, we don't need to handle that here, just return if it failed
         if state.voice is None:
             success = await ctx.invoke(self.summon)
             if not success:
                 return
-
+        
+        # If the queue is full, we ain't adding anything to it
         if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
 
         author_channel = ctx.message.author.voice.voice_channel
         my_channel = ctx.message.server.me.voice.voice_channel
-
+        
+        # To try to avoid some abuse, ensure the requester is actually in our channel
         if my_channel != author_channel:
             await self.bot.say("You are not currently in the channel; please join before trying to request a song.")
             return
-
+        
+        # Create the player, and check if this was successful
         try:
             player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         except youtube_dl.DownloadError:
-            await self.bot.send_message(ctx.message.channel, "Sorry, that's not a supported URL!")
+            fmt = "Sorry, either I had an issue downloading that video, or that's not a supported URL!"
+            await self.bot.say(fmt)
             return
+        
+        # Now we can create a VoiceEntry and queue it
         player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)
         await self.bot.say('Enqueued ' + str(entry))
@@ -186,8 +222,7 @@ class Music:
         """Pauses the currently played song."""
         state = self.get_voice_state(ctx.message.server)
         if state.is_playing():
-            player = state.player
-            player.pause()
+            state.player.pause()
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -195,8 +230,7 @@ class Music:
         """Resumes the currently played song."""
         state = self.get_voice_state(ctx.message.server)
         if state.is_playing():
-            player = state.player
-            player.resume()
+            state.player.resume()
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -206,11 +240,14 @@ class Music:
         """
         server = ctx.message.server
         state = self.get_voice_state(server)
-
+        
+        # Stop playing whatever song is playing. 
         if state.is_playing():
             player = state.player
             player.stop()
-
+        
+        # This will stop cancel the audio event we're using to loop through the queue
+        # Then erase the voice_state entirely, and disconnect from the channel
         try:
             state.audio_player.cancel()
             del self.voice_states[server.id]
@@ -222,23 +259,33 @@ class Music:
     @checks.custom_perms(send_messages=True)
     async def eta(self, ctx):
         """Provides an ETA on when your next song will play"""
+        # Note: There is no way to tell how long a song has been playing, or how long there is left on a song
+        # That is why this is called an "ETA"
         state = self.get_voice_state(ctx.message.server)
         author = ctx.message.author
 
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-        if len(state.songs._queue) == 0:
+        queue = state.songs._queue
+        if len(queue) == 0:
             await self.bot.say("Nothing currently in the queue")
             return
-
+        
+        # Start off by adding the length of the current song
         count = state.current.player.duration
         found = False
-        for song in state.songs._queue:
+        # Loop through the songs in the queue, until the author is found as the requester
+        # The found bool is used to see if we actually found the author, or we just looped through the whole queue
+        for song in queue:
             if song.requester == author:
                 found = True
                 break
             count += song.player.duration
+        
+        # This is checking if nothing from the queue has been added to the total
+        # If it has not, then we have not looped through the queue at all
+        # Since the queue was already checked to have more than one song in it, this means the author is next
         if count == state.current.player.duration:
             await self.bot.say("You are next in the queue!")
             return
@@ -255,7 +302,10 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-        if len(state.songs._queue) == 0:
+        
+        # Asyncio provides no non-private way to access the queue, so we have to use _queue
+        queue = state.songs._queue
+        if len(queue) == 0:
             fmt = "Nothing currently in the queue"
         else:
             fmt = "\n\n".join(str(x) for x in state.songs._queue)
@@ -279,14 +329,18 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-
+        
+        # Check if the person requesting a skip is the requester of the song, if so automatically skip
         voter = ctx.message.author
         if voter == state.current.requester:
             await self.bot.say('Requester requested skipping song...')
             state.skip()
+        # Otherwise check if the voter has already voted
         elif voter.id not in state.skip_votes:
             state.skip_votes.add(voter.id)
             total_votes = len(state.skip_votes)
+            
+            # Now check how many votes have been made, if 3 then go ahead and skip, otherwise add to the list of votes
             if total_votes >= 3:
                 await self.bot.say('Skip vote passed, skipping song...')
                 state.skip()

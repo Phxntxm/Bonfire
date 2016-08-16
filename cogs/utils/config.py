@@ -14,6 +14,7 @@ except FileNotFoundError:
 botDescription = global_config.get("description")
 commandPrefix = global_config.get("command_prefix", "!")
 discord_bots_key = global_config.get('discord_bots_key', "")
+dev_server = global_config.get("dev_server", "")
 
 battleWins = global_config.get("battleWins", [])
 defaultStatus = global_config.get("default_status", "")

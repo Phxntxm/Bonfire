@@ -24,6 +24,8 @@ class Core:
     async def calendar(self, month: str=None, year: int=None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
+        
+        # calendar takes in a number for the month, not the words, so we need this dictionary to transform the word to the number
         months = {
             "january": 1,
             "february": 2,
@@ -38,6 +40,7 @@ class Core:
             "november": 11,
             "december": 12
         }
+        # In month was not passed, use the current month
         if month is None:
             month = datetime.date.today().month
         else:
@@ -45,8 +48,10 @@ class Core:
             if month is None:
                 await self.bot.say("Please provide a valid Month!")
                 return
+        # If year was not passed, use the current year
         if year is None:
             year = datetime.datetime.today().year
+        # Here we create the actual "text" calendar that we are printing
         cal = calendar.TextCalendar().formatmonth(year, month)
         await self.bot.say("```\n{}```".format(cal))
         
@@ -54,16 +59,20 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def info(self):
         """This command can be used to print out some of my information"""
+        # fmt is a dictionary so we can set the key to it's output, then print both 
+        # The only real use of doing it this way is easier editing if the info in this command is changed
         fmt = {}
         
         all_members = list(self.bot.get_all_members())
         
-        fmt['Official Bot Server'] = "https://discord.gg/f6uzJEj"
+        
+        # We can pretty safely assume that the author is going to be in at least one channel with the bot
+        # So find the author based on that list
         authors = []
         for author_id in config.owner_ids:
             authors.append(discord.utils.get(all_members, id=author_id).name)
         
-        
+        fmt['Official Bot Server'] = config.dev_server
         fmt['Author'] = ", ".join(authors)
         fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
         fmt['Total Servers'] = len(self.bot.servers)
@@ -93,14 +102,16 @@ class Core:
         perms.embed_links = True
         perms.read_message_history = True
         perms.attach_files = True
+        app_info = await self.bot.application_info()
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
-                           .format(discord.utils.oauth_url('183748889814237186', perms)))
+                           .format(discord.utils.oauth_url(app_info.id, perms)))
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
+        # Find a random image based on how many we currently have
         f = glob.glob('images/doggo*')[random.SystemRandom().randint(0, len(glob.glob('images/doggo*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
@@ -110,6 +121,7 @@ class Core:
     async def snek(self, ctx):
         """Use this to print a random snek image.
         Sneks are o3o"""
+        # Find a random image based on how many we currently have
         f = glob.glob('images/snek*')[random.SystemRandom().randint(0, len(glob.glob('images/snek*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
@@ -118,6 +130,7 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def joke(self):
         """Prints a random riddle"""
+        # Use the fortune riddles command because it's funny, I promise
         fortune_command = "/usr/bin/fortune riddles"
         fortune = subprocess.check_output(fortune_command.split()).decode("utf-8")
         await self.bot.say(fortune)
@@ -127,15 +140,19 @@ class Core:
     async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
+        # Use regex to get the notation based on what was provided
         try:
+            # We do not want to try to convert the dice, because we want d# to be a valid notation
             dice = re.search("(\d*)d(\d*)", notation).group(1)
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
+        # Check if something like ed3 was provided, or something else entirely was provided
         except (AttributeError, ValueError):
             await self.bot.say("Please provide the die notation in #d#!")
             return
         
         # Dice will be None if d# was provided, assume this means 1d#
         dice = dice or 1
+        # Since we did not try to convert to int before, do it now after we have it set
         dice = int(dice)
         if dice > 10:
             await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")

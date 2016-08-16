@@ -12,14 +12,19 @@ class Game:
     def __init__(self, word, creator):
         self.word = word
         self.creator = creator
+        # This converts everything but spaces to a blank
+        # TODO: Only convert [a-zA-Z0-9]
         self.blanks = "".join(" " if letter == " " else "_" for letter in word)
         self.failed_letters = []
         self.guessed_letters = []
         self.fails = 0
     
     def guess_letter(self, letter):
+        # No matter what, add this to guessed letters so we only have to do one check if a letter was already guessed
         self.guessed_letters.append(letter)
         if letter in self.word:
+            # Replace every occurence of the guessed letter, with the correct letter
+            # Use the one in the word instead of letter, due to capitalization
             self.blanks = "".join(word_letter if letter.lower() == word_letter.lower() else self.blanks[i] for i, word_letter in enumerate(self.word))
             return True
         else:
@@ -43,6 +48,8 @@ class Game:
         
     
     def __str__(self):
+        # Here's our fancy formatting for the hangman picture
+        # Each position in the hangman picture is either a space, or part of the man, based on how many fails there are
         man = "     ——\n"
         man += "    |  |\n"
         man += "    {}  |\n".format("o" if self.fails > 0 else " ")
@@ -52,6 +59,7 @@ class Game:
         man += "       |\n"
         man += "    ———————\n"
         fmt = "```\n{}```".format(man)
+        # Then just add the guesses and the blanks to the string
         fmt += "```\nGuesses: {}\nWord: {}```".format(", ".join(self.failed_letters), " ".join(self.blanks))
         return fmt
     
@@ -61,6 +69,7 @@ class Hangman:
         self.games = {}
     
     def create(self, word, ctx):
+        # Create a new game, then save it as the server's game
         game = Game(word, ctx.message.author)
         self.games[ctx.message.server.id] = game
         return game
@@ -78,10 +87,16 @@ class Hangman:
         if ctx.message.author == game.creator:
             await self.bot.say("You can't guess at your own hangman game! :S")
             return
-            
+        
+        # Check if we are guessing a letter or a phrase. Only one letter can be guessed at a time
+        # So if anything more than one was provided, we're guessing at the phrase
+        
+        # We're creating a fmt variable, so that we can  add a message for if a guess was correct or not
+        # And also add a message for a loss/win
         if len(guess) == 1:
             if guess in game.guessed_letters:
                 await self.bot.say("That letter has already been guessed!")
+                # Return here as we don't want to count this as a failure
                 return
             if game.guess_letter(guess):
                 fmt = "That's correct!"
@@ -111,16 +126,20 @@ class Hangman:
         Due to the fact that I might not be able to delete a message, I will PM you and ask for the phrase you want.
         The phrase needs to be under 30 characters"""
         
+        # Only have one hangman game per server, since anyone in a server (except the creator) can guess towards the current game
         if self.games.get(ctx.message.server.id) != None:
             await self.bot.say("Sorry but only one Hangman game can be running per server!")
             return
-            
+        
+        # Make sure the phrase is less than 30 characters
         check = lambda m: len(m.content) < 30
         
         # Doing this so that while we wait for the phrase, another one cannot be started.
         self.games[ctx.message.server.id] = "placeholder"
         
+        # We want to send this message instead of just PM'ing the creator, as some people have PM's turned off/ don't pay attention to them
         await self.bot.say("I have just PM'd you {}, please respond there with the phrase you want to start a new hangman game with".format(ctx.message.author.display_name))
+        # The only reason we save this variable, is so that we can retrieve the PrivateChannel for it, for use in our wait_for_message command
         _msg = await self.bot.whisper("Please respond with the phrase you would like to use for your new hangman game\n"
                                         "Please note that it must be under 30 characters long")
         msg = await self.bot.wait_for_message(timeout=60.0, channel=_msg.channel, check=check)
@@ -131,6 +150,7 @@ class Hangman:
             return
         else:
             game = self.create(msg.content, ctx)
+        # Let them know the game has started, then print the current game so that the blanks are shown
         await self.bot.say("Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
 
 def setup(bot):
