@@ -30,7 +30,8 @@ class Mod:
         """This command can be used to set whether or not you want user notificaitons to show
         This will save what channel you run this command in, that will be the channel used to send the notification to
         Provide on, yes, or true to set it on; otherwise it will be turned off"""
-        # Join/Leave notifications can be kept separate from normal alerts, so we base this channel on it's own and not from alerts
+        # Join/Leave notifications can be kept separate from normal alerts
+        # So we base this channel on it's own and not from alerts
         # When mod logging becomes available, that will be kept to it's own channel if wanted as well
         on_off = ctx.message.channel.id if re.search("(on|yes|true)", on_off.lower()) else None
         notifications = config.get_content('user_notifications') or {}
@@ -112,7 +113,7 @@ class Mod:
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'
         If you want to open the command to everyone, provide 'none' as the permission"""
-        
+
         # Since subcommands exist, base the last word in the list as the permission, and the rest of it as the command
         command = " ".join(msg[0:len(msg) - 1])
         permissions = msg[len(msg) - 1]
@@ -125,11 +126,15 @@ class Mod:
         perm_obj = discord.Permissions.none()
         setattr(perm_obj, permissions, True)
         perm_value = perm_obj.value
-        
-        # This next loop ensures the command given is valid. We need to loop through commands, as self.bot.commands only includes parent commands
-        # So we are splitting the command in parts, looping through the commands and getting the subcommand based on the next part
-        # If we try to access commands of a command that isn't a group, we'll hit an AttributeError, meaning an invalid command was given
-        # If we loop through and don't find anything, cmd will still be None, and we'll report an invalid was given as well
+
+        # This next loop ensures the command given is valid. We need to loop through commands
+        # As self.bot.commands only includes parent commands
+        # So we are splitting the command in parts, looping through the commands
+        # And getting the subcommand based on the next part
+        # If we try to access commands of a command that isn't a group
+        # We'll hit an AttributeError, meaning an invalid command was given
+        # If we loop through and don't find anything, cmd will still be None
+        # And we'll report an invalid was given as well
         cmd = None
         for part in msg[0:len(msg) - 1]:
             try:
@@ -145,9 +150,10 @@ class Mod:
             await self.bot.say(
                 "That command does not exist! You can't have custom permissions on a non-existant command....")
             return
-        
+
         # Two cases I use should never have custom permissions setup on them, is_owner for obvious reasons
-        # The other case is if I'm using the default has_permissions case, which means I do not want to check custom permissions at all
+        # The other case is if I'm using the default has_permissions case
+        # Which means I do not want to check custom permissions at all
         # Currently the second case is only on adding and removing permissions, to avoid abuse on these
         for check in cmd.checks:
             if "is_owner" == check.__name__ or re.search("has_permissions", str(check)) is not None:
@@ -158,8 +164,7 @@ class Mod:
             await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```\n{}```"
                                .format(permissions, "\n".join(valid_perms)))
             return
-        
-        
+
         custom_perms = config.get_content('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id) or {}
         # Save the qualified name, so that we don't get screwed up by aliases
@@ -173,16 +178,17 @@ class Mod:
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
     async def remove_perms(self, ctx, *command: str):
-        """Removes the custom permissions setup on the command specified"""            
+        """Removes the custom permissions setup on the command specified"""
         custom_perms = config.get_content('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id) or {}
         if server_perms is None:
             await self.bot.say("There are no custom permissions setup on this server yet!")
             return
-        
+
         cmd = None
-        # This is the same loop as the add command, we need this to get the command object so we can get the qualified_name
-        for part in msg[0:len(msg) - 1]:
+        # This is the same loop as the add command, we need this to get the
+        # command object so we can get the qualified_name
+        for part in command[0:len(command) - 1]:
             try:
                 if cmd is None:
                     cmd = self.bot.commands.get(part)
@@ -196,12 +202,12 @@ class Mod:
             await self.bot.say(
                 "That command does not exist! You can't have custom permissions on a non-existant command....")
             return
-        
+
         command_perms = server_perms.get(cmd.qualified_name)
         if command_perms is None:
             await self.bot.say("You do not have custom permissions setup on this command!")
             return
-        
+
         del custom_perms[ctx.message.server.id][cmd]
         config.save_content('custom_permissions', custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
@@ -249,7 +255,7 @@ class Mod:
             await self.bot.say(
                 "This server currently has no rules on it! Can't remove something that doesn't exist bro")
             return
-        
+
         # Get the list of rules so that we can print it if no number was provided
         # Since this is a list and not a dictionary, order is preserved, and we just need the number of the rule
         list_rules = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(server_rules))
@@ -257,7 +263,7 @@ class Mod:
         if rule is None:
             await self.bot.say("Your rules are:\n```\n{}```Please provide the rule number"
                                "you would like to remove (just the number)".format(list_rules))
-            
+
             # All we need for the check is to ensure that the content is just a digit, that is all we need
             msg = await self.bot.wait_for_message(timeout=60.0, author=ctx.message.author, channel=ctx.message.channel,
                                                   check=lambda m: m.content.isdigit())
@@ -267,7 +273,7 @@ class Mod:
             del server_rules[int(msg.content) - 1]
             rules[ctx.message.server.id] = server_rules
             config.save_content('rules', rules)
-        
+
         # This check is just to ensure a number was provided within the list's range
         try:
             del server_rules[rule - 1]

@@ -124,8 +124,9 @@ class Hangman:
         Due to the fact that I might not be able to delete a message, I will PM you and ask for the phrase you want.
         The phrase needs to be under 30 characters"""
 
-        # Only have one hangman game per server, since anyone in a server (except the creator) can guess towards the current game
-        if self.games.get(ctx.message.server.id) != None:
+        # Only have one hangman game per server, since anyone
+        # In a server (except the creator) can guess towards the current game
+        if self.games.get(ctx.message.server.id) is not None:
             await self.bot.say("Sorry but only one Hangman game can be running per server!")
             return
 
@@ -135,11 +136,13 @@ class Hangman:
         # Doing this so that while we wait for the phrase, another one cannot be started.
         self.games[ctx.message.server.id] = "placeholder"
 
-        # We want to send this message instead of just PM'ing the creator, as some people have PM's turned off/ don't pay attention to them
+        # We want to send this message instead of just PM'ing the creator
+        # As some people have PM's turned off/ don't pay attention to them
         await self.bot.say(
-            "I have just PM'd you {}, please respond there with the phrase you want to start a new hangman game with".format(
-                ctx.message.author.display_name))
-        # The only reason we save this variable, is so that we can retrieve the PrivateChannel for it, for use in our wait_for_message command
+            "I have just PM'd you {}, please respond there with the phrase you want to start a new"
+            " hangman game with".format(ctx.message.author.display_name))
+        # The only reason we save this variable, is so that we can retrieve
+        # The PrivateChannel for it, for use in our wait_for_message command
         _msg = await self.bot.whisper("Please respond with the phrase you would like to use for your new hangman game\n"
                                       "Please note that it must be under 30 characters long")
         msg = await self.bot.wait_for_message(timeout=60.0, channel=_msg.channel, check=check)

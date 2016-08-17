@@ -6,6 +6,7 @@ import logging
 import datetime
 import pendulum
 import os
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 from discord.ext import commands
 from cogs.utils import config
@@ -30,7 +31,6 @@ extensions = ['cogs.interaction',
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.WARNING)
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 log = logging.getLogger()
 log.setLevel(logging.INFO)
