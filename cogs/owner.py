@@ -29,9 +29,14 @@ class Owner:
         # If we are, say which server it 
         servers_playing_music = [server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
                                  state.is_playing()]
-        await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on {} servers".format(
-            len(servers_playing_music)))
-        ctx.invoke(self.bot.commands.get('restart'))
+        if len(servers_playing_music) > 0:
+            await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on {} servers".format(
+                len(servers_playing_music)))
+        else:
+            config.save_content('restart_server', ctx.message.channel.id)
+            await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
+            python = sys.executable
+            os.execl(python, python, *sys.argv)
 
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
