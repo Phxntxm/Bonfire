@@ -106,7 +106,7 @@ class Interaction:
 
         # Add the author and player provided in a new battle
         battling = config.get_content('battling') or {}
-        battling[ctx.message.author.id] = ctx.message.mentions[0].id
+        battling[ctx.message.author.id] = player2.id
         config.save_content('battling', battling)
 
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
