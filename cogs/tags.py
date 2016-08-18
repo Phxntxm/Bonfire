@@ -25,7 +25,7 @@ class Tags:
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
         tags = config.get_content('tags') or {}
-        # Same generator as the method for tags, other than the second check to see get the tag that is provided
+        # Same generator as the method for tags, other than the second check to get the tag that is provided
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         if len(result) == 0:
             await self.bot.say('That tag does not exist!')
