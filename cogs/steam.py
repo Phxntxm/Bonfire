@@ -60,5 +60,10 @@ class Steam:
             data = response.json()
 
         stuff_to_print = ['total_kills', 'total_deaths', 'total_wins', 'total_mvps']
-        stats = "\n".join("{}: {}".format(d['name'], d['value']) for d in data['playerstats']['stats'] if d['name'] in stuff_to_print)
+        stats = "\n".join(
+            "{}: {}".format(d['name'], d['value']) for d in data['playerstats']['stats'] if d['name'] in stuff_to_print)
         await self.bot.say("CS:GO Stats for user {}: \n```\n{}```".format(user, stats))
+
+
+def setup(bot):
+    bot.add_cog(Steam(bot))
