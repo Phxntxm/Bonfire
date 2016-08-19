@@ -90,6 +90,11 @@ class Steam:
         Call this command by itself with a user, to view some information
         about that user's steam account, if it is linked
         Option can be achievements, games, info and will default to info"""
+        # First make sure the person requested isn't the bot
+        # Need to keep up the bot's sassy attitude, right?
+        if member == ctx.message.server.me:
+            await self.bot.say("I don't play video games anymore, I crushed everyone so badly I made everyone cry last time.")
+            return
         # Get the user's steam id if it exists
         try:
             steam_id = config.get_content('steam_users').get(member.id).get('steam_id')
