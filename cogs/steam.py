@@ -110,7 +110,7 @@ class Steam:
                     return
                 app_id = int(option[1])
             except ValueError:
-                app_id = get_app_id(option[1].lower())
+                app_id = get_app_id(game.lower())
             
             url = "{}/ISteamUserStats/GetPlayerAchievements/v0001/?key={}&steamid={}&appid={}".format(base_url, self.key, steam_id, app_id)
         elif option[0] == "games":
