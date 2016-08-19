@@ -50,7 +50,7 @@ class Stats:
         sorted_booped_members = sorted(booped_members.items(), key=lambda k: k[1], reverse=True)
 
         output = "\n".join(
-            "{0.display_name}: {1} times".format(discord.utils.get(self.bot.get_all_members(), id=m_id), amt) for
+            "{0.display_name}: {1} times".format(discord.utils.get(ctx.message.server.members, id=m_id), amt) for
             m_id, amt in sorted_booped_members)
         await self.bot.say("You have booped:```\n{}```".format(output))
 
