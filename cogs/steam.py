@@ -51,7 +51,7 @@ class Steam:
         except ValueError:
             steam_id = await self.find_id(user)
 
-        await self.bot.say("User given was: {}\nFound steam_id")
+        await self.bot.say("User given was: {}\nFound steam_id: {}".format(user, steam_id))
 
         if steam_id is None:
             await self.bot.say("Sorry, couldn't find that Steam user!")
@@ -59,7 +59,7 @@ class Steam:
 
         url = "{}&appid=730&steamid={}".format(base_url, steam_id)
         async with self.session.get(url, headers=self.headers) as response:
-            data = response.json()
+            data = await response.json()
 
         stuff_to_print = ['total_kills', 'total_deaths', 'total_wins', 'total_mvps']
         stats = "\n".join(
