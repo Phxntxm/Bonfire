@@ -32,18 +32,18 @@ class Steam:
                 return int(tree[0].text)
             except ValueError:
                 return None
-
+    
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def csgo(self, ctx, profile: str):
-        """This command can be used to lookup csgo stats for a user"""
+    async def steam(self, ctx, profile: str):
+        """This command can be used to link a steam profile to your user"""
         # Attempt to find the user/steamid based on the url provided
         # If a url is not provided that matches steamcommunity.com, assume they provided just the user/id
         try:
             user = re.search("((?<=://)?steamcommunity.com/(id|profile)/)+(.*)", profile).group(2)
         except AttributeError:
             user = profile
-
+        
         # To look up userdata, we need the steam ID. Try to convert to an int, if we can, it's the steam ID
         # If we can't convert to an int, use our method to find the steam ID for a certain user
         try:
@@ -53,6 +53,27 @@ class Steam:
 
         if steam_id is None:
             await self.bot.say("Sorry, couldn't find that Steam user!")
+            return
+        
+        # Save the author's steam ID, ensuring to only overwrite the steam id if they already exist
+        author = ctx.message.author
+        steam_users = config.get_content('steam_users') or {}
+        if steam_users.get(author.id):
+            steam_users[author.id]['steam_id'] = steam_id
+        else:
+            steam_users[author.id] = {'steam_id': steam_id}
+        
+        config.save_content('steam_users', steam_users)
+        await self.bot.say("I have just saved your steam account, you should now be able to view stats for your account!")
+        
+    @commands.command(pass_context=True)
+    @checks.custom_perms(send_messages=True)
+    async def csgo(self, ctx, member: discord.Member):
+        """This command can be used to lookup csgo stats for a user"""
+        try:
+            steam_id = config.get_content('steam_users').get(ctx.message.author.id).get('steam_id')
+        except AttributeError:
+            await self.bot.say("Sorry, but I don't have that user's steam account saved!")
             return
 
         url = "{}&appid=730&steamid={}".format(base_url, steam_id)
