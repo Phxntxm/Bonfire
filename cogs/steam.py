@@ -163,7 +163,7 @@ class Steam:
             all_achievements = data['playerstats']['achievements']
             # Now get all achievements that the user has achieved
             successful_achievements = [data for data in all_achievements if data['achieved'] == 1]
-            await self.bot.say("{} has achieved {}/{} achievements on the game {}".format(member.display_name, len(successful_achievements), len(all_achievements), option[0]))
+            await self.bot.say("{} has achieved {}/{} achievements on the game {}".format(member.display_name, len(successful_achievements), len(all_achievements), game))
         
         
     @steam.command(name='add', aliases=['link', 'create'], pass_context=True)
