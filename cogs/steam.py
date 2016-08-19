@@ -140,7 +140,7 @@ class Steam:
             last_seen_date = pendulum.from_timestamp(data.get('lastlogoff'))
             # We want the difference between now and then, to see when they were actually last Online
             # Instead of printing the exact time they were online
-            last_seen_delta = pendulum.utcnow - last_seen_date
+            last_seen_delta = pendulum.utcnow() - last_seen_date
             fmt = {"URL": data.get('profileurl'),
                    "Display Name": data.get('personaname'),
                    "Online status": status_map[data.get('personastate')],
