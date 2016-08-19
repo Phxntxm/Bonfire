@@ -92,7 +92,7 @@ class Steam:
         Option can be achievements, games, info and will default to info"""
         # Get the user's steam id if it exists
         try:
-            steam_id = config.get_content('steam_users').get(ctx.message.author.id).get('steam_id')
+            steam_id = config.get_content('steam_users').get(member.id).get('steam_id')
         except AttributeError:
             await self.bot.say("Sorry, but I don't have that user's steam account saved!")
             return
@@ -155,12 +155,19 @@ class Steam:
             fmt_string = "\n".join("{}: {}".format(key, value) for key, value in fmt.items() if value)
             await self.bot.say("```\n{}```".format(fmt_string))
         elif option[0] == 'achievements':
-            # First ensure that the profile is not private
+            # First ensure that the profile is not private, and the user has played it before
             if not data['playerstats']['success']:
-                await self.bot.say("Sorry, {} has a private steam account! I cannot lookup their achievements!")
+                if data['playerstats']['error'] == "Requested app has no stats":
+                    await self.bot.say("{} has no achievements on the game {}".format(member.display_name, game))
+                elif data['playerstats']['error'] == "Profile is not public"
+                    await self.bot.say("Sorry, {} has a private steam account! I cannot lookup their achievements!".format(member.display_name))
                 return
-            # Get all achievements for this game
-            all_achievements = data['playerstats']['achievements']
+            # Get all achievements for this game, making sure they actually exist
+            try:
+                all_achievements = data['playerstats']['achievements']
+            except KeyError:
+                await self.bot.say("Sorry, the game {} has no achievements!".format(game))
+                return
             # Now get all achievements that the user has achieved
             successful_achievements = [data for data in all_achievements if data['achieved'] == 1]
             await self.bot.say("{} has achieved {}/{} achievements on the game {}".format(member.display_name, len(successful_achievements), len(all_achievements), game))
