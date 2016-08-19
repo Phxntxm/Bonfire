@@ -22,7 +22,7 @@ class Owner:
     @commands.command()
     @commands.check(checks.is_owner)
     async def testcommand(self, member: discord.Member):
-        role = [discord.Roles(id="183749087038930944"), discord.Object(id="183749087038930944")]
+        role = [discord.Role(id="183749087038930944"), discord.Object(id="183749087038930944")]
         await self.bot.add_roles(member, *roles)
         await self.bot.say("Just added the roles {} to {}".format(role, member.display_name))
         
