@@ -159,7 +159,7 @@ class Steam:
             if not data['playerstats']['success']:
                 if data['playerstats']['error'] == "Requested app has no stats":
                     await self.bot.say("{} has no achievements on the game {}".format(member.display_name, game))
-                elif data['playerstats']['error'] == "Profile is not public"
+                elif data['playerstats']['error'] == "Profile is not public":
                     await self.bot.say("Sorry, {} has a private steam account! I cannot lookup their achievements!".format(member.display_name))
                 return
             # Get all achievements for this game, making sure they actually exist
