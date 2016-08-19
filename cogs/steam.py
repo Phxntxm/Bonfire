@@ -85,7 +85,7 @@ class Steam:
                 
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
-    async def steam(self, ctx, member: discord.Member, *option: str=["info"]):
+    async def steam(self, ctx, member: discord.Member, *option: str=None):
         """Handles linking/looking information for a certain user
         Call this command by itself with a user, to view some information
         about that user's steam account, if it is linked
@@ -96,7 +96,8 @@ class Steam:
         except AttributeError:
             await self.bot.say("Sorry, but I don't have that user's steam account saved!")
             return
-        
+        if option is None:
+            option = ['info']
         # Set the url based on which option is provided
         if option[0] == "info":
             url = "{}/ISteamUser/GetPlayerSummaries/v0002/?key={}&steamids={}".format(base_url, self.key, steam_id)
