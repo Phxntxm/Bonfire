@@ -85,7 +85,7 @@ class Steam:
                 
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
-    async def steam(self, ctx, member: discord.Member, *option: str="info"):
+    async def steam(self, ctx, member: discord.Member, *option: str=["info"]):
         """Handles linking/looking information for a certain user
         Call this command by itself with a user, to view some information
         about that user's steam account, if it is linked
