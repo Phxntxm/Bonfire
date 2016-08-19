@@ -51,8 +51,6 @@ class Steam:
         except ValueError:
             steam_id = await self.find_id(user)
 
-        await self.bot.say("User given was: {}\nFound steam_id: {}".format(user, steam_id))
-
         if steam_id is None:
             await self.bot.say("Sorry, couldn't find that Steam user!")
             return
@@ -64,7 +62,7 @@ class Steam:
         stuff_to_print = ['total_kills', 'total_deaths', 'total_wins', 'total_mvps']
         stats = "\n".join(
             "{}: {}".format(d['name'], d['value']) for d in data['playerstats']['stats'] if d['name'] in stuff_to_print)
-        await self.bot.say("CS:GO Stats for user {}: \n```\n{}```".format(user, stats))
+        await self.bot.say("CS:GO Stats for user {}: \n```\n{}```".format(user, stats.title().replace("_", " ")))
 
 
 def setup(bot):
