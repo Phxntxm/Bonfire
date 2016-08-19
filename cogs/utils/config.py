@@ -26,7 +26,9 @@ dev_server = global_config.get("dev_server", "")
 battleWins = global_config.get("battleWins", [])
 # The default status the bot will use
 defaultStatus = global_config.get("default_status", "")
-# 
+# The steam API key
+steam_key = global_config.get("steam_key", "")
+
 try:
     botToken = global_config["bot_token"]
 except KeyError:
