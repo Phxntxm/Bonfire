@@ -119,7 +119,7 @@ class Steam:
         # Make the request and get the data in json response, all url's we're using will give a json response
         try:
             async with self.session.get(url, headers=self.headers) as response:
-                data = response.json()
+                data = await response.json()
         except:
             await self.bot.say("Sorry, I failed looking up that user's information. I'll try better next time ;-;")
             return
