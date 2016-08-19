@@ -6,6 +6,7 @@ import json
 log = logging.getLogger()
 
 discord_bots_url = 'https://bots.discord.pw/api'
+carbonitex_url = 'https://www.carbonitex.net/discord/data/botdata.php'
 
 
 class StatsUpdate:
@@ -19,6 +20,15 @@ class StatsUpdate:
         config.loop.create_task(self.session.close())
 
     async def update(self):
+        
+        carbon_payload = {
+            'key': config.carbon_key,
+            'servercount': len(self.bot.servers)
+        }
+
+        async with self.session.post(carbonitex_url, data=carbon_payload) as resp:
+            log.info('Carbonitex statistics returned {} for {}'.format(resp.status, carbon_payload))
+            
         payload = json.dumps({
             'server_count': len(self.bot.servers)
         })
@@ -28,9 +38,9 @@ class StatsUpdate:
             'content-type': 'application/json'
         }
 
-        url = '{0}/bots/{1.user.id}/stats'.format(discord_bots_url, self.bot)
+        url = '{}/bots/{}/stats'.format(discord_bots_url, self.bot.user.id)
         async with self.session.post(url, data=payload, headers=headers) as resp:
-            log.info('bots.discord.pw statistics returned {0.status} for {1}'.format(resp, payload))
+            log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
 
     async def on_server_join(self, server):
         await self.update()
