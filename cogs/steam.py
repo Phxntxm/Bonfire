@@ -19,7 +19,7 @@ class Steam:
     async def find_id(self, user: str):
         # Get the profile link based on the user provided, and request the xml data for it
         url = 'http://steamcommunity.com/id/{}/?xml=1'.format(user)
-        async with self.session.get(url) as response:
+        async with self.session.get(url, headers=self.headers) as response:
             data = response.text()
             # Remove the xml version content, it breaks etree.fromstring
             data = re.sub('<\?xml.*\?>', '', data)
@@ -56,7 +56,7 @@ class Steam:
             return
 
         url = "{}&appid=730&steamid={}".format(base_url, steam_id)
-        async with self.session.get(url) as response:
+        async with self.session.get(url, headers=self.headers) as response:
             data = response.json()
 
         stuff_to_print = ['total_kills', 'total_deaths', 'total_wins', 'total_mvps']
