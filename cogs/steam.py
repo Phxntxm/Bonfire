@@ -55,8 +55,11 @@ app_id_map = {"portal 2": 620,
               "fallout new vegas": 22490
               }
 def get_app_id(game: str):
-    best_match = process.extractOne(game, app_id_map.keys())[0]
-    return app_id_map.get(best_match)
+    best_match = process.extractOne(game, app_id_map.keys())
+    if best_match[1] > 80:
+        return app_id_map.get(best_match[0])
+    else:
+        return None
    
 class Steam:
     def __init__(self, bot):
@@ -116,6 +119,9 @@ class Steam:
                 app_id = int(option[1])
             except ValueError:
                 app_id = get_app_id(game.lower())
+                if app_id is None:
+                    await self.bot.say("Sorry, I couldn't find a close match for the game {}".format(game))
+                    return
             
             url = "{}/ISteamUserStats/GetPlayerAchievements/v0001/?key={}&steamid={}&appid={}".format(base_url, self.key, steam_id, app_id)
         elif option[0] == "games":
