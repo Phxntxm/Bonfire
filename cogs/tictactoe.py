@@ -101,9 +101,7 @@ class Board:
 def update_records(winner, loser):
     # This is the exact same formula as the battling update.
     # The only difference is I use the word "match" instead of "battle"
-    matches = config.get_content('tictactoe')
-    if matches is None:
-        matches = {winner.id: "1-0", loser.id: "0-1"}
+    matches = config.get_content('tictactoe') or {}
 
     winner_stats = matches.get(winner.id) or {}
     winner_rating = winner_stats.get('rating') or 1000

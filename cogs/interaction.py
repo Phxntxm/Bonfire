@@ -35,9 +35,7 @@ def user_battling(ctx, player2=None):
 def update_battle_records(winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
-    battles = config.get_content('battle_records')
-    if battles is None:
-        battles = {winner.id: "1-0", loser.id: "0-1"}
+    battles = config.get_content('battle_records') or {}
 
     # Start ratings at 1000 if they have no rating
     winner_stats = battles.get(winner.id) or {}
