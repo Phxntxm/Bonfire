@@ -180,7 +180,7 @@ class Steam:
         # Attempt to find the user/steamid based on the url provided
         # If a url is not provided that matches steamcommunity.com, assume they provided just the user/id
         try:
-            user = re.search("((?<=://)?steamcommunity.com/(id|profile)/)+(.*)", profile).group(2)
+            user = re.search("((?<=://)?steamcommunity.com/(id|profile)/)+(.*)", profile).group(3)
         except AttributeError:
             user = profile
         
