@@ -18,7 +18,14 @@ class Owner:
 
     def __init__(self, bot):
         self.bot = bot
-
+    
+    @commands.command()
+    @commands.check(checks.is_owner)
+    async def testcommand(self, member: discord.Member):
+        roles = [discord.Object(id="183749087038930944")]
+        await self.bot.add_roles(member, *roles)
+        await self.bot.say("Just added the roles {} to {}".format(role, member.display_name))
+        
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
     async def saferestart(self, ctx):

@@ -4,6 +4,7 @@ import json
 
 loop = asyncio.get_event_loop()
 
+# Ensure that the required config.yml file actually exists
 try:
     with open("config.yml", "r") as f:
         global_config = yaml.load(f)
@@ -11,13 +12,21 @@ except FileNotFoundError:
     print("You have no config file setup! Please use config.yml.sample to setup a valid config file")
     quit()
 
+# Default bot's description
 botDescription = global_config.get("description")
+# Bot's default prefix for commands
 commandPrefix = global_config.get("command_prefix", "!")
+# The key for bots.discord.pw and carbonitex
 discord_bots_key = global_config.get('discord_bots_key', "")
+carbon_key = global_config.get('carbon_key', "")
+# The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
 
+# A list of all the outputs for the battle command
 battleWins = global_config.get("battleWins", [])
+# The default status the bot will use
 defaultStatus = global_config.get("default_status", "")
+# 
 try:
     botToken = global_config["bot_token"]
 except KeyError:
