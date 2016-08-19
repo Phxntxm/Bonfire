@@ -54,7 +54,7 @@ app_id_map = {"portal 2": 620,
               "fallout 4": 377160,
               "fallout new vegas": 22490
               }
-def get_app_id(self, game: str):
+def get_app_id(game: str):
     best_match = process.extractOne(game, app_id_map.keys())[0]
     return app_id_map.get(best_match)
    
@@ -104,12 +104,13 @@ class Steam:
             # If we can't convert, then an app_id wasn't given, try to find it based on our map of games
             # If the option list doesn't have an index of 1, then no game was given
             try:
+                game = " ".join(option[1:])
+                if game == "":
+                    await self.bot.say("Please provide a game you would like to get the achievements for!")
+                    return
                 app_id = int(option[1])
             except ValueError:
                 app_id = get_app_id(option[1].lower())
-            except IndexError:
-                await self.bot.say("Please provide a game you would like to get the achievements for!")
-                return
             
             url = "{}/ISteamUserStats/GetPlayerAchievements/v0001/?key={}&steamid={}&appid={}".format(base_url, self.key, steam_id, app_id)
         elif option[0] == "games":
