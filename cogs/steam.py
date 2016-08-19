@@ -105,28 +105,32 @@ class Steam:
             await self.bot.say("Sorry, but I don't have that user's steam account saved!")
             return
         # Set the url based on which option is provided
-        if option[0] == "info":
+        # If no option is provided, we'll hit the IndexError, assume info for that
+        try:
+            if option[0] == "info":
+                url = "{}/ISteamUser/GetPlayerSummaries/v0002/?key={}&steamids={}".format(base_url, self.key, steam_id)
+            elif option[0] == "achievements":
+                # Attempt to convert the given argument to an int
+                # If we can't convert, then an app_id wasn't given, try to find it based on our map of games
+                # If the option list doesn't have an index of 1, then no game was given
+                try:
+                    game = " ".join(option[1:])
+                    if game == "":
+                        await self.bot.say("Please provide a game you would like to get the achievements for!")
+                        return
+                    app_id = int(option[1])
+                except ValueError:
+                    app_id = get_app_id(game.lower())
+                    if app_id is None:
+                        await self.bot.say("Sorry, I couldn't find a close match for the game {}".format(game))
+                        return
+                
+                url = "{}/ISteamUserStats/GetPlayerAchievements/v0001/?key={}&steamid={}&appid={}".format(base_url, self.key, steam_id, app_id)
+            elif option[0] == "games":
+                await self.bot.say("Currently disabled, only achievements and info are available as options")
+                return
+        except IndexError:
             url = "{}/ISteamUser/GetPlayerSummaries/v0002/?key={}&steamids={}".format(base_url, self.key, steam_id)
-        elif option[0] == "achievements":
-            # Attempt to convert the given argument to an int
-            # If we can't convert, then an app_id wasn't given, try to find it based on our map of games
-            # If the option list doesn't have an index of 1, then no game was given
-            try:
-                game = " ".join(option[1:])
-                if game == "":
-                    await self.bot.say("Please provide a game you would like to get the achievements for!")
-                    return
-                app_id = int(option[1])
-            except ValueError:
-                app_id = get_app_id(game.lower())
-                if app_id is None:
-                    await self.bot.say("Sorry, I couldn't find a close match for the game {}".format(game))
-                    return
-            
-            url = "{}/ISteamUserStats/GetPlayerAchievements/v0001/?key={}&steamid={}&appid={}".format(base_url, self.key, steam_id, app_id)
-        elif option[0] == "games":
-            await self.bot.say("Currently disabled, only achievements and info are available as options")
-            return
         
         # Make the request and get the data in json response, all url's we're using will give a json response
         try:
