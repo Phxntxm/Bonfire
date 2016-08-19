@@ -20,7 +20,7 @@ class Steam:
         # Get the profile link based on the user provided, and request the xml data for it
         url = 'http://steamcommunity.com/id/{}/?xml=1'.format(user)
         async with self.session.get(url, headers=self.headers) as response:
-            data = response.text()
+            data = await response.text()
             # Remove the xml version content, it breaks etree.fromstring
             data = re.sub('<\?xml.*\?>', '', data)
             tree = etree.fromstring(data)
@@ -50,6 +50,8 @@ class Steam:
             steam_id = int(user)
         except ValueError:
             steam_id = await self.find_id(user)
+
+        await self.bot.say("User given was: {}\nFound steam_id")
 
         if steam_id is None:
             await self.bot.say("Sorry, couldn't find that Steam user!")
