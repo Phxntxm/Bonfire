@@ -112,7 +112,12 @@ class Music:
 
     async def create_voice_client(self, channel):
         # First join the channel and get the VoiceClient that we'll use to save per server
-        voice = await self.bot.join_voice_channel(channel)
+        try:
+            voice = await self.bot.join_voice_channel(channel)
+        except asyncio.TimeoutError:
+            await self.bot.say("Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
+                               "You can either try again, or try to change the server's region and see if that fixes the issue")
+            return
         state = self.get_voice_state(channel.server)
         state.voice = voice
 
@@ -168,10 +173,15 @@ class Music:
         # Check if we're in a channel already, if we are then we just need to move channels
         # Otherwse, we need to create an actual voice state
         state = self.get_voice_state(ctx.message.server)
-        if state.voice is None:
-            state.voice = await self.bot.join_voice_channel(summoned_channel)
-        else:
-            await state.voice.move_to(summoned_channel)
+        try:
+            if state.voice is None:
+                state.voice = await self.bot.join_voice_channel(summoned_channel)
+            else:
+                await state.voice.move_to(summoned_channel)
+        except asyncio.TimeoutError:
+            await self.bot.say("Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
+                               "You can either try again, or try to change the server's region and see if that fixes the issue")
+            return
         # Return true so that we can invoke this, and ensure we succeeded
         return True
 
