@@ -26,7 +26,8 @@ extensions = ['cogs.interaction',
               'cogs.statsupdate',
               'cogs.strawpoll',
               'cogs.tictactoe',
-              'cogs.hangman']
+              'cogs.hangman',
+              'cogs.steam']
 
 bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
 discord_logger = logging.getLogger('discord')
