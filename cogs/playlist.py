@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from .utils import checks
 import youtube_dl
+import math
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -30,6 +31,7 @@ class VoiceState:
         self.play_next_song = asyncio.Event()
         # This is the queue that holds all VoiceEntry's
         self.songs = asyncio.Queue(maxsize=10)
+        self.required_skips = 0
         # a set of user_ids that voted
         self.skip_votes = set()
         # Our actual task that handles the queue system
@@ -124,6 +126,12 @@ class Music:
             except:
                 pass
 
+    async def on_voice_state_update(self, before, after):
+        state = self.get_voice_state(after.server)
+        if state.voice is None:
+            return
+        #state.required_skips = state.voice.channel
+    
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def join(self, ctx, *, channel: discord.Channel):
@@ -327,7 +335,8 @@ class Music:
     @checks.custom_perms(send_messages=True)
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
-        3 skip votes are needed for the song to be skipped.
+        approximately 1/3 of the members in the voice channel
+        are required to vote to skip for the song to be skipped.
         """
 
         state = self.get_voice_state(ctx.message.server)
@@ -346,11 +355,11 @@ class Music:
             total_votes = len(state.skip_votes)
             
             # Now check how many votes have been made, if 3 then go ahead and skip, otherwise add to the list of votes
-            if total_votes >= 3:
+            if total_votes >= state.required_skips:
                 await self.bot.say('Skip vote passed, skipping song...')
                 state.skip()
             else:
-                await self.bot.say('Skip vote added, currently at [{}/3]'.format(total_votes))
+                await self.bot.say('Skip vote added, currently at [{}/{}]'.format(total_votes, state.required_skips))
         else:
             await self.bot.say('You have already voted to skip this song.')
 
@@ -376,7 +385,7 @@ class Music:
             await self.bot.say('Not playing anything.')
         else:
             skip_count = len(state.skip_votes)
-            await self.bot.say('Now playing {} [skips: {}/3]'.format(state.current, skip_count))
+            await self.bot.say('Now playing {} [skips: {}/{}]'.format(state.current, skip_count, state.required_skips))
 
 
 def setup(bot):
