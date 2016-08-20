@@ -274,6 +274,8 @@ class Mod:
             del server_rules[int(msg.content) - 1]
             rules[ctx.message.server.id] = server_rules
             config.save_content('rules', rules)
+            await self.bot.say("I have just removed that rule from your list of rules!")
+            return
 
         # This check is just to ensure a number was provided within the list's range
         try:
