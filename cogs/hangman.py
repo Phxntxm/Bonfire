@@ -3,6 +3,7 @@ from discord.ext.commands.cooldowns import BucketType
 
 from .utils import checks
 
+import re
 
 class Game:
     def __init__(self, word, creator):
@@ -10,7 +11,7 @@ class Game:
         self.creator = creator
         # This converts everything but spaces to a blank
         # TODO: Only convert [a-zA-Z0-9]
-        self.blanks = "".join(" " if letter == " " else "_" for letter in word)
+        self.blanks = "".join(letter if not re.search("[a-zA-Z0-9]", letter) else "_" for letter in word)
         self.failed_letters = []
         self.guessed_letters = []
         self.fails = 0
