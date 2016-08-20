@@ -130,7 +130,11 @@ class Music:
         state = self.get_voice_state(after.server)
         if state.voice is None:
             return
-        #state.required_skips = state.voice.channel
+        voice_channel = state.voice.channel
+        if voice_channel != before.voice.voice_channel and voice_channel != after.voice.voice_channel:
+            return
+        num_members =len(voice_channel.voice_members)
+        state.required_skips = math.ceil((num_members+1)/3)
     
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
