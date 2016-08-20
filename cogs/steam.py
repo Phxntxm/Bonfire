@@ -54,13 +54,16 @@ app_id_map = {"portal 2": 620,
               "fallout 4": 377160,
               "fallout new vegas": 22490
               }
+
+
 def get_app_id(game: str):
     best_match = process.extractOne(game, app_id_map.keys())
     if best_match[1] > 80:
         return app_id_map.get(best_match[0])
     else:
         return None
-   
+
+
 class Steam:
     def __init__(self, bot):
         self.bot = bot
@@ -84,8 +87,7 @@ class Steam:
                 return int(tree[0].text)
             except ValueError:
                 return None
-    
-                
+
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
     async def steam(self, ctx, member: discord.Member, *option: str):
@@ -96,7 +98,8 @@ class Steam:
         # First make sure the person requested isn't the bot
         # Need to keep up the bot's sassy attitude, right?
         if member == ctx.message.server.me:
-            await self.bot.say("I don't play video games anymore, I crushed everyone so badly I made everyone cry last time.")
+            await self.bot.say(
+                "I don't play video games anymore, I crushed everyone so badly I made everyone cry last time.")
             return
         # Get the user's steam id if it exists
         try:
@@ -124,14 +127,18 @@ class Steam:
                     if app_id is None:
                         await self.bot.say("Sorry, I couldn't find a close match for the game {}".format(game))
                         return
-                
-                url = "{}/ISteamUserStats/GetPlayerAchievements/v0001/?key={}&steamid={}&appid={}".format(base_url, self.key, steam_id, app_id)
+
+                url = "{}/ISteamUserStats/GetPlayerAchievements/v0001/?key={}&steamid={}&appid={}".format(base_url,
+                                                                                                          self.key,
+                                                                                                          steam_id,
+                                                                                                          app_id)
             elif option[0] == "games":
                 await self.bot.say("Currently disabled, only achievements and info are available as options")
                 return
         except IndexError:
+            option = ['info']
             url = "{}/ISteamUser/GetPlayerSummaries/v0002/?key={}&steamids={}".format(base_url, self.key, steam_id)
-        
+
         # Make the request and get the data in json response, all url's we're using will give a json response
         try:
             async with self.session.get(url, headers=self.headers) as response:
@@ -139,7 +146,7 @@ class Steam:
         except:
             await self.bot.say("Sorry, I failed looking up that user's information. I'll try better next time ;-;")
             return
-        
+
         if option[0] == "info":
             data = data['response']['players'][0]
             # We need to take into account private profiles, so first add public stuff
@@ -175,7 +182,9 @@ class Steam:
                 if data['playerstats']['error'] == "Requested app has no stats":
                     await self.bot.say("{} has no achievements on the game {}".format(member.display_name, game))
                 elif data['playerstats']['error'] == "Profile is not public":
-                    await self.bot.say("Sorry, {} has a private steam account! I cannot lookup their achievements!".format(member.display_name))
+                    await self.bot.say(
+                        "Sorry, {} has a private steam account! I cannot lookup their achievements!".format(
+                            member.display_name))
                 return
             # Get all achievements for this game, making sure they actually exist
             try:
@@ -185,9 +194,10 @@ class Steam:
                 return
             # Now get all achievements that the user has achieved
             successful_achievements = [data for data in all_achievements if data['achieved'] == 1]
-            await self.bot.say("{} has achieved {}/{} achievements on the game {}".format(member.display_name, len(successful_achievements), len(all_achievements), game))
-        
-        
+            await self.bot.say("{} has achieved {}/{} achievements on the game {}".format(member.display_name,
+                                                                                          len(successful_achievements),
+                                                                                          len(all_achievements), game))
+
     @steam.command(name='add', aliases=['link', 'create'], pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def add_steam(self, ctx, profile: str):
@@ -198,7 +208,7 @@ class Steam:
             user = re.search("((?<=://)?steamcommunity.com/(id|profile)/)+(.*)", profile).group(3)
         except AttributeError:
             user = profile
-        
+
         # To look up userdata, we need the steam ID. Try to convert to an int, if we can, it's the steam ID
         # If we can't convert to an int, use our method to find the steam ID for a certain user
         try:
@@ -209,7 +219,7 @@ class Steam:
         if steam_id is None:
             await self.bot.say("Sorry, couldn't find that Steam user!")
             return
-        
+
         # Save the author's steam ID, ensuring to only overwrite the steam id if they already exist
         author = ctx.message.author
         steam_users = config.get_content('steam_users') or {}
@@ -217,10 +227,11 @@ class Steam:
             steam_users[author.id]['steam_id'] = steam_id
         else:
             steam_users[author.id] = {'steam_id': steam_id}
-        
+
         config.save_content('steam_users', steam_users)
-        await self.bot.say("I have just saved your steam account, you should now be able to view stats for your account!")
-        
+        await self.bot.say(
+            "I have just saved your steam account, you should now be able to view stats for your account!")
+
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def csgo(self, ctx, member: discord.Member):
@@ -231,14 +242,16 @@ class Steam:
             await self.bot.say("Sorry, but I don't have that user's steam account saved!")
             return
 
-        url = "{}/ISteamUserStats/GetUserStatsForGame/v0002/?key={}&appid=730&steamid={}".format(base_url, self.key, steam_id)
+        url = "{}/ISteamUserStats/GetUserStatsForGame/v0002/?key={}&appid=730&steamid={}".format(base_url, self.key,
+                                                                                                 steam_id)
         async with self.session.get(url, headers=self.headers) as response:
             data = await response.json()
 
         stuff_to_print = ['total_kills', 'total_deaths', 'total_wins', 'total_mvps']
         stats = "\n".join(
             "{}: {}".format(d['name'], d['value']) for d in data['playerstats']['stats'] if d['name'] in stuff_to_print)
-        await self.bot.say("CS:GO Stats for user {}: \n```\n{}```".format(member.display_name, stats.title().replace("_", " ")))
+        await self.bot.say(
+            "CS:GO Stats for user {}: \n```\n{}```".format(member.display_name, stats.title().replace("_", " ")))
 
 
 def setup(bot):
