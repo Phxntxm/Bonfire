@@ -49,18 +49,17 @@ class Picarto:
             picarto = config.get_content('picarto') or {}
             # Get all online users before looping, so that only one request is needed
             online_users_list = await online_users()
-            for m_id, r in picarto.items():
+            old_online_users = {m_id: data for m_id, data in picarto.items() if
+                                data['notifications_on'] and data['live']}
+            old_offline_users = {m_id: data for m_id, data in picarto.items() if
+                                 data['notifications_on'] and not data['live']}
+
+            for m_id, r in old_offline_users.items():
+                # Get their url and their user based on that url
                 url = r['picarto_url']
-                # This is whether they are detected as live in the saved file
-                live = r['live']
-                notify = r['notifications_on']
                 user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                # This is whether or not they are actually online
-                online = check_online(online_users_list, user)
-
-                # If they're set to notify, not live in the config file
-                # But online currently, means they went online since the last check
-                if not live and notify and online:
+                # Check if they are online right now
+                if check_online(online_users_list, user):
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
@@ -70,14 +69,16 @@ class Picarto:
                         # Get the member that has just gone live
                         member = discord.utils.get(server.members, id=m_id)
 
-                        # Set them as live in the configuration file, and send a message saying they have just gone live
-                        picarto[m_id]['live'] = 1
                         fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
-                        config.save_content('picarto', picarto)
                         await self.bot.send_message(channel, fmt)
-                # If they're live in the configuration file, but not online currently
-                # Means they went offline since the last check
-                elif live and not online:
+                        picarto[m_id]['live'] = 1
+                    config.save_content('picarto', picarto)
+            for m_id, r in old_online_users.items():
+                # Get their url and their user based on that url
+                url = r['picarto_url']
+                user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
+                # Check if they are online right now
+                if not check_online(online_users_list, user):
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
@@ -86,15 +87,11 @@ class Picarto:
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
                         member = discord.utils.get(server.members, id=m_id)
-
-                        # Set them as offline in the confugration
-                        # Then send a message letting the channel know they've just gone offline
-                        picarto[m_id]['live'] = 0
                         fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
-                            member.display_name,
-                            url)
-                        config.save_content('picarto', picarto)
+                            member.display_name, url)
                         await self.bot.send_message(channel, fmt)
+                        picarto[m_id]['live'] = 0
+                    config.save_content('picarto', picarto)
             await asyncio.sleep(30)
 
     @commands.group(pass_context=True, invoke_without_command=True)

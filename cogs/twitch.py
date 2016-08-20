@@ -79,7 +79,7 @@ class Twitch:
                         # Get the member that has just gone live
                         member = discord.utils.get(server.members, id=m_id)
                         fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.display_name, url)
-                        await self.bot.send_message(server, fmt)
+                        await self.bot.send_message(channel, fmt)
                     twitch[m_id]['live'] = 0
                     config.save_content('twitch', twitch)
             await asyncio.sleep(30)
