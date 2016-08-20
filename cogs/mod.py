@@ -77,6 +77,7 @@ class Mod:
     @checks.custom_perms(kick_members=True)
     async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say"""
+        fmt = "\u200B{}".format(msg)
         await self.bot.say(msg)
         await self.bot.delete_message(ctx.message)
 
