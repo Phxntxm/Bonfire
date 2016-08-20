@@ -21,6 +21,7 @@ class Mod:
         server_alerts = config.get_content('server_alerts') or {}
         # This will update/add the channel if an entry for this server exists or not
         server_alerts[ctx.message.server.id] = channel.id
+        config.save_content('server_alerts', server_alerts)
         await self.bot.say("I have just changed this server's 'notifications' channel"
                            "\nAll notifications will now go to `{}`".format(channel))
 
