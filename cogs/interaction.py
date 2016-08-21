@@ -6,32 +6,6 @@ import discord
 import random
 
 
-def battling_off(player_id):
-    battling = config.get_content('battling') or {}
-
-    # Create a new dictionary, exactly the way the last one was setup
-    # But don't include any that have the player's ID provided
-    battling = {p1: p2 for p1, p2 in battling.items() if not p2 == player_id and not p1 == player_id}
-
-    config.save_content('battling', battling)
-
-
-def user_battling(ctx, player2=None):
-    battling = config.get_content('battling')
-
-    # If no one is battling, obviously the user is not battling
-    if battling is None:
-        return False
-    # Check if the author is battling
-    if ctx.message.author.id in battling.values() or ctx.message.author.id in battling.keys():
-        return True
-    # Check if the player2 was provided, if they are check if they're in the list
-    if player2 and (player2.id in battling.values() or player2.id in battling.keys()):
-        return True
-    # If neither are found, no one is battling
-    return False
-
-
 def update_battle_records(winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
@@ -86,6 +60,33 @@ class Interaction:
 
     def __init__(self, bot):
         self.bot = bot
+        # Format for battles: {'serverid': {'player1': 'player2', 'player1': 'player2'}}
+        self.battles = {}
+        
+    def user_battling(self, ctx, player2=None):
+        battling = self.battles.get(ctx.message.server.id)
+
+        # If no one is battling, obviously the user is not battling
+        if battling is None:
+            return False
+        # Check if the author is battling
+        if ctx.message.author.id in battling.values() or ctx.message.author.id in battling.keys():
+            return True
+        # Check if the player2 was provided, if they are check if they're in the list
+        if player2 and (player2.id in battling.values() or player2.id in battling.keys()):
+            return True
+        # If neither are found, no one is battling
+        return False
+    
+    # Handles removing the author from the dictionary of battles
+    def battling_off(self, ctx):
+        battles = self.battles.get(ctx.message.server.id) or {}
+        player_id = ctx.message.author.id
+        # Create a new dictionary, exactly the way the last one was setup
+        # But don't include any that have the author's ID
+        self.battles[ctx.message.server.id] = {p1: p2 for p1, p2 in battles.items() if not p2 == player_id and not p1 == player_id}
+
+    config.save_content('battling', battling)
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
@@ -98,33 +99,31 @@ class Interaction:
         if self.bot.user.id == player2.id:
             await self.bot.say("I always win, don't even try it.")
             return
-        if user_battling(ctx, player2):
+        if self.user_battling(ctx, player2):
             await self.bot.say("You or the person you are trying to battle is already in a battle!")
             return
 
         # Add the author and player provided in a new battle
-        battling = config.get_content('battling') or {}
-        battling[ctx.message.author.id] = player2.id
-        config.save_content('battling', battling)
+        #battling = config.get_content('battling') or {}
+        #battling[ctx.message.author.id] = player2.id
+        #config.save_content('battling', battling)
+        battles = self.battles.get(ctx.message.server.id) or {}
+        battles[ctx.message.author.id] = player2.id
+        self.battles[ctx.message.server.id] = battles
 
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
-        config.loop.call_later(180, battling_off, ctx.message.author.id)
+        config.loop.call_later(180, self.battling_off, ctx.message.author.id)
         await self.bot.say(fmt.format(ctx.message.author, player2))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def accept(self, ctx):
         """Accepts the battle challenge"""
-        # Ensure that the author is actually in a battle, otherwise they can't accept one
-        if not user_battling(ctx):
-            await self.bot.say("You are not currently in a battle!")
-            return
-
-        # This is an extra check to make sure that the author is the one being BATTLED
+        # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle 
-        battling = config.get_content('battling') or {}
-        p1 = [p1_id for p1_id, p2_id in battling.items() if p2_id == ctx.message.author.id]
+        battles = self.battles.get(ctx.message.server.id) or {}
+        p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
             await self.bot.say("You are not currently being challenged to a battle!")
             return
@@ -134,8 +133,8 @@ class Interaction:
 
         # Get a random win message from our list
         fmt = config.battleWins[random.SystemRandom().randint(0, len(config.battleWins) - 1)]
-        # Due to our previous check, the ID should only be in the dictionary once, in the current battle we're checking
-        battling_off(ctx.message.author.id)
+        # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
+        self.battling_off(ctx)
 
         # Randomize the order of who is printed/sent to the update system
         # All we need to do is change what order the challengers are printed/added as a paramater
@@ -151,14 +150,10 @@ class Interaction:
     @checks.custom_perms(send_messages=True)
     async def decline(self, ctx):
         """Declines the battle challenge"""
-        if not user_battling(ctx):
-            await self.bot.say("You are not currently in a battle!")
-            return
-
-        # This is an extra check to make sure that the author is the one being BATTLED
+        # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle 
-        battling = config.get_content('battling') or {}
-        p1 = [p1_id for p1_id, p2_id in battling.items() if p2_id == ctx.message.author.id]
+        battles = self.battles.get(ctx.message.server.id) or {}
+        p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
             await self.bot.say("You are not currently being challenged to a battle!")
             return
@@ -167,7 +162,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # There's no need to update the stats for the members if they declined the battle
-        battling_off(ctx.message.author.id)
+        self.battling_off(ctx)
         await self.bot.say("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
 
     @commands.command(pass_context=True, no_pm=True)
