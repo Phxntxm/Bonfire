@@ -22,12 +22,14 @@ class Owner:
     @commands.command()
     @commands.check(checks.is_owner)
     async def running(self):
+        """This command detects all things currently running
+        This includes music played, tictactoe games, hangman games, and battles"""
         servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
                                  state.is_playing()])
         hm_games = len([server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
         ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
         count_battles = 0
-        for battles in self.bot.get_cog('Interaction').battles:
+        for battles in self.bot.get_cog('Interaction').battles.values():
             count_battles += len(battles)
         fmt = ""
         if servers_playing_music:
