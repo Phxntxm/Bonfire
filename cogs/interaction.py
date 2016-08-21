@@ -111,7 +111,6 @@ class Interaction:
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
         config.loop.call_later(180, battling_off, ctx.message.author.id)
         await self.bot.say(fmt.format(ctx.message.author, player2))
-        await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -147,7 +146,6 @@ class Interaction:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             update_battle_records(battleP2, battleP1)
 
-        await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -171,7 +169,6 @@ class Interaction:
         # There's no need to update the stats for the members if they declined the battle
         battling_off(ctx.message.author.id)
         await self.bot.say("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
-        await self.bot.delete_message(ctx.message)
 
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 180, BucketType.user)
@@ -211,7 +208,6 @@ class Interaction:
         config.save_content('boops', boops)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
-        await self.bot.delete_message(ctx.message)
 
 
 def setup(bot):
