@@ -74,7 +74,7 @@ class Stats:
             member = discord.utils.get(ctx.message.server.members, id=member_id)
             fmt += "#{}) {} (Rating: {})\n".format(count, member.display_name, stats.get('rating'))
             count += 1
-            if count >= 10:
+            if count >= 11:
                 break
         await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
