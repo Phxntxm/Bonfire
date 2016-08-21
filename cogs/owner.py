@@ -26,9 +26,9 @@ class Owner:
                                  state.is_playing()])
         hm_games = len([server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
         ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
-        battles = 0
+        count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles:
-            battles += len(battles)
+            count_battles += len(battles)
         fmt = ""
         if servers_playing_music:
             fmt += "Playing songs in {} different servers\n".format(servers_playing_music)
@@ -36,8 +36,8 @@ class Owner:
             fmt += "{} different hangman games running\n".format(hm_games)
         if ttt_games:
             fmt += "{} different TicTacToe games running\n".format(ttt_games)
-        if battles:
-            fmt += "{} different battles going on\n".format(battles)
+        if count_battles:
+            fmt += "{} different battles going on\n".format(count_battles)
         
         if not fmt:
             fmt = "Nothing currently running!"
