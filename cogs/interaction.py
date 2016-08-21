@@ -86,8 +86,6 @@ class Interaction:
         # But don't include any that have the author's ID
         self.battles[ctx.message.server.id] = {p1: p2 for p1, p2 in battles.items() if not p2 == player_id and not p1 == player_id}
 
-    config.save_content('battling', battling)
-
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
