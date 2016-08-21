@@ -81,7 +81,10 @@ class VoiceState:
 
         # If they do exist, check if the current player has finished
         player = self.current.player
-        return not player.is_done()
+        try:
+            return not player.is_done()
+        except AttributeError:
+            return False
 
     @property
     def player(self):
