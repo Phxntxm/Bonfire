@@ -158,6 +158,19 @@ class Hangman:
         # Let them know the game has started, then print the current game so that the blanks are shown
         await self.bot.say(
             "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
+            
+    @hangman.command(name='delete', aliases=['stop', 'remove'], pass_context=True, no_pm=True)
+    @checks.custom_perms(kick_members=True)
+    async def stop_game(self, ctx):
+        """Force stops a game of hangman
+        This should realistically only be used in a situation like one player leaves
+        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that"""
+        if self.games.get(ctx.message.server.id) is None:
+            await self.bot.say("There are no Hangman games running on this server!")
+            return
+        
+        del self.games[ctx.message.server.id]
+        await self.bot.say("I have just stopped the game of Hangman, a new should be able to be started now!")
 
 
 def setup(bot):

@@ -264,6 +264,19 @@ class TicTacToe:
         fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!".format(
             x_player.display_name)
         await self.bot.say(fmt)
+    
+    @tictactoe.command(name='delete', aliases=['stop', 'remove'], pass_context=True, no_pm=True)
+    @checks.custom_perms(kick_members=True)
+    async def stop_game(self, ctx):
+        """Force stops a game of tictactoe
+        This should realistically only be used in a situation like one player leaves
+        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that"""
+        if self.boards.get(ctx.message.server.id) is None:
+            await self.bot.say("There are no tictactoe games running on this server!")
+            return
+            
+        del self.boards[ctx.message.server.id]
+        await self.bot.say("I have just stopped the game of TicTacToe, a new should be able to be started now!")
 
 
 def setup(bot):
