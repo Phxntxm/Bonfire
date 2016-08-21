@@ -17,15 +17,15 @@ class VoicePlayer:
     # Before the video is actually downloaded, which happens in our audio player task
     # For example, is_done() will not exist on this object, which could be called later
     # However, it should not ever be, as we overwrite this object with the StreamPlayer in our audio task
-    def __init__(self, url, **kwargs):
-        self.url = url
+    def __init__(self, song, **kwargs):
+        self.url = song
         self.views = kwargs.get('view_count')
         self.is_live = bool(kwargs.get('is_live'))
         self.likes = kwargs.get('likes')
         self.dislikes = kwargs.get('dislikes')
         self.duration = kwargs.get('duration')
         self.uploader = kwargs.get('uploader')
-        if 'twitch' in url:
+        if 'twitch' in song:
             self.title = kwargs.get('description')
             self.description = None
         else:
