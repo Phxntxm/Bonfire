@@ -21,10 +21,28 @@ class Owner:
     
     @commands.command()
     @commands.check(checks.is_owner)
-    async def testcommand(self, member: discord.Member):
-        roles = [discord.Object(id="183749087038930944")]
-        await self.bot.add_roles(member, *roles)
-        await self.bot.say("Just added the roles {} to {}".format(role, member.display_name))
+    async def running(self, ctx):
+        servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
+                                 state.is_playing()])
+        hm_games = len([server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
+        ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
+        battles = 0
+        for battles in self.bot.get_cog('Interaction').battles:
+            battles += len(battles)
+        fmt = ""
+        if servers_playing_music:
+            fmt += "Playing songs in {} different servers\n".format(servers_playing_music)
+        if hm_games:
+            fmt += "{} different hangman games running\n".format(hm_games)
+        if ttt_games:
+            fmt += "{} different TicTacToe games running\n".format(ttt_games)
+        if battles:
+            fmt += "{} different battles going on\n".format(battles)
+        
+        if not fmt:
+            fmt = "Nothing currently running!"
+        await self.bot.say(fmt)
+            
         
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
