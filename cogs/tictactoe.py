@@ -251,6 +251,10 @@ class TicTacToe:
         if self.boards.get(ctx.message.server.id) is not None:
             await self.bot.say("Sorry but only one Tic-Tac-Toe game can be running per server!")
             return
+        # Make sure we're not being challenged, I always win anyway
+        if player2 == ctx.message.server.me:
+            await self.bot.say("You want to play? Alright lets play.\n\nI win, so quick you didn't even notice it.")
+            return
         # Create the board and return who has been decided to go first
         x_player = self.create(ctx.message.server.id, player1, player2)
         fmt = "A tictactoe game has just started between {} and {}".format(player1.display_name, player2.display_name)
