@@ -5,6 +5,7 @@ from .utils import checks
 
 import re
 
+
 class Game:
     def __init__(self, word, creator):
         self.word = word
@@ -129,10 +130,6 @@ class Hangman:
         # In a server (except the creator) can guess towards the current game
         if self.games.get(ctx.message.server.id) is not None:
             await self.bot.say("Sorry but only one Hangman game can be running per server!")
-            return
-        # Make sure we're not being challenged, I always win anyway
-        if player2 == ctx.message.server.me:
-            await self.bot.say("You want to play? Alright lets play.\n\nI win, so quick you didn't even notice it.")
             return
 
         # Make sure the phrase is less than 30 characters
