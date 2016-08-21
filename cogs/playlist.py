@@ -4,9 +4,42 @@ from discord.ext import commands
 from .utils import checks
 import youtube_dl
 import math
+import functools
+import datetime
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
+
+
+class VoicePlayer:
+    # This does not need to match up too closely to the StreamPlayer that is "technically" used here
+    # This is more of a placeholder, just to keep the information that will be requested
+    # Before the video is actually downloaded, which happens in our audio player task
+    # For example, is_done() will not exist on this object, which could be called later
+    # However, it should not ever be, as we overwrite this object with the StreamPlayer in our audio task
+    def __init__(self, url, **kwargs):
+        self.url = url
+        self.views = kwargs.get('view_count')
+        self.is_live = bool(kwargs.get('is_live'))
+        self.likes = kwargs.get('likes')
+        self.dislikes = kwargs.get('dislikes')
+        self.duration = kwargs.get('duration')
+        self.uploader = kwargs.get('uploader')
+        if 'twitch' in url:
+            self.title = kwargs.get('description')
+            self.description = None
+        else:
+            self.title = kwargs.get('title')
+            self.description = kwargs.get('description')
+
+        date = kwargs.get('upload_date')
+        if date:
+            try:
+                date = datetime.datetime.strptime(date, '%Y%M%d').date()
+            except ValueError:
+                date = None
+
+        self.upload_date = date
 
 
 class VoiceEntry:
@@ -38,14 +71,14 @@ class VoiceState:
         self.audio_player = self.bot.loop.create_task(self.audio_player_task())
         self.opts = {
             'default_search': 'auto',
-            'quiet': True,
+            'quiet': True
         }
 
     def is_playing(self):
         # If our VoiceClient or current VoiceEntry do not exist, then we are not playing a song
         if self.voice is None or self.current is None:
             return False
-        
+
         # If they do exist, check if the current player has finished
         player = self.current.player
         return not player.is_done()
@@ -79,7 +112,7 @@ class VoiceState:
             self.current = await self.songs.get()
             # Tell the channel that requested the new song that we are now playing
             await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
-            # Recreate the player; depending on how long the song has been in the queue, the URL may have expired
+            # Create the player object; this automatically creates the ffmpeg player
             self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts,
                                                                       after=self.toggle_next)
             # Now we can start actually playing the song
@@ -96,10 +129,19 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
+        self.opts = {
+            'format': 'webm[abr>0]/bestaudio/best',
+            'prefer_ffmpeg': True,
+            'default_search': 'auto',
+            'quiet': True
+        }
+        # We want to create our own YoutubeDL object to avoid downloading a video when first searching it
+        # We will download the actual video, in our audio_player_task, for which we can just use create_ytdl_player
+        self.ytdl = youtube_dl.YoutubeDL(self.opts)
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
-        
+
         # Internally handle creating a voice state if there isn't a current state
         # This can be used for example, in case something is skipped when not being connected
         # We create the voice state when checked
@@ -115,8 +157,9 @@ class Music:
         try:
             voice = await self.bot.join_voice_channel(channel)
         except asyncio.TimeoutError:
-            await self.bot.say("Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
-                               "You can either try again, or try to change the server's region and see if that fixes the issue")
+            await self.bot.say(
+                "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
+                "You can either try again, or try to change the server's region and see if that fixes the issue")
             return
         state = self.get_voice_state(channel.server)
         state.voice = voice
@@ -138,9 +181,9 @@ class Music:
         voice_channel = state.voice.channel
         if voice_channel != before.voice.voice_channel and voice_channel != after.voice.voice_channel:
             return
-        num_members =len(voice_channel.voice_members)
-        state.required_skips = math.ceil((num_members+1)/3)
-    
+        num_members = len(voice_channel.voice_members)
+        state.required_skips = math.ceil((num_members + 1) / 3)
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def join(self, ctx, *, channel: discord.Channel):
@@ -163,13 +206,13 @@ class Music:
     @checks.custom_perms(send_messages=True)
     async def summon(self, ctx):
         """Summons the bot to join your voice channel."""
-        
+
         # First check if the author is even in a voice_channel
         summoned_channel = ctx.message.author.voice_channel
         if summoned_channel is None:
             await self.bot.say('You are not in a voice channel.')
             return False
-        
+
         # Check if we're in a channel already, if we are then we just need to move channels
         # Otherwse, we need to create an actual voice state
         state = self.get_voice_state(ctx.message.server)
@@ -179,8 +222,9 @@ class Music:
             else:
                 await state.voice.move_to(summoned_channel)
         except asyncio.TimeoutError:
-            await self.bot.say("Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
-                               "You can either try again, or try to change the server's region and see if that fixes the issue")
+            await self.bot.say(
+                "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
+                "You can either try again, or try to change the server's region and see if that fixes the issue")
             return
         # Return true so that we can invoke this, and ensure we succeeded
         return True
@@ -195,16 +239,16 @@ class Music:
         The list of supported sites can be found here:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
-        
+
         state = self.get_voice_state(ctx.message.server)
-        
+
         # First check if we are connected to a voice channel at all, if not summon to the channel the author is in
         # Since summon checks if the author is in a channel, we don't need to handle that here, just return if it failed
         if state.voice is None:
             success = await ctx.invoke(self.summon)
             if not success:
                 return
-        
+
         # If the queue is full, we ain't adding anything to it
         if state.songs.full():
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
@@ -212,22 +256,27 @@ class Music:
 
         author_channel = ctx.message.author.voice.voice_channel
         my_channel = ctx.message.server.me.voice.voice_channel
-        
+
         # To try to avoid some abuse, ensure the requester is actually in our channel
         if my_channel != author_channel:
             await self.bot.say("You are not currently in the channel; please join before trying to request a song.")
             return
-        
+
         # Create the player, and check if this was successful
+        # Here all we want is to get the information of the player
         try:
-            player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
+            func = functools.partial(self.ytdl.extract_info, song, download=False)
+            info = await self.bot.loop.run_in_executor(None, func)
+            if "entries" in info:
+                info = info['entries'][0]
+            player = VoicePlayer(song, **info)
+            # player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
         except youtube_dl.DownloadError:
             fmt = "Sorry, either I had an issue downloading that video, or that's not a supported URL!"
             await self.bot.send_message(ctx.message.channel, fmt)
             return
-        
+
         # Now we can create a VoiceEntry and queue it
-        player.volume = 0.6
         entry = VoiceEntry(ctx.message, player)
         await self.bot.say('Enqueued ' + str(entry))
         await state.songs.put(entry)
@@ -267,12 +316,12 @@ class Music:
         """
         server = ctx.message.server
         state = self.get_voice_state(server)
-        
+
         # Stop playing whatever song is playing. 
         if state.is_playing():
             player = state.player
             player.stop()
-        
+
         # This will stop cancel the audio event we're using to loop through the queue
         # Then erase the voice_state entirely, and disconnect from the channel
         try:
@@ -298,7 +347,7 @@ class Music:
         if len(queue) == 0:
             await self.bot.say("Nothing currently in the queue")
             return
-        
+
         # Start off by adding the length of the current song
         count = state.current.player.duration
         found = False
@@ -309,7 +358,7 @@ class Music:
                 found = True
                 break
             count += song.player.duration
-        
+
         # This is checking if nothing from the queue has been added to the total
         # If it has not, then we have not looped through the queue at all
         # Since the queue was already checked to have more than one song in it, this means the author is next
@@ -329,7 +378,7 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-        
+
         # Asyncio provides no non-private way to access the queue, so we have to use _queue
         queue = state.songs._queue
         if len(queue) == 0:
@@ -357,7 +406,7 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-        
+
         # Check if the person requesting a skip is the requester of the song, if so automatically skip
         voter = ctx.message.author
         if voter == state.current.requester:
@@ -367,7 +416,7 @@ class Music:
         elif voter.id not in state.skip_votes:
             state.skip_votes.add(voter.id)
             total_votes = len(state.skip_votes)
-            
+
             # Now check how many votes have been made, if 3 then go ahead and skip, otherwise add to the list of votes
             if total_votes >= state.required_skips:
                 await self.bot.say('Skip vote passed, skipping song...')
