@@ -114,7 +114,10 @@ class VoiceState:
             # Now wait for the next song in the queue
             self.current = await self.songs.get()
             # Tell the channel that requested the new song that we are now playing
-            await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
+            try:
+                await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
+            except discord.Forbidden:
+                pass
             # Create the player object; this automatically creates the ffmpeg player
             self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts,
                                                                       after=self.toggle_next)
