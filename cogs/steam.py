@@ -234,10 +234,11 @@ class Steam:
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def csgo(self, ctx, member: discord.Member):
+    async def csgo(self, ctx, member: discord.Member = None):
         """This command can be used to lookup csgo stats for a user"""
+        member = member or ctx.message.author
         try:
-            steam_id = config.get_content('steam_users').get(ctx.message.author.id).get('steam_id')
+            steam_id = config.get_content('steam_users').get(member.id).get('steam_id')
         except AttributeError:
             await self.bot.say("Sorry, but I don't have that user's steam account saved!")
             return

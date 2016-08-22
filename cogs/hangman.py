@@ -159,7 +159,7 @@ class Hangman:
         await self.bot.say(
             "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
             
-    @hangman.command(name='delete', aliases=['stop', 'remove'], pass_context=True, no_pm=True)
+    @hangman.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def stop_game(self, ctx):
         """Force stops a game of hangman

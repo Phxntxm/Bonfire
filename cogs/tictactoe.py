@@ -265,7 +265,7 @@ class TicTacToe:
             x_player.display_name)
         await self.bot.say(fmt)
     
-    @tictactoe.command(name='delete', aliases=['stop', 'remove'], pass_context=True, no_pm=True)
+    @tictactoe.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def stop_game(self, ctx):
         """Force stops a game of tictactoe
