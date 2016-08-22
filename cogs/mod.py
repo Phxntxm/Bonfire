@@ -79,7 +79,10 @@ class Mod:
         """Tells the bot to repeat what you say"""
         fmt = "\u200B{}".format(msg)
         await self.bot.say(msg)
-        await self.bot.delete_message(ctx.message)
+        try:
+            await self.bot.delete_message(ctx.message)
+        except:
+            pass
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
