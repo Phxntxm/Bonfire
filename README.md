@@ -22,3 +22,5 @@ The only required file to modify would be the config.yml.sample file. The entrie
 - default_stats: The default status to use when the bot is booted up, which will populate the "game" that the bot is playing
 - battleWins: A list of random "outcomes" to the battle command, needs to be in the exact format provided in the sample file. `{0}` is the winner, `{1}` is the loser
 - discord_bots_key: The key for the [bots.discord.pw site](https://bots.discord.pw/#g=1), if you don't have a key just leave it blank, it should fail and log the failure
+- carbon_key: The key used for the [carbonitex site(https://www.carbonitex.net/discord/bots)
+- steam_key: The steam token that is used for the API calls

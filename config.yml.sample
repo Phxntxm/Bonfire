@@ -4,5 +4,7 @@ description: 'Blah'
 command_prefix: '!'
 default_status: '!help for a list of commands'
 discord_bots_key: 'key'
+carbon_key: 'key'
+steam_key: 'key'
 
 battleWins: ["{0} wins, {1} loses"]
