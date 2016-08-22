@@ -112,6 +112,7 @@ class Overwatch:
         # Now just save the battletag
         ow = config.get_content('overwatch') or {}
         ow[ctx.message.author.id] = bt
+        config.save_content('overwatch', ow)
         await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
@@ -124,6 +125,9 @@ class Overwatch:
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
         else:
             await self.bot.say("I don't even have your battletag saved {}".format(ctx.message.author.mention))
+        
+        del result[ctx.message.author.id]
+        await self.bot.say("I have just removed your battletag!")
 
 
 def setup(bot):
