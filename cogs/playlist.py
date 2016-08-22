@@ -281,8 +281,8 @@ class Music:
 
         # Now we can create a VoiceEntry and queue it
         entry = VoiceEntry(ctx.message, player)
-        await self.bot.say('Enqueued ' + str(entry))
         await state.songs.put(entry)
+        await self.bot.say('Enqueued ' + str(entry))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
