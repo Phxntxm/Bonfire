@@ -281,6 +281,10 @@ class Music:
             fmt = "Sorry, either I had an issue downloading that video, or that's not a supported URL!"
             await self.bot.send_message(ctx.message.channel, fmt)
             return
+        except IndexError:
+            fmt = "Sorry, but there's no result with that search time! Try something else"
+            await self.bot.say(fmt)
+            return
 
         # Now we can create a VoiceEntry and queue it
         entry = VoiceEntry(ctx.message, player)
