@@ -232,6 +232,8 @@ class Music:
                 "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
                 "You can either try again, or try to change the server's region and see if that fixes the issue")
             return
+        except discord.ClientException:
+            await state.voice.move_to(summoned_channel)
         # Return true so that we can invoke this, and ensure we succeeded
         return True
 
