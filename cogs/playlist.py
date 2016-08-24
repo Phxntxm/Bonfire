@@ -233,7 +233,8 @@ class Music:
                 "You can either try again, or try to change the server's region and see if that fixes the issue")
             return
         except discord.ClientException:
-            await state.voice.move_to(summoned_channel)
+            await self.bot.voice_client_in(ctx.message.server).disconnect()
+            await ctx.invoke(self.summon)
         # Return true so that we can invoke this, and ensure we succeeded
         return True
 
