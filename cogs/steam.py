@@ -249,8 +249,11 @@ class Steam:
             data = await response.json()
 
         stuff_to_print = ['total_kills', 'total_deaths', 'total_wins', 'total_mvps']
-        stats = "\n".join(
-            "{}: {}".format(d['name'], d['value']) for d in data['playerstats']['stats'] if d['name'] in stuff_to_print)
+        try:
+            stats = "\n".join(
+                "{}: {}".format(d['name'], d['value']) for d in data['playerstats']['stats'] if d['name'] in stuff_to_print)
+        except KeyError:
+            await self.bot.say("Sorry, {} has no CS:GO stats!".format())
         await self.bot.say(
             "CS:GO Stats for user {}: \n```\n{}```".format(member.display_name, stats.title().replace("_", " ")))
 
