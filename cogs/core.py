@@ -4,7 +4,6 @@ from .utils import checks
 from .utils import config
 
 import subprocess
-import os
 import glob
 import random
 import re
@@ -21,11 +20,12 @@ class Core:
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def calendar(self, month: str=None, year: int=None):
+    async def calendar(self, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
-        
-        # calendar takes in a number for the month, not the words, so we need this dictionary to transform the word to the number
+
+        # calendar takes in a number for the month, not the words
+        # so we need this dictionary to transform the word to the number
         months = {
             "january": 1,
             "february": 2,
@@ -54,7 +54,7 @@ class Core:
         # Here we create the actual "text" calendar that we are printing
         cal = calendar.TextCalendar().formatmonth(year, month)
         await self.bot.say("```\n{}```".format(cal))
-        
+
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def info(self):
@@ -62,26 +62,43 @@ class Core:
         # fmt is a dictionary so we can set the key to it's output, then print both 
         # The only real use of doing it this way is easier editing if the info in this command is changed
         fmt = {}
-        
+
         all_members = list(self.bot.get_all_members())
-        
-        
+
         # We can pretty safely assume that the author is going to be in at least one channel with the bot
         # So find the author based on that list
         authors = []
         for author_id in config.owner_ids:
             authors.append(discord.utils.get(all_members, id=author_id).name)
-        
+
         fmt['Official Bot Server'] = config.dev_server
         fmt['Author'] = ", ".join(authors)
         fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
         fmt['Total Servers'] = len(self.bot.servers)
         fmt['Total Members'] = len(all_members)
         fmt['Description'] = self.bot.description
-        
+
+        servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
+                                     state.is_playing()])
+        hm_games = len([server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
+        ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
+        count_battles = 0
+        for battles in self.bot.get_cog('Interaction').battles.values():
+            count_battles += len(battles)
+
         information = "\n".join("{}: {}".format(key, result) for key, result in fmt.items())
+        information += "\n"
+        if servers_playing_music:
+            information += "Playing songs in {} different servers\n".format(servers_playing_music)
+        if hm_games:
+            information += "{} different hangman games running\n".format(hm_games)
+        if ttt_games:
+            information += "{} different TicTacToe games running\n".format(ttt_games)
+        if count_battles:
+            information += "{} different battles going on\n".format(count_battles)
+
         await self.bot.say("```\n{}```".format(information))
-        
+
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def uptime(self):
@@ -115,7 +132,7 @@ class Core:
         f = glob.glob('images/doggo*')[random.SystemRandom().randint(0, len(glob.glob('images/doggo*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
-            
+
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def snek(self, ctx):
@@ -137,7 +154,7 @@ class Core:
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def roll(self, ctx, notation: str="d6"):
+    async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         # Use regex to get the notation based on what was provided
@@ -149,7 +166,7 @@ class Core:
         except (AttributeError, ValueError):
             await self.bot.say("Please provide the die notation in #d#!")
             return
-        
+
         # Dice will be None if d# was provided, assume this means 1d#
         dice = dice or 1
         # Since we did not try to convert to int before, do it now after we have it set

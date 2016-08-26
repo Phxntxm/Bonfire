@@ -1,8 +1,4 @@
 #!/usr/local/bin/python3.5
-
-from discord.ext import commands
-from cogs.utils import config
-
 import discord
 import traceback
 import logging
@@ -11,6 +7,9 @@ import pendulum
 import os
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+from discord.ext import commands
+from cogs.utils import config
 
 extensions = ['cogs.interaction',
               'cogs.core',
