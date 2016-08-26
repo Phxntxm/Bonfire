@@ -84,6 +84,15 @@ class Hangman:
         if not game:
             await self.bot.say("There are currently no hangman games running!")
             return
+        # This check is here in case we failed in creating the hangman game
+        # It is easier to make this check here, instead of throwing try except's around the creation
+        # As there are multiple places we can fail...if we can't send a message/PM a user
+        if game == "placeholder":
+            self.games[ctx.ctx.message.server.id] = None
+            await self.bot.say("Sorry but the attempt to setup a game on this server failed!\n"
+                               "This is most likely due to me not being able to PM the user who created the game\n"
+                               "Make sure you allow this feature if you want to be able to create a hangman game")
+            return
         if ctx.message.author == game.creator:
             await self.bot.say("You can't guess at your own hangman game! :S")
             return
