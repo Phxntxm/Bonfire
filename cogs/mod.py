@@ -1,8 +1,10 @@
 from discord.ext import commands
 from .utils import checks
 from .utils import config
+
 import discord
 import re
+import asyncio
 
 valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
 
@@ -247,7 +249,9 @@ class Mod:
                 count += 1
                 if count >= limit:
                     break
-        await self.bot.say("{} messages succesfully deleted".format(count))
+        msg = await self.bot.say("{} messages succesfully deleted".format(count))
+        await asyncio.sleep(60)
+        await self.bot.delete_message(msg)
 
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
