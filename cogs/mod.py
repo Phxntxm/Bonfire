@@ -78,7 +78,7 @@ class Mod:
     async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say"""
         fmt = "\u200B{}".format(msg)
-        await self.bot.say(msg)
+        await self.bot.say(fmt)
         try:
             await self.bot.delete_message(ctx.message)
         except:
@@ -222,6 +222,32 @@ class Mod:
     async def purge(self, ctx, limit: int = 100):
         """This command is used to a purge a number of messages from the channel"""
         await self.bot.purge_from(ctx.message.channel, limit=limit)
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(manage_messages=True)
+    async def prune(self, ctx, limit: int = 100):
+        """This command can be used to prune messages from certain members
+        Mention any user you want to prune messages from; if no members are mentioned, the messages removed will be mine
+        If no limit is provided, then 100 will be used. This is also the max limit we can use"""
+        # We can only get logs from 100 messages at a time, so make sure we are not above that threshold
+        if limit > 100:
+            limit = 100
+
+        # If no members are provided, assume we're trying to prune our own messages
+        members = ctx.message.mentions
+        if len(members) == 0:
+            members = [ctx.message.server.me]
+
+        # Since logs_from will give us any message, not just the user's we need
+        # We'll increment count, and stop deleting messages if we hit the limit.
+        count = 0
+        async for msg in self.bot.logs_from(ctx.message.channel):
+            if msg.author in members:
+                await self.bot.delete_message(msg)
+                count += 1
+                if count >= limit:
+                    break
+        await self.bot.say("{} messages succesfully pruned")
 
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
