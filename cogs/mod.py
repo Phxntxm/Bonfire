@@ -247,7 +247,7 @@ class Mod:
                 count += 1
                 if count >= limit:
                     break
-        await self.bot.say("{} messages succesfully pruned")
+        await self.bot.say("{} messages succesfully deleted".format(count))
 
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)

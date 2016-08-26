@@ -1,15 +1,16 @@
 #!/usr/local/bin/python3.5
 
+from discord.ext import commands
+from cogs.utils import config
+
 import discord
 import traceback
 import logging
 import datetime
 import pendulum
 import os
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-from discord.ext import commands
-from cogs.utils import config
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 extensions = ['cogs.interaction',
               'cogs.core',
@@ -60,7 +61,7 @@ async def on_ready():
 async def on_member_join(member):
     notifications = config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
-    
+
     # By default, notifications should be off unless explicitly turned on
     if not server_notifications:
         return
@@ -73,7 +74,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
     notifications = config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
-    
+
     # By default, notifications should be off unless explicitly turned on
     if not server_notifications:
         return
