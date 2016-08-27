@@ -99,8 +99,12 @@ class Strawpoll:
         # The ID is all we really need from the returned data, as the rest we already sent/are not going to use ever
         payload = {'title': title,
                    'options': options}
-        async with self.session.post(self.url, data=json.dumps(payload), headers=self.headers) as response:
-            data = await response.json()
+        try:
+            async with self.session.post(self.url, data=json.dumps(payload), headers=self.headers) as response:
+                data = await response.json()
+        except json.JSONDecodeError:
+            await self.bot.say("Sorry, I couldn't connect to strawpoll at the moment. Please try again later")
+            return
 
         # Save this strawpoll in the list of running strawpolls for a server
         all_polls = config.get_content('strawpolls') or {}
