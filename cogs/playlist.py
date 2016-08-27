@@ -212,7 +212,7 @@ class Music:
     @checks.custom_perms(send_messages=True)
     async def summon(self, ctx):
         """Summons the bot to join your voice channel."""
-
+        # This method will be invoked by other commands, so we should return True or False instead of just returning
         # First check if the author is even in a voice_channel
         summoned_channel = ctx.message.author.voice_channel
         if summoned_channel is None:
@@ -227,11 +227,17 @@ class Music:
                 state.voice = await self.bot.join_voice_channel(summoned_channel)
             else:
                 await state.voice.move_to(summoned_channel)
+        # Weird timeout error usually caused by the region someone is in
         except asyncio.TimeoutError:
             await self.bot.say(
                 "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
                 "You can either try again, or try to change the server's region and see if that fixes the issue")
-            return
+            return False
+        # Sometimes the VoiceClient object gets stuck, if it does disconnect and have them try again
+        except discord.ClientException:
+            await self.bot.voice_client_in(ctx.message.server).disconnect()
+            await self.bot.say("Sorry, the voice client got stuck when trying to join the channel, please try again")
+            return False
         # Return true so that we can invoke this, and ensure we succeeded
         return True
 
