@@ -222,6 +222,9 @@ class Mod:
     @checks.custom_perms(manage_messages=True)
     async def purge(self, ctx, limit: int = 100):
         """This command is used to a purge a number of messages from the channel"""
+        if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
+            await self.bot.say("I do not have permission to delete messages...")
+            return
         await self.bot.purge_from(ctx.message.channel, limit=limit)
 
     @commands.command(pass_context=True, no_pm=True)
@@ -238,6 +241,11 @@ class Mod:
         members = ctx.message.mentions
         if len(members) == 0:
             members = [ctx.message.server.me]
+        # If we're not setting the user to the bot, then we're deleting someone elses messages
+        # To do so, we need manage_messages permission, so check if we have that
+        elif not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
+            await self.bot.say("I do not have permission to delete messages...")
+            return
 
         # Since logs_from will give us any message, not just the user's we need
         # We'll increment count, and stop deleting messages if we hit the limit.
