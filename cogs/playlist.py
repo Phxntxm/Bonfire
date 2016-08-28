@@ -289,13 +289,16 @@ class Music:
             return
         except IndexError:
             fmt = "Sorry, but there's no result with that search time! Try something else"
-            await self.bot.say(fmt)
+            await self.bot.send_message(ctx.message.channel, fmt)
             return
 
         # Now we can create a VoiceEntry and queue it
         entry = VoiceEntry(ctx.message, player)
         await state.songs.put(entry)
-        await self.bot.say('Enqueued ' + str(entry))
+        try:
+            await self.bot.say('Enqueued ' + str(entry))
+        except discord.Forbidden:
+            pass
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
