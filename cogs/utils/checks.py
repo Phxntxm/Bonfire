@@ -26,7 +26,7 @@ def custom_perms(**perms):
         except TypeError:
             required_perm = default_perms
         return member_perms >= required_perm
-
+    predicate.perms = perms
     return commands.check(predicate)
 
 
