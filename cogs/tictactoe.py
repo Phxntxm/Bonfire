@@ -263,8 +263,7 @@ class TicTacToe:
         # Print the board too just because
         fmt += str(self.boards[ctx.message.server.id])
         # We don't need to do anything weird with assigning x_player to something, it is already a member object, just use it
-        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!\n"
-               "Use the {}tictactoe command, and a position, to choose where you want to play".format(x_player.display_name, ctx.prefix)
+        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!\nUse the {}tictactoe command, and a position, to choose where you want to play".format(x_player.display_name, ctx.prefix)
         await self.bot.say(fmt)
     
     @tictactoe.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)
