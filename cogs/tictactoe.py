@@ -239,6 +239,8 @@ class TicTacToe:
             # If no one has won, and the game has not ended in a tie, print the new updated board
             # TODO: edit in place instead of printing?
             else:
+                player_turn = board.challengers.get('x') if board.X_turn else board.challengers.get('o')
+                fmt = str(board) + "\nIt is now your turn "
                 await self.bot.say(str(board))
 
     @tictactoe.command(name='start', aliases=['challenge', 'create'], pass_context=True, no_pm=True)
@@ -261,8 +263,8 @@ class TicTacToe:
         # Print the board too just because
         fmt += str(self.boards[ctx.message.server.id])
         # We don't need to do anything weird with assigning x_player to something, it is already a member object, just use it
-        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!".format(
-            x_player.display_name)
+        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!\n"
+               "Use the {}tictactoe command, and a position, to choose where you want to play".format(x_player.display_name, ctx.prefix)
         await self.bot.say(fmt)
     
     @tictactoe.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)

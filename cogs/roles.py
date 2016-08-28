@@ -13,7 +13,7 @@ class Roles:
         self.bot = bot
 
     @commands.group(aliases=['roles'], invoke_without_command=True, no_pm=True, pass_context=True)
-    @checks.custom_perms(manage_server=True)
+    @checks.custom_perms(send_messages=True)
     async def role(self, ctx):
         """This command can be used to modify the roles on the server.
         Pass no subcommands and this will print the roles currently available on this server"""
@@ -22,7 +22,7 @@ class Roles:
         await self.bot.say("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
 
     @role.command(name='remove', pass_context=True, no_pm=True)
-    @checks.custom_perms(manage_server=True)
+    @checks.custom_perms(manage_roles=True)
     async def remove_role(self, ctx):
         """Use this to remove roles from a number of members"""
         # No use in running through everything if the bot cannot manage roles
@@ -77,7 +77,7 @@ class Roles:
                            "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
     @role.command(name='add', pass_context=True, no_pm=True)
-    @checks.custom_perms(manage_server=True)
+    @checks.custom_perms(manage_roles=True)
     async def add_role(self, ctx):
         """Use this to add a role to multiple members.
         Provide the list of members, and I'll ask for the role
@@ -127,7 +127,7 @@ class Roles:
                            "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
     @role.command(name='delete', pass_context=True, no_pm=True)
-    @checks.custom_perms(manage_server=True)
+    @checks.custom_perms(manage_roles=True)
     async def delete_role(self, ctx, *, role: discord.Role = None):
         """This command can be used to delete one of the roles from the server"""
         # No use in running through everything if the bot cannot manage roles
@@ -159,7 +159,7 @@ class Roles:
         await self.bot.say("I have just removed the role {} from this server".format(role.name))
 
     @role.command(name='create', pass_context=True, no_pm=True)
-    @checks.custom_perms(manage_server=True)
+    @checks.custom_perms(manage_roles=True)
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server
         A prompt will follow asking what settings you would like for this new role

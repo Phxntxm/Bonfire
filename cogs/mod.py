@@ -128,7 +128,7 @@ class Mod:
                     if "is_owner" in func.__qualname__:
                         await self.bot.say("You need to own the bot to run this command")
                         return
-                await self.bot.say("You are required to have `manage_server` permissions to run {}".format(cmd.qualified_name))
+                await self.bot.say("You are required to have `manage_server` permissions to run `{}`".format(cmd.qualified_name))
                 return
             
             # Perms will be an attribute if custom_perms is found no matter what, so need to check this
