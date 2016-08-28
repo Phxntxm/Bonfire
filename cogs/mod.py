@@ -118,10 +118,10 @@ class Mod:
         perms_value = server_perms.get(cmd.qualified_name)
         if perms_value is None:
             # If we don't find custom permissions, get the required permission for a command
-            # based on what we set in checks.custom_perms, if custom_perms isn't found, we'll get a KeyError
+            # based on what we set in checks.custom_perms, if custom_perms isn't found, we'll get an IndexError
             try:
                 custom_perms = [func for func in cmd.checks if "custom_perms" in func.__qualname__][0]
-            except KeyError:
+            except IndexError:
                 # Loop through and check if there is a check called is_owner, if we loop through and don't find one
                 # This means that the only other choice is to be able to manage the server (for the checks on perm commands)
                 for func in cmd.checks:
