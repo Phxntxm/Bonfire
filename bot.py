@@ -29,7 +29,12 @@ extensions = ['cogs.interaction',
               'cogs.hangman',
               'cogs.steam']
 
-bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
+opts = {'command_prefix': config.commandPrefix,
+        'description': config.botDescription,
+        'pm_help': None,
+        'shard_count': config.shard_count,
+        'shard_id': config.shard_id}
+bot = commands.Bot(**opts)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.WARNING)
 
