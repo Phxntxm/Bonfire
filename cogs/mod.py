@@ -96,14 +96,44 @@ class Mod:
             return
 
         custom_perms = config.get_content('custom_permissions') or {}
-        server_perms = custom_perms.get(ctx.message.server.id)
-        if server_perms is None:
-            await self.bot.say("There are no custom permissions setup on this server yet!")
+        server_perms = custom_perms.get(ctx.message.server.id) or {}
+        
+        cmd = None
+        # This is the same loop as the add command, we need this to get the
+        # command object so we can get the qualified_name
+        for part in command.split():
+            try:
+                if cmd is None:
+                    cmd = self.bot.commands.get(part)
+                else:
+                    cmd = cmd.commands.get(part)
+            except AttributeError:
+                cmd = None
+                break
+        
+        if cmd is None:
+            await self.bot.say("That is not a valid command!")
             return
 
-        perms_value = server_perms.get(command)
+        perms_value = server_perms.get(cmd.qualified_name)
         if perms_value is None:
-            await self.bot.say("That command has no custom permissions setup on it!")
+            # If we don't find custom permissions, get the required permission for a command
+            # based on what we set in checks.custom_perms, if custom_perms isn't found, we'll get an IndexError
+            try:
+                custom_perms = [func for func in cmd.checks if "custom_perms" in func.__qualname__][0]
+            except IndexError:
+                # Loop through and check if there is a check called is_owner, if we loop through and don't find one
+                # This means that the only other choice is to be able to manage the server (for the checks on perm commands)
+                for func in cmd.checks:
+                    if "is_owner" in func.__qualname__:
+                        await self.bot.say("You need to own the bot to run this command")
+                        return
+                await self.bot.say("You are required to have `manage_server` permissions to run `{}`".format(cmd.qualified_name))
+                return
+            
+            # Perms will be an attribute if custom_perms is found no matter what, so need to check this
+            perms = "\n".join(attribute for attribute, setting in custom_perms.perms.items() if setting)
+            await self.bot.say("You are required to have `{}` permissions to run `{}`".format(perms, cmd.qualified_name))
         else:
             # Permissions are saved as bit values, so create an object based on that value
             # Then check which permission is true, that is our required permission
@@ -222,6 +252,9 @@ class Mod:
     @checks.custom_perms(manage_messages=True)
     async def purge(self, ctx, limit: int = 100):
         """This command is used to a purge a number of messages from the channel"""
+        if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
+            await self.bot.say("I do not have permission to delete messages...")
+            return
         await self.bot.purge_from(ctx.message.channel, limit=limit)
 
     @commands.command(pass_context=True, no_pm=True)
@@ -238,6 +271,11 @@ class Mod:
         members = ctx.message.mentions
         if len(members) == 0:
             members = [ctx.message.server.me]
+        # If we're not setting the user to the bot, then we're deleting someone elses messages
+        # To do so, we need manage_messages permission, so check if we have that
+        elif not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
+            await self.bot.say("I do not have permission to delete messages...")
+            return
 
         # Since logs_from will give us any message, not just the user's we need
         # We'll increment count, and stop deleting messages if we hit the limit.

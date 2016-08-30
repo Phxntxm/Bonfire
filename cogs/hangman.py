@@ -144,8 +144,6 @@ class Hangman:
         # Make sure the phrase is less than 30 characters
         check = lambda m: len(m.content) < 30
 
-        # Doing this so that while we wait for the phrase, another one cannot be started.
-        self.games[ctx.message.server.id] = "placeholder"
 
         # We want to send this message instead of just PM'ing the creator
         # As some people have PM's turned off/ don't pay attention to them
@@ -157,10 +155,13 @@ class Hangman:
         _msg = await self.bot.whisper("Please respond with the phrase you would like to use for your new hangman game\n"
                                       "Please note that it must be under 30 characters long")
         msg = await self.bot.wait_for_message(timeout=60.0, channel=_msg.channel, check=check)
+        
+        # Doing this so that while we wait for the phrase, another one cannot be started.
+        self.games[ctx.message.server.id] = "placeholder"
 
         if not msg:
-            await self.bot.whisper("Sorry, you took too long.")
             del self.games[ctx.message.server.id]
+            await self.bot.whisper("Sorry, you took too long.")
             return
         else:
             game = self.create(msg.content, ctx)
