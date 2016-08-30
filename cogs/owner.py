@@ -18,14 +18,14 @@ class Owner:
 
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command()
     @commands.check(checks.is_owner)
     async def running(self):
         """This command detects all things currently running
         This includes music played, tictactoe games, hangman games, and battles"""
         servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
-                                 state.is_playing()])
+                                     state.is_playing()])
         hm_games = len([server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
         ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
         count_battles = 0
@@ -40,12 +40,11 @@ class Owner:
             fmt += "{} different TicTacToe games running\n".format(ttt_games)
         if count_battles:
             fmt += "{} different battles going on\n".format(count_battles)
-        
+
         if not fmt:
             fmt = "Nothing currently running!"
         await self.bot.say(fmt)
-            
-        
+
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
     async def saferestart(self, ctx):

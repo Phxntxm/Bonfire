@@ -53,7 +53,7 @@ class Tags:
                 "Please provide the format for the tag in: {}tag add <tag> - <result>".format(ctx.prefix))
             return
 
-        tags = config.get_content('tags') or {}
+        tags = config.get_content('tags') or []
         for t in tags:
             # Attempt to find a tag with that name, so that we update it instead of making a duplicate
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
@@ -72,7 +72,7 @@ class Tags:
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
-        tags = config.get_content('tags') or {}
+        tags = config.get_content('tags') or []
         # Get a list of the tags that match this server, and the name provided (should only ever be one if any)
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         # If we haven't found one, can't delete it

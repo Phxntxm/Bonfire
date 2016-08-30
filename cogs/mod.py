@@ -53,7 +53,7 @@ class Mod:
     @checks.custom_perms(kick_members=True)
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
-        nsfw_channels = config.get_content('nsfw_channels') or {}
+        nsfw_channels = config.get_content('nsfw_channels') or []
         if ctx.message.channel.id in nsfw_channels:
             await self.bot.say("This channel is already registered as 'nsfw'!")
         else:
@@ -66,7 +66,7 @@ class Mod:
     @checks.custom_perms(kick_members=True)
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
-        nsfw_channels = config.get_content('nsfw_channels') or {}
+        nsfw_channels = config.get_content('nsfw_channels') or []
         if ctx.message.channel.id not in nsfw_channels:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
         else:
@@ -97,7 +97,7 @@ class Mod:
 
         custom_perms = config.get_content('custom_permissions') or {}
         server_perms = custom_perms.get(ctx.message.server.id) or {}
-        
+
         cmd = None
         # This is the same loop as the add command, we need this to get the
         # command object so we can get the qualified_name
@@ -110,7 +110,7 @@ class Mod:
             except AttributeError:
                 cmd = None
                 break
-        
+
         if cmd is None:
             await self.bot.say("That is not a valid command!")
             return
@@ -122,18 +122,22 @@ class Mod:
             try:
                 custom_perms = [func for func in cmd.checks if "custom_perms" in func.__qualname__][0]
             except IndexError:
-                # Loop through and check if there is a check called is_owner, if we loop through and don't find one
-                # This means that the only other choice is to be able to manage the server (for the checks on perm commands)
+                # Loop through and check if there is a check called is_owner
+                # Ff we loop through and don't find one
+                # This means that the only other choice is to be
+                # Able to manage the server (for the checks on perm commands)
                 for func in cmd.checks:
                     if "is_owner" in func.__qualname__:
                         await self.bot.say("You need to own the bot to run this command")
                         return
-                await self.bot.say("You are required to have `manage_server` permissions to run `{}`".format(cmd.qualified_name))
+                await self.bot.say(
+                    "You are required to have `manage_server` permissions to run `{}`".format(cmd.qualified_name))
                 return
-            
+
             # Perms will be an attribute if custom_perms is found no matter what, so need to check this
             perms = "\n".join(attribute for attribute, setting in custom_perms.perms.items() if setting)
-            await self.bot.say("You are required to have `{}` permissions to run `{}`".format(perms, cmd.qualified_name))
+            await self.bot.say(
+                "You are required to have `{}` permissions to run `{}`".format(perms, cmd.qualified_name))
         else:
             # Permissions are saved as bit values, so create an object based on that value
             # Then check which permission is true, that is our required permission

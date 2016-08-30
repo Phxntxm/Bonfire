@@ -151,11 +151,6 @@ class TicTacToe:
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers['x']
 
-    @commands.command(pass_context=True, no_pm=True, name='test')
-    @checks.custom_perms(send_messages=True)
-    async def test_sharding(self, ctx):
-        await self.bot.say("Responded on shard {}\nboard is {}".format(config.shard_id, self.boards.get(ctx.message.server.id)))
-
     @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
@@ -194,6 +189,8 @@ class TicTacToe:
             await self.bot.say("Please provide a valid location to play!")
             return
 
+        x = 0
+        y = 0
         # Simple assignments
         if top:
             x = 0
@@ -242,11 +239,10 @@ class TicTacToe:
                 await self.bot.say("This game has ended in a tie!")
                 del self.boards[ctx.message.server.id]
             # If no one has won, and the game has not ended in a tie, print the new updated board
-            # TODO: edit in place instead of printing?
             else:
                 player_turn = board.challengers.get('x') if board.X_turn else board.challengers.get('o')
-                fmt = str(board) + "\nIt is now your turn "
-                await self.bot.say(str(board))
+                fmt = str(board) + "\n{} It is now your turn to play!".format(player_turn.display_name)
+                await self.bot.say(fmt)
 
     @tictactoe.command(name='start', aliases=['challenge', 'create'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -262,15 +258,20 @@ class TicTacToe:
         if player2 == ctx.message.server.me:
             await self.bot.say("You want to play? Alright lets play.\n\nI win, so quick you didn't even notice it.")
             return
+
         # Create the board and return who has been decided to go first
         x_player = self.create(ctx.message.server.id, player1, player2)
         fmt = "A tictactoe game has just started between {} and {}".format(player1.display_name, player2.display_name)
         # Print the board too just because
         fmt += str(self.boards[ctx.message.server.id])
-        # We don't need to do anything weird with assigning x_player to something, it is already a member object, just use it
-        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!\nUse the {}tictactoe command, and a position, to choose where you want to play".format(x_player.display_name, ctx.prefix)
+
+        # We don't need to do anything weird with assigning x_player to something
+        # it is already a member object, just use it
+        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!" \
+               "Use the {}tictactoe command, and a position, to choose where you want to play"\
+            .format(x_player.display_name, ctx.prefix)
         await self.bot.say(fmt)
-    
+
     @tictactoe.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def stop_game(self, ctx):
@@ -280,7 +281,7 @@ class TicTacToe:
         if self.boards.get(ctx.message.server.id) is None:
             await self.bot.say("There are no tictactoe games running on this server!")
             return
-            
+
         del self.boards[ctx.message.server.id]
         await self.bot.say("I have just stopped the game of TicTacToe, a new should be able to be started now!")
 

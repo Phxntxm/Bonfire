@@ -62,7 +62,7 @@ class Interaction:
         self.bot = bot
         # Format for battles: {'serverid': {'player1': 'player2', 'player1': 'player2'}}
         self.battles = {}
-        
+
     def user_battling(self, ctx, player2=None):
         battling = self.battles.get(ctx.message.server.id)
 
@@ -77,14 +77,15 @@ class Interaction:
             return True
         # If neither are found, no one is battling
         return False
-    
+
     # Handles removing the author from the dictionary of battles
     def battling_off(self, ctx):
         battles = self.battles.get(ctx.message.server.id) or {}
         player_id = ctx.message.author.id
         # Create a new dictionary, exactly the way the last one was setup
         # But don't include any that have the author's ID
-        self.battles[ctx.message.server.id] = {p1: p2 for p1, p2 in battles.items() if not p2 == player_id and not p1 == player_id}
+        self.battles[ctx.message.server.id] = {p1: p2 for p1, p2 in battles.items() if
+                                               not p2 == player_id and not p1 == player_id}
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
@@ -102,9 +103,6 @@ class Interaction:
             return
 
         # Add the author and player provided in a new battle
-        #battling = config.get_content('battling') or {}
-        #battling[ctx.message.author.id] = player2.id
-        #config.save_content('battling', battling)
         battles = self.battles.get(ctx.message.server.id) or {}
         battles[ctx.message.author.id] = player2.id
         self.battles[ctx.message.server.id] = battles
@@ -130,7 +128,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # Get a random win message from our list
-        fmt = config.battleWins[random.SystemRandom().randint(0, len(config.battleWins) - 1)]
+        fmt = config.battle_wins[random.SystemRandom().randint(0, len(config.battle_wins) - 1)]
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
         self.battling_off(ctx)
 
@@ -142,7 +140,6 @@ class Interaction:
         else:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
             update_battle_records(battleP2, battleP1)
-
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)

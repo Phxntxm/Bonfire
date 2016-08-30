@@ -28,8 +28,8 @@ extensions = ['cogs.interaction',
               'cogs.hangman',
               'cogs.steam']
 
-opts = {'command_prefix': config.commandPrefix,
-        'description': config.botDescription,
+opts = {'command_prefix': config.command_prefix,
+        'description': config.bot_description,
         'pm_help': None,
         'shard_count': config.shard_count,
         'shard_id': config.shard_id}

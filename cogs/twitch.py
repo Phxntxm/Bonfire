@@ -14,7 +14,7 @@ async def channel_online(channel: str):
     with aiohttp.ClientSession() as s:
         async with s.get(url) as r:
             response = await r.text()
-    
+
     # For some reason Twitch's API call is not reliable, sometimes it returns stream as None
     # That is what we're checking specifically, sometimes it doesn't exist in the returned JSON at all
     # Sometimes it returns something that cannot be decoded with JSON
@@ -44,7 +44,8 @@ class Twitch:
             # Online/offline is based on whether they are set to such, in the config file
             # This means they were detected as online/offline before and we check for a change
             online_users = {m_id: data for m_id, data in twitch.items() if data['notifications_on'] and data['live']}
-            offline_users = {m_id: data for m_id, data in twitch.items() if data['notifications_on'] and not data['live']}
+            offline_users = {m_id: data for m_id, data in twitch.items() if
+                             data['notifications_on'] and not data['live']}
             for m_id, r in offline_users.items():
                 # Get their url and their user based on that url
                 url = r['twitch_url']
@@ -59,7 +60,7 @@ class Twitch:
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
                         member = discord.utils.get(server.members, id=m_id)
-                        
+
                         fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
                         await self.bot.send_message(channel, fmt)
                     twitch[m_id]['live'] = 1
@@ -78,7 +79,8 @@ class Twitch:
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
                         member = discord.utils.get(server.members, id=m_id)
-                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.display_name, url)
+                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
+                            member.display_name, url)
                         await self.bot.send_message(channel, fmt)
                     twitch[m_id]['live'] = 0
                     config.save_content('twitch', twitch)
@@ -86,7 +88,7 @@ class Twitch:
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def twitch(self, ctx, *, member: discord.Member=None):
+    async def twitch(self, ctx, *, member: discord.Member = None):
         """Use this command to check the twitch info of a user"""
         if member is None:
             member = ctx.message.author
@@ -128,7 +130,7 @@ class Twitch:
             url = "https://www.twitch.tv/{}".format(url)
         else:
             url = "https://www.{}".format(url)
-        
+
         # Try to find the channel provided, we'll get a 404 response if it does not exist
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
@@ -139,7 +141,7 @@ class Twitch:
 
         twitch = config.get_content('twitch') or {}
         result = twitch.get(ctx.message.author.id)
-        
+
         # Check to see if this user has already saved a twitch URL
         # If they have, update the URL, otherwise create a new entry
         # Assuming they're not live, and notifications should be on

@@ -4,7 +4,6 @@ from discord.ext import commands
 import discord
 
 import aiohttp
-import json
 
 base_url = "https://api.owapi.net/api/v2/u/"
 # This is a list of the possible things that we may want to retrieve from the stats
@@ -34,7 +33,7 @@ class Overwatch:
 
     @ow.command(name="stats", pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
-    async def ow_stats(self, ctx, user: discord.Member=None, hero: str=""):
+    async def ow_stats(self, ctx, user: discord.Member = None, hero: str = ""):
         """Prints out a basic overview of a member's stats
         Provide a hero after the member to get stats for that specific hero"""
         if user is None:
@@ -48,17 +47,18 @@ class Overwatch:
             return
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await self.bot.say("Searching profile information....")
-        
+
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
             async with self.session.get(base_url + "{}/stats/general".format(bt), headers=self.headers) as r:
                 data = await r.json()
-            
+
             # Here is our list comprehension to get what kind of data we want.
             fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
             fmt += "\n"
             fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
-            # title and replace are used to format things nicely, while not having to have information for every piece of data
+            # title and replace are used to format things nicely
+            # while not having to have information for every piece of data
             await self.bot.say(
                 "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
@@ -77,12 +77,13 @@ class Overwatch:
                     fmt = "{} is not an actual hero!".format(hero.title())
                     await self.bot.say(fmt)
                     return
-            
+
             # Same list comprehension as before
             fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
             # Someone was complaining there was no KDR provided, so I made one myself and added that to the list
             if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
-                fmt += "\nKill Death Ratio: {0:.2f}".format(data['general_stats'].get('eliminations')/data['general_stats'].get('deaths'))
+                fmt += "\nKill Death Ratio: {0:.2f}".format(
+                    data['general_stats'].get('eliminations') / data['general_stats'].get('deaths'))
             fmt += "\n"
             fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
             # Same formatting as above
@@ -96,11 +97,11 @@ class Overwatch:
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists
         bt = bt.replace("#", "-")
-        
+
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await self.bot.say("Looking up your profile information....")
         url = base_url + "{}/stats/general".format(bt)
-        
+
         # All we're doing here is ensuring that the status is 200 when looking up someone's general information
         # If it's not, let them know exactly how to format their tag
         async with self.session.get(url, headers=self.headers) as r:
@@ -108,7 +109,7 @@ class Overwatch:
                 await self.bot.say("Profile does not exist! Battletags are picky, "
                                    "format needs to be `user#xxxx`. Capitalization matters")
                 return
-        
+
         # Now just save the battletag
         ow = config.get_content('overwatch') or {}
         ow[ctx.message.author.id] = bt
@@ -125,7 +126,7 @@ class Overwatch:
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
         else:
             await self.bot.say("I don't even have your battletag saved {}".format(ctx.message.author.mention))
-        
+
         del result[ctx.message.author.id]
         await self.bot.say("I have just removed your battletag!")
 
