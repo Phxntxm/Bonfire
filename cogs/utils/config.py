@@ -13,6 +13,21 @@ except FileNotFoundError:
     print("You have no config file setup! Please use config.yml.sample to setup a valid config file")
     quit()
 
+
+try:
+    bot_token = global_config["bot_token"]
+except KeyError:
+    print("You have no bot_token saved, this is a requirement for running a bot.")
+    print("Please use config.yml.sample to setup a valid config file")
+    quit()
+
+try:
+    owner_ids = global_config["owner_id"]
+except KeyError:
+    print("You have no owner_id saved! You're not going to be able to run certain commands without this.")
+    print("Please use config.yml.sample to setup a valid config file")
+    quit()
+
 # Default bot's description
 botDescription = global_config.get("description")
 # Bot's default prefix for commands
@@ -30,32 +45,18 @@ shard_id = global_config.get('shard_id', '')
 # A list of all the outputs for the battle command
 battleWins = global_config.get("battleWins", [])
 # The default status the bot will use
-defaultStatus = global_config.get("default_status", "")
+default_status = global_config.get("default_status", "")
 # The steam API key
 steam_key = global_config.get("steam_key", "")
 
 # The rethinkdb hostname
-db_host = global_config.get('db_host', '')
+db_host = global_config.get('db_host', 'localhost')
 # The rethinkdb database name
-db_name = global_config.get('db_name', '')
+db_name = global_config.get('db_name', 'Discord_Bot')
 # The rethinkdb certification
-db_cert = global_config.get('db_cert', 'localhost')
+db_cert = global_config.get('db_cert', '')
 # The rethinkdb port
 db_port = global_config.get('db_port', 28015)
-
-try:
-    botToken = global_config["bot_token"]
-except KeyError:
-    print("You have no bot_token saved, this is a requirement for running a bot.")
-    print("Please use config.yml.sample to setup a valid config file")
-    quit()
-
-try:
-    owner_ids = global_config["owner_id"]
-except KeyError:
-    print("You have no owner_id saved! You're not going to be able to run certain commands without this.")
-    print("Please use config.yml.sample to setup a valid config file")
-    quit()
 
 
 def save_content(key: str, content):

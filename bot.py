@@ -34,6 +34,7 @@ opts = {'command_prefix': config.commandPrefix,
         'pm_help': None,
         'shard_count': config.shard_count,
         'shard_id': config.shard_id}
+
 bot = commands.Bot(**opts)
 discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.WARNING)
@@ -46,8 +47,9 @@ log.addHandler(handler)
 
 @bot.event
 async def on_ready():
+    print("We have connected")
     # Change the status upon connection to the default status
-    await bot.change_status(discord.Game(name=config.defaultStatus, type=0))
+    await bot.change_status(discord.Game(name=config.default_status, type=0))
     channel_id = config.get_content('restart_server')
 
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
@@ -128,6 +130,8 @@ async def on_command_error(error, ctx):
 
 
 if __name__ == '__main__':
+    print("Loading extensions")
     for e in extensions:
         bot.load_extension(e)
-    bot.run(config.botToken)
+    print("Running bot")
+    bot.run(config.bot_token)
