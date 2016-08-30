@@ -74,11 +74,17 @@ async def save_content(table: str, content):
 
 
 async def get_content(key: str):
+    # We need to make sure we're using asyncio
     r.set_loop_type("asyncio")
+    # Just connect to the database
     opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
     conn = await r.connect(**opts)
     cursor = await r.table(key).run(conn)
+    # We should only ever get one result, so use it if it exists, otherwise return none
     try:
-        return list(cursor)[0]
+        items = list(cursor.items)[0]
     except IndexError:
         return None
+    # Rethink db stores an internal id per table, delete this and return the rest
+    del items['id']
+    return items
