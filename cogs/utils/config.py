@@ -1,6 +1,7 @@
 import yaml
 import asyncio
 import json
+import rethinkdb as r
 
 loop = asyncio.get_event_loop()
 
@@ -22,6 +23,10 @@ carbon_key = global_config.get('carbon_key', "")
 # The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
 
+# The variables needed for sharding
+shard_count = global_config.get('shard_count', '')
+shard_id = global_config.get('shard_id', '')
+
 # A list of all the outputs for the battle command
 battleWins = global_config.get("battleWins", [])
 # The default status the bot will use
@@ -29,13 +34,22 @@ defaultStatus = global_config.get("default_status", "")
 # The steam API key
 steam_key = global_config.get("steam_key", "")
 
+# The rethinkdb hostname
+db_host = global_config.get('db_host', '')
+# The rethinkdb database name
+db_name = global_config.get('db_name', '')
+# The rethinkdb certification
+db_cert = global_config.get('db_cert', 'localhost')
+# The rethinkdb port
+db_port = global_config.get('db_port', 28015)
+
 try:
     botToken = global_config["bot_token"]
 except KeyError:
     print("You have no bot_token saved, this is a requirement for running a bot.")
     print("Please use config.yml.sample to setup a valid config file")
     quit()
-    
+
 try:
     owner_ids = global_config["owner_id"]
 except KeyError:
@@ -56,6 +70,23 @@ def save_content(key: str, content):
     except FileNotFoundError:
         with open("config.json", "w+") as jf:
             json.dump({key: content}, jf, indent=4)
+
+
+# Not in use yet
+async def _save_content(table: str, content):
+    r.set_loop_type("asyncio")
+    opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
+    conn = await r.connect(**opts)
+    # We need to make at least one query to ensure the key exists, so attempt to create it as our query
+    try:
+        r.table_create(table).run(conn)
+    except r.ReqlOpFailedError:
+        pass
+    # So now either the table was created already, or it has now been created, we can update the code
+    # Since we're handling everything that is rewritten in the code itself, we just need to delet then insert
+    r.table(table).delete().run(conn)
+    r.table(table).insert(content).run(conn)
+    await conn.close()
 
 
 def get_content(key: str):
