@@ -151,6 +151,11 @@ class TicTacToe:
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers['x']
 
+    @commands.command(pass_context=True, no_pm=True, name='test')
+    @checks.custom_perms(send_messages=True)
+    async def test_sharding(self, ctx):
+        await self.bot.say("Responded on shard {}\nboard is {}".format(config.shard_id, self.boards.get(ctx.message.server.id)))
+
     @commands.group(pass_context=True, aliases=['tic', 'tac', 'toe'], no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
