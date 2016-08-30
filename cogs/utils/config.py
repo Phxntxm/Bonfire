@@ -1,4 +1,4 @@
-import yaml
+import ruamel.yaml as yaml
 import asyncio
 import json
 import rethinkdb as r
