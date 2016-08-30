@@ -23,7 +23,6 @@ extensions = ['cogs.interaction',
               'cogs.links',
               'cogs.tags',
               'cogs.roles',
-              'cogs.statsupdate',
               'cogs.strawpoll',
               'cogs.tictactoe',
               'cogs.hangman',
@@ -36,13 +35,7 @@ opts = {'command_prefix': config.commandPrefix,
         'shard_id': config.shard_id}
 
 bot = commands.Bot(**opts)
-discord_logger = logging.getLogger('discord')
-discord_logger.setLevel(logging.WARNING)
-
-log = logging.getLogger()
-log.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='bonfire.log', encoding='utf-8', mode='a')
-log.addHandler(handler)
+logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 
 @bot.event
