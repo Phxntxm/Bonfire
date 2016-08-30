@@ -74,7 +74,7 @@ class Links:
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
             if ctx.message.channel.id in nsfw_channels:
-                url += ",+explicit||suggestive&filter_id=95938"
+                url += ",+explicit%20||%20suggestive&filter_id=95938"
             else:
                 url += ",+safe"
 
