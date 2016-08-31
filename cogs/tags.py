@@ -27,6 +27,7 @@ class Tags:
         tags = await config.get_content('tags')
         # Same generator as the method for tags, other than the second check to get the tag that is provided
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
+        print("Tags: {}\nAmount of tags: {}".format(tags, len(tags)))
         if len(result) == 0:
             await self.bot.say('That tag does not exist!')
             return

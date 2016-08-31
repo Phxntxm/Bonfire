@@ -118,7 +118,9 @@ async def get_content(key: str):
         cursor = await r.table(key).run(conn)
         items = list(cursor.items)[0]
     except (IndexError, r.ReqlOpFailedError):
+        await conn.close()
         return {}
     # Rethink db stores an internal id per table, delete this and return the rest
     del items['id']
+    conn.close()
     return items
