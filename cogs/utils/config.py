@@ -104,8 +104,11 @@ def command_prefix(bot, message):
     # So assume it's in cache, or it doesn't exist
     # If the prefix does exist in the database and isn't in our cache; too bad, something has messed up
     # But it is not worth a query for every single message the bot detects, to fix
-    prefix = cache['prefixes'].values.get(message.server.id)
-    return prefix or default_prefix
+    try:
+        prefix = cache['prefixes'].values.get(message.server.id)
+        return prefix or default_prefix
+    except KeyError:
+        return default_prefix
 
 
 async def save_content(table: str, content):
