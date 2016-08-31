@@ -26,6 +26,32 @@ except KeyError:
     print("Please use config.yml.sample to setup a valid config file")
     quit()
 
+# This class will hold all our custom permissions
+# We don't want to make queries everytime a command is run, to check for custom permissions
+# What we'll do here is anytime custom permissions are changed, we'll update this class
+
+
+class Perms:
+    def __init__(self):
+        self.custom_perms = {}
+        # We need to set the permissions initially when created
+        loop.create_task(self.update_perms())
+
+    async def update_perms(self):
+        # We need to make sure we're using asyncio
+        r.set_loop_type("asyncio")
+        # Just connect to the database
+        opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
+        conn = await r.connect(**opts)
+        try:
+            cursor = await r.table('custom_permissions').run(conn)
+            self.custom_perms = list(cursor.items)[0]
+        except (IndexError, r.ReqlOpFailedError):
+            return None
+
+    def __repr__(self):
+        return self.custom_perms
+
 # Default bot's description
 bot_description = global_config.get("description")
 # Bot's default prefix for commands
@@ -56,9 +82,13 @@ db_cert = global_config.get('db_cert', '')
 # The rethinkdb port
 db_port = global_config.get('db_port', 28015)
 
+# The perms object we'll update
+perms = Perms()
 
 async def save_content(table: str, content):
+    # We need to make sure we're using asyncio
     r.set_loop_type("asyncio")
+    # Just connect to the database
     opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
     conn = await r.connect(**opts)
     # We need to make at least one query to ensure the key exists, so attempt to create it as our query
@@ -70,6 +100,10 @@ async def save_content(table: str, content):
     # Since we're handling everything that is rewritten in the code itself, we just need to delet then insert
     await r.table(table).delete().run(conn)
     await r.table(table).insert(content).run(conn)
+
+    # If we're changing custom_permissions, we want to update our internal object
+    if table == "custom_permissions":
+        await perms.update_perms()
     await conn.close()
 
 
