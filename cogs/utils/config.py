@@ -26,36 +26,26 @@ except KeyError:
     print("Please use config.yml.sample to setup a valid config file")
     quit()
 
-# This class will hold all our custom permissions
-# We don't want to make queries everytime a command is run, to check for custom permissions
-# What we'll do here is anytime custom permissions are changed, we'll update this class
 
+# This is a simple class for the cache concept, all it holds is it's own key and the values
+# With a method that gets content based on it's key
+class Cache:
+    def __init__(self, key):
+        self.key = key
+        self.values = []
+        loop.create_task(self.update())
 
-class Perms:
-    def __init__(self):
-        self.custom_perms = {}
-        # We need to set the permissions initially when created
-        loop.create_task(self.update_perms())
-
-    async def update_perms(self):
-        # We need to make sure we're using asyncio
-        r.set_loop_type("asyncio")
-        # Just connect to the database
-        opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
-        conn = await r.connect(**opts)
-        try:
-            cursor = await r.table('custom_permissions').run(conn)
-            self.custom_perms = list(cursor.items)[0]
-        except (IndexError, r.ReqlOpFailedError):
-            return None
+    async def update(self):
+        self.values = await _get_content(self.key)
 
     def __repr__(self):
-        return self.custom_perms
+        return self.values
+
 
 # Default bot's description
 bot_description = global_config.get("description")
 # Bot's default prefix for commands
-command_prefix = global_config.get("command_prefix", "!")
+default_prefix = global_config.get("command_prefix", "!")
 # The key for bots.discord.pw and carbonitex
 discord_bots_key = global_config.get('discord_bots_key', "")
 carbon_key = global_config.get('carbon_key', "")
@@ -84,8 +74,25 @@ db_port = global_config.get('db_port', 28015)
 # We've set all the options we need to be able to connect
 # so create a dictionary that we can use to unload to connect
 db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
-# The perms object we'll update
-perms = Perms()
+
+possible_keys = ['prefix', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications', 'nsfw_channels'
+                 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags', 'tictactoe']
+# This will be a dictionary that holds the cache object, based on the key that is saved
+cache = {}
+
+# Populate cache with each object
+for k in possible_keys:
+    cache[k] = Cache(k)
+
+
+def command_prefix(bot, message):
+    # We do not want to make a query for every message that is sent
+    # So assume it's in cache, or it doesn't exist
+    # If the prefix does exist in the database and isn't in our cache; too bad, something has messed up
+    # But it is not worth a query for every single message the bot detects, to fix
+    prefix = cache['prefix'].get(message.server.id)
+    return prefix or default_prefix
+
 
 async def save_content(table: str, content):
     # We need to make sure we're using asyncio
@@ -102,13 +109,27 @@ async def save_content(table: str, content):
     await r.table(table).delete().run(conn)
     await r.table(table).insert(content).run(conn)
 
-    # If we're changing custom_permissions, we want to update our internal object
-    if table == "custom_permissions":
-        await perms.update_perms()
+    # Now that we've saved the new content, we should update our cache
+    cached = cache.get(table)
+    # While this should theoretically never happen, we just want to make sure
+    if cached is None:
+        cache[table] = Cache(table)
+    else:
+        await cache[table].update()
     await conn.close()
 
 
 async def get_content(key: str):
+    cached = cache.get('key')
+    if cached is None:
+        value = await _get_content(key)
+    else:
+        value = cached.values
+    return value
+
+
+# This is our internal method to get content from the database
+async def _get_content(key: str):
     # We need to make sure we're using asyncio
     r.set_loop_type("asyncio")
     # Just connect to the database
