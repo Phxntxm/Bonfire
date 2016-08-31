@@ -25,7 +25,8 @@ extensions = ['cogs.interaction',
               'cogs.roles',
               'cogs.strawpoll',
               'cogs.tictactoe',
-              'cogs.hangman']
+              'cogs.hangman',
+              'cogs.statsupdate']
 
 opts = {'command_prefix': config.command_prefix,
         'description': config.bot_description,

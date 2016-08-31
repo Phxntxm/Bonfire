@@ -312,8 +312,6 @@ class Mod:
     async def rules(self, ctx):
         """This command can be used to view the current rules on the server"""
         rules = await config.get_content('rules')
-        # Same issue as the nsfw channels
-        rules = rules.get('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         if server_rules is None or len(server_rules) == 0:
             await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
@@ -328,11 +326,10 @@ class Mod:
         """Adds a rule to this server's rules"""
         # Nothing fancy here, just get the rules, append the rule, and save it
         rules = await config.get_content('rules')
-        rules = rules.get('rules') or {}
         server_rules = rules.get(ctx.message.server.id) or []
         server_rules.append(rule)
         rules[ctx.message.server.id] = server_rules
-        await config.save_content('rules', {'rules': rules})
+        await config.save_content('rules', rules)
         await self.bot.say("I have just saved your new rule, use the rules command to view this server's current rules")
 
     @rules.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
@@ -342,7 +339,6 @@ class Mod:
         Provide a number to delete that rule; if no number is provided
         I'll print your current rules and ask for a number"""
         rules = await config.get_content('rules')
-        rules = rules.get('rules') or {}
         server_rules = rules.get(ctx.message.server.id) or []
         if server_rules is None or len(server_rules) == 0:
             await self.bot.say(
@@ -365,7 +361,7 @@ class Mod:
                 return
             del server_rules[int(msg.content) - 1]
             rules[ctx.message.server.id] = server_rules
-            await config.save_content('rules', {'rules': rules})
+            await config.save_content('rules', rules)
             await self.bot.say("I have just removed that rule from your list of rules!")
             return
 
@@ -373,7 +369,7 @@ class Mod:
         try:
             del server_rules[rule - 1]
             rules[ctx.message.server.id] = server_rules
-            await config.save_content('rules', {'rules': rules})
+            await config.save_content('rules', rules)
             await self.bot.say("I have just removed that rule from your list of rules!")
         except IndexError:
             await self.bot.say("That is not a valid rule number, try running the command again. "
