@@ -22,9 +22,7 @@ async def channel_online(channel: str):
     try:
         data = json.loads(response)
         return data['stream'] is not None
-    except KeyError:
-        return False
-    except json.JSONDecodeError:
+    except (KeyError, json.JSONDecodeError):
         return False
 
 

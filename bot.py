@@ -39,7 +39,6 @@ logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 @bot.event
 async def on_ready():
-    print("We have connected")
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.default_status, type=0))
     channel_id = await config.get_content('restart_server') or 0
@@ -122,8 +121,6 @@ async def on_command_error(error, ctx):
 
 
 if __name__ == '__main__':
-    print("Loading extensions")
     for e in extensions:
         bot.load_extension(e)
-    print("Running bot")
     bot.run(config.bot_token)

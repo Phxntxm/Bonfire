@@ -25,9 +25,7 @@ def custom_perms(**perms):
             perm_values = loop.run_until_complete(config.get_content('custom_permissions'))
             required_perm_value = perm_values[ctx.message.server.id][ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
-        except KeyError:
-            required_perm = default_perms
-        except TypeError:
+        except (KeyError, TypeError):
             required_perm = default_perms
         return member_perms >= required_perm
 
