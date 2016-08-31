@@ -143,9 +143,12 @@ async def disabled_get_content(key: str):
         value = cached.values
     return value
 
+async def get_content(key: str):
+    value = await _get_content(key)
+    return value
 
 # This is our internal method to get content from the database
-async def get_content(key: str):
+async def _get_content(key: str):
     # We need to make sure we're using asyncio
     r.set_loop_type("asyncio")
     # Just connect to the database
