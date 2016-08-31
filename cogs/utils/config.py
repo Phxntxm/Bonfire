@@ -73,7 +73,8 @@ db_cert = global_config.get('db_cert', '')
 db_port = global_config.get('db_port', 28015)
 # We've set all the options we need to be able to connect
 # so create a dictionary that we can use to unload to connect
-db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
+# db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
+db_opts = {'host': db_host, 'db': db_name, 'port': db_port}
 
 possible_keys = ['prefixes', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications',
                  'nsfw_channels', 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
