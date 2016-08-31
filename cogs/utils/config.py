@@ -32,7 +32,7 @@ except KeyError:
 class Cache:
     def __init__(self, key):
         self.key = key
-        self.values = []
+        self.values = {}
         loop.create_task(self.update())
 
     async def update(self):
