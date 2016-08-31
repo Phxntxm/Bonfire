@@ -42,7 +42,7 @@ async def on_ready():
     print("We have connected")
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.default_status, type=0))
-    channel_id = config.get_content('restart_server')
+    channel_id = config.get_content('restart_server') or 0
 
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
     config.save_content('battling', {})
