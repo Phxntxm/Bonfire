@@ -89,12 +89,10 @@ cache = {}
 sharded_data = {}
 
 # Populate cache with each object
-for k in possible_keys:
-    cache[k] = Cache(k)
+# for k in possible_keys:
+# cache[k] = Cache(k)
 
-""" { 'shard_0': {'server_count': 146,
-                 'member_count': 146}
-    }"""
+
 def get_bot_data(key):
     # This method will handle data that we'd like to get across all shards
     # First get the bot's data from cache or the database
@@ -135,7 +133,7 @@ async def save_content(table: str, content):
     await conn.close()
 
 
-async def get_content(key: str):
+async def disabled_get_content(key: str):
     cached = cache.get('key')
     if cached is None:
         value = await _get_content(key)
@@ -147,7 +145,7 @@ async def get_content(key: str):
 
 
 # This is our internal method to get content from the database
-async def _get_content(key: str):
+async def get_content(key: str):
     # We need to make sure we're using asyncio
     r.set_loop_type("asyncio")
     # Just connect to the database
