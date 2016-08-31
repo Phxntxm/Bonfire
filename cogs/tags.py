@@ -14,7 +14,7 @@ class Tags:
     @checks.custom_perms(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has"""
-        tags = config.get_content('tags') or {}
+        tags = await config.get_content('tags')
         # Simple generator that adds a tag to the list to print, if the tag is for this server
         fmt = "\n".join("{}".format(tag['tag']) for tag in tags if tag['server_id'] == ctx.message.server.id)
         await self.bot.say('```\n{}```'.format(fmt))
@@ -24,9 +24,10 @@ class Tags:
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>"""
-        tags = config.get_content('tags') or {}
+        tags = await config.get_content('tags')
         # Same generator as the method for tags, other than the second check to get the tag that is provided
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
+        print("Tags: {}\nAmount of tags: {}".format(tags, len(tags)))
         if len(result) == 0:
             await self.bot.say('That tag does not exist!')
             return
@@ -53,7 +54,7 @@ class Tags:
                 "Please provide the format for the tag in: {}tag add <tag> - <result>".format(ctx.prefix))
             return
 
-        tags = config.get_content('tags') or {}
+        tags = await config.get_content('tags')
         for t in tags:
             # Attempt to find a tag with that name, so that we update it instead of making a duplicate
             if t['tag'] == tag and t['server_id'] == ctx.message.server.id:
@@ -63,7 +64,7 @@ class Tags:
                 return
         # If we haven't found one, append a new one to the list
         tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
-        config.save_content('tags', tags)
+        await config.save_content('tags', tags)
         await self.bot.say(
             "I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
 
@@ -72,7 +73,7 @@ class Tags:
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag that from use for this server
         Format to delete a tag is !tag delete <tag>"""
-        tags = config.get_content('tags') or {}
+        tags = await config.get_content('tags')
         # Get a list of the tags that match this server, and the name provided (should only ever be one if any)
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
         # If we haven't found one, can't delete it
@@ -84,7 +85,7 @@ class Tags:
         # Since there should never be more than one result due to our checks we've made, just remove the first result
         tags.remove(result[0])
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
-        config.save_content('tags', tags)
+        await config.save_content('tags', tags)
 
 
 def setup(bot):

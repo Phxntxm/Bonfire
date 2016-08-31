@@ -11,7 +11,6 @@ class Game:
         self.word = word
         self.creator = creator
         # This converts everything but spaces to a blank
-        # TODO: Only convert [a-zA-Z0-9]
         self.blanks = "".join(letter if not re.search("[a-zA-Z0-9]", letter) else "_" for letter in word)
         self.failed_letters = []
         self.guessed_letters = []
@@ -144,7 +143,6 @@ class Hangman:
         # Make sure the phrase is less than 30 characters
         check = lambda m: len(m.content) < 30
 
-
         # We want to send this message instead of just PM'ing the creator
         # As some people have PM's turned off/ don't pay attention to them
         await self.bot.say(
@@ -155,7 +153,7 @@ class Hangman:
         _msg = await self.bot.whisper("Please respond with the phrase you would like to use for your new hangman game\n"
                                       "Please note that it must be under 30 characters long")
         msg = await self.bot.wait_for_message(timeout=60.0, channel=_msg.channel, check=check)
-        
+
         # Doing this so that while we wait for the phrase, another one cannot be started.
         self.games[ctx.message.server.id] = "placeholder"
 
@@ -168,7 +166,7 @@ class Hangman:
         # Let them know the game has started, then print the current game so that the blanks are shown
         await self.bot.say(
             "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
-            
+
     @hangman.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def stop_game(self, ctx):
@@ -178,7 +176,7 @@ class Hangman:
         if self.games.get(ctx.message.server.id) is None:
             await self.bot.say("There are no Hangman games running on this server!")
             return
-        
+
         del self.games[ctx.message.server.id]
         await self.bot.say("I have just stopped the game of Hangman, a new should be able to be started now!")
 

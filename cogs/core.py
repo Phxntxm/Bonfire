@@ -123,9 +123,9 @@ class Core:
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
                            .format(discord.utils.oauth_url(app_info.id, perms)))
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def doggo(self, ctx):
+    async def doggo(self):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
         # Find a random image based on how many we currently have
@@ -133,9 +133,9 @@ class Core:
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def snek(self, ctx):
+    async def snek(self):
         """Use this to print a random snek image.
         Sneks are o3o"""
         # Find a random image based on how many we currently have
