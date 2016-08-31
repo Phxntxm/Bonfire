@@ -319,7 +319,7 @@ class Mod:
         # Nothing fancy here, just get the rules, append the rule, and save it
         rules = await config.get_content('rules')
         rules = rules.get('rules') or {}
-        server_rules = rules.get(ctx.message.server.id)
+        server_rules = rules.get(ctx.message.server.id) or []
         server_rules.append(rule)
         rules[ctx.message.server.id] = server_rules
         await config.save_content('rules', {'rules': rules})
@@ -333,7 +333,7 @@ class Mod:
         I'll print your current rules and ask for a number"""
         rules = await config.get_content('rules')
         rules = rules.get('rules') or {}
-        server_rules = rules.get(ctx.message.server.id)
+        server_rules = rules.get(ctx.message.server.id) or []
         if server_rules is None or len(server_rules) == 0:
             await self.bot.say(
                 "This server currently has no rules on it! Can't remove something that doesn't exist bro")
