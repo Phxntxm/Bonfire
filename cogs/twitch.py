@@ -38,7 +38,7 @@ class Twitch:
         await self.bot.wait_until_ready()
         # Loop through as long as the bot is connected
         while not self.bot.is_closed:
-            twitch = await config.get_content('twitch') or {}
+            twitch = await config.get_content('twitch')
             # Online/offline is based on whether they are set to such, in the config file
             # This means they were detected as online/offline before and we check for a change
             online_users = {m_id: data for m_id, data in twitch.items() if data['notifications_on'] and data['live']}
@@ -53,7 +53,7 @@ class Twitch:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
-                        server_alerts = await config.get_content('server_alerts') or {}
+                        server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
@@ -72,7 +72,7 @@ class Twitch:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
-                        server_alerts = await config.get_content('server_alerts') or {}
+                        server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
@@ -91,7 +91,7 @@ class Twitch:
         if member is None:
             member = ctx.message.author
 
-        twitch_channels = await config.get_content('twitch') or {}
+        twitch_channels = await config.get_content('twitch')
         result = twitch_channels.get(ctx.message.author.id)
         if result is None:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
@@ -137,7 +137,7 @@ class Twitch:
                                        "What would be the point of adding a nonexistant twitch user? Silly")
                     return
 
-        twitch = await config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         result = twitch.get(ctx.message.author.id)
 
         # Check to see if this user has already saved a twitch URL
@@ -155,7 +155,7 @@ class Twitch:
     @checks.custom_perms(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
-        twitch = await config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         # Make sure the user exists before trying to delete them from the list
         if twitch.get(ctx.message.author.id) is not None:
             # Simply remove this user from the list, and save
@@ -172,7 +172,7 @@ class Twitch:
     async def notify(self, ctx):
         """This can be used to modify notification settings for your twitch user
         Call this command by itself to add 'this' server as one that will be notified when you on/offline"""
-        twitch = await config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         result = twitch.get(ctx.message.author.id)
         # Check if this user is saved at all
         if result is None:
@@ -189,7 +189,7 @@ class Twitch:
     async def notify_on(self, ctx):
         """Turns twitch notifications on"""
         # Make sure this user is saved before we attempt to modify their information
-        twitch = await config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         result = twitch.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
@@ -211,7 +211,7 @@ class Twitch:
     async def notify_off(self, ctx):
         """Turns twitch notifications off"""
         # This method is exactly the same, except for turning off notifcations instead of on
-        twitch = await config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         if twitch.get(ctx.message.author.id) is None:
             await self.bot.say(
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(

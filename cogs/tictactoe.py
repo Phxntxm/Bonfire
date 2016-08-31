@@ -101,7 +101,7 @@ class Board:
 async def update_records(winner, loser):
     # This is the exact same formula as the battling update.
     # The only difference is I use the word "match" instead of "battle"
-    matches = await config.get_content('tictactoe') or {}
+    matches = await config.get_content('tictactoe')
 
     winner_stats = matches.get(winner.id) or {}
     winner_rating = winner_stats.get('rating') or 1000

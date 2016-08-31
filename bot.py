@@ -41,7 +41,8 @@ logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 async def on_ready():
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.default_status, type=0))
-    channel_id = await config.get_content('restart_server') or 0
+    channel_id = await config.get_content('restart_server')
+    channel_id = channel_id or 0
 
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
     await config.save_content('battling', {})
@@ -56,7 +57,8 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    notifications = await config.get_content('user_notifications') or {}
+    notifications = await config.get_content('user_notifications')
+    notifications = notifications or {}
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on
@@ -69,7 +71,8 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-    notifications = await config.get_content('user_notifications') or {}
+    notifications = await config.get_content('user_notifications')
+    notifications = notifications or {}
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on

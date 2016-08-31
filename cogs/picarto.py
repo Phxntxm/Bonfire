@@ -46,7 +46,7 @@ class Picarto:
         await self.bot.wait_until_ready()
         # This is a loop that runs every 30 seconds, checking if anyone has gone online
         while not self.bot.is_closed:
-            picarto = await config.get_content('picarto') or {}
+            picarto = await config.get_content('picarto')
             # Get all online users before looping, so that only one request is needed
             online_users_list = await online_users()
             old_online_users = {m_id: data for m_id, data in picarto.items() if
@@ -63,7 +63,7 @@ class Picarto:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
-                        server_alerts = await config.get_content('server_alerts') or {}
+                        server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
@@ -82,7 +82,7 @@ class Picarto:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
-                        server_alerts = await config.get_content('server_alerts') or {}
+                        server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
@@ -100,7 +100,7 @@ class Picarto:
         """This command can be used to view Picarto stats about a certain member"""
         # If member is not given, base information on the author
         member = member or ctx.message.author
-        picarto_urls = await config.get_content('picarto') or {}
+        picarto_urls = await config.get_content('picarto')
         try:
             member_url = picarto_urls.get(member.id)['picarto_url']
         except:
@@ -156,7 +156,7 @@ class Picarto:
                                    "What would be the point of adding a nonexistant Picarto user? Silly")
                 return
 
-        picarto_urls = await config.get_content('picarto') or {}
+        picarto_urls = await config.get_content('picarto')
         result = picarto_urls.get(ctx.message.author.id)
 
         # If information for this user already exists, override just the url, and not the information
@@ -177,7 +177,7 @@ class Picarto:
     @checks.custom_perms(send_messages=True)
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
-        picarto = await config.get_content('picarto') or {}
+        picarto = await config.get_content('picarto')
         if picarto.get(ctx.message.author.id) is not None:
             del picarto[ctx.message.author.id]
             await config.save_content('picarto', picarto)
@@ -195,7 +195,7 @@ class Picarto:
         member = ctx.message.author
 
         # If this user's picarto URL is not saved, no use in adding this server to the list that doesn't exist
-        picarto = await config.get_content('picarto') or {}
+        picarto = await config.get_content('picarto')
         result = picarto.get(member.id)
         if result is None:
             await self.bot.say(
@@ -213,7 +213,7 @@ class Picarto:
     @checks.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns picarto notifications on"""
-        picarto = await config.get_content('picarto') or {}
+        picarto = await config.get_content('picarto')
         result = picarto.get(ctx.message.author.id)
         # Check if this user has saved their picarto URL first
         if result is None:
@@ -234,7 +234,7 @@ class Picarto:
     @checks.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
         """Turns picarto notifications off"""
-        picarto = await config.get_content('picarto') or {}
+        picarto = await config.get_content('picarto')
         # Check if this user has saved their picarto URL first
         if picarto.get(ctx.message.author.id) is None:
             await self.bot.say(

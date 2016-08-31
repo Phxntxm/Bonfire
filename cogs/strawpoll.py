@@ -36,7 +36,7 @@ class Strawpoll:
         """This command can be used to show a strawpoll setup on this server"""
         # Strawpolls cannot be 'deleted' so to handle whether a poll is running or not on a server
         # Just save the poll in the config file, which can then be removed when it should not be "running" anymore
-        all_polls = await config.get_content('strawpolls') or {}
+        all_polls = await config.get_content('strawpolls')
         server_polls = all_polls.get(ctx.message.server.id) or {}
         if not server_polls:
             await self.bot.say("There are currently no strawpolls running on this server!")
@@ -107,7 +107,7 @@ class Strawpoll:
             return
 
         # Save this strawpoll in the list of running strawpolls for a server
-        all_polls = await config.get_content('strawpolls') or {}
+        all_polls = await config.get_content('strawpolls')
         server_polls = all_polls.get(ctx.message.server.id) or {}
         server_polls[data['id']] = {'author': ctx.message.author.id, 'date': str(pendulum.utcnow()), 'title': title}
         all_polls[ctx.message.server.id] = server_polls
@@ -121,7 +121,7 @@ class Strawpoll:
         """This command can be used to delete one of the existing strawpolls
         If you don't provide an ID it will print the list of polls available"""
 
-        all_polls = await config.get_content('strawpolls') or {}
+        all_polls = await config.get_content('strawpolls')
         server_polls = all_polls.get(ctx.message.server.id) or {}
 
         # Check if a poll_id was provided, if it is then we can continue, if not print the list of current polls

@@ -81,7 +81,9 @@ db_name = global_config.get('db_name', 'Discord_Bot')
 db_cert = global_config.get('db_cert', '')
 # The rethinkdb port
 db_port = global_config.get('db_port', 28015)
-
+# We've set all the options we need to be able to connect
+# so create a dictionary that we can use to unload to connect
+db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
 # The perms object we'll update
 perms = Perms()
 
@@ -89,15 +91,14 @@ async def save_content(table: str, content):
     # We need to make sure we're using asyncio
     r.set_loop_type("asyncio")
     # Just connect to the database
-    opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
-    conn = await r.connect(**opts)
+    conn = await r.connect(**db_opts)
     # We need to make at least one query to ensure the key exists, so attempt to create it as our query
     try:
         await r.table_create(table).run(conn)
     except r.ReqlOpFailedError:
         pass
-    # So now either the table was created already, or it has now been created, we can update the code
-    # Since we're handling everything that is rewritten in the code itself, we just need to delet then insert
+    # So the table already existed, or it has now been created, we can update the data now
+    # Since we're handling everything that is rewritten in the code itself, we just need to delete then insert
     await r.table(table).delete().run(conn)
     await r.table(table).insert(content).run(conn)
 
@@ -111,14 +112,13 @@ async def get_content(key: str):
     # We need to make sure we're using asyncio
     r.set_loop_type("asyncio")
     # Just connect to the database
-    opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
-    conn = await r.connect(**opts)
+    conn = await r.connect(**db_opts)
     # We should only ever get one result, so use it if it exists, otherwise return none
     try:
         cursor = await r.table(key).run(conn)
         items = list(cursor.items)[0]
     except (IndexError, r.ReqlOpFailedError):
-        return None
+        return {}
     # Rethink db stores an internal id per table, delete this and return the rest
     del items['id']
     return items
