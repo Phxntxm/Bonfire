@@ -256,6 +256,16 @@ class Mod:
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(manage_server=True)
+    async def prefix(self, ctx, *, prefix: str):
+        """This command can be used to set a custom prefix per server"""
+        prefixes = config.get_content('prefix')
+        prefixes[ctx.message.server.id] = prefix
+        config.save_content('prefixes', prefixes)
+        await self.bot.say(
+            "I have just updated the prefix for this server; you now need to call commands with `{}`".format(prefix))
+
+    @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(manage_messages=True)
     async def purge(self, ctx, limit: int = 100):
         """This command is used to a purge a number of messages from the channel"""
