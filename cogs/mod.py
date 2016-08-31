@@ -55,7 +55,7 @@ class Mod:
         """Registers this channel as a 'nsfw' channel"""
         nsfw_channels = await config.get_content('nsfw_channels')
         # rethinkdb cannot save a list as a field, so we need a dict with one elemtn to store our list
-        nsfw_channels = nsfw_channels.get('registered')
+        nsfw_channels = nsfw_channels.get('registered') or []
         if ctx.message.channel.id in nsfw_channels:
             await self.bot.say("This channel is already registered as 'nsfw'!")
         else:
@@ -69,7 +69,7 @@ class Mod:
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
         nsfw_channels = await config.get_content('nsfw_channels')
-        nsfw_channels = nsfw_channels.get('registered')
+        nsfw_channels = nsfw_channels.get('registered') or []
         if ctx.message.channel.id not in nsfw_channels:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
         else:
@@ -303,7 +303,7 @@ class Mod:
         """This command can be used to view the current rules on the server"""
         rules = await config.get_content('rules')
         # Same issue as the nsfw channels
-        rules = rules.get('rules')
+        rules = rules.get('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         if server_rules is None or len(server_rules) == 0:
             await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
@@ -318,7 +318,7 @@ class Mod:
         """Adds a rule to this server's rules"""
         # Nothing fancy here, just get the rules, append the rule, and save it
         rules = await config.get_content('rules')
-        rules = rules.get('rules')
+        rules = rules.get('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         server_rules.append(rule)
         rules[ctx.message.server.id] = server_rules
@@ -332,7 +332,7 @@ class Mod:
         Provide a number to delete that rule; if no number is provided
         I'll print your current rules and ask for a number"""
         rules = await config.get_content('rules')
-        rules = rules.get('rules')
+        rules = rules.get('rules') or {}
         server_rules = rules.get(ctx.message.server.id)
         if server_rules is None or len(server_rules) == 0:
             await self.bot.say(
