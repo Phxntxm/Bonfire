@@ -73,6 +73,7 @@ class VoiceState:
             'default_search': 'auto',
             'quiet': True
         }
+        self.volume = 50
 
     def is_playing(self):
         # If our VoiceClient or current VoiceEntry do not exist, then we are not playing a song
@@ -123,6 +124,7 @@ class VoiceState:
                                                                       after=self.toggle_next)
             # Now we can start actually playing the song
             self.current.player.start()
+            self.current.player.volume = self.volume / 100
             # Wait till the Event has been set, before doing our task again
             await self.play_next_song.wait()
 
@@ -309,6 +311,7 @@ class Music:
         if value > 200:
             await self.bot.say("Sorry but the max volume is 200")
             return
+        state.volume = value
         if state.is_playing():
             player = state.player
             player.volume = value / 100
