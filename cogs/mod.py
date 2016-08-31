@@ -259,9 +259,9 @@ class Mod:
     @checks.custom_perms(manage_server=True)
     async def prefix(self, ctx, *, prefix: str):
         """This command can be used to set a custom prefix per server"""
-        prefixes = config.get_content('prefix')
+        prefixes = await config.get_content('prefix')
         prefixes[ctx.message.server.id] = prefix
-        config.save_content('prefixes', prefixes)
+        await config.save_content('prefixes', prefixes)
         await self.bot.say(
             "I have just updated the prefix for this server; you now need to call commands with `{}`".format(prefix))
 
