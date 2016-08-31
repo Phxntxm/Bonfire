@@ -59,7 +59,7 @@ class Owner:
             await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on {} servers".format(
                 len(servers_playing_music)))
         else:
-            config.save_content('restart_server', ctx.message.channel.id)
+            await config.save_content('restart_server', ctx.message.channel.id)
             await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
             python = sys.executable
             os.execl(python, python, *sys.argv)
@@ -69,7 +69,7 @@ class Owner:
     async def restart(self, ctx):
         """Forces the bot to restart"""
         # This command is left in so that we can invoke it from saferestart, or we need a restart no matter what
-        config.save_content('restart_server', ctx.message.channel.id)
+        await config.save_content('restart_server', ctx.message.channel.id)
         await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
         python = sys.executable
         os.execl(python, python, *sys.argv)

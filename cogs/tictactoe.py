@@ -98,10 +98,10 @@ class Board:
         return "```\n{}```".format(_board)
 
 
-def update_records(winner, loser):
+async def update_records(winner, loser):
     # This is the exact same formula as the battling update.
     # The only difference is I use the word "match" instead of "battle"
-    matches = config.get_content('tictactoe') or {}
+    matches = await config.get_content('tictactoe') or {}
 
     winner_stats = matches.get(winner.id) or {}
     winner_rating = winner_stats.get('rating') or 1000
@@ -137,7 +137,7 @@ def update_records(winner, loser):
     matches[winner.id] = winner_stats
     matches[loser.id] = loser_stats
 
-    return config.save_content('tictactoe', matches)
+    await config.save_content('tictactoe', matches)
 
 
 class TicTacToe:
@@ -230,7 +230,7 @@ class TicTacToe:
             await self.bot.say("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name,
                                                                                                     loser.display_name))
             # Handle updating ratings based on the winner and loser
-            update_records(winner, loser)
+            await update_records(winner, loser)
             # This game has ended, delete it so another one can be made
             del self.boards[ctx.message.server.id]
         else:

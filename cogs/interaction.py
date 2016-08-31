@@ -6,10 +6,10 @@ import discord
 import random
 
 
-def update_battle_records(winner, loser):
+async def update_battle_records(winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
-    battles = config.get_content('battle_records') or {}
+    battles = await config.get_content('battle_records') or {}
 
     # Start ratings at 1000 if they have no rating
     winner_stats = battles.get(winner.id) or {}
@@ -52,7 +52,7 @@ def update_battle_records(winner, loser):
     battles[winner.id] = winner_stats
     battles[loser.id] = loser_stats
 
-    return config.save_content('battle_records', battles)
+    return await config.save_content('battle_records', battles)
 
 
 class Interaction:
@@ -136,10 +136,10 @@ class Interaction:
         # All we need to do is change what order the challengers are printed/added as a paramater
         if random.SystemRandom().randint(0, 1):
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
-            update_battle_records(battleP1, battleP2)
+            await update_battle_records(battleP1, battleP2)
         else:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
-            update_battle_records(battleP2, battleP1)
+            await update_battle_records(battleP2, battleP1)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -173,7 +173,7 @@ class Interaction:
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
             return
 
-        boops = config.get_content('boops') or {}
+        boops = await config.get_content('boops') or {}
 
         # This is only used to print the amount of times they've booped someone
         # Set to 1 for the first time someone was booped
@@ -195,7 +195,7 @@ class Interaction:
             booper_boops[boopee.id] = amount
             boops[ctx.message.author.id] = booper_boops
 
-        config.save_content('boops', boops)
+        await config.save_content('boops', boops)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
 

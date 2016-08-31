@@ -42,22 +42,22 @@ async def on_ready():
     print("We have connected")
     # Change the status upon connection to the default status
     await bot.change_status(discord.Game(name=config.default_status, type=0))
-    channel_id = config.get_content('restart_server') or 0
+    channel_id = await config.get_content('restart_server') or 0
 
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
-    config.save_content('battling', {})
+    await config.save_content('battling', {})
     # Check if the bot was restarted, if so send a message to the channel the bot was restarted from
     if channel_id != 0:
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
-        config.save_content('restart_server', 0)
+        await config.save_content('restart_server', 0)
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
 
 
 @bot.event
 async def on_member_join(member):
-    notifications = config.get_content('user_notifications') or {}
+    notifications = await config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on
@@ -70,7 +70,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-    notifications = config.get_content('user_notifications') or {}
+    notifications = await config.get_content('user_notifications') or {}
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on

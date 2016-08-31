@@ -18,7 +18,7 @@ def custom_perms(**perms):
             setattr(default_perms, perm, setting)
 
         try:
-            required_perm_value = config.get_content('custom_permissions')[ctx.message.server.id][
+            required_perm_value = await config.get_content('custom_permissions')[ctx.message.server.id][
                 ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
         except KeyError:

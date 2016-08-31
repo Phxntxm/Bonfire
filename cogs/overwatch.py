@@ -39,7 +39,7 @@ class Overwatch:
         if user is None:
             user = ctx.message.author
 
-        ow_stats = config.get_content('overwatch') or {}
+        ow_stats = await config.get_content('overwatch') or {}
         bt = ow_stats.get(user.id)
 
         if bt is None:
@@ -111,16 +111,16 @@ class Overwatch:
                 return
 
         # Now just save the battletag
-        ow = config.get_content('overwatch') or {}
+        ow = await config.get_content('overwatch') or {}
         ow[ctx.message.author.id] = bt
-        config.save_content('overwatch', ow)
+        await config.save_content('overwatch', ow)
         await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def delete(self, ctx):
         """Removes your battletag from the records"""
-        result = config.get_content('overwatch') or {}
+        result = await config.get_content('overwatch') or {}
         if result.get(ctx.message.author.id):
             del result[ctx.message.author.id]
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
