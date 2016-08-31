@@ -22,7 +22,7 @@ def custom_perms(**perms):
             setattr(default_perms, perm, setting)
 
         try:
-            perm_values = config.perms
+            perm_values = config.cache.get('custom_permissions')
             required_perm_value = perm_values[ctx.message.server.id][ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
         except (KeyError, TypeError):
