@@ -82,13 +82,23 @@ db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'user': db_user, 'pa
 
 possible_keys = ['prefixes', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications',
                  'nsfw_channels', 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
-                 'tictactoe']
+                 'tictactoe', 'bot_data']
 # This will be a dictionary that holds the cache object, based on the key that is saved
 cache = {}
+
+sharded_data = {}
 
 # Populate cache with each object
 for k in possible_keys:
     cache[k] = Cache(k)
+
+""" { 'shard_0': {'server_count': 146,
+                 'member_count': 146}
+    }"""
+def get_bot_data(key):
+    # This method will handle data that we'd like to get across all shards
+    # First get the bot's data from cache or the database
+    bot_data = get_content('bot_data')
 
 
 def command_prefix(bot, message):
@@ -129,6 +139,8 @@ async def get_content(key: str):
     cached = cache.get('key')
     if cached is None:
         value = await _get_content(key)
+        # If we found this object not cached, cache it
+        cache['key'] = value
     else:
         value = cached.values
     return value

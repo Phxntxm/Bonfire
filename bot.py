@@ -45,6 +45,9 @@ async def on_ready():
     channel_id = await config.get_content('restart_server')
     channel_id = channel_id or 0
 
+    if not hasattr(bot, 'uptime'):
+        bot.uptime = pendulum.utcnow()
+
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
     await config.save_content('battling', {})
     # Check if the bot was restarted, if so send a message to the channel the bot was restarted from
@@ -52,8 +55,6 @@ async def on_ready():
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
         await config.save_content('restart_server', 0)
-    if not hasattr(bot, 'uptime'):
-        bot.uptime = pendulum.utcnow()
 
 
 @bot.event
