@@ -71,10 +71,14 @@ db_name = global_config.get('db_name', 'Discord_Bot')
 db_cert = global_config.get('db_cert', '')
 # The rethinkdb port
 db_port = global_config.get('db_port', 28015)
+# The user and password assigned
+db_user = global_config.get('db_user', 'admin')
+db_pass = global_config.get('db_pass', '')
 # We've set all the options we need to be able to connect
 # so create a dictionary that we can use to unload to connect
-# db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
-db_opts = {'host': db_host, 'db': db_name, 'port': db_port}
+# db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl':
+# {'ca_certs': db_cert}, 'user': db_user, 'password': db_pass}
+db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'user': db_user, 'password': db_pass}
 
 possible_keys = ['prefixes', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications',
                  'nsfw_channels', 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
