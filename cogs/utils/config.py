@@ -75,8 +75,9 @@ db_port = global_config.get('db_port', 28015)
 # so create a dictionary that we can use to unload to connect
 db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl': {'ca_certs': db_cert}}
 
-possible_keys = ['prefix', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications', 'nsfw_channels'
-                 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags', 'tictactoe']
+possible_keys = ['prefixes', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications',
+                 'nsfw_channels', 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
+                 'tictactoe']
 # This will be a dictionary that holds the cache object, based on the key that is saved
 cache = {}
 
@@ -90,7 +91,7 @@ def command_prefix(bot, message):
     # So assume it's in cache, or it doesn't exist
     # If the prefix does exist in the database and isn't in our cache; too bad, something has messed up
     # But it is not worth a query for every single message the bot detects, to fix
-    prefix = cache['prefix'].values.get(message.server.id)
+    prefix = cache['prefixes'].values.get(message.server.id)
     return prefix or default_prefix
 
 

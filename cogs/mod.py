@@ -259,7 +259,7 @@ class Mod:
     @checks.custom_perms(manage_server=True)
     async def prefix(self, ctx, *, prefix: str):
         """This command can be used to set a custom prefix per server"""
-        prefixes = await config.get_content('prefix')
+        prefixes = await config.get_content('prefixes')
         prefixes[ctx.message.server.id] = prefix
         await config.save_content('prefixes', prefixes)
         await self.bot.say(
