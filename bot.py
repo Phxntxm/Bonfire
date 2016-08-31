@@ -58,7 +58,6 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     notifications = await config.get_content('user_notifications')
-    notifications = notifications or {}
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on
@@ -72,7 +71,6 @@ async def on_member_join(member):
 @bot.event
 async def on_member_remove(member):
     notifications = await config.get_content('user_notifications')
-    notifications = notifications or {}
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on

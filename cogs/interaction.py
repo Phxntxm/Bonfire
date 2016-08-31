@@ -10,7 +10,6 @@ async def update_battle_records(winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
     battles = await config.get_content('battle_records')
-    battles = battles or {}
 
     # Start ratings at 1000 if they have no rating
     winner_stats = battles.get(winner.id) or {}
@@ -175,7 +174,6 @@ class Interaction:
             return
 
         boops = await config.get_content('boops')
-        boops = boops or {}
 
         # This is only used to print the amount of times they've booped someone
         # Set to 1 for the first time someone was booped
