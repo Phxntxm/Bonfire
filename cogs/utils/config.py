@@ -1,6 +1,7 @@
 import ruamel.yaml as yaml
 import asyncio
 import rethinkdb as r
+import pendulum
 
 loop = asyncio.get_event_loop()
 
@@ -33,10 +34,12 @@ class Cache:
     def __init__(self, key):
         self.key = key
         self.values = {}
+        self.refreshed = pendulum.utcnow()
         loop.create_task(self.update())
 
     async def update(self):
         self.values = await _get_content(self.key)
+        self.refreshed = pendulum.utcnow()
 
     def __repr__(self):
         return self.values
@@ -89,8 +92,8 @@ cache = {}
 sharded_data = {}
 
 # Populate cache with each object
-# for k in possible_keys:
-# cache[k] = Cache(k)
+for k in possible_keys:
+    cache[k] = Cache(k)
 
 
 def command_prefix(bot, message):
@@ -130,18 +133,17 @@ async def save_content(table: str, content):
     await conn.close()
 
 
-async def disabled_get_content(key: str):
+async def get_content(key: str):
     cached = cache.get('key')
-    if cached is None or len(cached) == 0:
+    # We want to check here if the key exists in cache, and it was not created more than an hour ago
+    # We also want to make sure that if what we're getting in cache has content
+    # if not, lets make sure something didn't go awry, by getting from the database instead
+    if cached is None or len(cached.values) == 0 or (pendulum.utcnow() - cached.refreshed).hours >= 1:
         value = await _get_content(key)
         # If we found this object not cached, cache it
         cache['key'] = value
     else:
         value = cached.values
-    return value
-
-async def get_content(key: str):
-    value = await _get_content(key)
     return value
 
 # This is our internal method to get content from the database
