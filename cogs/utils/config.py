@@ -135,7 +135,7 @@ async def get_content(key: str):
     # We want to check here if the key exists in cache, and it was not created more than an hour ago
     # We also want to make sure that if what we're getting in cache has content
     # if not, lets make sure something didn't go awry, by getting from the database instead
-    if cached is None or isinstance(cached, {}) or len(cached.values) == 0 or (
+    if cached is None or isinstance(cached, dict) or len(cached.values) == 0 or (
                 pendulum.utcnow() - cached.refreshed).hours >= 1:
         value = await _get_content(key)
         # If we found this object not cached, cache it
