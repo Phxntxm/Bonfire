@@ -41,9 +41,6 @@ class Cache:
         self.values = await _get_content(self.key)
         self.refreshed = pendulum.utcnow()
 
-    def __repr__(self):
-        return self.values
-
 
 # Default bot's description
 bot_description = global_config.get("description")
@@ -127,10 +124,10 @@ async def save_content(table: str, content):
     # Now that we've saved the new content, we should update our cache
     cached = cache.get(table)
     # While this should theoretically never happen, we just want to make sure
-    if cached is None:
+    if cached is None or len(cached.values) == 0:
         cache[table] = Cache(table)
     else:
-        await cache[table].update()
+        await cached.update()
 
 
 async def get_content(key: str):
@@ -158,6 +155,7 @@ async def _get_content(key: str):
         await conn.close()
         items = list(cursor.items)[0]
     except (IndexError, r.ReqlOpFailedError):
+        await conn.close()
         return {}
     # Rethink db stores an internal id per table, delete this and return the rest
     del items['id']
