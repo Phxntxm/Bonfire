@@ -63,7 +63,7 @@ class Core:
         # The only real use of doing it this way is easier editing if the info in this command is changed
         fmt = {}
 
-        bot_data = config.get_content('bot_data')
+        bot_data = await config.get_content('bot_data')
         total_data = {}
         for shard, values in bot_data.items():
             for key, value in values.items():
