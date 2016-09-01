@@ -155,11 +155,10 @@ async def _get_content(key: str):
     # We should only ever get one result, so use it if it exists, otherwise return none
     try:
         cursor = await r.table(key).run(conn)
+        await conn.close()
         items = list(cursor.items)[0]
     except (IndexError, r.ReqlOpFailedError):
-        await conn.close()
         return {}
     # Rethink db stores an internal id per table, delete this and return the rest
     del items['id']
-    conn.close()
     return items
