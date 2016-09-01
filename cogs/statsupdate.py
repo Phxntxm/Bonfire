@@ -47,27 +47,27 @@ class StatsUpdate:
 
     async def on_server_join(self, server):
         data = await config.get_content('bot_data')
-        shard_data = data.get('shard_{}'.format(config.shard_id))
+        shard_data = data.get('shard_{}'.format(config.shard_id)) or {}
         shard_data['server_count'] = len(self.bot.servers)
-        shard_data['member_count'] = len(list(self.bot.get_all_members()))
+        shard_data['member_count'] = len(set(self.bot.get_all_members()))
         data['shard_{}'.format(config.shard_id)] = shard_data
         await config.save_content('bot_data', data)
         await self.update(shard_data)
 
     async def on_server_leave(self, server):
         data = await config.get_content('bot_data')
-        shard_data = data.get('shard_{}'.format(config.shard_id))
+        shard_data = data.get('shard_{}'.format(config.shard_id)) or {}
         shard_data['server_count'] = len(self.bot.servers)
-        shard_data['member_count'] = len(list(self.bot.get_all_members()))
+        shard_data['member_count'] = len(set(self.bot.get_all_members()))
         data['shard_{}'.format(config.shard_id)] = shard_data
         await config.save_content('bot_data', data)
         await self.update(shard_data)
 
     async def on_ready(self):
         data = await config.get_content('bot_data')
-        shard_data = data.get('shard_{}'.format(config.shard_id))
+        shard_data = data.get('shard_{}'.format(config.shard_id)) or {}
         shard_data['server_count'] = len(self.bot.servers)
-        shard_data['member_count'] = len(list(self.bot.get_all_members()))
+        shard_data['member_count'] = len(set(self.bot.get_all_members()))
         data['shard_{}'.format(config.shard_id)] = shard_data
         await config.save_content('bot_data', data)
         await self.update(shard_data)
