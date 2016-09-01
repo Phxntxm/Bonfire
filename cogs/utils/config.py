@@ -122,6 +122,7 @@ async def save_content(table: str, content):
     # Since we're handling everything that is rewritten in the code itself, we just need to delete then insert
     await r.table(table).delete().run(conn)
     await r.table(table).insert(content).run(conn)
+    await conn.close()
 
     # Now that we've saved the new content, we should update our cache
     cached = cache.get(table)
@@ -130,18 +131,17 @@ async def save_content(table: str, content):
         cache[table] = Cache(table)
     else:
         await cache[table].update()
-    await conn.close()
 
 
 async def get_content(key: str):
-    cached = cache.get('key')
+    cached = cache.get(key)
     # We want to check here if the key exists in cache, and it was not created more than an hour ago
     # We also want to make sure that if what we're getting in cache has content
     # if not, lets make sure something didn't go awry, by getting from the database instead
     if cached is None or len(cached.values) == 0 or (pendulum.utcnow() - cached.refreshed).hours >= 1:
         value = await _get_content(key)
         # If we found this object not cached, cache it
-        cache['key'] = value
+        cache[key] = value
     else:
         value = cached.values
     return value
