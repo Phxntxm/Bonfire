@@ -50,6 +50,8 @@ class StatsUpdate:
         shard_data = data.get('shard_{}'.format(config.shard_id))
         shard_data['server_count'] = len(self.bot.servers)
         shard_data['member_count'] = len(list(self.bot.get_all_members()))
+        data['shard_{}'.format(config.shard_id)] = shard_data
+        await config.save_content('bot_data', data)
         await self.update(shard_data)
 
     async def on_server_leave(self, server):
@@ -57,7 +59,8 @@ class StatsUpdate:
         shard_data = data.get('shard_{}'.format(config.shard_id))
         shard_data['server_count'] = len(self.bot.servers)
         shard_data['member_count'] = len(list(self.bot.get_all_members()))
-        await config.save_content('bot_data')
+        data['shard_{}'.format(config.shard_id)] = shard_data
+        await config.save_content('bot_data', data)
         await self.update(shard_data)
 
     async def on_ready(self):
@@ -65,7 +68,8 @@ class StatsUpdate:
         shard_data = data.get('shard_{}'.format(config.shard_id))
         shard_data['server_count'] = len(self.bot.servers)
         shard_data['member_count'] = len(list(self.bot.get_all_members()))
-        await config.save_content('bot_data')
+        data['shard_{}'.format(config.shard_id)] = shard_data
+        await config.save_content('bot_data', data)
         await self.update(shard_data)
 
 
