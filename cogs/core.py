@@ -63,19 +63,22 @@ class Core:
         # The only real use of doing it this way is easier editing if the info in this command is changed
         fmt = {}
 
-        all_members = list(self.bot.get_all_members())
+        bot_data = config.get_content('bot_data')
+        total_data = {}
+        for shard, values in bot_data.items():
+            for key, value in values.items():
+                if key in total_data:
+                    total_data[key] += value
+                else:
+                    total_data[key] = value
 
         # We can pretty safely assume that the author is going to be in at least one channel with the bot
         # So find the author based on that list
-        authors = []
-        for author_id in config.owner_ids:
-            authors.append(discord.utils.get(all_members, id=author_id).name)
 
         fmt['Official Bot Server'] = config.dev_server
-        fmt['Author'] = ", ".join(authors)
         fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
-        fmt['Total Servers'] = len(self.bot.servers)
-        fmt['Total Members'] = len(all_members)
+        fmt['Total Servers'] = total_data.get('server_count')
+        fmt['Total Members'] = total_data.get('member_count')
         fmt['Description'] = self.bot.description
 
         servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if

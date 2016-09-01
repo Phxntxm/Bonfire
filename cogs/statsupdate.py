@@ -44,12 +44,27 @@ class StatsUpdate:
 
     async def on_server_join(self, server):
         await self.update()
+        data = await config.get_content('bot_data')
+        shard_data = data.get('shard_{}'.format(config.shard_id))
+        shard_data['server_count'] = len(self.bot.servers)
+        shard_data['member_count'] = len(list(self.bot.get_all_members()))
+        await config.save_content('bot_data')
 
     async def on_server_leave(self, server):
         await self.update()
+        data = await config.get_content('bot_data')
+        shard_data = data.get('shard_{}'.format(config.shard_id))
+        shard_data['server_count'] = len(self.bot.servers)
+        shard_data['member_count'] = len(list(self.bot.get_all_members()))
+        await config.save_content('bot_data')
 
     async def on_ready(self):
         await self.update()
+        data = await config.get_content('bot_data')
+        shard_data = data.get('shard_{}'.format(config.shard_id))
+        shard_data['server_count'] = len(self.bot.servers)
+        shard_data['member_count'] = len(list(self.bot.get_all_members()))
+        await config.save_content('bot_data')
 
 
 def setup(bot):

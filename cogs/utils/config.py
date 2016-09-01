@@ -93,12 +93,6 @@ sharded_data = {}
 # cache[k] = Cache(k)
 
 
-def get_bot_data(key):
-    # This method will handle data that we'd like to get across all shards
-    # First get the bot's data from cache or the database
-    bot_data = get_content('bot_data')
-
-
 def command_prefix(bot, message):
     # We do not want to make a query for every message that is sent
     # So assume it's in cache, or it doesn't exist
@@ -138,7 +132,7 @@ async def save_content(table: str, content):
 
 async def disabled_get_content(key: str):
     cached = cache.get('key')
-    if cached is None:
+    if cached is None or len(cached) == 0:
         value = await _get_content(key)
         # If we found this object not cached, cache it
         cache['key'] = value
