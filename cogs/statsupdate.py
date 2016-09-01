@@ -19,18 +19,21 @@ class StatsUpdate:
     def __unload(self):
         config.loop.create_task(self.session.close())
 
-    async def update(self):
-        
+    async def update(self, data):
+        server_count = 0
+        for shard, data in data.items():
+            server_count += data.get('server_count')
+
         carbon_payload = {
             'key': config.carbon_key,
-            'servercount': len(self.bot.servers)
+            'servercount': server_count
         }
 
         async with self.session.post(carbonitex_url, data=carbon_payload) as resp:
             log.info('Carbonitex statistics returned {} for {}'.format(resp.status, carbon_payload))
             
         payload = json.dumps({
-            'server_count': len(self.bot.servers)
+            'server_count': server_count
         })
 
         headers = {
@@ -43,28 +46,27 @@ class StatsUpdate:
             log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
 
     async def on_server_join(self, server):
-        await self.update()
         data = await config.get_content('bot_data')
         shard_data = data.get('shard_{}'.format(config.shard_id))
         shard_data['server_count'] = len(self.bot.servers)
         shard_data['member_count'] = len(list(self.bot.get_all_members()))
-        await config.save_content('bot_data')
+        await self.update(shard_data)
 
     async def on_server_leave(self, server):
-        await self.update()
         data = await config.get_content('bot_data')
         shard_data = data.get('shard_{}'.format(config.shard_id))
         shard_data['server_count'] = len(self.bot.servers)
         shard_data['member_count'] = len(list(self.bot.get_all_members()))
         await config.save_content('bot_data')
+        await self.update(shard_data)
 
     async def on_ready(self):
-        await self.update()
         data = await config.get_content('bot_data')
         shard_data = data.get('shard_{}'.format(config.shard_id))
         shard_data['server_count'] = len(self.bot.servers)
         shard_data['member_count'] = len(list(self.bot.get_all_members()))
         await config.save_content('bot_data')
+        await self.update(shard_data)
 
 
 def setup(bot):
