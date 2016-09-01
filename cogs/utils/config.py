@@ -124,7 +124,7 @@ async def save_content(table: str, content):
     # Now that we've saved the new content, we should update our cache
     cached = cache.get(table)
     # While this should theoretically never happen, we just want to make sure
-    if cached is None or len(cached.values) == 0:
+    if cached is None or isinstance(cached, {}) or len(cached.values) == 0:
         cache[table] = Cache(table)
     else:
         await cached.update()
