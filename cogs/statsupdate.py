@@ -21,8 +21,8 @@ class StatsUpdate:
 
     async def update(self, data):
         server_count = 0
-        for shard, data in data.items():
-            server_count += data.get('server_count')
+        for d in data.values():
+            server_count += d.get('server_count')
 
         carbon_payload = {
             'key': config.carbon_key,
@@ -52,7 +52,7 @@ class StatsUpdate:
         shard_data['member_count'] = len(set(self.bot.get_all_members()))
         data['shard_{}'.format(config.shard_id)] = shard_data
         await config.save_content('bot_data', data)
-        await self.update(shard_data)
+        await self.update(data)
 
     async def on_server_leave(self, server):
         data = await config.get_content('bot_data')
@@ -61,7 +61,7 @@ class StatsUpdate:
         shard_data['member_count'] = len(set(self.bot.get_all_members()))
         data['shard_{}'.format(config.shard_id)] = shard_data
         await config.save_content('bot_data', data)
-        await self.update(shard_data)
+        await self.update(data)
 
     async def on_ready(self):
         data = await config.get_content('bot_data')
@@ -70,7 +70,7 @@ class StatsUpdate:
         shard_data['member_count'] = len(set(self.bot.get_all_members()))
         data['shard_{}'.format(config.shard_id)] = shard_data
         await config.save_content('bot_data', data)
-        await self.update(shard_data)
+        await self.update(data)
 
 
 def setup(bot):
