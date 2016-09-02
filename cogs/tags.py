@@ -29,7 +29,6 @@ class Tags:
         tags = tags['tags']
         # Same generator as the method for tags, other than the second check to get the tag that is provided
         result = [t for t in tags if t['tag'] == tag and t['server_id'] == ctx.message.server.id]
-        print("Tags: {}\nAmount of tags: {}".format(tags, len(tags)))
         if len(result) == 0:
             await self.bot.say('That tag does not exist!')
             return
@@ -64,12 +63,11 @@ class Tags:
                 t['result'] = tag_result
                 await self.bot.say(
                     "I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
-                return
         # If we haven't found one, append a new one to the list
         tags.append({'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result})
-        await config.save_content('tags', tags)
         await self.bot.say(
             "I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+        await config.save_content('tags', {'tags': tags})
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -89,7 +87,7 @@ class Tags:
         # Since there should never be more than one result due to our checks we've made, just remove the first result
         tags.remove(result[0])
         await self.bot.say('I have just removed the tag `{}`'.format(tag))
-        await config.save_content('tags', tags)
+        await config.save_content('tags', {'tags': tags})
 
 
 def setup(bot):
