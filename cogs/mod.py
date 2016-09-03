@@ -224,7 +224,7 @@ class Mod:
         cmd = None
         # This is the same loop as the add command, we need this to get the
         # command object so we can get the qualified_name
-        for part in command[0:len(command) - 1]:
+        for part in command[0:len(command)]:
             try:
                 if cmd is None:
                     cmd = self.bot.commands.get(part)
@@ -244,7 +244,7 @@ class Mod:
             await self.bot.say("You do not have custom permissions setup on this command!")
             return
 
-        del custom_perms[ctx.message.server.id][cmd]
+        del custom_perms[ctx.message.server.id][cmd.qualified_name]
         config.save_content('custom_permissions', custom_perms)
         await self.bot.say("I have just removed the custom permissions for {}!".format(cmd))
 
