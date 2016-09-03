@@ -1,6 +1,10 @@
+import asyncio
+
 from discord.ext import commands
 import discord
 from . import config
+
+loop = asyncio.get_event_loop()
 
 
 def is_owner(ctx):
@@ -18,14 +22,13 @@ def custom_perms(**perms):
             setattr(default_perms, perm, setting)
 
         try:
-            required_perm_value = config.get_content('custom_permissions')[ctx.message.server.id][
-                ctx.command.qualified_name]
+            perm_values = config.cache.get('custom_permissions')
+            required_perm_value = perm_values[ctx.message.server.id][ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
-        except KeyError:
-            required_perm = default_perms
-        except TypeError:
+        except (KeyError, TypeError):
             required_perm = default_perms
         return member_perms >= required_perm
+
     predicate.perms = perms
     return commands.check(predicate)
 

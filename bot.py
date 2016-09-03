@@ -23,42 +23,43 @@ extensions = ['cogs.interaction',
               'cogs.links',
               'cogs.tags',
               'cogs.roles',
-              'cogs.statsupdate',
               'cogs.strawpoll',
               'cogs.tictactoe',
               'cogs.hangman',
-              'cogs.steam']
+              'cogs.statsupdate']
 
-bot = commands.Bot(command_prefix=config.commandPrefix, description=config.botDescription, pm_help=None)
-discord_logger = logging.getLogger('discord')
-discord_logger.setLevel(logging.WARNING)
+opts = {'command_prefix': config.command_prefix,
+        'description': config.bot_description,
+        'pm_help': None,
+        'shard_count': config.shard_count,
+        'shard_id': config.shard_id}
 
-log = logging.getLogger()
-log.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='bonfire.log', encoding='utf-8', mode='a')
-log.addHandler(handler)
+bot = commands.Bot(**opts)
+logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 
 @bot.event
 async def on_ready():
     # Change the status upon connection to the default status
-    await bot.change_status(discord.Game(name=config.defaultStatus, type=0))
-    channel_id = config.get_content('restart_server')
+    await bot.change_status(discord.Game(name=config.default_status, type=0))
+    channel_id = await config.get_content('restart_server')
+    channel_id = channel_id or 0
+
+    if not hasattr(bot, 'uptime'):
+        bot.uptime = pendulum.utcnow()
 
     # Just in case the bot was restarted while someone was battling, clear it so they do not get stuck
-    config.save_content('battling', {})
+    await config.save_content('battling', {})
     # Check if the bot was restarted, if so send a message to the channel the bot was restarted from
     if channel_id != 0:
         destination = discord.utils.find(lambda m: m.id == channel_id, bot.get_all_channels())
         await bot.send_message(destination, "I have just finished restarting!")
-        config.save_content('restart_server', 0)
-    if not hasattr(bot, 'uptime'):
-        bot.uptime = pendulum.utcnow()
+        await config.save_content('restart_server', 0)
 
 
 @bot.event
 async def on_member_join(member):
-    notifications = config.get_content('user_notifications') or {}
+    notifications = await config.get_content('user_notifications')
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on
@@ -71,7 +72,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-    notifications = config.get_content('user_notifications') or {}
+    notifications = await config.get_content('user_notifications')
     server_notifications = notifications.get(member.server.id)
 
     # By default, notifications should be off unless explicitly turned on
@@ -89,6 +90,7 @@ async def on_message(message):
     if message.author.bot:
         return
     await bot.process_commands(message)
+
 
 
 @bot.event
@@ -125,4 +127,4 @@ async def on_command_error(error, ctx):
 if __name__ == '__main__':
     for e in extensions:
         bot.load_extension(e)
-    bot.run(config.botToken)
+    bot.run(config.bot_token)

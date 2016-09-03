@@ -14,7 +14,7 @@ async def channel_online(channel: str):
     with aiohttp.ClientSession() as s:
         async with s.get(url) as r:
             response = await r.text()
-    
+
     # For some reason Twitch's API call is not reliable, sometimes it returns stream as None
     # That is what we're checking specifically, sometimes it doesn't exist in the returned JSON at all
     # Sometimes it returns something that cannot be decoded with JSON
@@ -22,9 +22,7 @@ async def channel_online(channel: str):
     try:
         data = json.loads(response)
         return data['stream'] is not None
-    except KeyError:
-        return False
-    except json.JSONDecodeError:
+    except (KeyError, json.JSONDecodeError):
         return False
 
 
@@ -40,11 +38,12 @@ class Twitch:
         await self.bot.wait_until_ready()
         # Loop through as long as the bot is connected
         while not self.bot.is_closed:
-            twitch = config.get_content('twitch') or {}
+            twitch = await config.get_content('twitch')
             # Online/offline is based on whether they are set to such, in the config file
             # This means they were detected as online/offline before and we check for a change
             online_users = {m_id: data for m_id, data in twitch.items() if data['notifications_on'] and data['live']}
-            offline_users = {m_id: data for m_id, data in twitch.items() if data['notifications_on'] and not data['live']}
+            offline_users = {m_id: data for m_id, data in twitch.items() if
+                             data['notifications_on'] and not data['live']}
             for m_id, r in offline_users.items():
                 # Get their url and their user based on that url
                 url = r['twitch_url']
@@ -54,16 +53,16 @@ class Twitch:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
-                        server_alerts = config.get_content('server_alerts') or {}
+                        server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
                         member = discord.utils.get(server.members, id=m_id)
-                        
+
                         fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
                         await self.bot.send_message(channel, fmt)
                     twitch[m_id]['live'] = 1
-                    config.save_content('twitch', twitch)
+                    await config.save_content('twitch', twitch)
             for m_id, r in online_users.items():
                 # Get their url and their user based on that url
                 url = r['twitch_url']
@@ -73,25 +72,26 @@ class Twitch:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
-                        server_alerts = config.get_content('server_alerts') or {}
+                        server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
                         # Get the member that has just gone live
                         member = discord.utils.get(server.members, id=m_id)
-                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(member.display_name, url)
+                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
+                            member.display_name, url)
                         await self.bot.send_message(channel, fmt)
                     twitch[m_id]['live'] = 0
-                    config.save_content('twitch', twitch)
+                    await config.save_content('twitch', twitch)
             await asyncio.sleep(30)
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def twitch(self, ctx, *, member: discord.Member=None):
+    async def twitch(self, ctx, *, member: discord.Member = None):
         """Use this command to check the twitch info of a user"""
         if member is None:
             member = ctx.message.author
 
-        twitch_channels = config.get_content('twitch') or {}
+        twitch_channels = await config.get_content('twitch')
         result = twitch_channels.get(ctx.message.author.id)
         if result is None:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
@@ -128,7 +128,7 @@ class Twitch:
             url = "https://www.twitch.tv/{}".format(url)
         else:
             url = "https://www.{}".format(url)
-        
+
         # Try to find the channel provided, we'll get a 404 response if it does not exist
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
@@ -137,9 +137,9 @@ class Twitch:
                                        "What would be the point of adding a nonexistant twitch user? Silly")
                     return
 
-        twitch = config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         result = twitch.get(ctx.message.author.id)
-        
+
         # Check to see if this user has already saved a twitch URL
         # If they have, update the URL, otherwise create a new entry
         # Assuming they're not live, and notifications should be on
@@ -148,19 +148,19 @@ class Twitch:
         else:
             twitch[ctx.message.author.id] = {'twitch_url': url, 'servers': [ctx.message.server.id],
                                              'notifications_on': 1, 'live': 0}
-        config.save_content('twitch', twitch)
+        await config.save_content('twitch', twitch)
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
-        twitch = config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         # Make sure the user exists before trying to delete them from the list
         if twitch.get(ctx.message.author.id) is not None:
             # Simply remove this user from the list, and save
             del twitch[ctx.message.author.id]
-            config.save_content('twitch', twitch)
+            await config.save_content('twitch', twitch)
             await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
         else:
             await self.bot.say(
@@ -172,7 +172,7 @@ class Twitch:
     async def notify(self, ctx):
         """This can be used to modify notification settings for your twitch user
         Call this command by itself to add 'this' server as one that will be notified when you on/offline"""
-        twitch = config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         result = twitch.get(ctx.message.author.id)
         # Check if this user is saved at all
         if result is None:
@@ -182,14 +182,14 @@ class Twitch:
         # Otherwise we just need to append the server's ID to the servers list
         else:
             twitch[ctx.message.author.id]['servers'].append(ctx.message.server.id)
-            config.save_content('twitch', twitch)
+            await config.save_content('twitch', twitch)
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on"""
         # Make sure this user is saved before we attempt to modify their information
-        twitch = config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         result = twitch.get(ctx.message.author.id)
         if result is None:
             await self.bot.say(
@@ -202,7 +202,7 @@ class Twitch:
         # Otherwise, turn on notifications
         else:
             twitch[ctx.message.author.id]['notifications_on'] = 1
-            config.save_content('twitch', twitch)
+            await config.save_content('twitch', twitch)
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
 
@@ -211,7 +211,7 @@ class Twitch:
     async def notify_off(self, ctx):
         """Turns twitch notifications off"""
         # This method is exactly the same, except for turning off notifcations instead of on
-        twitch = config.get_content('twitch') or {}
+        twitch = await config.get_content('twitch')
         if twitch.get(ctx.message.author.id) is None:
             await self.bot.say(
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(

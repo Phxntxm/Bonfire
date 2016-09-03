@@ -194,7 +194,8 @@ class Roles:
         await self.bot.say("Sounds fancy! Here is a list of all the permissions available. Please respond with just "
                            "the numbers, seperated by commas, of the permissions you want this role to have.\n"
                            "```\n{}```".format(fmt))
-        # For this we're going to give a couple extra minutes before we timeout, as it might take a bit to figure out which permissions they want
+        # For this we're going to give a couple extra minutes before we timeout
+        # as it might take a bit to figure out which permissions they want
         msg = await self.bot.wait_for_message(timeout=180.0, author=author, channel=channel, check=num_separated_check)
         if msg is None:
             await self.bot.say("You took too long. I'm impatient, don't make me wait")

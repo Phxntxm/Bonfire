@@ -63,19 +63,22 @@ class Core:
         # The only real use of doing it this way is easier editing if the info in this command is changed
         fmt = {}
 
-        all_members = list(self.bot.get_all_members())
+        bot_data = await config.get_content('bot_data')
+        total_data = {}
+        for shard, values in bot_data.items():
+            for key, value in values.items():
+                if key in total_data:
+                    total_data[key] += value
+                else:
+                    total_data[key] = value
 
         # We can pretty safely assume that the author is going to be in at least one channel with the bot
         # So find the author based on that list
-        authors = []
-        for author_id in config.owner_ids:
-            authors.append(discord.utils.get(all_members, id=author_id).name)
 
         fmt['Official Bot Server'] = config.dev_server
-        fmt['Author'] = ", ".join(authors)
         fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
-        fmt['Total Servers'] = len(self.bot.servers)
-        fmt['Total Members'] = len(all_members)
+        fmt['Total Servers'] = total_data.get('server_count')
+        fmt['Total Members'] = total_data.get('member_count')
         fmt['Description'] = self.bot.description
 
         servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
@@ -123,9 +126,9 @@ class Core:
         await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
                            .format(discord.utils.oauth_url(app_info.id, perms)))
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def doggo(self, ctx):
+    async def doggo(self):
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
         # Find a random image based on how many we currently have
@@ -133,9 +136,9 @@ class Core:
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def snek(self, ctx):
+    async def snek(self):
         """Use this to print a random snek image.
         Sneks are o3o"""
         # Find a random image based on how many we currently have
