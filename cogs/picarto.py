@@ -63,6 +63,8 @@ class Picarto:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
+                        if server is None:
+                            continue
                         server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
@@ -82,6 +84,8 @@ class Picarto:
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
+                        if server is None:
+                            continue
                         server_alerts = await config.get_content('server_alerts')
                         channel_id = server_alerts.get(server_id) or server_id
                         channel = self.bot.get_channel(channel_id)
