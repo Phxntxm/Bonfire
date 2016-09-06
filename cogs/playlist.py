@@ -201,7 +201,7 @@ class Music:
         # Check if the channel given was an actual voice channel
         except discord.InvalidArgument:
             await self.bot.say('This is not a voice channel...')
-        # Check if we failed to join a channel, which means we are already in a channel. 
+        # Check if we failed to join a channel, which means we are already in a channel.
         # move_channel needs to be used if we are already in a channel
         except discord.ClientException:
             state = self.get_voice_state(ctx.message.server)
@@ -237,7 +237,9 @@ class Music:
             return False
         # Sometimes the VoiceClient object gets stuck, if it does disconnect and have them try again
         except discord.ClientException:
-            await self.bot.voice_client_in(ctx.message.server).disconnect()
+            voice_channel = self.bot.voice_client_in(ctx.message.server)
+            if voice_channel is not None:
+                await voice_channel.disconnect()
             await self.bot.say("Sorry, the voice client got stuck when trying to join the channel, please try again")
             return False
         # Return true so that we can invoke this, and ensure we succeeded
@@ -342,7 +344,7 @@ class Music:
         server = ctx.message.server
         state = self.get_voice_state(server)
 
-        # Stop playing whatever song is playing. 
+        # Stop playing whatever song is playing.
         if state.is_playing():
             player = state.player
             player.stop()

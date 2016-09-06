@@ -18,9 +18,10 @@ class Core:
     def __init__(self, bot):
         self.bot = bot
 
+
     @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def calendar(self, month: str = None, year: int = None):
+    async def calendar(self, month: str=None, year: int=None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
 
@@ -59,8 +60,9 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def info(self):
         """This command can be used to print out some of my information"""
-        # fmt is a dictionary so we can set the key to it's output, then print both 
-        # The only real use of doing it this way is easier editing if the info in this command is changed
+        # fmt is a dictionary so we can set the key to it's output, then print both
+        # The only real use of doing it this way is easier editing if the info
+        # in this command is changed
         fmt = {}
 
         bot_data = await config.get_content('bot_data')
@@ -83,22 +85,29 @@ class Core:
 
         servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
                                      state.is_playing()])
-        hm_games = len([server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
-        ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
+        hm_games = len(
+            [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
+        ttt_games = len([server_id for server_id,
+                         game in self.bot.get_cog('TicTacToe').boards.items()])
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
             count_battles += len(battles)
 
-        information = "\n".join("{}: {}".format(key, result) for key, result in fmt.items())
+        information = "\n".join("{}: {}".format(key, result)
+                                for key, result in fmt.items())
         information += "\n"
         if servers_playing_music:
-            information += "Playing songs in {} different servers\n".format(servers_playing_music)
+            information += "Playing songs in {} different servers\n".format(
+                servers_playing_music)
         if hm_games:
-            information += "{} different hangman games running\n".format(hm_games)
+            information += "{} different hangman games running\n".format(
+                hm_games)
         if ttt_games:
-            information += "{} different TicTacToe games running\n".format(ttt_games)
+            information += "{} different TicTacToe games running\n".format(
+                ttt_games)
         if count_battles:
-            information += "{} different battles going on\n".format(count_battles)
+            information += "{} different battles going on\n".format(
+                count_battles)
 
         await self.bot.say("```\n{}```".format(information))
 
@@ -132,7 +141,8 @@ class Core:
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
         # Find a random image based on how many we currently have
-        f = glob.glob('images/doggo*')[random.SystemRandom().randint(0, len(glob.glob('images/doggo*')) - 1)]
+        f = glob.glob(
+            'images/doggo*')[random.SystemRandom().randint(0, len(glob.glob('images/doggo*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
@@ -142,7 +152,8 @@ class Core:
         """Use this to print a random snek image.
         Sneks are o3o"""
         # Find a random image based on how many we currently have
-        f = glob.glob('images/snek*')[random.SystemRandom().randint(0, len(glob.glob('images/snek*')) - 1)]
+        f = glob.glob(
+            'images/snek*')[random.SystemRandom().randint(0, len(glob.glob('images/snek*')) - 1)]
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
@@ -152,27 +163,31 @@ class Core:
         """Prints a random riddle"""
         # Use the fortune riddles command because it's funny, I promise
         fortune_command = "/usr/bin/fortune riddles"
-        fortune = subprocess.check_output(fortune_command.split()).decode("utf-8")
+        fortune = subprocess.check_output(
+            fortune_command.split()).decode("utf-8")
         await self.bot.say(fortune)
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def roll(self, ctx, notation: str = "d6"):
+    async def roll(self, ctx, notation: str="d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         # Use regex to get the notation based on what was provided
         try:
-            # We do not want to try to convert the dice, because we want d# to be a valid notation
+            # We do not want to try to convert the dice, because we want d# to
+            # be a valid notation
             dice = re.search("(\d*)d(\d*)", notation).group(1)
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
-        # Check if something like ed3 was provided, or something else entirely was provided
+        # Check if something like ed3 was provided, or something else entirely
+        # was provided
         except (AttributeError, ValueError):
             await self.bot.say("Please provide the die notation in #d#!")
             return
 
         # Dice will be None if d# was provided, assume this means 1d#
         dice = dice or 1
-        # Since we did not try to convert to int before, do it now after we have it set
+        # Since we did not try to convert to int before, do it now after we
+        # have it set
         dice = int(dice)
         if dice > 10:
             await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
@@ -181,7 +196,8 @@ class Core:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
 
-        value_str = ", ".join(str(random.SystemRandom().randint(1, num)) for i in range(0, int(dice)))
+        value_str = ", ".join(str(random.SystemRandom().randint(1, num))
+                              for i in range(0, int(dice)))
 
         if dice == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
