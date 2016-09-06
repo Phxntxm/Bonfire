@@ -111,7 +111,7 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.MissingRequiredArgument):
         await bot.send_message(ctx.message.channel, error)
-    elif not isinstance(error, commands.CommandNotFound):
+    elif not isinstance(error, commands.CommandNotFound) or isinstance(error, discord.Forbidden):
         now = datetime.datetime.now()
         with open("error_log", 'a') as f:
             print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
