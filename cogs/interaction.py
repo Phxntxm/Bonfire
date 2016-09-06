@@ -93,12 +93,21 @@ class Interaction:
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         if ctx.message.author.id == player2.id:
+            bucket = ctx.command._buckets.get_bucket(ctx)
+            bucket.is_rate_limited()
+            bucket._token = bucket.rate
             await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
             return
         if self.bot.user.id == player2.id:
+            bucket = ctx.command._buckets.get_bucket(ctx)
+            bucket.is_rate_limited()
+            bucket._token = bucket.rate
             await self.bot.say("I always win, don't even try it.")
             return
         if self.user_battling(ctx, player2):
+            bucket = ctx.command._buckets.get_bucket(ctx)
+            bucket.is_rate_limited()
+            bucket._token = bucket.rate
             await self.bot.say("You or the person you are trying to battle is already in a battle!")
             return
 
@@ -167,9 +176,15 @@ class Interaction:
         """Boops the mentioned person"""
         booper = ctx.message.author
         if boopee.id == booper.id:
+            bucket = ctx.command._buckets.get_bucket(ctx)
+            bucket.is_rate_limited()
+            bucket._token = bucket.rate
             await self.bot.say("You can't boop yourself! Silly...")
             return
         if boopee.id == self.bot.user.id:
+            bucket = ctx.command._buckets.get_bucket(ctx)
+            bucket.is_rate_limited()
+            bucket._token = bucket.rate
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
             return
 

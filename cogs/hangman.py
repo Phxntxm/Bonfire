@@ -114,6 +114,9 @@ class Hangman:
         """Makes a guess towards the server's currently running hangman game"""
         game = self.games.get(ctx.message.server.id)
         if not game:
+            bucket = ctx.command._buckets.get_bucket(ctx)
+            bucket.is_rate_limited()
+            bucket._token = bucket.rate
             await self.bot.say("There are currently no hangman games running!")
             return
 
@@ -123,6 +126,9 @@ class Hangman:
         # And also add a message for a loss/win
         if len(guess) == 1:
             if guess in game.guessed_letters:
+                bucket = ctx.command._buckets.get_bucket(ctx)
+                bucket.is_rate_limited()
+                bucket._token = bucket.rate
                 await self.bot.say("That letter has already been guessed!")
                 # Return here as we don't want to count this as a failure
                 return
