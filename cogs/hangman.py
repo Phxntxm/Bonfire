@@ -128,7 +128,7 @@ class Hangman:
             if guess in game.guessed_letters:
                 bucket = ctx.command._buckets.get_bucket(ctx)
                 bucket.is_rate_limited()
-                bucket._token = bucket.rate
+                bucket._tokens = bucket.rate
                 await self.bot.say("That letter has already been guessed!")
                 # Return here as we don't want to count this as a failure
                 return
