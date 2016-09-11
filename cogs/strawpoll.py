@@ -109,7 +109,7 @@ class Strawpoll:
         # Save this strawpoll in the list of running strawpolls for a server
         all_polls = await config.get_content('strawpolls')
         server_polls = all_polls.get(ctx.message.server.id) or {}
-        server_polls[data['id']] = {'author': ctx.message.author.id, 'date': str(pendulum.utcnow()), 'title': title}
+        server_polls[str(data['id'])] = {'author': ctx.message.author.id, 'date': str(pendulum.utcnow()), 'title': title}
         all_polls[ctx.message.server.id] = server_polls
         await config.save_content('strawpolls', all_polls)
 

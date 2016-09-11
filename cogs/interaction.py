@@ -93,21 +93,15 @@ class Interaction:
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle"""
         if ctx.message.author.id == player2.id:
-            bucket = ctx.command._buckets.get_bucket(ctx)
-            bucket.is_rate_limited()
-            bucket._tokens = bucket.rate
+            ctx.command.reset_cooldown(ctx)
             await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
             return
         if self.bot.user.id == player2.id:
-            bucket = ctx.command._buckets.get_bucket(ctx)
-            bucket.is_rate_limited()
-            bucket._tokens = bucket.rate
+            ctx.command.reset_cooldown(ctx)
             await self.bot.say("I always win, don't even try it.")
             return
         if self.user_battling(ctx, player2):
-            bucket = ctx.command._buckets.get_bucket(ctx)
-            bucket.is_rate_limited()
-            bucket._tokens = bucket.rate
+            ctx.command.reset_cooldown(ctx)
             await self.bot.say("You or the person you are trying to battle is already in a battle!")
             return
 
@@ -176,39 +170,23 @@ class Interaction:
         """Boops the mentioned person"""
         booper = ctx.message.author
         if boopee.id == booper.id:
-            bucket = ctx.command._buckets.get_bucket(ctx)
-            bucket.is_rate_limited()
-            bucket._tokens = bucket.rate
+            ctx.command.reset_cooldown(ctx)
             await self.bot.say("You can't boop yourself! Silly...")
             return
         if boopee.id == self.bot.user.id:
-            bucket = ctx.command._buckets.get_bucket(ctx)
-            bucket.is_rate_limited()
-            bucket._tokens = bucket.rate
+            ctx.command.reset_cooldown(ctx)
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
             return
 
         boops = await config.get_content('boops')
 
-        # This is only used to print the amount of times they've booped someone
-        # Set to 1 for the first time someone was booped
-        amount = 1
         # Get all the booped stats for the author
-        booper_boops = boops.get(ctx.message.author.id)
-        # If the author does not exist in the dictionary, then he has never booped someone
-        # Create a new dictionary with the amount 
-        if booper_boops is None:
-            boops[ctx.message.author.id] = {boopee.id: 1}
-        # If the booper has never booped the member provided, still add that user
-        # To the dictionary with the amount of 1 to start it off
-        elif booper_boops.get(boopee.id) is None:
-            booper_boops[boopee.id] = 1
-            boops[ctx.message.author.id] = booper_boops
-        # Otherwise increment how many times they've booped that user
-        else:
-            amount = booper_boops.get(boopee.id) + 1
-            booper_boops[boopee.id] = amount
-            boops[ctx.message.author.id] = booper_boops
+        # Set to default as having just booped boopee 0 times, so that we can increment that
+        booper_boops = boops.get(ctx.message.author.id, {boopee.id: 0})
+        # If the booper has never booped the member provided, assume 0 like above so we can increment like normal
+        amount = booper_boops.get(boopee.id, 0) + 1
+        booper_boops[boopee.id] = amount
+        boops[ctx.message.author.id] = booper_boops
 
         await config.save_content('boops', boops)
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
