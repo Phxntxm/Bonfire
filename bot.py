@@ -95,6 +95,8 @@ async def on_message(message):
 
 @bot.event
 async def on_command_error(error, ctx):
+    if isinstance(error, discord.Forbidden) or isinstance(error, commands.CommandNotFound):
+        return
     if isinstance(error, commands.BadArgument):
         fmt = "Please provide a valid argument to pass to the command: {}".format(error)
         await bot.send_message(ctx.message.channel, fmt)
@@ -111,7 +113,7 @@ async def on_command_error(error, ctx):
         await bot.send_message(ctx.message.channel, fmt)
     elif isinstance(error, commands.MissingRequiredArgument):
         await bot.send_message(ctx.message.channel, error)
-    elif not isinstance(error, commands.CommandNotFound) and not isinstance(error, discord.Forbidden):
+    else:
         now = datetime.datetime.now()
         with open("error_log", 'a') as f:
             print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
