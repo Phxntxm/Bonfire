@@ -82,7 +82,8 @@ db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'user': db_user, 'pa
 
 possible_keys = ['prefixes', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications',
                  'nsfw_channels', 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
-                 'tictactoe', 'bot_data']
+                 'tictactoe', 'bot_data', 'command_manage']
+
 # This will be a dictionary that holds the cache object, based on the key that is saved
 cache = {}
 
@@ -124,22 +125,28 @@ async def save_content(table: str, content):
     # Now that we've saved the new content, we should update our cache
     cached = cache.get(table)
     # While this should theoretically never happen, we just want to make sure
-    if cached is None or isinstance(cached, dict) or len(cached.values) == 0:
+    if cached is None:
         cache[table] = Cache(table)
     else:
-        await cached.update()
+        loop.create_task(cached.update())
 
 
 async def get_content(key: str):
     cached = cache.get(key)
     # We want to check here if the key exists in cache, and it was not created more than an hour ago
     # We also want to make sure that if what we're getting in cache has content
-    # if not, lets make sure something didn't go awry, by getting from the database instead
-    if cached is None or isinstance(cached, dict) or len(cached.values) == 0 or (
-                pendulum.utcnow() - cached.refreshed).hours >= 1:
+    # If not, lets make sure something didn't go awry, by getting from the database instead
+
+    # If we found this object not cached, cache it
+    if cached is None:
         value = await _get_content(key)
-        # If we found this object not cached, cache it
-        cache[key] = value
+        cache[key] = Cache(key)
+    # Otherwise, check our timeout and make sure values is invalid
+    # If either of these are the case, we want to updated our values, and get our current data from the database
+    elif len(cached.values) == 0 or (pendulum.utcnow() - cached.refreshed).hours >= 1:
+        value = await _get_content(key)
+        loop.create_task(cached.update())
+    # Otherwise, we have valid content in cache, use it
     else:
         value = cached.values
     return value
@@ -154,8 +161,8 @@ async def _get_content(key: str):
     # We should only ever get one result, so use it if it exists, otherwise return none
     try:
         cursor = await r.table(key).run(conn)
-        await conn.close()
         items = list(cursor.items)[0]
+        await conn.close()
     except (IndexError, r.ReqlOpFailedError):
         await conn.close()
         return {}
