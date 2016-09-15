@@ -224,25 +224,38 @@ class Music:
         # Check if we're in a channel already, if we are then we just need to move channels
         # Otherwse, we need to create an actual voice state
         state = self.get_voice_state(ctx.message.server)
-        try:
-            if state.voice is None:
-                state.voice = await self.bot.join_voice_channel(summoned_channel)
+        # Discord's voice connecting is not very reliable, so we need to implement
+        # a couple different workarounds here in case something goes wrong
+
+        # First check if we have a voice connection saved
+        if state.voice is not None:
+            # Check if our saved voice connection doesn't actually exist
+            if self.bot.voice_client_in(ctx.message.server) is None:
+                await state.voice.disconnect()
+                await self.bot.say("I had an issue connecting to the channel, please try again")
+                return False
+            # If it does exist, then we are in a voice channel already, and need to move to the new channel
             else:
                 await state.voice.move_to(summoned_channel)
-        # Weird timeout error usually caused by the region someone is in
-        except asyncio.TimeoutError:
-            await self.bot.say(
-                "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
-                "You can either try again, or try to change the server's region and see if that fixes the issue")
-            return False
-        # Sometimes the VoiceClient object gets stuck, if it does disconnect and have them try again
-        except discord.ClientException:
+        # Otherwise, our connection is not detected by this cog
+        else:
+            # Check if there is actually a voice connection though
             voice_channel = self.bot.voice_client_in(ctx.message.server)
             if voice_channel is not None:
                 await voice_channel.disconnect()
-            await self.bot.say("Sorry, the voice client got stuck when trying to join the channel, please try again")
-            return False
-        # Return true so that we can invoke this, and ensure we succeeded
+                await self.bot.say("I had an issue connecting to the channel, please try again")
+                return False
+            # In this case, nothing has gone wrong, and we aren't in a channel, so we can join it
+            else:
+                try:
+                    state.voice = await self.bot.join_voice_channel(summoned_channel)
+                # Weird timeout error usually caused by the region someone is in
+                except asyncio.TimeoutError:
+                    await self.bot.say(
+                        "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
+                        "You can either try again, or try to change the server's region and see if that fixes the issue")
+                    return False
+        # Return true if nothing has failed, so that we can invoke this, and ensure we succeeded
         return True
 
     @commands.command(pass_context=True, no_pm=True)
