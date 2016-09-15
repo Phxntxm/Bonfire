@@ -33,7 +33,7 @@ class Tags:
             await self.bot.say('That tag does not exist!')
             return
         # We shouldn't ever have two tags of the same name, so just get the first result
-        await self.bot.say("{}".format(result[0]['result']))
+        await self.bot.say("\u200B{}".format(result[0]['result']))
 
     @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
