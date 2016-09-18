@@ -308,7 +308,10 @@ class Mod:
                     break
         msg = await self.bot.say("{} messages succesfully deleted".format(count))
         await asyncio.sleep(60)
-        await self.bot.delete_message(msg)
+        try:
+            await self.bot.delete_message(msg)
+        except discord.NotFound:
+            pass
 
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
