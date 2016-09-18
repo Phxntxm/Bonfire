@@ -165,6 +165,11 @@ class Mod:
         if permissions.lower() == "none":
             permissions = "send_messages"
 
+        # Check if the permission that was requested is valid
+        if getattr(discord.Permissions, permissions, None) is None:
+            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```\n{}```"
+                               .format(permissions, "\n".join(valid_perms)))
+            return
         # Convert the string to an int value of the permissions object, based on the required permission
         perm_obj = discord.Permissions.none()
         setattr(perm_obj, permissions, True)
@@ -202,11 +207,6 @@ class Mod:
             if "is_owner" == check.__name__ or re.search("has_permissions", str(check)) is not None:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
-
-        if getattr(discord.Permissions, permissions, None) is None:
-            await self.bot.say("{} does not appear to be a valid permission! Valid permissions are: ```\n{}```"
-                               .format(permissions, "\n".join(valid_perms)))
-            return
 
         custom_perms = await config.get_content('custom_permissions')
         server_perms = custom_perms.get(ctx.message.server.id) or {}
@@ -299,8 +299,11 @@ class Mod:
         count = 0
         async for msg in self.bot.logs_from(ctx.message.channel):
             if msg.author in members:
-                await self.bot.delete_message(msg)
-                count += 1
+                try:
+                    await self.bot.delete_message(msg)
+                    count += 1
+                except discord.NotFound:
+                    pass
                 if count >= limit:
                     break
         msg = await self.bot.say("{} messages succesfully deleted".format(count))
