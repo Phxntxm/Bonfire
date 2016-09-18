@@ -95,7 +95,9 @@ async def on_message(message):
 
 @bot.event
 async def on_command_error(error, ctx):
-    if isinstance(error, discord.Forbidden) or isinstance(error, commands.CommandNotFound):
+    if isinstance(error, commands.CommandNotFound):
+        return
+    if error.original and isinstance(error.original, discord.Forbidden):
         return
     if isinstance(error, commands.BadArgument):
         fmt = "Please provide a valid argument to pass to the command: {}".format(error)
