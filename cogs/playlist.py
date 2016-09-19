@@ -308,6 +308,11 @@ class Music:
             fmt = "Sorry, but there's no result with that search time! Try something else"
             await self.bot.send_message(ctx.message.channel, fmt)
             return
+        except ValueError:
+            fmt = "Brackets are my enemy; please remove them or else!\n" \
+                  "(Youtube_dl errors when brackets are used, try running this again without the brackets)"
+            await self.bot.send_message(ctx.message.channel, fmt)
+            return
 
         # Now we can create a VoiceEntry and queue it
         entry = VoiceEntry(ctx.message, player)
