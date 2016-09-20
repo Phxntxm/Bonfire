@@ -49,6 +49,8 @@ default_prefix = global_config.get("command_prefix", "!")
 # The key for bots.discord.pw and carbonitex
 discord_bots_key = global_config.get('discord_bots_key', "")
 carbon_key = global_config.get('carbon_key', "")
+# The client ID for twitch requsets
+twitch_key = global_config.get('twitch_key', "")
 # The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
 

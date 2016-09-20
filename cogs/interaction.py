@@ -112,7 +112,7 @@ class Interaction:
 
         fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
-        config.loop.call_later(180, self.battling_off, ctx)
+        self.bot.loop.call_later(180, self.battling_off, ctx)
         await self.bot.say(fmt.format(ctx.message.author, player2))
 
     @commands.command(pass_context=True, no_pm=True)

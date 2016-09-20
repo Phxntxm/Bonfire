@@ -259,5 +259,5 @@ class Picarto:
 
 def setup(bot):
     p = Picarto(bot)
-    config.loop.create_task(p.check_channels())
+    bot.loop.create_task(p.check_channels())
     bot.add_cog(Picarto(bot))

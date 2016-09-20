@@ -17,7 +17,7 @@ class StatsUpdate:
         self.session = aiohttp.ClientSession()
 
     def __unload(self):
-        config.loop.create_task(self.session.close())
+        self.bot.loop.create_task(self.session.close())
 
     async def update(self, data):
         server_count = 0
