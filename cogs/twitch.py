@@ -8,24 +8,6 @@ import json
 import re
 
 
-async def channel_online(channel: str):
-    # Check a specific channel's data, and get the response in text format
-    url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
-    with aiohttp.ClientSession() as s:
-        async with s.get(url) as r:
-            response = await r.text()
-
-    # For some reason Twitch's API call is not reliable, sometimes it returns stream as None
-    # That is what we're checking specifically, sometimes it doesn't exist in the returned JSON at all
-    # Sometimes it returns something that cannot be decoded with JSON
-    # In either error case, just assume they're offline, the next check will most likely work
-    try:
-        data = json.loads(response)
-        return data['stream'] is not None
-    except (KeyError, json.JSONDecodeError):
-        return False
-
-
 class Twitch:
     """Class for some twitch integration
     You can add or remove your twitch stream for your user
@@ -33,6 +15,25 @@ class Twitch:
 
     def __init__(self, bot):
         self.bot = bot
+        self.headers = {"User-Agent": "Bonfire/1.0.0",
+                        "Client-ID": config.twitch_key}
+
+    async def channel_online(self, channel: str):
+        # Check a specific channel's data, and get the response in text format
+        url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
+        with aiohttp.ClientSession() as s:
+            async with s.get(url, headers=self.headers) as r:
+                response = await r.text()
+        print(response)
+        # For some reason Twitch's API call is not reliable, sometimes it returns stream as None
+        # That is what we're checking specifically, sometimes it doesn't exist in the returned JSON at all
+        # Sometimes it returns something that cannot be decoded with JSON
+        # In either error case, just assume they're offline, the next check will most likely work
+        try:
+            data = json.loads(response)
+            return data['stream'] is not None
+        except (KeyError, json.JSONDecodeError):
+            return False
 
     async def check_channels(self):
         await self.bot.wait_until_ready()
@@ -49,7 +50,7 @@ class Twitch:
                 url = r['twitch_url']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
                 # Check if they are online right now
-                if await channel_online(user):
+                if await self.channel_online(user):
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
@@ -70,7 +71,7 @@ class Twitch:
                 url = r['twitch_url']
                 user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
                 # Check if they are online right now
-                if not await channel_online(user):
+                if not await self.channel_online(user):
                     for server_id in r['servers']:
                         # Get the channel to send the message to, based on the saved alert's channel
                         server = self.bot.get_server(server_id)
@@ -104,9 +105,8 @@ class Twitch:
         url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
         with aiohttp.ClientSession() as s:
-            async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user)) as r:
-                response = await r.text()
-        data = json.loads(response)
+            async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user), headers=self.headers) as r:
+                data = await r.json()
 
         fmt = "Username: {}".format(data['display_name'])
         fmt += "\nStatus: {}".format(data['status'])
@@ -135,7 +135,7 @@ class Twitch:
 
         # Try to find the channel provided, we'll get a 404 response if it does not exist
         with aiohttp.ClientSession() as s:
-            async with s.get(url) as r:
+            async with s.get(url, headers=self.headers) as r:
                 if not r.status == 200:
                     await self.bot.say("That twitch user does not exist! "
                                        "What would be the point of adding a nonexistant twitch user? Silly")
@@ -233,5 +233,5 @@ class Twitch:
 
 def setup(bot):
     t = Twitch(bot)
-    config.loop.create_task(t.check_channels())
+    bot.loop.create_task(t.check_channels())
     bot.add_cog(Twitch(bot))
