@@ -166,7 +166,7 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
-    async def boop(self, ctx, boopee: discord.Member):
+    async def boop(self, ctx, boopee: discord.Member=None):
         """Boops the mentioned person"""
         booper = ctx.message.author
         if boopee.id == booper.id:
@@ -176,6 +176,9 @@ class Interaction:
         if boopee.id == self.bot.user.id:
             ctx.command.reset_cooldown(ctx)
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
+            return
+        if boopee is None:
+            await self.bot.say("You try to boop the air, the air boops back. Be afraid....")
             return
 
         boops = await config.get_content('boops')
