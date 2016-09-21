@@ -15,12 +15,13 @@ class Twitch:
 
     def __init__(self, bot):
         self.bot = bot
+        self.key = config.twitch_key
         self.headers = {"User-Agent": "Bonfire/1.0.0",
-                        "Client-ID": config.twitch_key}
+                        "Client-ID": self.key}
 
     async def channel_online(self, channel: str):
         # Check a specific channel's data, and get the response in text format
-        url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
+        url = "https://api.twitch.tv/kraken/streams/{}?client_id={}".format(channel, self.key)
         with aiohttp.ClientSession() as s:
             async with s.get(url, headers=self.headers) as r:
                 response = await r.text()
@@ -105,7 +106,7 @@ class Twitch:
         url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
         with aiohttp.ClientSession() as s:
-            async with s.get("https://api.twitch.tv/kraken/channels/{}".format(user), headers=self.headers) as r:
+            async with s.get("https://api.twitch.tv/kraken/channels/{}?client_id={}".format(user, self.key)) as r:
                 data = await r.json()
 
         fmt = "Username: {}".format(data['display_name'])
@@ -129,13 +130,13 @@ class Twitch:
         try:
             url = re.search("((?<=://)?twitch.tv/)+(.*)", url).group(0)
         except AttributeError:
-            url = "https://www.twitch.tv/{}".format(url)
+            url = "https://www.twitch.tv/{}?client_id={}".format(url, self.key)
         else:
             url = "https://www.{}".format(url)
 
         # Try to find the channel provided, we'll get a 404 response if it does not exist
         with aiohttp.ClientSession() as s:
-            async with s.get(url, headers=self.headers) as r:
+            async with s.get(url) as r:
                 if not r.status == 200:
                     await self.bot.say("That twitch user does not exist! "
                                        "What would be the point of adding a nonexistant twitch user? Silly")
