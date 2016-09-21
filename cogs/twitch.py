@@ -23,7 +23,7 @@ class Twitch:
         # Check a specific channel's data, and get the response in text format
         url = "https://api.twitch.tv/kraken/streams/{}?client_id={}".format(channel, self.key)
         with aiohttp.ClientSession() as s:
-            async with s.get(url, headers=self.headers) as r:
+            async with s.get(url) as r:
                 response = await r.text()
         print(response)
         # For some reason Twitch's API call is not reliable, sometimes it returns stream as None
@@ -108,6 +108,8 @@ class Twitch:
         with aiohttp.ClientSession() as s:
             async with s.get("https://api.twitch.tv/kraken/channels/{}?client_id={}".format(user, self.key)) as r:
                 data = await r.json()
+        with open("twitch_testing", 'w') as f:
+            json.dump(data, f)
 
         fmt = "Username: {}".format(data['display_name'])
         fmt += "\nStatus: {}".format(data['status'])
