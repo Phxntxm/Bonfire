@@ -105,11 +105,13 @@ class Twitch:
 
         url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
+        twitch_url = "https://api.twitch.tv/kraken/channels/{}?client_id={}".format(user, self.key)
         with aiohttp.ClientSession() as s:
-            async with s.get("https://api.twitch.tv/kraken/channels/{}?client_id={}".format(user, self.key)) as r:
+            async with s.get(twitch_url) as r:
                 data = await r.json()
         with open("twitch_testing", 'w') as f:
             json.dump(data, f)
+            print("URL was: {}".format(twitch_url), file=f)
 
         fmt = "Username: {}".format(data['display_name'])
         fmt += "\nStatus: {}".format(data['status'])
