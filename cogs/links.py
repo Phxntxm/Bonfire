@@ -104,7 +104,7 @@ class Links:
         else:
             # If no search term was provided, search for a random image
             async with self.session.get('https://derpibooru.org/images/random') as r:
-                # .url will be the URl we end up at, not the one requested. 
+                # .url will be the URl we end up at, not the one requested.
                 # https://derpibooru.org/images/random redirects to a random image, so this is exactly what we want
                 image_link = r.url
         await self.bot.say(image_link)
@@ -138,16 +138,16 @@ class Links:
         async with self.session.get(url, headers=self.headers) as r:
             data = await r.json()
 
-        # Check if there were any results, if there are find a random image based on the length of results
-        if len(data) == 0:
+        # Try to find an image from the list. If there were no results, we're going to attempt to find
+        # A number between (0,-1) and receive an error.
+        # The response should be in a list format, so we'll end up getting a key error if the response was in json
+        # i.e. it responded with a 404/504/etc.
+        try:
+                rand_image = data[random.SystemRandom().randint(0, len(data) - 1)]['file_url']
+                await self.bot.say(rand_image)
+        except (ValueError, KeyError):
             await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
             return
-        else:
-            if len(data) == 1:
-                rand_image = data[0]['file_url']
-            else:
-                rand_image = data[random.SystemRandom().randint(0, len(data) - 1)]['file_url']
-        await self.bot.say(rand_image)
 
 
 def setup(bot):
