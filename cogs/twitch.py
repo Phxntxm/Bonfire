@@ -98,7 +98,7 @@ class Twitch:
             member = ctx.message.author
 
         twitch_channels = await config.get_content('twitch')
-        result = twitch_channels.get(ctx.message.author.id)
+        result = twitch_channels.get(member.id)
         if result is None:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
             return
