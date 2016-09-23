@@ -97,8 +97,12 @@ async def on_message(message):
 async def on_command_error(error, ctx):
     if isinstance(error, commands.CommandNotFound):
         return
-    if error.original and isinstance(error.original, discord.Forbidden):
-        return
+    try:
+        if isinstance(error.original, discord.Forbidden):
+            return
+    except AttributeError:
+        pass
+
     if isinstance(error, commands.BadArgument):
         fmt = "Please provide a valid argument to pass to the command: {}".format(error)
         await bot.send_message(ctx.message.channel, fmt)
