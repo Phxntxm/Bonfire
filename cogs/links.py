@@ -146,7 +146,7 @@ class Links:
                 rand_image = data[random.SystemRandom().randint(0, len(data) - 1)]['file_url']
                 await self.bot.say(rand_image)
         except (ValueError, KeyError):
-            await self.bot.say("No results with that image {}".format(ctx.message.author.mention))
+            await self.bot.say("No results with that tag {}".format(ctx.message.author.mention))
             return
 
 
