@@ -58,7 +58,7 @@ class Overwatch:
             output_data = {k.title().replace("_", " "): r for k, r in data['game_stats'].items() if k in check_g_stats}
             for k, r in data['overall_stats'].items():
                 if k in check_o_stats:
-                    output_data[k] = r
+                    output_data[k.title().replace("_", " ")] = r
         else:
             # If there was a hero provided, search for a user's data on that hero
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
@@ -81,7 +81,7 @@ class Overwatch:
                            k in check_g_stats}
 
             for k, r in data['hero_stats'].items():
-                output_data[k] = r
+                output_data[k.title().replace("_", " ")] = r
             # Someone was complaining there was no KDR provided, so I made one myself and added that to the list
             if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
                 output_data["Kill Death Ratio"] = "{0:.2f}".format(
