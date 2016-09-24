@@ -25,7 +25,7 @@ class Twitch:
         with aiohttp.ClientSession() as s:
             async with s.get(url) as r:
                 response = await r.text()
-        print(response)
+
         # For some reason Twitch's API call is not reliable, sometimes it returns stream as None
         # That is what we're checking specifically, sometimes it doesn't exist in the returned JSON at all
         # Sometimes it returns something that cannot be decoded with JSON
@@ -111,7 +111,6 @@ class Twitch:
                 data = await r.json()
         with open("twitch_testing", 'w') as f:
             json.dump(data, f)
-            print("URL was: {}".format(twitch_url), file=f)
 
         fmt = "Username: {}".format(data['display_name'])
         fmt += "\nStatus: {}".format(data['status'])
