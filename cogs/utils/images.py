@@ -21,6 +21,10 @@ async def create_banner(member, image_title, data):
         member -> The user to display stats about
         image_title -> The title that will displayed before the stats
         data -> A dictionary that will be displayed, in the format 'Key: Value' like normal dictionaries"""
+    # First ensure the paths we need are created
+    os.makedirs(base_path, exist_ok=True)
+    os.makedirs(tmp_path, exist_ok=True)
+
     # Open up the avatar, save it as a temporary file
     avatar_url = member.avatar_url
     avatar_path = "{}/avatar_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
