@@ -12,3 +12,4 @@ images/*
 .ftpquota
 bonfire.log
 *.sublime-*
+cert.pem
