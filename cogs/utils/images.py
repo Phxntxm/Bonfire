@@ -36,8 +36,8 @@ async def create_banner(member, image_title, data):
 
     # Parse the data we need to create our image
     username = (member.display_name[:23] + '...') if len(member.display_name) > 23 else member.display_name
-    result_keys = data.keys()
-    result_values = data.values()
+    list(result_keys = data.keys())
+    list(result_values = data.values())
     lines_of_text = len(result_keys)
     output_file = "{}/banner_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
 
