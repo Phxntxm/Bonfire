@@ -91,6 +91,41 @@ async def on_message(message):
         return
     await bot.process_commands(message)
 
+@bot.event
+async def on_command_completion(command, ctx):
+    # There's no reason to continue waiting for this to complete, so lets immediately lanch this in a new future
+    bot.loop.create_task(process_command(command, ctx))
+
+async def process_command(command, ctx):
+    # This try catch is only here while this is first being implemented
+    # It will be removed once I ensure this is working correctly
+    try:
+        author = ctx.message.author
+        server = ctx.message.server
+
+        total_command_usage = await config.get_content('command_usage')
+        command_usage = total_command_usage.get(command.qualified_name, {})
+        # Add one to the total usage for this command, basing it off 0 to start with (obviously)
+        total_usage = command_usage.get('total_usage', 0) + 1
+        command_usage['total_usage'] = total_usage
+
+        # Add one to the author's usage for this command
+        total_member_usage = command_usage.get('member_usage',{})
+        member_usage = total_member_usage.get(author.id, 0) + 1
+        command_usage['member_usage'] = member_usage
+
+        # Add one to the server's usage for this command
+        total_server_usage = command_usage.get('server_usage', {})
+        server_usage = total_server_usage.get(server.id, 0) + 1
+        command_usage['server_usage'] = server_usage
+
+        # Save all the changes
+        total_command_usage[command.qualified_name] = command_usage
+        await config.save_content('command_usage', total_command_usage)
+    except Exception as error:
+        with open("error_log", 'a') as f:
+            traceback.print_tb(error.__traceback__, file=f)
+            print('{0.__class__.__name__}: {0}'.format(error), file=f)
 
 
 @bot.event
