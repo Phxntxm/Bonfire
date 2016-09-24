@@ -10,7 +10,7 @@ import aiohttp
 base_url = "https://api.owapi.net/api/v2/u/"
 # This is a list of the possible things that we may want to retrieve from the stats
 # The API returns something if it exists, and leaves it out of the data returned entirely if it does not
-# For example if you have not win with a character, wins will not exist in the list
+# For example if you have not won with a character, wins will not exist in the list
 # This sets an easy way to use list comprehension later, to print all possible things we want, if it exists
 check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
                  'cards', 'damage_done', 'healing_done', 'multikills']
@@ -55,21 +55,10 @@ class Overwatch:
             async with self.session.get(base_url + "{}/stats/general".format(bt), headers=self.headers) as r:
                 data = await r.json()
 
-            output_data = {k: r for k, r in data['game_stats'].items() if k in check_g_stats}
+            output_data = {k.title().replace("_", " "): r for k, r in data['game_stats'].items() if k in check_g_stats}
             for k, r in data['overall_stats'].items():
                 if k in check_o_stats:
                     output_data[k] = r
-            banner = await images.create_banner(user, "Overwatch", output_data)
-            await self.bot.upload(banner)
-
-            # Here is our list comprehension to get what kind of data we want.
-            # fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
-            # fmt += "\n"
-            # fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
-            # title and replace are used to format things nicely
-            # while not having to have information for every piece of data
-            # await self.bot.say(
-            #    "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
             # If there was a hero provided, search for a user's data on that hero
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
@@ -88,16 +77,22 @@ class Overwatch:
                     return
 
             # Same list comprehension as before
-            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['general_stats'].items() if i in check_g_stats)
+            output_data = {k.title().replace("_", " "): r for k, r in data['general_stats'].items() if
+                           k in check_g_stats}
+
+            for k, r in data['hero_stats'].items():
+                output_data[k] = r
             # Someone was complaining there was no KDR provided, so I made one myself and added that to the list
             if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
-                fmt += "\nKill Death Ratio: {0:.2f}".format(
+                output_data["Kill Death Ratio"] = "{0:.2f}".format(
                     data['general_stats'].get('eliminations') / data['general_stats'].get('deaths'))
-            fmt += "\n"
-            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['hero_stats'].items())
-            # Same formatting as above
-            await self.bot.say("Overwatch stats for {} using the hero {}: ```py\n{}``` "
-                               .format(user.name, hero.title(), fmt.title().replace("_", " ")))
+
+        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+            banner = await images.create_banner(user, "Overwatch", output_data)
+            await self.bot.upload(banner)
+        else:
+            fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data)
+            await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
     @ow.command(pass_context=True, name="add", no_pm=True)
     @checks.custom_perms(send_messages=True)
