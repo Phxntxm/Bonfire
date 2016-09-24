@@ -1,5 +1,7 @@
 from .utils import config
 from .utils import checks
+from .utils import images
+
 from discord.ext import commands
 import discord
 
@@ -53,14 +55,21 @@ class Overwatch:
             async with self.session.get(base_url + "{}/stats/general".format(bt), headers=self.headers) as r:
                 data = await r.json()
 
+            output_data = {k: r for k, r in data['game_stats'].items() if k in check_g_stats}
+            for k, r in data['overall_stats'].items():
+                if k in check_o_stats:
+                    output_data[k] = r
+            banner = await images.create_banner(user, "Overwatch", output_data)
+            await self.bot.upload(banner)
+
             # Here is our list comprehension to get what kind of data we want.
-            fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
-            fmt += "\n"
-            fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
+            # fmt = "\n".join("{}: {}".format(i, r) for i, r in data['game_stats'].items() if i in check_g_stats)
+            # fmt += "\n"
+            # fmt += "\n".join("{}: {}".format(i, r) for i, r in data['overall_stats'].items() if i in check_o_stats)
             # title and replace are used to format things nicely
             # while not having to have information for every piece of data
-            await self.bot.say(
-                "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
+            # await self.bot.say(
+            #    "Overwatch stats for {}: ```py\n{}```".format(user.name, fmt.title().replace("_", " ")))
         else:
             # If there was a hero provided, search for a user's data on that hero
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
