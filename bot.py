@@ -91,10 +91,12 @@ async def on_message(message):
         return
     await bot.process_commands(message)
 
+
 @bot.event
 async def on_command_completion(command, ctx):
     # There's no reason to continue waiting for this to complete, so lets immediately lanch this in a new future
     bot.loop.create_task(process_command(command, ctx))
+
 
 async def process_command(command, ctx):
     # This try catch is only here while this is first being implemented
@@ -110,14 +112,16 @@ async def process_command(command, ctx):
         command_usage['total_usage'] = total_usage
 
         # Add one to the author's usage for this command
-        total_member_usage = command_usage.get('member_usage',{})
+        total_member_usage = command_usage.get('member_usage', {})
         member_usage = total_member_usage.get(author.id, 0) + 1
-        command_usage['member_usage'] = member_usage
+        total_member_usage[author.id] = member_usage
+        command_usage['member_usage'] = total_member_usage
 
         # Add one to the server's usage for this command
         total_server_usage = command_usage.get('server_usage', {})
         server_usage = total_server_usage.get(server.id, 0) + 1
-        command_usage['server_usage'] = server_usage
+        total_server_usage[server.id] = server_usage
+        command_usage['server_usage'] = total_server_usage
 
         # Save all the changes
         total_command_usage[command.qualified_name] = command_usage
