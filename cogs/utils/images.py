@@ -10,7 +10,6 @@ whitneyMedium = "/usr/share/fonts/whitney-medium.ttf"
 whitneyBold = "/usr/share/fonts/whitney-bold.ttf"
 header_height = 125
 base_height = 345
-offset = 125
 banner_background = "{}/bannerTop2.png".format(base_path)
 banner_bot = "{}/bannerBot.png".format(base_path)
 
@@ -24,6 +23,7 @@ async def create_banner(member, image_title, data):
     # First ensure the paths we need are created
     os.makedirs(base_path, exist_ok=True)
     os.makedirs(tmp_path, exist_ok=True)
+    offset = 125
 
     # Open up the avatar, save it as a temporary file
     avatar_url = member.avatar_url
