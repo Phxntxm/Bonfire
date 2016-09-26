@@ -107,67 +107,53 @@ def command_prefix(bot, message):
     except KeyError:
         return default_prefix
 
+async def add_content(table, filter, content):
+        r.set_loop_type("asyncio")
+        conn = await r.connect(**db_opts)
+        # First we need to make sure that this entry doesn't exist
+        # For all rethinkDB cares, multiple entries can exist with the same content
+        # For our purposes however, we do not want this
+        try:
+                cursor = await r.table(table).filter(filter).run(conn)
+                if len(list(cursor)) > 0:
+                        await conn.close()
+                        return False
+                else:
+                        await r.table(table).insert(content).run(conn)
+                        await conn.close()
+                        return True
+        except r.ReqlOpFailedError:
+                # This means the table does not exist
+                await r.create_table(table).run(conn)
+                await r.table(table).filter(filter).insert(content).run(conn)
+                await con.close()
+                return False
 
-async def save_content(table: str, content):
-    # We need to make sure we're using asyncio
-    r.set_loop_type("asyncio")
-    # Just connect to the database
-    conn = await r.connect(**db_opts)
-    # We need to make at least one query to ensure the key exists, so attempt to create it as our query
-    try:
-        await r.table_create(table).run(conn)
-    except r.ReqlOpFailedError:
-        pass
-    # So the table already existed, or it has now been created, we can update the data now
-    # Since we're handling everything that is rewritten in the code itself, we just need to delete then insert
-    await r.table(table).delete().run(conn)
-    await r.table(table).insert(content).run(conn)
-    await conn.close()
-
-    # Now that we've saved the new content, we should update our cache
-    cached = cache.get(table)
-    # While this should theoretically never happen, we just want to make sure
-    if cached is None:
-        cache[table] = Cache(table)
-    else:
-        loop.create_task(cached.update())
-
-
-async def get_content(key: str):
-    cached = cache.get(key)
-    # We want to check here if the key exists in cache, and it was not created more than an hour ago
-    # We also want to make sure that if what we're getting in cache has content
-    # If not, lets make sure something didn't go awry, by getting from the database instead
-
-    # If we found this object not cached, cache it
-    if cached is None:
-        value = await _get_content(key)
-        cache[key] = Cache(key)
-    # Otherwise, check our timeout and make sure values is invalid
-    # If either of these are the case, we want to updated our values, and get our current data from the database
-    elif len(cached.values) == 0 or (pendulum.utcnow() - cached.refreshed).hours >= 1:
-        value = await _get_content(key)
-        loop.create_task(cached.update())
-    # Otherwise, we have valid content in cache, use it
-    else:
-        value = cached.values
-    return value
-
-
-# This is our internal method to get content from the database
-async def _get_content(key: str):
-    # We need to make sure we're using asyncio
-    r.set_loop_type("asyncio")
-    # Just connect to the database
-    conn = await r.connect(**db_opts)
-    # We should only ever get one result, so use it if it exists, otherwise return none
-    try:
-        cursor = await r.table(key).run(conn)
-        items = list(cursor.items)[0]
+async def update_content(table, filter, content):
+        r.set_loop_type("asyncio")
+        conn = await r.connect(**db_opts)
+        # This method is only for updating content, so if we find that it doesn't exist, just return false
+        try:
+                # Update based on the content and filter passed to us
+                # rethinkdb allows you to do many many things inside of update
+                # This is why we're accepting a variable and using it, whatever it may be, as the query
+                # Will take some testing, but I might not even need the add_content method above
+                await r.table(table).filter(filter).update(content).run(conn)
+        except r.ReqlOpFailedError:
+                await conn.close()
+                return False
         await conn.close()
-    except (IndexError, r.ReqlOpFailedError):
+        return True
+
+async def get_content(key: str, filter):
+        r.set_loop_type("asyncio")
+        conn = await r.connect(**db_opts)
+        try:
+                cursor = await r.table(key).filter(filter).run(conn)
+                content = list(cursor.items)[0]
+                del content['id']
+        except (IndexError, r.ReqlOpFailedError):
+                content = None
         await conn.close()
-        return {}
-    # Rethink db stores an internal id per table, delete this and return the rest
-    del items['id']
-    return items
+        return content
+
