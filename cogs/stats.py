@@ -3,12 +3,43 @@ from .utils import config
 from .utils import checks
 import discord
 
+def find_command(command):
+    cmd = None
+
+        for part in command.split():
+            try:
+                if cmd is None:
+                    cmd = self.bot.commands.get(part)
+                else:
+                    cmd = cmd.commands.get(part)
+            except AttributeError:
+                cmd = None
+                break
+
+        if cmd is None:
+            await self.bot.say("That is not a valid command!")
+            return
 
 class Stats:
     """Leaderboard/stats related commands"""
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.group(no_pm=True)
+    @checks.custom_perms(send_messages=True)
+    async def command(self):
+        pass
+
+    @command.command(no_pm=True, name = "stats")
+    @checks.custom_perms(send_messages=True)
+    async def command_stats(self, ctx, *, command):
+        """This command can be used to view some usage stats about a specific command"""
+        cmd = find_command(command)
+        if cmd is None:
+            await self.bot.say("`{}` is not a valid command".format(command))
+
+        total_command_stats = await config.get('command_usage')
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -18,7 +49,7 @@ class Stats:
         if not boops.get(ctx.message.author.id):
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
-        
+
         # First get a list of the ID's of all members in this server, for use in list comprehension
         server_member_ids = [member.id for member in ctx.message.server.members]
         # Then get a sorted list, based on the amount of times they've booped the member
@@ -26,7 +57,7 @@ class Stats:
         sorted_boops = sorted(boops.get(ctx.message.author.id).items(), key=lambda x: x[1], reverse=True)
         # Then override the same list, checking if the member they've booped is in this server
         sorted_boops = [x for x in sorted_boops if x[0] in server_member_ids]
-        
+
         # Since this is sorted, we just need to get the following information on the first user in the list
         most_boops = sorted_boops[0][1]
         most_id = sorted_boops[0][0]
@@ -43,7 +74,7 @@ class Stats:
         if booped_members is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
-        
+
         # Same concept as the mostboops method
         server_member_ids = [member.id for member in ctx.message.server.members]
         booped_members = {m_id: amt for m_id, amt in booped_members.items() if m_id in server_member_ids}
@@ -59,7 +90,7 @@ class Stats:
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record"""
         battles = await config.get_content('battle_records')
-        
+
         # Same concept as mostboops
         server_member_ids = [member.id for member in ctx.message.server.members]
         server_members = {member_id: stats for member_id, stats in battles.items() if member_id in server_member_ids}
@@ -95,7 +126,7 @@ class Stats:
                           member_id in server_member_ids}
         sorted_server_members = sorted(server_members.items(), key=lambda x: x[1]['rating'], reverse=True)
         sorted_all_members = sorted(all_members.items(), key=lambda x: x[1]['rating'], reverse=True)
-        
+
         # Enumurate the list so that we can go through, find the user's place in the list
         # and get just that for the rank
         server_rank = [i for i, x in enumerate(sorted_server_members) if x[0] == member.id][0] + 1
