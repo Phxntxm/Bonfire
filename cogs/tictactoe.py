@@ -98,48 +98,6 @@ class Board:
         return "```\n{}```".format(_board)
 
 
-async def update_records(winner, loser):
-    # This is the exact same formula as the battling update.
-    # The only difference is I use the word "match" instead of "battle"
-    matches = await config.get_content('tictactoe')
-
-    winner_stats = matches.get(winner.id) or {}
-    winner_rating = winner_stats.get('rating') or 1000
-
-    loser_stats = matches.get(loser.id) or {}
-    loser_rating = loser_stats.get('rating') or 1000
-
-    difference = abs(winner_rating - loser_rating)
-    rating_change = 0
-    count = 25
-    while count <= difference:
-        if count > 300:
-            break
-        rating_change += 1
-        count += 25
-
-    if winner_rating > loser_rating:
-        winner_rating += 16 - rating_change
-        loser_rating -= 16 - rating_change
-    else:
-        winner_rating += 16 + rating_change
-        loser_rating -= 16 + rating_change
-
-    winner_wins = winner_stats.get('wins') or 0
-    winner_losses = winner_stats.get('losses') or 0
-    loser_wins = loser_stats.get('wins') or 0
-    loser_losses = loser_stats.get('losses') or 0
-    winner_wins += 1
-    loser_losses += 1
-
-    winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
-    loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
-    matches[winner.id] = winner_stats
-    matches[loser.id] = loser_stats
-
-    await config.save_content('tictactoe', matches)
-
-
 class TicTacToe:
     def __init__(self, bot):
         self.bot = bot
@@ -230,7 +188,7 @@ class TicTacToe:
             await self.bot.say("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name,
                                                                                                     loser.display_name))
             # Handle updating ratings based on the winner and loser
-            await update_records(winner, loser)
+            await config.update_records('tictactoe', winner, loser)
             # This game has ended, delete it so another one can be made
             del self.boards[ctx.message.server.id]
         else:

@@ -8,6 +8,7 @@ import aiohttp
 import re
 import json
 import pendulum
+import rethinkdb as r
 
 
 def setup(bot):
@@ -35,20 +36,25 @@ class Strawpoll:
     async def strawpolls(self, ctx, poll_id: str = None):
         """This command can be used to show a strawpoll setup on this server"""
         # Strawpolls cannot be 'deleted' so to handle whether a poll is running or not on a server
-        # Just save the poll in the config file, which can then be removed when it should not be "running" anymore
-        all_polls = await config.get_content('strawpolls')
-        server_polls = all_polls.get(ctx.message.server.id) or {}
-        if not server_polls:
-            await self.bot.say("There are currently no strawpolls running on this server!")
-            return
-        # If no poll_id was provided, print a list of all current running poll's on this server
-        if not poll_id:
+        # Just save the poll, which can then be removed when it should not be "running" anymore
+        r_filter = {'server_id': ctx.message.server.id}
+        # Add to our filter the poll_id, if one was provided
+        if poll_id is not None:
+            r_filter['poll_id'] = poll_id
+        polls = await config.get_content('strawpolls', r_filter)
+        # Now output all polls if a poll ID was not provided
+        if poll_id is None:
+            if len(polls) == 0:
+                await self.bot.say("There are currently no strawpolls running on this server!")
+                return
             fmt = "\n".join(
-                "{}: https://strawpoll.me/{}".format(data['title'], _id) for _id, data in server_polls.items())
+                "{}: https://strawpoll.me/{}".format(data['title'], data['poll_id']) for data in polls)
             await self.bot.say("```\n{}```".format(fmt))
-        # Else if a valid poll_id was provided, print info about that poll
-        elif poll_id in server_polls.keys():
-            poll = server_polls[poll_id]
+        # Otherwise, a poll ID was provided, and we searched based on the poll ID earlier, so just check the length
+        elif len(polls) > 0:
+            # Since strawpoll should never allow us to have more than one poll with the same ID
+            # It's safe to assume there's only one result
+            poll = polls[0]
 
             async with self.session.get("{}/{}".format(self.url, poll_id),
                                         headers={'User-Agent': 'Bonfire/1.0.0'}) as response:
@@ -59,7 +65,7 @@ class Strawpoll:
             # And the votes to match it, based on the index of the option
             # The rest is simple formatting
             fmt_options = "\n\t".join(
-                "{}: {}".format(r, data['votes'][i]) for i, r in enumerate(data['options']))
+                "{}: {}".format(result, data['votes'][i]) for i, result in enumerate(data['options']))
             author = discord.utils.get(ctx.message.server.members, id=poll['author'])
             created_ago = (pendulum.utcnow() - pendulum.parse(poll['date'])).in_words()
             link = "https://strawpoll.me/{}".format(poll_id)
@@ -107,37 +113,33 @@ class Strawpoll:
             return
 
         # Save this strawpoll in the list of running strawpolls for a server
-        all_polls = await config.get_content('strawpolls')
-        server_polls = all_polls.get(ctx.message.server.id) or {}
-        server_polls[str(data['id'])] = {'author': ctx.message.author.id, 'date': str(pendulum.utcnow()), 'title': title}
-        all_polls[ctx.message.server.id] = server_polls
-        await config.save_content('strawpolls', all_polls)
+        poll_id = str(data['id'])
 
-        await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(data['id']))
+        r_filter = {'server_id': ctx.message.server.id}
+        sub_entry = {'poll_id': poll_id,
+                     'author': ctx.message.author.id,
+                     'date': str(pendulum.utcnow()),
+                     'title': title}
+
+        entry = {'server_id': ctx.message.server.id,
+                 'polls': sub_entry}
+        update = {'polls': r.row['polls'].append(sub_entry)}
+        if not await config.update_content('strawpolls', update, r_filter):
+            await config.add_content('strawpolls', entry, {'poll_id': poll_id})
+        await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(poll_id))
 
     @strawpolls.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
     @checks.custom_perms(kick_members=True)
-    async def remove_strawpoll(self, ctx, poll_id: str = None):
-        """This command can be used to delete one of the existing strawpolls
-        If you don't provide an ID it will print the list of polls available"""
+    async def remove_strawpoll(self, ctx, poll_id):
+        """This command can be used to delete one of the existing strawpolls"""
+        r_filter = {'server_id': ctx.message.server.id}
+        content = await config.get_content('strawpolls', r_filter)
+        content = content[0]['polls']
+        polls = [{key: result} for key, result in content.items() if poll_id != result['poll_id']]
 
-        all_polls = await config.get_content('strawpolls')
-        server_polls = all_polls.get(ctx.message.server.id) or {}
-
-        # Check if a poll_id was provided, if it is then we can continue, if not print the list of current polls
-        if poll_id:
-            poll = server_polls.get(poll_id)
-            # Check if no poll exists with that ID, then print a list of the polls
-            if not poll:
-                fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls.items())
-                await self.bot.say(
-                    "There is no poll setup with that ID! Here is a list of the current polls```\n{}```".format(fmt))
-            else:
-                # Delete the poll that was just found
-                del server_polls[poll_id]
-                all_polls[ctx.message.server.id] = server_polls
-                await config.save_content('strawpolls', all_polls)
-                await self.bot.say("I have just removed the poll with the ID {}".format(poll_id))
+        update = {'polls': polls}
+        # Try to remove the poll based on the ID, if it doesn't exist, this will return false
+        if await config.update_content('strawpolls', update, r_filter):
+            await self.bot.say("I have just removed the poll with the ID {}".format(poll_id))
         else:
-            fmt = "\n".join("{}: {}".format(data['title'], _poll_id) for _poll_id, data in server_polls.items())
-            await self.bot.say("Here is a list of the polls on this server:\n```\n{}```".format(fmt))
+            await self.bot.say("There is no poll setup with that ID!")

@@ -3,8 +3,15 @@ from .utils import config
 from .utils import checks
 import discord
 
-def find_command(command):
-    cmd = None
+
+class Stats:
+    """Leaderboard/stats related commands"""
+
+    def __init__(self, bot):
+        self.bot = bot
+
+    def find_command(self, command):
+        cmd = None
 
         for part in command.split():
             try:
@@ -16,26 +23,18 @@ def find_command(command):
                 cmd = None
                 break
 
-        if cmd is None:
-            await self.bot.say("That is not a valid command!")
-            return
-
-class Stats:
-    """Leaderboard/stats related commands"""
-
-    def __init__(self, bot):
-        self.bot = bot
+        return cmd
 
     @commands.group(no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def command(self):
         pass
 
-    @command.command(no_pm=True, name = "stats")
+    @command.command(no_pm=True, name="stats")
     @checks.custom_perms(send_messages=True)
     async def command_stats(self, ctx, *, command):
         """This command can be used to view some usage stats about a specific command"""
-        cmd = find_command(command)
+        cmd = self.find_command(command)
         if cmd is None:
             await self.bot.say("`{}` is not a valid command".format(command))
 
@@ -45,10 +44,14 @@ class Stats:
     @checks.custom_perms(send_messages=True)
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times"""
-        boops = await config.get_content('boops')
-        if not boops.get(ctx.message.author.id):
+        r_filter = {'member_id': ctx.message.author.id}
+        boops = await config.get_content('boops', r_filter)
+        if boops is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
+
+        # Just to make this easier, just pay attention to the boops data, now that we have the right entry
+        boops = boops[0]['boops']
 
         # First get a list of the ID's of all members in this server, for use in list comprehension
         server_member_ids = [member.id for member in ctx.message.server.members]
@@ -69,15 +72,18 @@ class Stats:
     @checks.custom_perms(send_messages=True)
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times"""
-        boops = await config.get_content('boops')
-        booped_members = boops.get(ctx.message.author.id)
-        if booped_members is None:
+        r_filter = {'member_id': ctx.message.author.id}
+        boops = await config.get_content('boops', r_filter)
+        if boops is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
 
+        # Just to make this easier, just pay attention to the boops data, now that we have the right entry
+        boops = boops[0]['boops']
+
         # Same concept as the mostboops method
         server_member_ids = [member.id for member in ctx.message.server.members]
-        booped_members = {m_id: amt for m_id, amt in booped_members.items() if m_id in server_member_ids}
+        booped_members = {m_id: amt for m_id, amt in boops.items() if m_id in server_member_ids}
         sorted_booped_members = sorted(booped_members.items(), key=lambda k: k[1], reverse=True)
 
         output = "\n".join(
@@ -89,13 +95,13 @@ class Stats:
     @checks.custom_perms(send_messages=True)
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record"""
-        battles = await config.get_content('battle_records')
-
-        # Same concept as mostboops
+        # Create a list of the ID's of all members in this server, for comparison to the records saved
         server_member_ids = [member.id for member in ctx.message.server.members]
-        server_members = {member_id: stats for member_id, stats in battles.items() if member_id in server_member_ids}
-        # Only real difference is the key, the key needs to be based on the rating in the member's dictionary of stats
-        sorted_members = sorted(server_members.items(), key=lambda k: k[1]['rating'], reverse=True)
+        r_filter = lambda row: row['member_id'] in server_member_ids
+        battles = await config.get_content('battle_records', r_filter)
+
+        # Sort the members based on their rating
+        sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)
 
         fmt = ""
         count = 1
@@ -109,21 +115,25 @@ class Stats:
                 break
         await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True, no_pm=True, name="battle stats")
     @checks.custom_perms(send_messages=True)
-    async def stats(self, ctx, member: discord.Member=None):
+    async def stats(self, ctx, member: discord.Member = None):
         """Prints the battling stats for you, or the user provided"""
         member = member or ctx.message.author
 
+        # For this one, we don't want to pass a filter, as we do need all battle records
+        # We need this because we want to make a comparison for overall rank
         all_members = await config.get_content('battle_records')
-        if member.id not in all_members:
+
+        # Make a list comprehension to just check if the user has battled
+        if len([entry for entry in all_members if entry['member_id'] == member.id]) == 0:
             await self.bot.say("That user has not battled yet!")
             return
 
         # Same concept as the leaderboard
         server_member_ids = [member.id for member in ctx.message.server.members]
-        server_members = {member_id: stats for member_id, stats in all_members.items() if
-                          member_id in server_member_ids}
+        server_members = {stats['member_id']: stats for stats in all_members if
+                          stats['member_id'] in server_member_ids}
         sorted_server_members = sorted(server_members.items(), key=lambda x: x[1]['rating'], reverse=True)
         sorted_all_members = sorted(all_members.items(), key=lambda x: x[1]['rating'], reverse=True)
 
