@@ -105,6 +105,7 @@ class Twitch:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
             return
 
+        result = result[0]
         url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
         twitch_url = "https://api.twitch.tv/kraken/channels/{}?client_id={}".format(user, self.key)
@@ -148,16 +149,17 @@ class Twitch:
                     return
 
         r_filter = {'member_id': ctx.message.author.id}
-        result = await config.get_content('twitch', r_filter)
+        entry = {'twitch_url': url,
+                 'servers': [ctx.message.server.id],
+                 'notifications_on': 1,
+                 'live': 0}
+        update = {'twitch_url': url}
 
         # Check to see if this user has already saved a twitch URL
         # If they have, update the URL, otherwise create a new entry
         # Assuming they're not live, and notifications should be on
-        if result is not None:
-            await config.update_content('twitch', {'twitch_url': url}, r_filter)
-        else:
-            await config.add_content('twitch', {'twitch_url': url, 'servers': [ctx.message.server.id],
-                                                'notifications_on': 1, 'live': 0}, r_filter)
+        if not await config.add_content('twitch', entry, r_filter):
+            await config.update_content('twitch', update, r_filter)
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
@@ -165,7 +167,8 @@ class Twitch:
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL"""
         # Just try to remove it, if it doesn't exist, nothing is going to happen
-        await config.remove_content('twitch', {'member_id': ctx.message.author.id})
+        r_filter = {'member_id': ctx.message.author.id}
+        await config.remove_content('twitch', r_filter)
         await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
     @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
