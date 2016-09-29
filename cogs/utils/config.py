@@ -94,7 +94,7 @@ cache = {}
 # With the new saving method, we're not going to be able to cache the way that I was before
 # This is on standby until I rethink how to do this, because I do still want to cache data
 """for k in possible_keys:
-    cache[k] = Cache(k)"""
+    ca che[k] = Cache(k)"""
 
 # We still need 'cache' for prefixes and custom permissions however, so for now, just include that
 cache['prefixes'] = Cache('prefixes')
@@ -149,8 +149,12 @@ async def update_records(key, winner, loser):
     winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
     loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
 
-    await update_content(key, {'member_id': winner.id}, winner_stats)
-    await update_content(key, {'member_id': loser.id}, loser_stats)
+    if not await update_content(key, winner_stats, {'member_id': winner.id}):
+        winner_stats['member_id'] = winner.id
+        await add_content(key, winner_stats, {'member_id': winner.id})
+    if not await update_content(key, loser_stats, {'member_id': loser.id}):
+        loser_stats['member_id'] = loser.id
+        await add_content(key, loser_stats, {'member_id': loser.id})
 
 
 def command_prefix(bot, message):
