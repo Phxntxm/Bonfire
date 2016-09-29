@@ -46,7 +46,7 @@ class Mod:
         Any notifications (like someone going live on Twitch, or Picarto) will go to that channel"""
         r_filter = {'server_id': ctx.message.server.id}
         entry = {'server_id': ctx.message.server.id,
-                 'channel_id': ctx.message.channel.id}
+                 'channel_id': channel.id}
         if not await config.add_content('server_alerts', entry, r_filter):
             await config.update_content('server_alerts', entry, r_filter)
         await self.bot.say("I have just changed this server's 'notifications' channel"
@@ -312,11 +312,12 @@ class Mod:
         """This command can be used to view the current rules on the server"""
         r_filter = {'server_id': ctx.message.server.id}
         rules = await config.get_content('rules', r_filter)
-        rules = rules[0]['rules']
-
-        if rules is None:
+        try:
+            rules = rules[0]['rules']
+        except TypeError:
             await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
             return
+        
         if rule is None:
             # Enumerate the list, so that we can print the number and the rule for each rule
             fmt = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(rules))
