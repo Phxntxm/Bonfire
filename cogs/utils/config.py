@@ -160,7 +160,10 @@ def command_prefix(bot, message):
     # But it is not worth a query for every single message the bot detects, to fix
     try:
         values = cache['prefixes'].values
-        prefix = [data['prefix'] for data in values if message.server.id == data['server_id']][0]
+        try:
+            prefix = [data['prefix'] for data in values if message.server.id == data['server_id']][0]
+        except IndexError:
+            prefix = None
         return prefix or default_prefix
     except KeyError:
         return default_prefix
