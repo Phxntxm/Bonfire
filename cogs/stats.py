@@ -42,7 +42,7 @@ class Stats:
             await self.bot.say("`{}` is not a valid command".format(command))
 
         r_filter = {'command': cmd.qualified_name}
-        command_stats = await config.get('command_usage', r_filter)
+        command_stats = await config.get_content('command_usage', r_filter)
         try:
             command_stats = command_stats[0]
         except IndexError:
@@ -62,7 +62,7 @@ class Stats:
 
     @command.command(no_pm=True, pass_context=True, name="leaderboard")
     @checks.custom_perms(send_messages=True)
-    async def command_leaderboard(self, ctx, option):
+    async def command_leaderboard(self, ctx, option="server"):
         """This command can be used to print a leaderboard of commands
         Provide 'server' to print a leaderboard for this server
         Provide 'me', 'author', 'member' to print a leaderboard for your own usage"""
