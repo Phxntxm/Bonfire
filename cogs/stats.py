@@ -45,7 +45,7 @@ class Stats:
         command_stats = await config.get_content('command_usage', r_filter)
         try:
             command_stats = command_stats[0]
-        except IndexError:
+        except TypeError:
             await self.bot.say("That command has never been used! You know I worked hard on that! :c")
             return
 
