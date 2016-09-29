@@ -175,19 +175,13 @@ async def add_content(table, content, r_filter=None):
     try:
         if r_filter is not None:
             cursor = await r.table(table).filter(r_filter).run(conn)
-            content = await _convert_to_list(cursor)
-            if len(content) > 0:
+            cur_content = await _convert_to_list(cursor)
+            if len(cur_content) > 0:
                 await conn.close()
                 return False
-            else:
-                await r.table(table).insert(content).run(conn)
-                await conn.close()
-                return True
-
-        else:
-            await r.table(table).insert(content).run(conn)
-            await conn.close()
-            return True
+        await r.table(table).insert(content).run(conn)
+        await conn.close()
+        return True
     except r.ReqlOpFailedError:
         # This means the table does not exist
         await r.create_table(table).run(conn)
