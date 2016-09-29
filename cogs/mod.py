@@ -120,8 +120,10 @@ class Mod:
 
         r_filter = {'server_id': ctx.message.server.id}
         server_perms = await config.get_content('custom_permissions', r_filter)
-        server_perms = server_perms[0]
-
+        try:
+            server_perms = server_perms[0]
+        except TypeError:
+            server_perms = {}
         cmd = self.find_command(command)
 
         if cmd is None:
@@ -219,7 +221,7 @@ class Mod:
 
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
-    async def remove_perms(self, ctx, *command: str):
+    async def remove_perms(self, ctx, *, command: str):
         """Removes the custom permissions setup on the command specified"""
 
         cmd = self.find_command(command)
@@ -317,13 +319,20 @@ class Mod:
         except TypeError:
             await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
             return
-        
+        if len(rules) == 0:
+            await self.bot.say("This server currently has no rules on it! I see you like to live dangerously...")
+            return
+
         if rule is None:
             # Enumerate the list, so that we can print the number and the rule for each rule
             fmt = "\n".join("{}) {}".format(num + 1, rule) for num, rule in enumerate(rules))
             await self.bot.say('```\n{}```'.format(fmt))
         else:
-            fmt = rules[rule - 1]
+            try:
+                fmt = rules[rule - 1]
+            except IndexError:
+                await self.bot.say("That rules does not exist.")
+                return
             await self.bot.say("Rule {}: \"{}\"".format(rule, fmt))
 
     @rules.command(name='add', aliases=['create'], pass_context=True, no_pm=True)
