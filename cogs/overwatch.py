@@ -101,7 +101,7 @@ class Overwatch:
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists
         bt = bt.replace("#", "-")
-        r_filter = {'member_id', ctx.message.author.id}
+        r_filter = {'member_id': ctx.message.author.id}
 
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await self.bot.say("Looking up your profile information....")
