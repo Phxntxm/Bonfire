@@ -142,7 +142,7 @@ class Stats:
         total_rank = [i for i, x in enumerate(sorted_all_members) if x['member_id'] == member.id][0] + 1
         # The rest of this is straight forward, just formatting
 
-        entry = [member for member in server_members if member['member_id'] == member.id][0]
+        entry = [m for m in server_members if m['member_id'] == member.id][0]
         rating = entry['rating']
         record = "{}-{}".format(entry['wins'], entry['losses'])
         fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
