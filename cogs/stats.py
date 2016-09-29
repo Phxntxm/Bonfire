@@ -1,7 +1,10 @@
+import discord
 from discord.ext import commands
+
 from .utils import config
 from .utils import checks
-import discord
+
+import re
 
 
 class Stats:
@@ -38,7 +41,60 @@ class Stats:
         if cmd is None:
             await self.bot.say("`{}` is not a valid command".format(command))
 
-        total_command_stats = await config.get('command_usage')
+        r_filter = {'command': cmd.qualified_name}
+        command_stats = await config.get('command_usage', r_filter)
+        try:
+            command_stats = command_stats[0]
+        except IndexError:
+            await self.bot.say("That command has never been used! You know I worked hard on that! :c")
+            return
+
+        total_usage = command_stats['total_usage']
+        member_usage = command_stats['member_usage'].get(ctx.message.author.id, 0)
+        server_usage = command_stats['server_usage'].get(ctx.message.server.id, 0)
+
+        fmt = "The command {} has been used a total of {} times\n" \
+              "{} times on this server\n" \
+              "It has been ran by you, {}, {} times".format(cmd.qualified_name, total_usage, server_usage,
+                                                            ctx.message.author.display_name, member_usage)
+
+        await self.bot.say(fmt)
+
+    @command.command(no_pm=True, name="leaderboard")
+    @checks.custom_perms(send_messages=True)
+    async def command_leaderboard(self, ctx, option):
+        """This command can be used to print a leaderboard of commands
+        Provide 'server' to print a leaderboard for this server
+        Provide 'me', 'author', 'member' to print a leaderboard for your own usage"""
+        if re.search('(author|me)', option):
+            author = ctx.message.author
+            # First lets get all the command usage
+            command_stats = await config.get_content('command_usage')
+            # Now use a dictionary comprehension to get just the command name, and usage
+            # Based on the author's usage of the command
+            stats = {data['command']: data['member_usage'].get(author.id) for data in command_stats
+                     if data['member_usage'].get(author.id, 0) > 0}
+            # Now sort it by the amount of times used
+            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
+
+            # Create a string, each command on it's own line, based on the top 5 used commands
+            top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
+            # I'm letting it use the length of the sorted_stats[:5]
+            # As this can include, for example, all 3 if there are only 3 entries
+            await self.bot.say("Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
+        elif re.search('server', option):
+            # This is exactly the same as above, except server usage instead of member usage
+            server = ctx.message.server
+            command_stats = await config.get_content('command_usage')
+            stats = {data['command']: data['server_usage'].get(server.id) for data in command_stats
+                     if data['server_usage'].get(server.id, 0) > 0}
+            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
+
+            top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
+            await self.bot.say(
+                "This server's top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
+        else:
+            await self.bot.say("That is not a valid option, valid options are: `server` or `member`, `author`, `me`")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
