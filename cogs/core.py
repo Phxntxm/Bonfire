@@ -71,9 +71,6 @@ class Core:
             total_data['member_count'] += entry['member_count']
             total_data['server_count'] += entry['server_count']
 
-        # We can pretty safely assume that the author is going to be in at least one channel with the bot
-        # So find the author based on that list
-
         fmt['Official Bot Server'] = config.dev_server
         fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
         fmt['Total Servers'] = total_data.get('server_count')
