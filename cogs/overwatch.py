@@ -117,9 +117,10 @@ class Overwatch:
 
         # Now just save the battletag
         entry = {'member_id': ctx.message.author.id, 'battletag': bt}
+        update = {'battletag': bt}
         # Try adding this first, if that fails, update the saved entry
         if not await config.add_content('overwatch', entry, r_filter):
-            await config.update_content('overwatch', entry, r_filter)
+            await config.update_content('overwatch', update, r_filter)
         await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
