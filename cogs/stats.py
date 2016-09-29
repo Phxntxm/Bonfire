@@ -33,7 +33,7 @@ class Stats:
     async def command(self):
         pass
 
-    @command.command(no_pm=True, name="stats")
+    @command.command(no_pm=True, pass_context=True, name="stats")
     @checks.custom_perms(send_messages=True)
     async def command_stats(self, ctx, *, command):
         """This command can be used to view some usage stats about a specific command"""
@@ -60,7 +60,7 @@ class Stats:
 
         await self.bot.say(fmt)
 
-    @command.command(no_pm=True, name="leaderboard")
+    @command.command(no_pm=True, pass_context=True, name="leaderboard")
     @checks.custom_perms(send_messages=True)
     async def command_leaderboard(self, ctx, option):
         """This command can be used to print a leaderboard of commands
