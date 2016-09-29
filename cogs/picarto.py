@@ -168,7 +168,9 @@ class Picarto:
         r_filter = {'member_id': ctx.message.author.id}
         entry = {'picarto_url': url,
                  'servers': [ctx.message.server.id],
-                 'notifications_on': 1, 'live': 0}
+                 'notifications_on': 1,
+                 'live': 0,
+                 'member_id': ctx.message.author.id}
         if await config.add_content('picarto', entry, r_filter):
             await self.bot.say(
                 "I have just saved your Picarto URL {}, this server will now be notified when you go live".format(
