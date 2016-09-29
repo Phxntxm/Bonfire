@@ -113,6 +113,7 @@ class Twitch:
             async with s.get(twitch_url) as response:
                 data = await response.json()
         with open("twitch_testing", 'w') as f:
+            data['requested_url'] = url
             json.dump(data, f)
 
         fmt = "Username: {}".format(data['display_name'])
@@ -152,7 +153,8 @@ class Twitch:
         entry = {'twitch_url': url,
                  'servers': [ctx.message.server.id],
                  'notifications_on': 1,
-                 'live': 0}
+                 'live': 0,
+                 'member_id': ctx.message.author.id}
         update = {'twitch_url': url}
 
         # Check to see if this user has already saved a twitch URL
