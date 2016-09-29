@@ -57,13 +57,13 @@ class Stats:
         server_member_ids = [member.id for member in ctx.message.server.members]
         # Then get a sorted list, based on the amount of times they've booped the member
         # Reverse needs to be true, as we want it to go from highest to lowest
-        sorted_boops = sorted(boops.get(ctx.message.author.id).items(), key=lambda x: x[1], reverse=True)
+        sorted_boops = sorted(boops.items(), key=lambda x: x[1], reverse=True)
         # Then override the same list, checking if the member they've booped is in this server
         sorted_boops = [x for x in sorted_boops if x[0] in server_member_ids]
 
         # Since this is sorted, we just need to get the following information on the first user in the list
-        most_boops = sorted_boops[0][1]
-        most_id = sorted_boops[0][0]
+        most_id, most_boops = sorted_boops[0]
+
         member = discord.utils.find(lambda m: m.id == most_id, self.bot.get_all_members())
         await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
             ctx.message.author.mention, member.mention, most_boops))
@@ -106,16 +106,16 @@ class Stats:
         fmt = ""
         count = 1
         for x in sorted_members:
-            member_id = x[0]
-            stats = x[1]
-            member = discord.utils.get(ctx.message.server.members, id=member_id)
-            fmt += "#{}) {} (Rating: {})\n".format(count, member.display_name, stats.get('rating'))
+            member_id = x['member_id']
+            rating = x['rating']
+            member = ctx.message.server.get_member(member_id)
+            fmt += "#{}) {} (Rating: {})\n".format(count, member.display_name, rating)
             count += 1
             if count >= 11:
                 break
         await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
-    @commands.command(pass_context=True, no_pm=True, name="battle stats")
+    @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def stats(self, ctx, member: discord.Member = None):
         """Prints the battling stats for you, or the user provided"""
