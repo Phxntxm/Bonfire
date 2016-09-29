@@ -137,8 +137,13 @@ class Strawpoll:
         """This command can be used to delete one of the existing strawpolls"""
         r_filter = {'server_id': ctx.message.server.id}
         content = await config.get_content('strawpolls', r_filter)
-        content = content[0]['polls']
-        polls = [{key: result} for key, result in content.items() if poll_id != result['poll_id']]
+        try:
+            content = content[0]['polls']
+        except TypeError:
+            await self.bot.say("There are no strawpolls setup on this server!")
+            return
+
+        polls = [poll for poll in content if poll['poll_id'] != poll_id]
 
         update = {'polls': polls}
         # Try to remove the poll based on the ID, if it doesn't exist, this will return false
