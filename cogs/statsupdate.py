@@ -19,10 +19,12 @@ class StatsUpdate:
     def __unload(self):
         self.bot.loop.create_task(self.session.close())
 
-    async def update(self, data):
+    async def update(self):
         server_count = 0
-        for d in data.values():
-            server_count += d.get('server_count')
+        data = await config.get_content('bot_data')
+
+        for entry in data:
+            server_count += entry.get('server_count')
 
         carbon_payload = {
             'key': config.carbon_key,
@@ -46,31 +48,34 @@ class StatsUpdate:
             log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
 
     async def on_server_join(self, server):
-        data = await config.get_content('bot_data')
-        shard_data = data.get('shard_{}'.format(config.shard_id)) or {}
-        shard_data['server_count'] = len(self.bot.servers)
-        shard_data['member_count'] = len(set(self.bot.get_all_members()))
-        data['shard_{}'.format(config.shard_id)] = shard_data
-        await config.save_content('bot_data', data)
-        await self.update(data)
+        r_filter = {'shard_id': config.shard_id}
+        server_count = len(self.bot.servers)
+        member_count = len(set(self.bot.get_all_members()))
+        entry = {'server_count': server_count, 'member_count': member_count, "shard_id": config.shard_id}
+        # Check if this was successful, if it wasn't, that means a new shard was added and we need to add that entry
+        if not await config.update_content('bot_data', entry, r_filter):
+            await config.add_content('bot_data', entry, r_filter)
+        self.bot.loop.create_task(self.update())
 
     async def on_server_leave(self, server):
-        data = await config.get_content('bot_data')
-        shard_data = data.get('shard_{}'.format(config.shard_id)) or {}
-        shard_data['server_count'] = len(self.bot.servers)
-        shard_data['member_count'] = len(set(self.bot.get_all_members()))
-        data['shard_{}'.format(config.shard_id)] = shard_data
-        await config.save_content('bot_data', data)
-        await self.update(data)
+        r_filter = {'shard_id': config.shard_id}
+        server_count = len(self.bot.servers)
+        member_count = len(set(self.bot.get_all_members()))
+        entry = {'server_count': server_count, 'member_count': member_count, "shard_id": config.shard_id}
+        # Check if this was successful, if it wasn't, that means a new shard was added and we need to add that entry
+        if not await config.update_content('bot_data', entry, r_filter):
+            await config.add_content('bot_data', entry, r_filter)
+        self.bot.loop.create_task(self.update())
 
     async def on_ready(self):
-        data = await config.get_content('bot_data')
-        shard_data = data.get('shard_{}'.format(config.shard_id)) or {}
-        shard_data['server_count'] = len(self.bot.servers)
-        shard_data['member_count'] = len(set(self.bot.get_all_members()))
-        data['shard_{}'.format(config.shard_id)] = shard_data
-        await config.save_content('bot_data', data)
-        await self.update(data)
+        r_filter = {'shard_id': config.shard_id}
+        server_count = len(self.bot.servers)
+        member_count = len(set(self.bot.get_all_members()))
+        entry = {'server_count': server_count, 'member_count': member_count, "shard_id": config.shard_id}
+        # Check if this was successful, if it wasn't, that means a new shard was added and we need to add that entry
+        if not await config.update_content('bot_data', entry, r_filter):
+            await config.add_content('bot_data', entry, r_filter)
+        self.bot.loop.create_task(self.update())
 
 
 def setup(bot):

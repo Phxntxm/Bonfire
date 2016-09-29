@@ -38,17 +38,17 @@ class Overwatch:
     async def ow_stats(self, ctx, user: discord.Member = None, hero: str = ""):
         """Prints out a basic overview of a member's stats
         Provide a hero after the member to get stats for that specific hero"""
-        if user is None:
-            user = ctx.message.author
+        user = user or ctx.message.author
+        r_filter = {'member_id': user.id}
+        ow_stats = await config.get_content('overwatch', r_filter)
 
-        ow_stats = await config.get_content('overwatch')
-        bt = ow_stats.get(user.id)
-
-        if bt is None:
+        if ow_stats is None:
             await self.bot.say("I do not have this user's battletag saved!")
             return
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await self.bot.say("Searching profile information....")
+
+        bt = ow_stats[0]['battletag']
 
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
@@ -101,6 +101,7 @@ class Overwatch:
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists
         bt = bt.replace("#", "-")
+        r_filter = {'member_id': ctx.message.author.id}
 
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await self.bot.say("Looking up your profile information....")
@@ -115,24 +116,22 @@ class Overwatch:
                 return
 
         # Now just save the battletag
-        ow = await config.get_content('overwatch')
-        ow[ctx.message.author.id] = bt
-        await config.save_content('overwatch', ow)
+        entry = {'member_id': ctx.message.author.id, 'battletag': bt}
+        update = {'battletag': bt}
+        # Try adding this first, if that fails, update the saved entry
+        if not await config.add_content('overwatch', entry, r_filter):
+            await config.update_content('overwatch', update, r_filter)
         await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def delete(self, ctx):
         """Removes your battletag from the records"""
-        result = await config.get_content('overwatch')
-        if result.get(ctx.message.author.id):
-            del result[ctx.message.author.id]
+        r_filter = {'member_id': ctx.message.author.id}
+        if await config.remove_content('overwatch', r_filter):
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))
         else:
             await self.bot.say("I don't even have your battletag saved {}".format(ctx.message.author.mention))
-
-        del result[ctx.message.author.id]
-        await self.bot.say("I have just removed your battletag!")
 
 
 def setup(bot):

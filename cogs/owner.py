@@ -1,10 +1,7 @@
 from discord.ext import commands
-from .utils import config
 from .utils import checks
 import re
-import os
 import glob
-import sys
 import discord
 import inspect
 import aiohttp
@@ -44,35 +41,6 @@ class Owner:
         if not fmt:
             fmt = "Nothing currently running!"
         await self.bot.say(fmt)
-
-    @commands.command(pass_context=True)
-    @commands.check(checks.is_owner)
-    async def saferestart(self, ctx):
-        """This commands is used to check if there is anything playing in any servers at the moment
-        If there is, I'll tell you not to restart, if not I'll just go ahead and restart"""
-        # I do not want to restart the bot if someone is playing music 
-        # This gets all the exiting VoiceStates that are playing music right now
-        # If we are, say which server it 
-        servers_playing_music = [server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
-                                 state.is_playing()]
-        if len(servers_playing_music) > 0:
-            await self.bot.say("Sorry, it's not safe to restart. I am currently playing a song on {} servers".format(
-                len(servers_playing_music)))
-        else:
-            await config.save_content('restart_server', ctx.message.channel.id)
-            await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
-            python = sys.executable
-            os.execl(python, python, *sys.argv)
-
-    @commands.command(pass_context=True)
-    @commands.check(checks.is_owner)
-    async def restart(self, ctx):
-        """Forces the bot to restart"""
-        # This command is left in so that we can invoke it from saferestart, or we need a restart no matter what
-        await config.save_content('restart_server', ctx.message.channel.id)
-        await self.bot.say("Restarting; see you in the next life {0}!".format(ctx.message.author.mention))
-        python = sys.executable
-        os.execl(python, python, *sys.argv)
 
     @commands.command()
     @commands.check(checks.is_owner)

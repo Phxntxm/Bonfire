@@ -6,55 +6,6 @@ import discord
 import random
 
 
-async def update_battle_records(winner, loser):
-    # We're using the Harkness scale to rate
-    # http://opnetchessclub.wikidot.com/harkness-rating-system
-    battles = await config.get_content('battle_records')
-
-    # Start ratings at 1000 if they have no rating
-    winner_stats = battles.get(winner.id) or {}
-    winner_rating = winner_stats.get('rating') or 1000
-
-    loser_stats = battles.get(loser.id) or {}
-    loser_rating = loser_stats.get('rating') or 1000
-
-    # The scale is based off of increments of 25, increasing the change by 1 for each increment
-    # That is all this loop does, increment the "change" for every increment of 25
-    # The change caps off at 300 however, so break once we are over that limit
-    difference = abs(winner_rating - loser_rating)
-    rating_change = 0
-    count = 25
-    while count <= difference:
-        if count > 300:
-            break
-        rating_change += 1
-        count += 25
-
-    # 16 is the base change, increased or decreased based on whoever has the higher current rating
-    if winner_rating > loser_rating:
-        winner_rating += 16 - rating_change
-        loser_rating -= 16 - rating_change
-    else:
-        winner_rating += 16 + rating_change
-        loser_rating -= 16 + rating_change
-
-    # Just increase wins/losses for each person, making sure it's at least 0
-    winner_wins = winner_stats.get('wins') or 0
-    winner_losses = winner_stats.get('losses') or 0
-    loser_wins = loser_stats.get('wins') or 0
-    loser_losses = loser_stats.get('losses') or 0
-    winner_wins += 1
-    loser_losses += 1
-
-    # Now save the new wins, losses, and ratings
-    winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
-    loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
-    battles[winner.id] = winner_stats
-    battles[loser.id] = loser_stats
-
-    return await config.save_content('battle_records', battles)
-
-
 class Interaction:
     """Commands that interact with another user"""
 
@@ -139,10 +90,10 @@ class Interaction:
         # All we need to do is change what order the challengers are printed/added as a paramater
         if random.SystemRandom().randint(0, 1):
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
-            await update_battle_records(battleP1, battleP2)
+            await config.update_records('battle_records', battleP1, battleP2)
         else:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
-            await update_battle_records(battleP2, battleP1)
+            await config.update_records('battle_records', battleP2, battleP1)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -182,17 +133,22 @@ class Interaction:
             await self.bot.say("Why the heck are you booping me? Get away from me >:c")
             return
 
-        boops = await config.get_content('boops')
+        r_filter = {'member_id': booper.id}
+        boops = await config.get_content('boops', r_filter)
+        if boops is not None:
+            boops = boops[0]['boops']
+            # If the booper has never booped the member provided, assure it's 0
+            amount = boops.get(boopee.id, 0) + 1
+            boops[boopee.id] = amount
 
-        # Get all the booped stats for the author
-        # Set to default as having just booped boopee 0 times, so that we can increment that
-        booper_boops = boops.get(ctx.message.author.id, {boopee.id: 0})
-        # If the booper has never booped the member provided, assume 0 like above so we can increment like normal
-        amount = booper_boops.get(boopee.id, 0) + 1
-        booper_boops[boopee.id] = amount
-        boops[ctx.message.author.id] = booper_boops
+            await config.update_content('boops', {'boops': boops}, r_filter)
+        else:
+            entry = {'member_id': booper.id,
+                     'boops': {boopee.id: 1}}
 
-        await config.save_content('boops', boops)
+            await config.add_content('boops', entry, r_filter)
+            amount = 1
+
         fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
         await self.bot.say(fmt.format(booper, boopee, amount))
 

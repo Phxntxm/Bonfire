@@ -18,10 +18,9 @@ class Core:
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def calendar(self, month: str=None, year: int=None):
+    async def calendar(self, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
 
@@ -66,16 +65,11 @@ class Core:
         fmt = {}
 
         bot_data = await config.get_content('bot_data')
-        total_data = {}
-        for shard, values in bot_data.items():
-            for key, value in values.items():
-                if key in total_data:
-                    total_data[key] += value
-                else:
-                    total_data[key] = value
-
-        # We can pretty safely assume that the author is going to be in at least one channel with the bot
-        # So find the author based on that list
+        total_data = {'member_count': 0,
+                      'server_count': 0}
+        for entry in bot_data:
+            total_data['member_count'] += entry['member_count']
+            total_data['server_count'] += entry['server_count']
 
         fmt['Official Bot Server'] = config.dev_server
         fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
@@ -88,7 +82,7 @@ class Core:
         hm_games = len(
             [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
         ttt_games = len([server_id for server_id,
-                         game in self.bot.get_cog('TicTacToe').boards.items()])
+                        game in self.bot.get_cog('TicTacToe').boards.items()])
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
             count_battles += len(battles)
@@ -169,7 +163,7 @@ class Core:
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def roll(self, ctx, notation: str="d6"):
+    async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
         Format should be #d#"""
         # Use regex to get the notation based on what was provided

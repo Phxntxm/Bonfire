@@ -4,6 +4,7 @@ import rethinkdb as r
 import pendulum
 
 loop = asyncio.get_event_loop()
+global_config = {}
 
 # Ensure that the required config.yml file actually exists
 try:
@@ -38,7 +39,7 @@ class Cache:
         loop.create_task(self.update())
 
     async def update(self):
-        self.values = await _get_content(self.key)
+        self.values = await get_content(self.key)
         self.refreshed = pendulum.utcnow()
 
 
@@ -82,18 +83,74 @@ db_pass = global_config.get('db_pass', '')
 # {'ca_certs': db_cert}, 'user': db_user, 'password': db_pass}
 db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'user': db_user, 'password': db_pass}
 
-possible_keys = ['prefixes', 'battling', 'battle_records', 'boops', 'server_alerts', 'user_notifications',
-                 'nsfw_channels', 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
+possible_keys = ['prefixes', 'battle_records', 'boops', 'server_alerts', 'user_notifications', 'nsfw_channels',
+                 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
                  'tictactoe', 'bot_data', 'command_manage']
 
 # This will be a dictionary that holds the cache object, based on the key that is saved
 cache = {}
 
-sharded_data = {}
-
 # Populate cache with each object
-for k in possible_keys:
-    cache[k] = Cache(k)
+# With the new saving method, we're not going to be able to cache the way that I was before
+# This is on standby until I rethink how to do this, because I do still want to cache data
+"""for k in possible_keys:
+    cache[k] = Cache(k)"""
+
+# We still need 'cache' for prefixes and custom permissions however, so for now, just include that
+cache['prefixes'] = Cache('prefixes')
+cache['custom_permissions'] = Cache('custom_permissions')
+
+async def update_records(key, winner, loser):
+    # We're using the Harkness scale to rate
+    # http://opnetchessclub.wikidot.com/harkness-rating-system
+    r_filter = lambda row: (row['member_id'] == winner.id) | (row['member_id'] == loser.id)
+    matches = await get_content(key, r_filter)
+
+    winner_stats = {}
+    loser_stats = {}
+    for stat in matches:
+        if stat.get('member_id') == winner.id:
+            winner_stats = stat
+        elif stat.get('member_id') == loser.id:
+            loser_stats = stat
+
+    winner_rating = winner_stats.get('rating') or 1000
+    loser_rating = loser_stats.get('rating') or 1000
+
+    # The scale is based off of increments of 25, increasing the change by 1 for each increment
+    # That is all this loop does, increment the "change" for every increment of 25
+    # The change caps off at 300 however, so break once we are over that limit
+    difference = abs(winner_rating - loser_rating)
+    rating_change = 0
+    count = 25
+    while count <= difference:
+        if count > 300:
+            break
+        rating_change += 1
+        count += 25
+
+    # 16 is the base change, increased or decreased based on whoever has the higher current rating
+    if winner_rating > loser_rating:
+        winner_rating += 16 - rating_change
+        loser_rating -= 16 - rating_change
+    else:
+        winner_rating += 16 + rating_change
+        loser_rating -= 16 + rating_change
+
+    # Just increase wins/losses for each person, making sure it's at least 0
+    winner_wins = winner_stats.get('wins') or 0
+    winner_losses = winner_stats.get('losses') or 0
+    loser_wins = loser_stats.get('wins') or 0
+    loser_losses = loser_stats.get('losses') or 0
+    winner_wins += 1
+    loser_losses += 1
+
+    # Now save the new wins, losses, and ratings
+    winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
+    loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
+
+    await update_content(key, {'member_id': winner.id}, winner_stats)
+    await update_content(key, {'member_id': loser.id}, loser_stats)
 
 
 def command_prefix(bot, message):
@@ -102,72 +159,111 @@ def command_prefix(bot, message):
     # If the prefix does exist in the database and isn't in our cache; too bad, something has messed up
     # But it is not worth a query for every single message the bot detects, to fix
     try:
-        prefix = cache['prefixes'].values.get(message.server.id)
+        values = cache['prefixes'].values
+        try:
+            prefix = [data['prefix'] for data in values if message.server.id == data['server_id']][0]
+        except IndexError:
+            prefix = None
         return prefix or default_prefix
     except KeyError:
         return default_prefix
 
 
-async def save_content(table: str, content):
-    # We need to make sure we're using asyncio
+async def add_content(table, content, r_filter=None):
     r.set_loop_type("asyncio")
-    # Just connect to the database
     conn = await r.connect(**db_opts)
-    # We need to make at least one query to ensure the key exists, so attempt to create it as our query
+    # First we need to make sure that this entry doesn't exist
+    # For all rethinkDB cares, multiple entries can exist with the same content
+    # For our purposes however, we do not want this
     try:
-        await r.table_create(table).run(conn)
+        if r_filter is not None:
+            cursor = await r.table(table).filter(r_filter).run(conn)
+            cur_content = await _convert_to_list(cursor)
+            if len(cur_content) > 0:
+                await conn.close()
+                return False
+        await r.table(table).insert(content).run(conn)
+        await conn.close()
+        return True
     except r.ReqlOpFailedError:
-        pass
-    # So the table already existed, or it has now been created, we can update the data now
-    # Since we're handling everything that is rewritten in the code itself, we just need to delete then insert
-    await r.table(table).delete().run(conn)
-    await r.table(table).insert(content).run(conn)
-    await conn.close()
-
-    # Now that we've saved the new content, we should update our cache
-    cached = cache.get(table)
-    # While this should theoretically never happen, we just want to make sure
-    if cached is None:
-        cache[table] = Cache(table)
-    else:
-        loop.create_task(cached.update())
+        # This means the table does not exist
+        await r.create_table(table).run(conn)
+        await r.table(table).insert(content).run(conn)
+        await conn.close()
+        return True
 
 
-async def get_content(key: str):
-    cached = cache.get(key)
-    # We want to check here if the key exists in cache, and it was not created more than an hour ago
-    # We also want to make sure that if what we're getting in cache has content
-    # If not, lets make sure something didn't go awry, by getting from the database instead
-
-    # If we found this object not cached, cache it
-    if cached is None:
-        value = await _get_content(key)
-        cache[key] = Cache(key)
-    # Otherwise, check our timeout and make sure values is invalid
-    # If either of these are the case, we want to updated our values, and get our current data from the database
-    elif len(cached.values) == 0 or (pendulum.utcnow() - cached.refreshed).hours >= 1:
-        value = await _get_content(key)
-        loop.create_task(cached.update())
-    # Otherwise, we have valid content in cache, use it
-    else:
-        value = cached.values
-    return value
-
-
-# This is our internal method to get content from the database
-async def _get_content(key: str):
-    # We need to make sure we're using asyncio
+async def remove_content(table, r_filter=None):
+    if r_filter is None:
+        r_filter = {}
     r.set_loop_type("asyncio")
-    # Just connect to the database
     conn = await r.connect(**db_opts)
-    # We should only ever get one result, so use it if it exists, otherwise return none
     try:
-        cursor = await r.table(key).run(conn)
-        items = list(cursor.items)[0]
+        result = await r.table(table).filter(r_filter).delete().run(conn)
+    except r.ReqlOpFailedError:
+        result = {}
+        pass
+    await conn.close()
+    return result.get('deleted', 0) > 0
+
+
+async def update_content(table, content, r_filter=None):
+    if r_filter is None:
+        r_filter = {}
+    r.set_loop_type("asyncio")
+    conn = await r.connect(**db_opts)
+    # This method is only for updating content, so if we find that it doesn't exist, just return false
+    try:
+        # Update based on the content and filter passed to us
+        # rethinkdb allows you to do many many things inside of update
+        # This is why we're accepting a variable and using it, whatever it may be, as the query
+        result = await r.table(table).filter(r_filter).update(content).run(conn)
+    except r.ReqlOpFailedError:
         await conn.close()
+        result = {}
+    await conn.close()
+    return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
+
+
+async def replace_content(table, content, r_filter=None):
+    # This method is here because .replace and .update can have some different functionalities
+    if r_filter is None:
+        r_filter = {}
+    r.set_loop_type("asyncio")
+    conn = await r.connect(**db_opts)
+    try:
+        result = await r.table(table).filter(r_filter).replace(content).run(conn)
+    except r.ReqlOpFailedError:
+        await conn.close()
+        result = {}
+    await conn.close()
+    return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
+
+
+async def get_content(key: str, r_filter=None):
+    if r_filter is None:
+        r_filter = {}
+    r.set_loop_type("asyncio")
+    conn = await r.connect(**db_opts)
+    try:
+        cursor = await r.table(key).filter(r_filter).run(conn)
+        content = await _convert_to_list(cursor)
+        if len(content) == 0:
+            content = None
     except (IndexError, r.ReqlOpFailedError):
-        await conn.close()
-        return {}
-    # Rethink db stores an internal id per table, delete this and return the rest
-    del items['id']
-    return items
+        content = None
+    await conn.close()
+    return content
+
+
+async def _convert_to_list(cursor):
+    # This method is here because atm, AsyncioCursor is not iterable
+    # For our purposes, we want a list, so we need to do this manually
+    cursor_list = []
+    while True:
+        try:
+            val = await cursor.next()
+            cursor_list.append(val)
+        except r.ReqlCursorEmpty:
+            break
+    return cursor_list

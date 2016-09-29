@@ -69,12 +69,13 @@ class Links:
         if len(search) > 0:
             # This sets the url as url?q=search+terms
             url = 'https://derpibooru.org/search.json?q={}'.format('+'.join(search))
-            nsfw_channels = await config.get_content("nsfw_channels")
-            nsfw_channels = nsfw_channels.get('registered') or []
+
+            r_filter = {'channel_id': ctx.message.channel.id}
+            nsfw_channels = await config.get_content("nsfw_channels", r_filter)
             # If this is a nsfw channel, we just need to tack on 'explicit' to the terms
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
-            if ctx.message.channel.id in nsfw_channels:
+            if nsfw_channels is not None:
                 url += ",+%28explicit+OR+suggestive%29&filter_id=95938"
             else:
                 url += ",+safe"
@@ -126,11 +127,11 @@ class Links:
         # Due to this, send a message saying we're looking up the information first
         await self.bot.say("Looking up an image with those tags....")
 
-        nsfw_channels = await config.get_content("nsfw_channels")
-        nsfw_channels = nsfw_channels.get('registered') or []
+        r_filter = {'channel_id': ctx.message.channel.id}
+        nsfw_channels = await config.get_content("nsfw_channels", r_filter)
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
-        if ctx.message.channel.id in nsfw_channels:
+        if nsfw_channels is not None:
             url += "%20rating:explicit"
         else:
             url += "%20rating:safe"
