@@ -6,6 +6,7 @@ import discord
 import aiohttp
 import random
 import re
+import math
 
 
 class Links:
@@ -90,15 +91,17 @@ class Links:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
                 return
 
-            # Find a random image based on the first page of results.
-            # Currently derpibooru provides no way to change how many results can be shown on one page
-            # Nor anyway to see how many pages are returned by a certain query
-            # Due to the fact that a query may only return one page
-            # We cannot try to check more than one as it might fail
-            # So this is the best that we can do at the moment
+            # The first request we've made ensures there are results
+            # Now we can get the total count from that, and make another request based on the number of pages as well
             if len(results) > 0:
+                pages = math.ceil(data['total'] / len(results))
+                url += '&page={}'.format(random.SystemRandom().randint(1, pages))
+                async with self.session.get(url, headers=self.headers) as r:
+                    data = await r.json()
+                results = data['search']
+
                 index = random.SystemRandom().randint(0, len(results) - 1)
-                image_link = 'http://{}'.format(results[index].get('representations').get('full')[2:].strip())
+                image_link = 'https://derpibooru.org/{}'.format(results[index])
             else:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
                 return
