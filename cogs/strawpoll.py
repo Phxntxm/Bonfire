@@ -125,7 +125,7 @@ class Strawpoll:
                      'title': title}
 
         entry = {'server_id': ctx.message.server.id,
-                 'polls': sub_entry}
+                 'polls': [sub_entry]}
         update = {'polls': r.row['polls'].append(sub_entry)}
         if not await config.update_content('strawpolls', update, r_filter):
             await config.add_content('strawpolls', entry, {'poll_id': poll_id})
