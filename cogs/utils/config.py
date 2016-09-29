@@ -108,11 +108,14 @@ async def update_records(key, winner, loser):
 
     winner_stats = {}
     loser_stats = {}
-    for stat in matches:
-        if stat.get('member_id') == winner.id:
-            winner_stats = stat
-        elif stat.get('member_id') == loser.id:
-            loser_stats = stat
+    try:
+        for stat in matches:
+            if stat.get('member_id') == winner.id:
+                winner_stats = stat
+            elif stat.get('member_id') == loser.id:
+                loser_stats = stat
+    except TypeError:
+        pass
 
     winner_rating = winner_stats.get('rating') or 1000
     loser_rating = loser_stats.get('rating') or 1000
@@ -138,10 +141,10 @@ async def update_records(key, winner, loser):
         loser_rating -= 16 + rating_change
 
     # Just increase wins/losses for each person, making sure it's at least 0
-    winner_wins = winner_stats.get('wins') or 0
-    winner_losses = winner_stats.get('losses') or 0
-    loser_wins = loser_stats.get('wins') or 0
-    loser_losses = loser_stats.get('losses') or 0
+    winner_wins = winner_stats.get('wins', 0)
+    winner_losses = winner_stats.get('losses', 0)
+    loser_wins = loser_stats.get('wins', 0)
+    loser_losses = loser_stats.get('losses', 0)
     winner_wins += 1
     loser_losses += 1
 

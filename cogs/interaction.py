@@ -38,7 +38,7 @@ class Interaction:
         self.battles[ctx.message.server.id] = {p1: p2 for p1, p2 in battles.items() if
                                                not p2 == player_id and not p1 == player_id}
 
-    @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
+    @commands.group(pass_context=True, no_pm=True, invoke_without_command=True, enabled=False)
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
