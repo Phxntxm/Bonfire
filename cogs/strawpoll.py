@@ -38,23 +38,26 @@ class Strawpoll:
         # Strawpolls cannot be 'deleted' so to handle whether a poll is running or not on a server
         # Just save the poll, which can then be removed when it should not be "running" anymore
         r_filter = {'server_id': ctx.message.server.id}
-        # Add to our filter the poll_id, if one was provided
-        if poll_id is not None:
-            r_filter['poll_id'] = poll_id
         polls = await config.get_content('strawpolls', r_filter)
-        # Now output all polls if a poll ID was not provided
+        # Check if there are any polls setup on this server
+        try:
+            polls = polls[0]['polls']
+        except TypeError:
+            await self.bot.say("There are currently no strawpolls running on this server!")
+            return
+        # Print all polls on this server if poll_id was not provided
         if poll_id is None:
-            if polls is None:
-                await self.bot.say("There are currently no strawpolls running on this server!")
-                return
             fmt = "\n".join(
                 "{}: https://strawpoll.me/{}".format(data['title'], data['poll_id']) for data in polls)
             await self.bot.say("```\n{}```".format(fmt))
-        # Otherwise, a poll ID was provided, and we searched based on the poll ID earlier, so just check the length
-        elif polls is None:
+        else:
             # Since strawpoll should never allow us to have more than one poll with the same ID
             # It's safe to assume there's only one result
-            poll = polls[0]
+            try:
+                poll = [p for p in polls if p['poll_id'] == poll_id][0]
+            except IndexError:
+                await self.bot.say("That poll does not exist on this server!")
+                return
 
             async with self.session.get("{}/{}".format(self.url, poll_id),
                                         headers={'User-Agent': 'Bonfire/1.0.0'}) as response:
