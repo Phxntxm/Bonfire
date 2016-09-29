@@ -105,7 +105,7 @@ async def process_command(command, ctx):
     r_filter = {'command': command.qualified_name}
     command_usage = await config.get_content('command_usage', r_filter)
     if command_usage is None:
-        command_usage = {}
+        command_usage = {'command': command.qualified_name}
     else:
         command_usage = command_usage[0]
     # Add one to the total usage for this command, basing it off 0 to start with (obviously)
