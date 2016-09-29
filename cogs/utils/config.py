@@ -179,6 +179,11 @@ async def add_content(table, content, r_filter=None):
             if len(content) > 0:
                 await conn.close()
                 return False
+            else:
+                await r.table(table).insert(content).run(conn)
+                await conn.close()
+                return True
+
         else:
             await r.table(table).insert(content).run(conn)
             await conn.close()

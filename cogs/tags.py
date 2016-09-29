@@ -26,7 +26,7 @@ class Tags:
          The format to call a custom tag is !tag <tag>"""
         r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
         tags = await config.get_content('tags', r_filter)
-        if len(tags) == 0:
+        if tags is None:
             await self.bot.say('That tag does not exist!')
             return
         # We shouldn't ever have two tags of the same name, so just get the first result
