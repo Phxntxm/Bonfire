@@ -44,14 +44,14 @@ class Strawpoll:
         polls = await config.get_content('strawpolls', r_filter)
         # Now output all polls if a poll ID was not provided
         if poll_id is None:
-            if len(polls) == 0:
+            if polls is None:
                 await self.bot.say("There are currently no strawpolls running on this server!")
                 return
             fmt = "\n".join(
                 "{}: https://strawpoll.me/{}".format(data['title'], data['poll_id']) for data in polls)
             await self.bot.say("```\n{}```".format(fmt))
         # Otherwise, a poll ID was provided, and we searched based on the poll ID earlier, so just check the length
-        elif len(polls) > 0:
+        elif polls is None:
             # Since strawpoll should never allow us to have more than one poll with the same ID
             # It's safe to assume there's only one result
             poll = polls[0]
