@@ -97,8 +97,8 @@ class Stats:
         """Prints a leaderboard of everyone in the server's battling record"""
         # Create a list of the ID's of all members in this server, for comparison to the records saved
         server_member_ids = [member.id for member in ctx.message.server.members]
-        r_filter = lambda row: row['member_id'] in server_member_ids
-        battles = await config.get_content('battle_records', r_filter)
+        battles = await config.get_content('battle_records')
+        battles = [battle for battle in battles if battle['member_id'] in server_member_ids]
 
         # Sort the members based on their rating
         sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)
@@ -132,18 +132,19 @@ class Stats:
 
         # Same concept as the leaderboard
         server_member_ids = [member.id for member in ctx.message.server.members]
-        server_members = {stats['member_id']: stats for stats in all_members if
-                          stats['member_id'] in server_member_ids}
-        sorted_server_members = sorted(server_members.items(), key=lambda x: x[1]['rating'], reverse=True)
-        sorted_all_members = sorted(all_members.items(), key=lambda x: x[1]['rating'], reverse=True)
+        server_members = [stats for stats in all_members if stats['member_id'] in server_member_ids]
+        sorted_server_members = sorted(server_members, key=lambda x: x['rating'], reverse=True)
+        sorted_all_members = sorted(all_members, key=lambda x: x['rating'], reverse=True)
 
         # Enumurate the list so that we can go through, find the user's place in the list
         # and get just that for the rank
-        server_rank = [i for i, x in enumerate(sorted_server_members) if x[0] == member.id][0] + 1
-        total_rank = [i for i, x in enumerate(sorted_all_members) if x[0] == member.id][0] + 1
+        server_rank = [i for i, x in enumerate(sorted_server_members) if x['member_id'] == member.id][0] + 1
+        total_rank = [i for i, x in enumerate(sorted_all_members) if x['member_id'] == member.id][0] + 1
         # The rest of this is straight forward, just formatting
-        rating = server_members[member.id]['rating']
-        record = "{}-{}".format(server_members[member.id]['wins'], server_members[member.id]['losses'])
+
+        entry = [member for member in server_members if member['member_id'] == member.id][0]
+        rating = entry['rating']
+        record = "{}-{}".format(entry['wins'], entry['losses'])
         fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
         fmt = fmt.format(member.display_name, record, server_rank, len(server_members), total_rank, len(all_members),
                          rating)
