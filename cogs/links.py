@@ -101,7 +101,7 @@ class Links:
                 results = data['search']
 
                 index = random.SystemRandom().randint(0, len(results) - 1)
-                image_link = 'https://derpibooru.org/{}'.format(results[index])
+                image_link = 'https://derpibooru.org/{}'.format(results[index]['id'])
             else:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
                 return
