@@ -98,7 +98,7 @@ async def on_command_completion(command, ctx):
 
     fmt = "In server '{0.message.server}' at {1}\n" \
           "Full message: `{0.message.content}`\n" \
-          "Command detected was: {}\n" \
+          "Command detected was: {2}\n" \
           "ctx command would be: {0.command.qualified_name}\n\n".format(
            ctx, str(now), command.qualified_name)
     with open('command_log', 'a') as l:
