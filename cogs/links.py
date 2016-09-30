@@ -69,6 +69,8 @@ class Links:
         """Provides a random image from the first page of derpibooru.org for the following term"""
         if len(search) > 0:
             # This sets the url as url?q=search+terms
+            # Ensure a filter was not provided, as we either want to use our own, or none (for safe pics)
+            search = [value for value in search if not re.search('&?filter_id=[0-9]+')]
             url = 'https://derpibooru.org/search.json?q={}'.format('+'.join(search))
 
             r_filter = {'channel_id': ctx.message.channel.id}
@@ -80,6 +82,8 @@ class Links:
                 url += ",+%28explicit+OR+suggestive%29&filter_id=95938"
             else:
                 url += ",+safe"
+
+            await self.bot.say("Looking up an image with those tags....")
 
             # Get the response from derpibooru and parse the 'search' result from it
             async with self.session.get(url, headers=self.headers) as r:
