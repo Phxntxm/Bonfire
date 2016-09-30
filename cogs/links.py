@@ -70,7 +70,7 @@ class Links:
         if len(search) > 0:
             # This sets the url as url?q=search+terms
             # Ensure a filter was not provided, as we either want to use our own, or none (for safe pics)
-            search = [value for value in search if not re.search('&?filter_id=[0-9]+')]
+            search = [value for value in search if not re.search('&?filter_id=[0-9]+', value)]
             url = 'https://derpibooru.org/search.json?q={}'.format('+'.join(search))
 
             r_filter = {'channel_id': ctx.message.channel.id}
