@@ -94,6 +94,15 @@ async def on_message(message):
 async def on_command_completion(command, ctx):
     # There's no reason to continue waiting for this to complete, so lets immediately launch this in a new future
     bot.loop.create_task(process_command(command, ctx))
+    now = datetime.datetime.now()
+
+    fmt = "In server '{0.message.server}' at {1}\n" \
+          "Full message: `{0.message.content}`\n" \
+          "Command detected was: {}\n" \
+          "ctx command would be: {0.command.qualified_name}\n\n".format(
+           ctx, str(now), command.qualified_name)
+    with open('command_log', 'a') as l:
+        print(fmt, file=l)
 
 
 async def process_command(command, ctx):
