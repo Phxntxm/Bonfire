@@ -16,8 +16,11 @@ class Tags:
         """Prints all the custom tags that this server currently has"""
         tags = await config.get_content('tags', {'server_id': ctx.message.server.id})
         # Simple generator that adds a tag to the list to print, if the tag is for this server
-        fmt = "\n".join("{}".format(tag['tag']) for tag in tags)
-        await self.bot.say('```\n{}```'.format(fmt))
+        try:
+            fmt = "\n".join("{}".format(tag['tag']) for tag in tags)
+            await self.bot.say('```\n{}```'.format(fmt))
+        except TypeError:
+            await self.bot.say("There are not tags setup on this server!")
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
