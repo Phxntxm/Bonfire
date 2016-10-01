@@ -78,7 +78,7 @@ class Links:
             url = 'https://derpibooru.org/search.json'
 
             # Ensure a filter was not provided, as we either want to use our own, or none (for safe pics)
-            query = '+'.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
+            query = ' '.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
             params = {'q': query}
 
             r_filter = {'channel_id': ctx.message.channel.id}
@@ -87,10 +87,10 @@ class Links:
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
             if nsfw_channels is not None:
-                params['q'] += ",+%28explicit+OR+suggestive%29"
+                params['q'] += ", (explicit OR suggestive)"
                 params['filter_id'] = 95938
             else:
-                params['q'] += ",+safe"
+                params['q'] += ", safe"
 
 
             await self.bot.say("Looking up an image with those tags....")
@@ -137,7 +137,6 @@ class Links:
         # This changes the formatting for queries, so we don't
         # Have to use e621's stupid formatting when using the command
         tags = tags.replace(' ', '_')
-        tags = tags.replace(',_', '%20')
         url = 'https://e621.net/post/index.json'
         params = {'limit': 320,
                             'tags': tags}
@@ -151,16 +150,16 @@ class Links:
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
         if nsfw_channels is not None:
-            params['tags'] += "%20rating:explicit"
+            params['tags'] += " rating:explicit"
         else:
-            url += "%20rating:safe"
+            url += " rating:safe"
         try:
             async with self.session.get(url, headers=self.headers) as r:
                 data = await r.json()
         except json.JSONDecodeError:
             await self.bot.say("Sorry, I had trouble connecting at the moment; please try again later")
             return
-            params['tags'] += "%20rating:safe"
+            params['tags'] += " rating:safe"
 
         async with self.session.get(url, params=params, headers=self.headers) as r:
             data = await r.json()
