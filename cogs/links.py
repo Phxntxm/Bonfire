@@ -7,6 +7,7 @@ import aiohttp
 import random
 import re
 import math
+import json
 
 
 class Links:
@@ -142,9 +143,12 @@ class Links:
             url += "%20rating:explicit"
         else:
             url += "%20rating:safe"
-
-        async with self.session.get(url, headers=self.headers) as r:
-            data = await r.json()
+        try:
+            async with self.session.get(url, headers=self.headers) as r:
+                data = await r.json()
+        except json.JSONDecodeError:
+            await self.bot.say("Sorry, I had trouble connecting at the moment; please try again later")
+            return
 
         # Try to find an image from the list. If there were no results, we're going to attempt to find
         # A number between (0,-1) and receive an error.
