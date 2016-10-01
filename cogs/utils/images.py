@@ -1,6 +1,7 @@
 import aiohttp
 import datetime
 import os
+from shutil import copyfile
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
@@ -28,11 +29,17 @@ async def create_banner(member, image_title, data):
     # Open up the avatar, save it as a temporary file
     avatar_url = member.avatar_url
     avatar_path = "{}/avatar_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
-    with aiohttp.ClientSession() as s:
-        async with s.get(avatar_url) as r:
-            val = await r.read()
-            with open(avatar_path, "wb") as f:
-                f.write(val)
+    # Ensure the user has an avatar
+    if avatar_url != "":
+        with aiohttp.ClientSession() as s:
+            async with s.get(avatar_url) as r:
+                val = await r.read()
+                with open(avatar_path, "wb") as f:
+                    f.write(val)
+    # Otherwise use the default avatar
+    else:
+        avatar_src_path = "{}/default_avatar.jpg".format(base_path)
+        copyfile(avatar_src_path, avatar_path)
 
     # Parse the data we need to create our image
     username = (member.display_name[:23] + '...') if len(member.display_name) > 23 else member.display_name
