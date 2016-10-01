@@ -170,7 +170,11 @@ class Mod:
 
         # Since subcommands exist, base the last word in the list as the permission, and the rest of it as the command
         command = " ".join(msg[0:len(msg) - 1])
-        permissions = msg[len(msg) - 1]
+        try:
+            permissions = msg[len(msg) - 1]
+        except IndexError:
+            await self.bot.say("Please provide the permissions you want to setup, the format for this must be in:\n"
+                                           "`perms add <command> <permission>`")
 
         # If a user can run a command, they have to have send_messages permissions; so use this as the base
         if permissions.lower() == "none":
