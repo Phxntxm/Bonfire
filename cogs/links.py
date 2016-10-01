@@ -23,9 +23,14 @@ class Links:
     @checks.custom_perms(send_messages=True)
     async def wiki(self, *, query: str):
         """Pulls the top match for a specific term, and returns the definition"""
-        # All we need to do is search for the term provided, so the action list and format never need to change
-        base_url = "https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&srsearch="
-        async with self.session.get("{}{}".format(base_url, query.replace(" ", "%20")), headers=self.headers) as r:
+        # All we need to do is search for the term provided, so the action, list, and format never need to change
+        base_url = "https://en.wikipedia.org/w/api.php"
+        params = {"action": "query",
+                            "list": "search",
+                            "format": "json",
+                            "srsearch": query.replace(" ", "%20")}
+
+        async with self.session.get(base_url, params=params, headers=self.headers) as r:
             data = await r.json()
         if len(data['query']['search']) == 0:
             await self.bot.say("I could not find any results with that term, I tried my best :c")
@@ -48,8 +53,9 @@ class Links:
     @checks.custom_perms(send_messages=True)
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
-        url = "http://api.urbandictionary.com/v0/define?term={}".format('+'.join(msg))
-        async with self.session.get(url, headers=self.headers) as r:
+        url = "http://api.urbandictionary.com/v0/define"
+        params = {"term": '+'.join(msg)}
+        async with self.session.get(url, params=params, headers=self.headers) as r:
             data = await r.json()
 
         # Urban dictionary has some long definitions, some might not be able to be sent
@@ -68,8 +74,11 @@ class Links:
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term"""
         if len(search) > 0:
-            # This sets the url as url?q=search+terms
-            url = 'https://derpibooru.org/search.json?q={}'.format('+'.join(search))
+            url = 'https://derpibooru.org/search.json'
+
+            # Ensure a filter was not provided, as we either want to use our own, or none (for safe pics)
+            query = '+'.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
+            params = {'q': query}
 
             r_filter = {'channel_id': ctx.message.channel.id}
             nsfw_channels = await config.get_content("nsfw_channels", r_filter)
@@ -77,12 +86,14 @@ class Links:
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
             if nsfw_channels is not None:
-                url += ",+%28explicit+OR+suggestive%29&filter_id=95938"
+                params['q'] += ",+%28explicit+OR+suggestive%29"
+                params['filter_id'] = 95938
             else:
-                url += ",+safe"
+                params['q'] += ",+safe"
+
 
             # Get the response from derpibooru and parse the 'search' result from it
-            async with self.session.get(url, headers=self.headers) as r:
+            async with self.session.get(url, params=params, headers=self.headers) as r:
                 data = await r.json()
 
             try:
@@ -95,8 +106,8 @@ class Links:
             # Now we can get the total count from that, and make another request based on the number of pages as well
             if len(results) > 0:
                 pages = math.ceil(data['total'] / len(results))
-                url += '&page={}'.format(random.SystemRandom().randint(1, pages))
-                async with self.session.get(url, headers=self.headers) as r:
+                params['page'] = random.SystemRandom().randint(1, pages)
+                async with self.session.get(url, params=params, headers=self.headers) as r:
                     data = await r.json()
                 results = data['search']
 
@@ -124,7 +135,9 @@ class Links:
         # Have to use e621's stupid formatting when using the command
         tags = tags.replace(' ', '_')
         tags = tags.replace(',_', '%20')
-        url = 'https://e621.net/post/index.json?limit=320&tags={}'.format(tags)
+        url = 'https://e621.net/post/index.json'
+        params = {'limit': 320,
+                            'tags': tags}
         # e621 provides a way to change how many images can be shown on one request
         # This gives more of a chance of random results, however it causes the lookup to take longer than most
         # Due to this, send a message saying we're looking up the information first
@@ -135,11 +148,11 @@ class Links:
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
         if nsfw_channels is not None:
-            url += "%20rating:explicit"
+            params['tags'] += "%20rating:explicit"
         else:
-            url += "%20rating:safe"
+            params['tags'] += "%20rating:safe"
 
-        async with self.session.get(url, headers=self.headers) as r:
+        async with self.session.get(url, params=params, headers=self.headers) as r:
             data = await r.json()
 
         # Try to find an image from the list. If there were no results, we're going to attempt to find
