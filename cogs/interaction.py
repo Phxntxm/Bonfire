@@ -22,6 +22,27 @@ battle_outcomes = ["A meteor fell on {1}, {0} is left standing and has been decl
              "{0} realized it was high noon, {1} never even saw it coming.",
              "{1} spontaneously combusted...lol rip"]
 
+hugs = ["*hugs {}.*",
+"*tackles {} for a hug.*",
+"*drags {} into her dungeon where hugs ensue*",
+"*pulls {} to the side for a warm hug*",
+"*goes out to buy a big enough blanket to embrace {}*",
+"*hard codes an electric hug to {}*",
+"*hires mercenaries to take {} out....to a nice dinner*",
+"*pays $10 to not touch {}*",
+"*clones herself to create a hug pile with {}*",
+"*orders and airstrike of hugs {}*",
+"*glomps {}*",
+"*hears a knock at her door, opens it, finds {} and hugs them excitedly*",
+"*goes in for a punch but misses and ends up hugging {}*",
+"*hugs {} from behind*",
+"*denies a hug from {}*",
+"*does a hug to {}*",
+"*lets {} cuddle nonchalantly*",
+"*cuddles {}*",
+"*burrows underground and pops up underneath {} she hugs their legs.*",
+"*approaches {} after having gone to the gym for several months and almost crushes them.*"]
+
 class Interaction:
     """Commands that interact with another user"""
 
@@ -53,6 +74,15 @@ class Interaction:
         # But don't include any that have the author's ID
         self.battles[ctx.message.server.id] = {p1: p2 for p1, p2 in battles.items() if
                                                not p2 == player_id and not p1 == player_id}
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(send_messages=True)
+    async def hug (self, ctx, user: discord.Member=None):
+        if user is None:
+            user = ctx.message.author
+
+        fmt = random.SystemRandom().choice(hugs)
+        await self.bot.say(fmt.format(user.display_name))
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
