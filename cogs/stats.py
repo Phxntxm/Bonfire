@@ -194,7 +194,7 @@ class Stats:
         if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
             banner = await images.create_banner(ctx.message.author, "Battling Leaderboard", output)
         else:
-            fmt = "\n".join("#{}) {}".format(key, value for key, value in output))
+            fmt = "\n".join("#{}) {}".format(key, value) for key, value in output.items())
             await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)
