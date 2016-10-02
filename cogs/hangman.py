@@ -162,7 +162,7 @@ class Hangman:
             await self.bot.say("Sorry but only one Hangman game can be running per server!")
             return
 
-        game = self.create(phrases[random.SystemRandom().randint(0, len(phrases) - 1)], ctx)
+        game = self.create(random.SystemRandom().choice(phrases), ctx)
         # Let them know the game has started, then print the current game so that the blanks are shown
         await self.bot.say(
             "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
