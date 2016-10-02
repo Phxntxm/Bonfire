@@ -135,8 +135,7 @@ class Core:
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
         # Find a random image based on how many we currently have
-        f = glob.glob(
-            'images/doggo*')[random.SystemRandom().randint(0, len(glob.glob('images/doggo*')) - 1)]
+        f =random.SystemRandom().choice(glob.glob('images/doggo*'))
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
@@ -146,8 +145,7 @@ class Core:
         """Use this to print a random snek image.
         Sneks are o3o"""
         # Find a random image based on how many we currently have
-        f = glob.glob(
-            'images/snek*')[random.SystemRandom().randint(0, len(glob.glob('images/snek*')) - 1)]
+        f =random.SystemRandom().choice(glob.glob('images/snek*'))
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 

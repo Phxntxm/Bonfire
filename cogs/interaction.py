@@ -5,6 +5,22 @@ from .utils import checks
 import discord
 import random
 
+battle_outcomes = ["A meteor fell on {1}, {0} is left standing and has been declared the victor!",
+             "{0} has bucked {1} into a tree, even Big Mac would be impressed at that kick!",
+             "As they were battling, {1} was struck by lightning! {0} you lucked out this time!",
+             "{1} tried to dive at {0} while fighting, somehow they missed and landed in quicksand. Try paying more attention next time {1}",
+             "{1} got a little...heated during the battle and ended up getting set on fire. {0} wins by remaining cool",
+             "Princess Celestia came in and banished {1} to the moon. Good luck getting into any battles up there",
+             "{1} took an arrow to the knee, they are no longer an adventurer. Keep on adventuring {0}",
+             "Common sense should make it obvious not to get into battle with {0}. Apparently {1} didn't get the memo",
+             "{0} had a nice cup of tea with {1} over their conflict, and mutually agreed that {0} was Best Pony",
+             "{0} and {1} had an intense staring contest. Sadly, {1} forgot to breathe and lost much more than the staring contest",
+             "It appears {1} is actually a pacifist, they ran away screaming and crying. Maybe you should have thought of that before getting in a fight?",
+             "A bunch of parasprites came in and ate up the jetpack while {1} was flying with it. Those pesky critters...",
+             "{0} used their charm to seduce {1} to surrender.",
+             "{1} slipped on a banana peel and fell into a pit of spikes. That's actually impressive.",
+             "{0} realized it was high noon, {1} never even saw it coming.",
+             "{1} spontaneously combusted...lol rip"]
 
 class Interaction:
     """Commands that interact with another user"""
@@ -71,7 +87,7 @@ class Interaction:
     async def accept(self, ctx):
         """Accepts the battle challenge"""
         # This is a check to make sure that the author is the one being BATTLED
-        # And not the one that started the battle 
+        # And not the one that started the battle
         battles = self.battles.get(ctx.message.server.id) or {}
         p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
@@ -82,7 +98,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # Get a random win message from our list
-        fmt = config.battle_wins[random.SystemRandom().randint(0, len(config.battle_wins) - 1)]
+        fmt = random.SystemRandom().choice(battle_outcomes)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
         self.battling_off(ctx)
 
@@ -100,7 +116,7 @@ class Interaction:
     async def decline(self, ctx):
         """Declines the battle challenge"""
         # This is a check to make sure that the author is the one being BATTLED
-        # And not the one that started the battle 
+        # And not the one that started the battle
         battles = self.battles.get(ctx.message.server.id) or {}
         p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
