@@ -92,6 +92,7 @@ class Stats:
             if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
                 top_5 = {data[0]: data[1] for data in sorted_stats[:5]}
                 banner = await images.create_banner(ctx.message.author, "Your command usage", top_5)
+                await self.bot.upload(banner)
             else:
                 top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
                 await self.bot.say("Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
@@ -193,6 +194,7 @@ class Stats:
 
         if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
             banner = await images.create_banner(ctx.message.author, "Battling Leaderboard", output)
+            await self.bot.upload(banner)
         else:
             fmt = "\n".join("#{}) {}".format(key, value) for key, value in output.items())
             await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
