@@ -10,7 +10,7 @@ tmp_path = "images/banner/tmp"
 whitneyMedium = "/usr/share/fonts/whitney-medium.ttf"
 whitneyBold = "/usr/share/fonts/whitney-bold.ttf"
 header_height = 125
-base_height = 245
+canvas_height = 145
 banner_background = "{}/bannerTop2.png".format(base_path)
 banner_bot = "{}/bannerBot.png".format(base_path)
 
@@ -47,7 +47,8 @@ async def create_banner(member, image_title, data):
     result_values = list(data.values())
     lines_of_text = len(result_keys)
     output_file = "{}/banner_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
-
+    base_height = canvas_height + (lines_of_text * 20)
+    
     # This is the background to the avatar
     mask = Image.open('{}/mask.png'.format(base_path)).convert('L')
     user_avatar = Image.open(avatar_path)
