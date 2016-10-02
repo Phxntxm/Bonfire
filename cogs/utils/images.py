@@ -10,7 +10,7 @@ tmp_path = "images/banner/tmp"
 whitneyMedium = "/usr/share/fonts/whitney-medium.ttf"
 whitneyBold = "/usr/share/fonts/whitney-bold.ttf"
 header_height = 125
-base_height = 345
+base_height = 245
 banner_background = "{}/bannerTop2.png".format(base_path)
 banner_bot = "{}/bannerBot.png".format(base_path)
 
