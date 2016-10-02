@@ -324,10 +324,14 @@ class Music:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
-    async def volume(self, ctx, value: int):
+    async def volume(self, ctx, value: int=None):
         """Sets the volume of the currently playing song."""
 
         state = self.get_voice_state(ctx.message.server)
+        if value is None:
+            volume = state.volume
+            await self.bot.say("Current volume is {}".format(volume))
+            return
         if value > 200:
             await self.bot.say("Sorry but the max volume is 200")
             return
