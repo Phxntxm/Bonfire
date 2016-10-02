@@ -82,7 +82,7 @@ class Core:
         hm_games = len(
             [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
         ttt_games = len([server_id for server_id,
-                        game in self.bot.get_cog('TicTacToe').boards.items()])
+                         game in self.bot.get_cog('TicTacToe').boards.items()])
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
             count_battles += len(battles)
@@ -135,7 +135,7 @@ class Core:
         """Use this to print a random doggo image.
         Doggo is love, doggo is life."""
         # Find a random image based on how many we currently have
-        f =random.SystemRandom().choice(glob.glob('images/doggo*'))
+        f = random.SystemRandom().choice(glob.glob('images/doggo*'))
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
@@ -145,7 +145,7 @@ class Core:
         """Use this to print a random snek image.
         Sneks are o3o"""
         # Find a random image based on how many we currently have
-        f =random.SystemRandom().choice(glob.glob('images/snek*'))
+        f = random.SystemRandom().choice(glob.glob('images/snek*'))
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 

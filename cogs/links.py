@@ -27,9 +27,9 @@ class Links:
         # All we need to do is search for the term provided, so the action, list, and format never need to change
         base_url = "https://en.wikipedia.org/w/api.php"
         params = {"action": "query",
-                            "list": "search",
-                            "format": "json",
-                            "srsearch": query.replace(" ", "%20")}
+                  "list": "search",
+                  "format": "json",
+                  "srsearch": query.replace(" ", "%20")}
 
         async with self.session.get(base_url, params=params, headers=self.headers) as r:
             data = await r.json()
@@ -92,7 +92,6 @@ class Links:
             else:
                 params['q'] += ", safe"
 
-
             await self.bot.say("Looking up an image with those tags....")
 
             # Get the response from derpibooru and parse the 'search' result from it
@@ -139,7 +138,7 @@ class Links:
         tags = tags.replace(' ', '_')
         url = 'https://e621.net/post/index.json'
         params = {'limit': 320,
-                            'tags': tags}
+                  'tags': tags}
         # e621 provides a way to change how many images can be shown on one request
         # This gives more of a chance of random results, however it causes the lookup to take longer than most
         # Due to this, send a message saying we're looking up the information first
@@ -147,30 +146,25 @@ class Links:
 
         r_filter = {'channel_id': ctx.message.channel.id}
         nsfw_channels = await config.get_content("nsfw_channels", r_filter)
+
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
-        if nsfw_channels is not None:
-            params['tags'] += " rating:explicit"
-        else:
-            url += " rating:safe"
+        params['tags'] += " rating:explicit" if nsfw_channels else " rating:safe"
+
         try:
-            async with self.session.get(url, headers=self.headers) as r:
+            async with self.session.get(url, params=params, headers=self.headers) as r:
                 data = await r.json()
         except json.JSONDecodeError:
             await self.bot.say("Sorry, I had trouble connecting at the moment; please try again later")
             return
-            params['tags'] += " rating:safe"
-
-        async with self.session.get(url, params=params, headers=self.headers) as r:
-            data = await r.json()
 
         # Try to find an image from the list. If there were no results, we're going to attempt to find
         # A number between (0,-1) and receive an error.
         # The response should be in a list format, so we'll end up getting a key error if the response was in json
         # i.e. it responded with a 404/504/etc.
         try:
-                rand_image = data[random.SystemRandom().randint(0, len(data) - 1)]['file_url']
-                await self.bot.say(rand_image)
+            rand_image = data[random.SystemRandom().randint(0, len(data) - 1)]['file_url']
+            await self.bot.say(rand_image)
         except (ValueError, KeyError, TypeError):
             await self.bot.say("No results with that tag {}".format(ctx.message.author.mention))
             return

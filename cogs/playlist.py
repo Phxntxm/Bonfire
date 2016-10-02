@@ -253,7 +253,8 @@ class Music:
                 except asyncio.TimeoutError:
                     await self.bot.say(
                         "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
-                        "You can either try again, or try to change the server's region and see if that fixes the issue")
+                        "You can either try again, or try to change the server's"
+                        " region and see if that fixes the issue")
                     return False
         # Return true if nothing has failed, so that we can invoke this, and ensure we succeeded
         return True
@@ -324,7 +325,7 @@ class Music:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
-    async def volume(self, ctx, value: int=None):
+    async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song."""
 
         state = self.get_voice_state(ctx.message.server)
