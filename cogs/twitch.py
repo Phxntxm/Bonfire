@@ -113,9 +113,6 @@ class Twitch:
         with aiohttp.ClientSession() as s:
             async with s.get(twitch_url) as response:
                 data = await response.json()
-        with open("twitch_testing", 'w') as f:
-            data['requested_url'] = twitch_url
-            json.dump(data, f)
 
         fmt = "Username: {}".format(data['display_name'])
         fmt += "\nStatus: {}".format(data['status'])
