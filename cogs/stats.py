@@ -3,6 +3,7 @@ from discord.ext import commands
 
 from .utils import config
 from .utils import checks
+from .utils import images
 
 import re
 
@@ -53,19 +54,27 @@ class Stats:
         member_usage = command_stats['member_usage'].get(ctx.message.author.id, 0)
         server_usage = command_stats['server_usage'].get(ctx.message.server.id, 0)
 
-        fmt = "The command {} has been used a total of {} times\n" \
-              "{} times on this server\n" \
-              "It has been ran by you, {}, {} times".format(cmd.qualified_name, total_usage, server_usage,
-                                                            ctx.message.author.display_name, member_usage)
+        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+            data = {"Command Name": cmd.qualified_name,
+                           "Total Usage": total_usage,
+                           "Your Usage": member_usage,
+                           "This Server's Usage": server_usage}
+            banner = await images.create_banner(ctx.message.author, "Command Stats", data)
+            await self.bot.upload(banner)
+        else:
+            fmt = "The command {} has been used a total of {} times\n" \
+                  "{} times on this server\n" \
+                  "It has been ran by you, {}, {} times".format(cmd.qualified_name, total_usage, server_usage,
+                                                                ctx.message.author.display_name, member_usage)
 
-        await self.bot.say(fmt)
+            await self.bot.say(fmt)
 
     @command.command(no_pm=True, pass_context=True, name="leaderboard")
     @checks.custom_perms(send_messages=True)
     async def command_leaderboard(self, ctx, option="server"):
         """This command can be used to print a leaderboard of commands
         Provide 'server' to print a leaderboard for this server
-        Provide 'me', 'author', 'member' to print a leaderboard for your own usage"""
+        Provide 'me' to print a leaderboard for your own usage"""
         if re.search('(author|me)', option):
             author = ctx.message.author
             # First lets get all the command usage
@@ -78,10 +87,14 @@ class Stats:
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
 
             # Create a string, each command on it's own line, based on the top 5 used commands
-            top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
             # I'm letting it use the length of the sorted_stats[:5]
             # As this can include, for example, all 3 if there are only 3 entries
-            await self.bot.say("Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
+            if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+                top_5 = {data[0]: data[1] for data in sorted_stats[:5]}
+                banner = await images.create_banner(ctx.message.author, "Your command usage", top_5)
+            else:
+                top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
+                await self.bot.say("Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
         elif re.search('server', option):
             # This is exactly the same as above, except server usage instead of member usage
             server = ctx.message.server
@@ -94,7 +107,7 @@ class Stats:
             await self.bot.say(
                 "This server's top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
         else:
-            await self.bot.say("That is not a valid option, valid options are: `server` or `member`, `author`, `me`")
+            await self.bot.say("That is not a valid option, valid options are: `server` or `me`")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -141,11 +154,19 @@ class Stats:
         server_member_ids = [member.id for member in ctx.message.server.members]
         booped_members = {m_id: amt for m_id, amt in boops.items() if m_id in server_member_ids}
         sorted_booped_members = sorted(booped_members.items(), key=lambda k: k[1], reverse=True)
+        # Now we only want the first 10 members, so splice this list
+        sorted_booped_members = sorted_booped_members[:10]
 
-        output = "\n".join(
-            "{0.display_name}: {1} times".format(discord.utils.get(ctx.message.server.members, id=m_id), amt) for
-            m_id, amt in sorted_booped_members)
-        await self.bot.say("You have booped:```\n{}```".format(output))
+        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+            output = {"{0.display_name}".format(ctx.message.server.get_member(m_id)): amt
+                               for m_id, amt in sorted_booped_members}
+            banner = await images.create_banner(ctx.message.author, "Your booped victims", output)
+            await self.bot.upload(banner)
+        else:
+            output = "\n".join(
+                "{0.display_name}: {1} times".format(ctx.message.server.get_member(m_id), amt) for
+                m_id, amt in sorted_booped_members)
+            await self.bot.say("You have booped:```\n{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -159,17 +180,22 @@ class Stats:
         # Sort the members based on their rating
         sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)
 
-        fmt = ""
+        output = {}
         count = 1
         for x in sorted_members:
             member_id = x['member_id']
             rating = x['rating']
             member = ctx.message.server.get_member(member_id)
-            fmt += "#{}) {} (Rating: {})\n".format(count, member.display_name, rating)
+            output[count] = "{} (Rating: {})".format(member.display_name, rating)
             count += 1
             if count >= 11:
                 break
-        await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
+
+        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+            banner = await images.create_banner(ctx.message.author, "Battling Leaderboard", output)
+        else:
+            fmt = "\n".join("#{}) {}".format(key, value for key, value in output))
+            await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
