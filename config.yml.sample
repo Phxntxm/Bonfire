@@ -1,10 +1,18 @@
-bot_token: 'token'
-owner_id: ['1234546789']
-description: 'Blah'
+bot_token: 'token
+owner_id: ['12345']
+description: 'Bot Description Here'
 command_prefix: '!'
 default_status: '!help for a list of commands'
 discord_bots_key: 'key'
 carbon_key: 'key'
-steam_key: 'key'
+twitch_key: 'key'
 
-battleWins: ["{0} wins, {1} loses"]
+shard_count: 1
+shard_id: 0
+
+db_host: 'localhost'
+db_name: 'Bot_Name'
+db_cert: 'cert.pem'
+db_port: 28015
+db_user: 'admin'
+db_pass: 'password'

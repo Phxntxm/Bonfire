@@ -56,11 +56,9 @@ twitch_key = global_config.get('twitch_key', "")
 dev_server = global_config.get("dev_server", "")
 
 # The variables needed for sharding
-shard_count = global_config.get('shard_count', '')
-shard_id = global_config.get('shard_id', '')
+shard_count = global_config.get('shard_count', 1)
+shard_id = global_config.get('shard_id', 0)
 
-# A list of all the outputs for the battle command
-battle_wins = global_config.get("battleWins", [])
 # The default status the bot will use
 default_status = global_config.get("default_status", "")
 # The steam API key
