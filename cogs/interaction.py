@@ -39,7 +39,7 @@ hugs = \
      "*hires mercenaries to take {} out....to a nice dinner*",
      "*pays $10 to not touch {}*",
      "*clones herself to create a hug pile with {}*",
-     "*orders and airstrike of hugs {}*",
+     "*orders an airstrike of hugs {}*",
      "*glomps {}*",
      "*hears a knock at her door, opens it, finds {} and hugs them excitedly*",
      "*goes in for a punch but misses and ends up hugging {}*",
