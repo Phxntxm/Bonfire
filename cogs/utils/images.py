@@ -89,16 +89,16 @@ async def create_banner(member, image_title, data):
 
     # Loop through and place all the data in the image
     for current_line in range(lines_of_text):
-        font = ImageFont.truetype(whitneyMedium, 48)
-        text_bar = Image.new("RGB", (1050, 60), "#36393e").convert("RGBA")
+        font = ImageFont.truetype(whitneyMedium, 96)
+        text_bar = Image.new("RGB", (2100, 120), "#36393e").convert("RGBA")
         draw = ImageDraw.Draw(text_bar)
         text = "{}: ".format(result_keys[current_line])
         stat_text = "{}".format(result_values[current_line])
         stat_offset = draw.textsize(text, font=font, spacing=0)
 
-        font = ImageFont.truetype(whitneyMedium, 48)
-        draw.text((180, -2), text, (255, 255, 255), font=font, align="center")
-        draw.text((180 + stat_offset[0], -2), stat_text, (0, 201, 252), font=font)
+        font = ImageFont.truetype(whitneyMedium, 96)
+        draw.text((360, -4), text, (255, 255, 255), font=font, align="center")
+        draw.text((360 + stat_offset[0], -4), stat_text, (0, 402, 504), font=font)
         save_me = text_bar.resize((350, 20), Image.ANTIALIAS)
         offset += 20
         base_image.paste(save_me, (0, offset), save_me)
