@@ -136,6 +136,8 @@ class Links:
         # This changes the formatting for queries, so we don't
         # Have to use e621's stupid formatting when using the command
         tags = tags.replace(' ', '_')
+        tags = tags.replace(',_', ' ')
+
         url = 'https://e621.net/post/index.json'
         params = {'limit': 320,
                   'tags': tags}
