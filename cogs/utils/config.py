@@ -63,7 +63,8 @@ shard_id = global_config.get('shard_id', 0)
 default_status = global_config.get("default_status", "")
 # The steam API key
 steam_key = global_config.get("steam_key", "")
-
+# The key for youtube API calls
+youtube_key = global_config.get("youtube_key", "")
 # The rethinkdb hostname
 db_host = global_config.get('db_host', 'localhost')
 # The rethinkdb database name

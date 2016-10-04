@@ -21,6 +21,33 @@ class Links:
         self.session = aiohttp.ClientSession()
 
     @commands.command()
+    @checks.custom_perms(send_messages=True, aliases=['yt'])
+    async def youtube(self, *, query: str):
+        key = config.youtube_key
+        url = "https://www.googleapis.com/youtube/v3/search"
+        params = {'key': key,
+                            'part': 'snippet, id',
+                            'type': 'video',
+                            'q': query}
+
+        async with self.session.get(url, params=params, headers=self.headers) as r:
+            data = r.json()
+
+        try:
+            result = data['items'][0]
+        except IndexError:
+            await self.bot.say("I could not find any results with the search term {}".format(query))
+            return
+
+        result_url = "https://youtube.com/watch?v={}".format(result['id']['videoId'])
+        title = result['snippet']['title']
+        description = result['snippet']['description']
+
+        fmt = "**Title:** {}\n\n**Description:** {}\n\n**URL:** {}".format(title, description, result_url)
+        await self.bot.say(fmt)
+
+
+    @commands.command()
     @checks.custom_perms(send_messages=True)
     async def wiki(self, *, query: str):
         """Pulls the top match for a specific term, and returns the definition"""
