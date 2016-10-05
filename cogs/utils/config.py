@@ -99,6 +99,10 @@ cache = {}
 cache['prefixes'] = Cache('prefixes')
 cache['custom_permissions'] = Cache('custom_permissions')
 
+async def update_cache():
+    for value in cache.values():
+        await value.update()
+
 async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
@@ -190,12 +194,14 @@ async def add_content(table, content, r_filter=None):
                 return False
         await r.table(table).insert(content).run(conn)
         await conn.close()
+        loop.create_task(update_cache())
         return True
     except r.ReqlOpFailedError:
         # This means the table does not exist
         await r.create_table(table).run(conn)
         await r.table(table).insert(content).run(conn)
         await conn.close()
+        loop.create_task(update_cache())
         return True
 
 
@@ -210,6 +216,7 @@ async def remove_content(table, r_filter=None):
         result = {}
         pass
     await conn.close()
+    loop.create_task(update_cache())
     return result.get('deleted', 0) > 0
 
 
@@ -228,6 +235,7 @@ async def update_content(table, content, r_filter=None):
         await conn.close()
         result = {}
     await conn.close()
+    loop.create_task(update_cache())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
@@ -243,6 +251,7 @@ async def replace_content(table, content, r_filter=None):
         await conn.close()
         result = {}
     await conn.close()
+    loop.create_task(update_cache())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
@@ -259,6 +268,7 @@ async def get_content(key: str, r_filter=None):
     except (IndexError, r.ReqlOpFailedError):
         content = None
     await conn.close()
+    loop.create_task(update_cache())
     return content
 
 
