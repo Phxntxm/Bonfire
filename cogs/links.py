@@ -31,7 +31,7 @@ class Links:
                   'q': query}
 
         async with self.session.get(url, params=params, headers=self.headers) as r:
-            data = r.json()
+            data = await r.json()
 
         try:
             result = data['items'][0]
