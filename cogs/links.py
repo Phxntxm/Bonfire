@@ -20,15 +20,15 @@ class Links:
         self.headers = {"User-Agent": "Bonfire/1.0.0"}
         self.session = aiohttp.ClientSession()
 
-    @commands.command()
-    @checks.custom_perms(send_messages=True, aliases=['yt'])
+    @commands.command(aliases=['yt'])
+    @checks.custom_perms(send_messages=True)
     async def youtube(self, *, query: str):
         key = config.youtube_key
         url = "https://www.googleapis.com/youtube/v3/search"
         params = {'key': key,
-                            'part': 'snippet, id',
-                            'type': 'video',
-                            'q': query}
+                  'part': 'snippet, id',
+                  'type': 'video',
+                  'q': query}
 
         async with self.session.get(url, params=params, headers=self.headers) as r:
             data = r.json()
@@ -45,7 +45,6 @@ class Links:
 
         fmt = "**Title:** {}\n\n**Description:** {}\n\n**URL:** {}".format(title, description, result_url)
         await self.bot.say(fmt)
-
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
