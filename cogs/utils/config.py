@@ -194,14 +194,12 @@ async def add_content(table, content, r_filter=None):
                 return False
         await r.table(table).insert(content).run(conn)
         await conn.close()
-        loop.create_task(update_cache())
         return True
     except r.ReqlOpFailedError:
         # This means the table does not exist
         await r.create_table(table).run(conn)
         await r.table(table).insert(content).run(conn)
         await conn.close()
-        loop.create_task(update_cache())
         return True
 
 
@@ -216,7 +214,8 @@ async def remove_content(table, r_filter=None):
         result = {}
         pass
     await conn.close()
-    loop.create_task(update_cache())
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return result.get('deleted', 0) > 0
 
 
@@ -235,7 +234,8 @@ async def update_content(table, content, r_filter=None):
         await conn.close()
         result = {}
     await conn.close()
-    loop.create_task(update_cache())
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
@@ -251,24 +251,26 @@ async def replace_content(table, content, r_filter=None):
         await conn.close()
         result = {}
     await conn.close()
-    loop.create_task(update_cache())
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
-async def get_content(key: str, r_filter=None):
+async def get_content(table: str, r_filter=None):
     if r_filter is None:
         r_filter = {}
     r.set_loop_type("asyncio")
     conn = await r.connect(**db_opts)
     try:
-        cursor = await r.table(key).filter(r_filter).run(conn)
+        cursor = await r.table(table).filter(r_filter).run(conn)
         content = await _convert_to_list(cursor)
         if len(content) == 0:
             content = None
     except (IndexError, r.ReqlOpFailedError):
         content = None
     await conn.close()
-    loop.create_task(update_cache())
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return content
 
 
