@@ -55,7 +55,7 @@ class Deviantart:
                     result = cache.get(da_name, None)
                     if result is None:
                         params['username'] = da_name
-                        async with self.session.get(self.base_url, headers=self.headers, params) as response:
+                        async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
                             data = await response.json()
                             result = data['results'][0]
                             cache[da_name] = result
