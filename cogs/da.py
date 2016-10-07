@@ -15,7 +15,8 @@ class Deviantart:
         self.session = aiohttp.ClientSession()
         bot.loop.create_task(self.get_token())
         # Lets start the task a few seconds after, to ensure our token gets set
-        bot.loop.call_later(5, self.post_task)
+        await asyncio.sleep(5)
+        bot.loop.create_task(self.post_task())
 
     async def post_task(self):
         while(True):
