@@ -197,7 +197,7 @@ async def add_content(table, content, r_filter=None):
         return True
     except r.ReqlOpFailedError:
         # This means the table does not exist
-        await r.create_table(table).run(conn)
+        await r.table_create(table).run(conn)
         await r.table(table).insert(content).run(conn)
         await conn.close()
         return True
