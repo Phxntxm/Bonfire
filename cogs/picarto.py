@@ -102,7 +102,7 @@ class Picarto:
                     await config.update_content('picarto', {'live': 0}, {'member_id': m_id})
             await asyncio.sleep(30)
 
-    @commands.group(pass_context=True, invoke_without_command=True)
+    @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def picarto(self, ctx, member: discord.Member = None):
         """This command can be used to view Picarto stats about a certain member"""

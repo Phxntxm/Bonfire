@@ -70,14 +70,14 @@ class Mod:
         fmt = "notify" if on_off else "not notify"
         await self.bot.say("This server will now {} if someone has joined or left".format(fmt))
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group(pass_context=True)
     async def nsfw(self, ctx):
         """Handles adding or removing a channel as a nsfw channel"""
         # This command isn't meant to do anything, so just send an error if an invalid subcommand is passed
         if ctx.invoked_subcommand is None:
             await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
 
-    @nsfw.command(name="add", pass_context=True, no_pm=True)
+    @nsfw.command(name="add", pass_context=True)
     @checks.custom_perms(kick_members=True)
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel"""
@@ -87,7 +87,7 @@ class Mod:
         else:
             await self.bot.say("This channel is already registered as 'nsfw'!")
 
-    @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
+    @nsfw.command(name="remove", aliases=["delete"], pass_context=True)
     @checks.custom_perms(kick_members=True)
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel"""
@@ -97,7 +97,7 @@ class Mod:
         else:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
     @checks.custom_perms(kick_members=True)
     async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say"""
