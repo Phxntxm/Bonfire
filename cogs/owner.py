@@ -8,6 +8,7 @@ import glob
 import discord
 import inspect
 import aiohttp
+import pendulum
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```', re.DOTALL)
@@ -18,6 +19,19 @@ class Owner:
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    @commands.check(checks.is_owner)
+    async def motd_push(self, *, message):
+        """Used to push a new message to the message of the day"""
+        date = pendulum.utcnow().to_date_string()
+        r_filter = {'date': date}
+        entry = {'motd': message, 'date': date}
+        # Try to add this, if there's an entry for that date, lets update it to make sure only one motd is sent a day
+        # I should be managing this myself, more than one should not be sent in a day
+        if false await config.add_content('motd', entry, r_filter):
+            await config.update_content('motd', entry, r_filter)
+        await self.bot.say("New motd update for {}!".format(date))
 
     @commands.command()
     @commands.check(checks.is_owner)

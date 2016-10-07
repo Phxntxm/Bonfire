@@ -20,6 +20,33 @@ class Core:
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
+    async def motd(self, *, date=None):
+        """This command can be used to print the current MOTD (Message of the day)
+        This will most likely not be updated every day, however messages will still be pushed to this every now and then"""
+        if date is None:
+            motd = await config.get_content('motd')
+            date = motd['date']
+            motd = motd['motd']
+            fmt = "Last updated: {}\n\n{}".format(date, motd)
+            await self.bot.say(fmt)
+        else:
+            try:
+                r_filter = pendulum.parse(date)
+                motd = await config.get_content('motd', r_filter)
+                date = motd['date']
+                motd = motd['motd']
+                fmt = "Message of the day for {}:\n\n{}".format(date, motd)
+                await self.bot.say(fmt)
+            # This one will be hit if we return None for that day
+            except AttributeError:
+                await self.bot.say("No message of the day for {}!".format(date))
+            # This will be hit if pendulum fails to parse the date passed
+            except ValueError:
+                now = pendulum.utcnow().to_date_string()
+                await self.bot.say("Invalid date format! Try like {}".format(now))
+
+    @commands.command()
+    @checks.custom_perms(send_messages=True)
     async def calendar(self, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month"""
