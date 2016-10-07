@@ -26,9 +26,18 @@ class Core:
         if date is None:
             motd = await config.get_content('motd')
             try:
-                date = motd['date']
-                motd = motd['motd']
-            # This one will be hit if we return None for that day
+                # Lets set this to the first one in the list first
+                latest_motd = motd[0]
+                for entry in motd:
+                    d = pendulum.parse(entry['date'])
+
+                    # Check if the date for this entry is newer than our currently saved latest entry
+                    if d > latest_motd['date']:
+                        latest_motd = entry
+
+                date = latest_motd['date']
+                motd = latest_motd['motd']
+            # This will be hit if we do not have any entries for motd
             except TypeError:
                 await self.bot.say("No message of the day!")
             else:
@@ -38,8 +47,8 @@ class Core:
             try:
                 r_filter = pendulum.parse(date)
                 motd = await config.get_content('motd', r_filter)
-                date = motd['date']
-                motd = motd['motd']
+                date = motd[0]['date']
+                motd = motd[0]['motd']
                 fmt = "Message of the day for {}:\n\n{}".format(date, motd)
                 await self.bot.say(fmt)
             # This one will be hit if we return None for that day
