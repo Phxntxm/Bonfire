@@ -14,6 +14,13 @@ class Deviantart:
         self.headers = {"User-Agent": "Bonfire/1.0.0"}
         self.session = aiohttp.ClientSession()
         bot.loop.create_task(self.get_token())
+        # Lets start the task a few seconds after, to ensure our token gets set
+        bot.loop.call_later(5, self.post_task)
+
+    async def post_task(self):
+        while(True):
+            await check_posts()
+            await asyncio.sleep(300)
 
     async def get_token(self):
         # We need a token to create requests, it doesn't seem this token goes away
@@ -32,51 +39,51 @@ class Deviantart:
             self.token = data.get('access_token', None)
             self.params = {'access_token': self.token}
 
-        async def check_posts(self):
-            content = await config.get_content('deviantart')
-            # People might sub to the same person, so lets cache every person and their last update
-            cache = {}
+    async def check_posts(self):
+        content = await config.get_content('deviantart')
+        # People might sub to the same person, so lets cache every person and their last update
+        cache = {}
 
-            for entry in content:
-                user = discord.utils.get(self.bot.get_all_members(), id=entry['member_id'])
+        for entry in content:
+            user = discord.utils.get(self.bot.get_all_members(), id=entry['member_id'])
 
-                # If we're sharded, we might not be able to find this user. If the bot is not in the server with the member either
-                if user is None:
-                    continue
+            # If we're sharded, we might not be able to find this user. If the bot is not in the server with the member either
+            if user is None:
+                continue
 
-                params = self.params.copy()
-                # Now loop through the subscriptions
-                for da_name in entry['subbed']:
-                    # Check what the last updated content we sent to this user was
-                    # Since we cannot go back in time, if this doesn't match the last uploaded from the user
-                    # Assume we need to notify the user of this post
-                    last_updated_id = entry['last_updated'].get(da_name, None)
-                    # Check if this user has been requested already, if so we don't need to make another request
-                    result = cache.get(da_name, None)
-                    if result is None:
-                        params['username'] = da_name
-                        async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
-                            data = await response.json()
-                            result = data['results'][0]
-                            cache[da_name] = result
+            params = self.params.copy()
+            # Now loop through the subscriptions
+            for da_name in entry['subbed']:
+                # Check what the last updated content we sent to this user was
+                # Since we cannot go back in time, if this doesn't match the last uploaded from the user
+                # Assume we need to notify the user of this post
+                last_updated_id = entry['last_updated'].get(da_name, None)
+                # Check if this user has been requested already, if so we don't need to make another request
+                result = cache.get(da_name, None)
+                if result is None:
+                    params['username'] = da_name
+                    async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
+                        data = await response.json()
+                        result = data['results'][0]
+                        cache[da_name] = result
 
-                    # This means that our last update to this user, for this author, is not the same
-                    if last_updated_id != result['deviationid']:
-                        # First lets check if the last updated ID was None, if so...then we haven't alerted them yet
-                        # We don't want to alert them, we just want to act like the artist's most recent update was the last notified
-                        # So just notify the user if this is not None
-                        if last_updated_id is not None:
-                            fmt = "**Title:** {}\n**User:** {}\n**Category:** {}\n**URL:** {}".format(
-                                        title = result['title'],
-                                        artist = result['author']['username'],
-                                        url = result['url'],
-                                        category = result['category'])
-                            await self.bot.send_message(user, fmt)
-                        # Now we can update the user's last updated for this DA
-                        # We want to do this whether or not our last if statement was met
-                        r_filter = {'member_id': user.id}
-                        update = {'last_updated': {da_name: result['deviationid']}}
-                        await config.update_content('deviantart', update, r_filter)
+                # This means that our last update to this user, for this author, is not the same
+                if last_updated_id != result['deviationid']:
+                    # First lets check if the last updated ID was None, if so...then we haven't alerted them yet
+                    # We don't want to alert them, we just want to act like the artist's most recent update was the last notified
+                    # So just notify the user if this is not None
+                    if last_updated_id is not None:
+                        fmt = "**Title:** {}\n**User:** {}\n**Category:** {}\n**URL:** {}".format(
+                                    title = result['title'],
+                                    artist = result['author']['username'],
+                                    url = result['url'],
+                                    category = result['category'])
+                        await self.bot.send_message(user, fmt)
+                    # Now we can update the user's last updated for this DA
+                    # We want to do this whether or not our last if statement was met
+                    r_filter = {'member_id': user.id}
+                    update = {'last_updated': {da_name: result['deviationid']}}
+                    await config.update_content('deviantart', update, r_filter)
 
 
 
@@ -117,3 +124,6 @@ class Deviantart:
             await self.bot.say("You have just unsubscribed from {}!".format(username))
         else:
             await self.bot.say("You are not subscribed to that user!")
+
+def setup(bot):
+    bot.add_cog(Deviantart(bot))
