@@ -38,7 +38,7 @@ async def create_banner(member, image_title, data):
                     f.write(val)
     # Otherwise use the default avatar
     else:
-        avatar_src_path = "{}/default_avatar.jpg".format(base_path)
+        avatar_src_path = "{}/default_avatar.png".format(base_path)
         copyfile(avatar_src_path, avatar_path)
 
     # Parse the data we need to create our image
@@ -48,7 +48,7 @@ async def create_banner(member, image_title, data):
     lines_of_text = len(result_keys)
     output_file = "{}/banner_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
     base_height = canvas_height + (lines_of_text * 20)
-    
+
     # This is the background to the avatar
     mask = Image.open('{}/mask.png'.format(base_path)).convert('L')
     user_avatar = Image.open(avatar_path)
