@@ -11,7 +11,7 @@ if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
 
 
-class VoicePlayer:server
+class VoicePlayer:
     # This does not need to match up too closely to the StreamPlayer that is "technically" used here
     # This is more of a placeholder, just to keep the information that will be requested
     # Before the video is actually downloaded, which happens in our audio player task
