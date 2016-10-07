@@ -31,8 +31,9 @@ class Core:
             # This one will be hit if we return None for that day
             except TypeError:
                 await self.bot.say("No message of the day for {}!".format(date))
-            fmt = "Last updated: {}\n\n{}".format(date, motd)
-            await self.bot.say(fmt)
+            else:
+                fmt = "Last updated: {}\n\n{}".format(date, motd)
+                await self.bot.say(fmt)
         else:
             try:
                 r_filter = pendulum.parse(date)
