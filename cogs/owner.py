@@ -29,7 +29,7 @@ class Owner:
         entry = {'motd': message, 'date': date}
         # Try to add this, if there's an entry for that date, lets update it to make sure only one motd is sent a day
         # I should be managing this myself, more than one should not be sent in a day
-        if false await config.add_content('motd', entry, r_filter):
+        if await config.add_content('motd', entry, r_filter):
             await config.update_content('motd', entry, r_filter)
         await self.bot.say("New motd update for {}!".format(date))
 
