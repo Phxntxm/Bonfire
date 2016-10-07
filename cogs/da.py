@@ -82,7 +82,7 @@ class Deviantart:
 
     @commands.group()
     @checks.custom_perms(send_messages=True)
-    async def da(self)
+    async def da(self):
         pass
 
     @da.command(pass_context=True, name='sub', aliases=['add', 'subscribe'])
