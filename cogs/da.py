@@ -130,7 +130,7 @@ class Deviantart:
         r_filter = {'member_id': ctx.message.author.id}
         content = await config.get_content('deviantart', r_filter)
 
-        if content is None:
+        if content is None or content[0]['subbed'] is None:
             await self.bot.say("You are not subscribed to anyone at the moment!")
         elif username in content[0]['subbed']:
             sub_list = content[0]['subbed'].remove(username)
