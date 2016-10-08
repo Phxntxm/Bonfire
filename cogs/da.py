@@ -113,11 +113,15 @@ class Deviantart:
             entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_entry': {}}
             await config.add_content('deviantart', entry, r_filter)
             await self.bot.say("You have just subscribed to {}!".format(username))
-        elif username in content[0]['subbed']:
-            await self.bot.say("You are already subscribed to that user!")
-        else:
-            await config.update_content('deviantart', {'subbed': r.row['subbed'].append(username)}, r_filter)
+        elif content[0]['subbed'] is None or username not in content[0]['subbed']:
+            if content[0]['subbed'] is None:
+                sub_list = [username]
+            else:
+                sub_list = content[0]['subbed'].append(username)
+            await config.update_content('deviantart', {'subbed': sub_list}, r_filter)
             await self.bot.say("You have just subscribed to {}!".format(username))
+        else:
+            await self.bot.say("You are already subscribed to that user!")
 
     @da.command(pass_context=True, name='unsub', aliases=['delete', 'remove', 'unsubscribe'])
     @checks.custom_perms(send_messages=True)
@@ -129,7 +133,8 @@ class Deviantart:
         if content is None:
             await self.bot.say("You are not subscribed to anyone at the moment!")
         elif username in content[0]['subbed']:
-            await config.update_content('deviantart', {'subbed': content[0]['subbed'].remove(username)}, r_filter)
+            sub_list = content[0]['subbed'].remove(username)
+            await config.update_content('deviantart', {'subbed': sub_list}, r_filter)
             await self.bot.say("You have just unsubscribed from {}!".format(username))
         else:
             await self.bot.say("You are not subscribed to that user!")
