@@ -52,6 +52,13 @@ discord_bots_key = global_config.get('discord_bots_key', "")
 carbon_key = global_config.get('carbon_key', "")
 # The client ID for twitch requsets
 twitch_key = global_config.get('twitch_key', "")
+# The steam API key
+steam_key = global_config.get("steam_key", "")
+# The key for youtube API calls
+youtube_key = global_config.get("youtube_key", "")
+# The keys needed for deviant art calls
+da_id = global_confg.get("da_id", "")
+da_secret = global_config.get("da_secret", "")
 # The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
 
@@ -61,10 +68,6 @@ shard_id = global_config.get('shard_id', 0)
 
 # The default status the bot will use
 default_status = global_config.get("default_status", "")
-# The steam API key
-steam_key = global_config.get("steam_key", "")
-# The key for youtube API calls
-youtube_key = global_config.get("youtube_key", "")
 # The rethinkdb hostname
 db_host = global_config.get('db_host', 'localhost')
 # The rethinkdb database name
