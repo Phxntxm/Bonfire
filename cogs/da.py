@@ -13,15 +13,20 @@ class Deviantart:
         self.bot = bot
         self.headers = {"User-Agent": "Bonfire/1.0.0"}
         self.session = aiohttp.ClientSession()
-        bot.loop.create_task(self.get_token())
+        bot.loop.create_task(self.token_task())
         # Lets start the task a few seconds after, to ensure our token gets set
-        bot.loop.call_later(lambda: bot.loop.create_task(self.post_task()))
         await asyncio.sleep(5)
         bot.loop.create_task(self.post_task())
 
+    async def token_task(self):
+        while(True):
+            expires_in = await self.get_token()
+            await asyncio.sleep(expires_in)
+
+
     async def post_task(self):
         while(True):
-            await check_posts()
+            expires_in = await check_posts()
             await asyncio.sleep(300)
 
     async def get_token(self):
@@ -34,12 +39,12 @@ class Deviantart:
 
         async with self.session.get(url, headers=self.headers, params=params) as response:
             data = await response.json()
+            self.token = data.get('access_token', None)
+            self.params = {'access_token': self.token}
             # Make sure we refresh our token, based on when they tell us it expires
             # Ensure we call it a few seconds earlier, to give us enough time to set the new token
             # If there was an issue, lets call this in a minute again
-            self.bot.loop.call_later(data.get('expires_in', 65) - 5, get_token)
-            self.token = data.get('access_token', None)
-            self.params = {'access_token': self.token}
+            return data.get('expires_in', 65) - 5
 
     async def check_posts(self):
         content = await config.get_content('deviantart')
