@@ -129,7 +129,7 @@ class Deviantart:
         if content is None:
             await self.bot.say("You are not subscribed to anyone at the moment!")
         elif username in content[0]['subbed']:
-            await config.update_content('deviantart', {'subbed': r.row['subbed'].remove(username)}, r_filter)
+            await config.update_content('deviantart', {'subbed': content[0]['subbed'].remove(username)}, r_filter)
             await self.bot.say("You have just unsubscribed from {}!".format(username))
         else:
             await self.bot.say("You are not subscribed to that user!")
