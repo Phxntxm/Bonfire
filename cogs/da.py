@@ -14,8 +14,6 @@ class Deviantart:
         self.headers = {"User-Agent": "Bonfire/1.0.0"}
         self.session = aiohttp.ClientSession()
         bot.loop.create_task(self.token_task())
-        # Lets start the task a few seconds after, to ensure our token gets set
-        await asyncio.sleep(5)
         bot.loop.create_task(self.post_task())
 
     async def token_task(self):
@@ -25,6 +23,8 @@ class Deviantart:
 
 
     async def post_task(self):
+        await asyncio.sleep(5)
+        # Lets start the task a few seconds after, to ensure our token gets set
         while(True):
             expires_in = await check_posts()
             await asyncio.sleep(300)
