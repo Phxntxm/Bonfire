@@ -57,7 +57,7 @@ steam_key = global_config.get("steam_key", "")
 # The key for youtube API calls
 youtube_key = global_config.get("youtube_key", "")
 # The keys needed for deviant art calls
-da_id = global_confg.get("da_id", "")
+da_id = global_config.get("da_id", "")
 da_secret = global_config.get("da_secret", "")
 # The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
