@@ -27,7 +27,7 @@ class Deviantart:
         await asyncio.sleep(5)
         # Lets start the task a few seconds after, to ensure our token gets set
         while(True):
-            expires_in = await check_posts()
+            expires_in = await self.check_posts()
             await asyncio.sleep(300)
 
     async def get_token(self):
@@ -98,6 +98,8 @@ class Deviantart:
     @commands.group()
     @checks.custom_perms(send_messages=True)
     async def da(self):
+        """This provides a sort of 'RSS' feed for subscribed to artists.
+        Subscribe to artists, and I will PM you when new posts come out from these artists"""
         pass
 
     @da.command(pass_context=True, name='sub', aliases=['add', 'subscribe'])
@@ -126,7 +128,7 @@ class Deviantart:
     @da.command(pass_context=True, name='unsub', aliases=['delete', 'remove', 'unsubscribe'])
     @checks.custom_perms(send_messages=True)
     async def da_unsub(self, ctx, *, username):
-        """"This command can be used to unsub from the specified user"""
+        """This command can be used to unsub from the specified user"""
         r_filter = {'member_id': ctx.message.author.id}
         content = await config.get_content('deviantart', r_filter)
 
