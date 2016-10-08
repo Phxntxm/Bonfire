@@ -14,7 +14,7 @@ base_url = "https://api.owapi.net/api/v2/u/"
 # This sets an easy way to use list comprehension later, to print all possible things we want, if it exists
 check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
                  'cards', 'damage_done', 'healing_done', 'multikills']
-check_o_stats = ['wins', 'losses']
+check_o_stats = ['wins']
 
 
 class Overwatch:
