@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import discord
 import re
+import rethinkdb as r
 
 from discord.ext import commands
 from .utils import config
@@ -111,6 +112,7 @@ class Deviantart:
         if content is None:
             entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_entry': {}}
             await config.add_content('deviantart', entry, r_filter)
+            await self.bot.say("You have just subscribed to {}!".format(username))
         elif username in content[0]['subbed']:
             await self.bot.say("You are already subscribed to that user!")
         else:
