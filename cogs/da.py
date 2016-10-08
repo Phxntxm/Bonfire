@@ -1,12 +1,11 @@
 import aiohttp
 import asyncio
 import discord
-import re
-import rethinkdb as r
 
 from discord.ext import commands
 from .utils import config
 from .utils import checks
+
 
 class Deviantart:
     def __init__(self, bot):
@@ -14,20 +13,21 @@ class Deviantart:
         self.bot = bot
         self.headers = {"User-Agent": "Bonfire/1.0.0"}
         self.session = aiohttp.ClientSession()
+        self.token = None
+        self.params = None
         bot.loop.create_task(self.token_task())
         bot.loop.create_task(self.post_task())
 
     async def token_task(self):
-        while(True):
+        while True:
             expires_in = await self.get_token()
             await asyncio.sleep(expires_in)
-
 
     async def post_task(self):
         await asyncio.sleep(5)
         # Lets start the task a few seconds after, to ensure our token gets set
-        while(True):
-            expires_in = await self.check_posts()
+        while True:
+            await self.check_posts()
             await asyncio.sleep(300)
 
     async def get_token(self):
@@ -55,7 +55,8 @@ class Deviantart:
         for entry in content:
             user = discord.utils.get(self.bot.get_all_members(), id=entry['member_id'])
 
-            # If we're sharded, we might not be able to find this user. If the bot is not in the server with the member either
+            # If we're sharded, we might not be able to find this user.
+            # If the bot is not in the server with the member either
             if user is None:
                 continue
 
@@ -78,22 +79,21 @@ class Deviantart:
                 # This means that our last update to this user, for this author, is not the same
                 if last_updated_id != result['deviationid']:
                     # First lets check if the last updated ID was None, if so...then we haven't alerted them yet
-                    # We don't want to alert them, we just want to act like the artist's most recent update was the last notified
+                    # We don't want to alert them in this case
+                    # We just want to act like the artist's most recent update was the last notified
                     # So just notify the user if this is not None
                     if last_updated_id is not None:
-                        fmt = "**Title:** {}\n**User:** {}\n**Category:** {}\n**URL:** {}".format(
-                                    title = result['title'],
-                                    artist = result['author']['username'],
-                                    url = result['url'],
-                                    category = result['category'])
+                        fmt = "There has been a new post by an artist you are subscribed to!\n\n" \
+                              "**Title:** {}\n**User:** {}\n**URL:** {}".format(
+                                result['title'],
+                                result['author']['username'],
+                                result['url'])
                         await self.bot.send_message(user, fmt)
                     # Now we can update the user's last updated for this DA
                     # We want to do this whether or not our last if statement was met
                     r_filter = {'member_id': user.id}
                     update = {'last_updated': {da_name: result['deviationid']}}
                     await config.update_content('deviantart', update, r_filter)
-
-
 
     @commands.group()
     @checks.custom_perms(send_messages=True)
@@ -112,14 +112,15 @@ class Deviantart:
         # TODO: Ensure the user provided is a real user
 
         if content is None:
-            entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_entry': {}}
+            entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_updated': {}}
             await config.add_content('deviantart', entry, r_filter)
             await self.bot.say("You have just subscribed to {}!".format(username))
         elif content[0]['subbed'] is None or username not in content[0]['subbed']:
             if content[0]['subbed'] is None:
                 sub_list = [username]
             else:
-                sub_list = content[0]['subbed'].append(username)
+                content[0]['subbed'].append(username)
+                sub_list = content[0]['subbed']
             await config.update_content('deviantart', {'subbed': sub_list}, r_filter)
             await self.bot.say("You have just subscribed to {}!".format(username))
         else:
@@ -135,11 +136,12 @@ class Deviantart:
         if content is None or content[0]['subbed'] is None:
             await self.bot.say("You are not subscribed to anyone at the moment!")
         elif username in content[0]['subbed']:
-            sub_list = content[0]['subbed'].remove(username)
-            await config.update_content('deviantart', {'subbed': sub_list}, r_filter)
+            content[0]['subbed'].remove(username)
+            await config.update_content('deviantart', {'subbed': content[0]['subbed']}, r_filter)
             await self.bot.say("You have just unsubscribed from {}!".format(username))
         else:
             await self.bot.say("You are not subscribed to that user!")
+
 
 def setup(bot):
     bot.add_cog(Deviantart(bot))
