@@ -32,7 +32,7 @@ class Core:
                     d = pendulum.parse(entry['date'])
 
                     # Check if the date for this entry is newer than our currently saved latest entry
-                    if d > latest_motd['date']:
+                    if d > pendulum.parse(latest_motd['date']):
                         latest_motd = entry
 
                 date = latest_motd['date']
