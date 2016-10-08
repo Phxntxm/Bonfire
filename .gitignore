@@ -13,3 +13,5 @@ images/*
 bonfire.log
 *.sublime-*
 cert.pem
+.bash*
+.cache
