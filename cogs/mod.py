@@ -40,6 +40,34 @@ class Mod:
         return cmd
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(kick_members=True)
+    async def kick(self, ctx, member: discord.Member):
+        """Used to kick a member from this server"""
+        try:
+            await self.bot.kick(member)
+            await self.bot.say("\N{OK HAND SIGN}")
+        except discord.Forbidden:
+            await self.bot.say("But I can't, muh permissions >:c")
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(ban_members=True)
+    async def unban(self, ctx, member_id: int):
+        """Used to unban a member from this server
+        Due to the fact that I cannot find a user without being in a server with them
+        only the ID should be provided"""
+
+        # Lets only accept an int for this method, in order to ensure only an ID is provided
+        # Due to that though, we need to ensure a string is passed as the member's ID
+        member = discord.Object(id=str(member_id))
+        try:
+            await self.bot.unban(ctx.message.server, member)
+            await self.bot.say("\N{OK HAND SIGN}")
+        except discord.Forbidden:
+            await self.bot.say("But I can't, muh permissions >:c")
+        except discord.HTTPException:
+            await self.bot.say("Sorry, I failed to unban that user!")
+
+    @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(ban_members=True)
     async def ban(self, ctx, *, member):
         """Used to ban a member
@@ -67,6 +95,8 @@ class Mod:
             await self.bot.say("\N{OK HAND SIGN}")
         except discord.HTTPException:
             await self.bot.say("Sorry, I failed to ban that user!")
+        except discord.Forbidden:
+            await self.bot.say("But I can't, muh permissions >:c")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
