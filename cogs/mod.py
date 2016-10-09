@@ -40,6 +40,36 @@ class Mod:
         return cmd
 
     @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(ban_members=True)
+    async def ban(self, ctx, *, member):
+        """Used to ban a member
+        This can be used to ban someone preemptively as well.
+        Provide the ID of the user and this should ban them without them being in the server"""
+
+        # Lets first check if a user ID was provided, as that will be the easiest case to ban
+        if member.isdigit():
+            # First convert it to a discord object based on the ID that was given
+            member = discord.Object(id=member)
+            # Next, to ban from the server the API takes a server obejct and uses that ID
+            # So set "this" server as the member's server. This creates the "fake" member we need
+            member.server = ctx.message.server
+        else:
+            # If no ID was provided, lets try to convert what was given using the internal coverter
+            converter = commands.converter.UserConverter(ctx, member)
+            try:
+                member = converter.convert()
+            except commands.converter.BadArgument:
+                await self.bot.say("{} does not appear to be a valid member. "
+                                   "If this member is not in this server, please provide their ID".format())
+                return
+        # Now lets try actually banning the member we've been given
+        try:
+            await self.bot.ban(member)
+            await self.bot.say("\N{OK HAND SIGN}")
+        except discord.HTTPException:
+            await self.bot.say("Sorry, I failed to ban that user!")
+
+    @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def alerts(self, ctx, channel: discord.Channel):
         """This command is used to set a channel as the server's 'notifications' channel
