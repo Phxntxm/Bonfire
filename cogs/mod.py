@@ -59,8 +59,7 @@ class Mod:
             try:
                 member = converter.convert()
             except commands.converter.BadArgument:
-                await self.bot.say("{} does not appear to be a valid member. "
-                                   "If this member is not in this server, please provide their ID".format())
+                await self.bot.say("{} does not appear to be a valid member. If this member is not in this server, please provide their ID".format(member))
                 return
         # Now lets try actually banning the member we've been given
         try:
