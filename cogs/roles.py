@@ -203,9 +203,6 @@ class Roles:
 
         # Check if any integer's were provided that are within the length of the list of permissions
         num_permissions = [int(i) for i in re.split(' ?,?', msg.content) if i.isdigit() and int(i) < len(all_perms)]
-        if len(num_permissions) == 0:
-            await self.bot.say("You did not provide any valid numbers! Try better next time.")
-            return
 
         # Check if this role should be in a separate section on the sidebard, i.e. hoisted
         await self.bot.say("Do you want this role to be in a separate section on the sidebar? (yes or no)")
