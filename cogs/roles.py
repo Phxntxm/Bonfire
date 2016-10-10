@@ -29,7 +29,7 @@ class Roles:
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't manage roles in this server, do you not trust  me? :c")
             return
-        
+
         server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
         # First get the list of all mentioned users
         members = ctx.message.mentions
@@ -45,7 +45,7 @@ class Roles:
                 return
             # Override members if everything has gone alright, and then continue
             members = msg.mentions
-        
+
         # This allows the user to remove multiple roles from the list of users, if they want.
         await self.bot.say("Alright, please provide the roles you would like to remove from this member. "
                            "Make sure the roles, if more than one is provided, are separate by commas. "
@@ -55,7 +55,7 @@ class Roles:
         if msg is None:
             await self.bot.say("You took too long. I'm impatient, don't make me wait")
             return
-        
+
         # Split the content based on commas, using regex so we can split if a space was not provided or if it was
         role_names = re.split(', ?', msg.content)
         roles = []
@@ -64,12 +64,12 @@ class Roles:
             _role = discord.utils.get(server_roles, name=role)
             if _role is not None:
                 roles.append(_role)
-        
+
         # If no valid roles were given, let them know that and return
         if len(roles) == 0:
             await self.bot.say("Please provide a valid role next time!")
             return
-        
+
         # Otherwise, remove the roles from each member given
         for member in members:
             await self.bot.remove_roles(member, *roles)
@@ -86,7 +86,7 @@ class Roles:
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't manage roles in this server, do you not trust  me? :c")
             return
-        
+
         # This is exactly the same as removing roles, except we call add_roles instead.
         server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
         members = ctx.message.mentions
@@ -134,7 +134,7 @@ class Roles:
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't delete roles in this server, do you not trust  me? :c")
             return
-        
+
         # If no role was given, get the current roles on the server and ask which ones they'd like to remove
         if role is None:
             server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
@@ -142,7 +142,7 @@ class Roles:
             await self.bot.say(
                 "Which role would you like to remove from the server? Here is a list of this server's roles:"
                 "```\n{}```".format("\n".join([r.name for r in server_roles])))
-            
+
             # For this method we're only going to delete one role at a time
             # This check attempts to find a role based on the content provided, if it can't find one it returns None
             # We can use that fact to simply use just that as our check
@@ -175,7 +175,7 @@ class Roles:
         channel = ctx.message.channel
 
         # A couple checks that will be used in the wait_for_message's
-        num_separated_check = lambda m: re.search("\d(,| )", m.content) is not None
+        num_separated_check = lambda m: re.search("(\d(, ?| )?|[nN]one)", m.content) is not None
         yes_no_check = lambda m: re.search("(yes|no)", m.content.lower()) is not None
         members_check = lambda m: len(m.mentions) > 0
 
@@ -244,7 +244,7 @@ class Roles:
         # There's no need to mention the users, so don't send a failure message if they didn't, just return
         if msg is None:
             return
-        
+
         # Otherwise members were mentioned, add the new role to them now
         for member in msg.mentions:
             await self.bot.add_roles(member, role)
