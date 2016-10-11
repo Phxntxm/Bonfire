@@ -78,7 +78,7 @@ class Links:
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
-    async def urban(self, *msg: str):
+    async def urban(self, *, msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         url = "http://api.urbandictionary.com/v0/define"
         params = {"term": msg}
