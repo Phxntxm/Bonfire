@@ -25,8 +25,8 @@ class Raffle:
             await self.bot.say("There are currently no raffles setup on this server!")
             return
 
-        fmt = "\n\n".join("**Raffle:** {}\n**Title:** {}\n**Total Entrants:** {}\n**Ends:** {}".format(
-                                                                                       num,
+        fmt = "\n\n".join("**Raffle:** {}\n**Title:** {}\n**Total Entrants:** {}\n**Ends:** {} UTC".format(
+                                                                                       num + 1,
                                                                                        raffle['title'],
                                                                                        len(raffle['entrants']),
                                                                                        raffle['expires']) for num, raffle in enumerate(raffles))
