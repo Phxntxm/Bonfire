@@ -55,7 +55,7 @@ class Links:
         params = {"action": "query",
                   "list": "search",
                   "format": "json",
-                  "srsearch": query.replace(" ", "%20")}
+                  "srsearch": query}
 
         async with self.session.get(base_url, params=params, headers=self.headers) as r:
             data = await r.json()
@@ -81,7 +81,7 @@ class Links:
     async def urban(self, *msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         url = "http://api.urbandictionary.com/v0/define"
-        params = {"term": '+'.join(msg)}
+        params = {"term": msg}
         async with self.session.get(url, params=params, headers=self.headers) as r:
             data = await r.json()
 
