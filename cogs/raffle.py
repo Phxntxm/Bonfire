@@ -30,6 +30,7 @@ class Raffle:
                                                                                        raffle['title'],
                                                                                        len(raffle['entrants']),
                                                                                        raffle['expires']) for num, raffle in enumerate(raffles))
+        await self.bot.say(fmt)
 
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
@@ -152,7 +153,7 @@ class Raffle:
 
         # We don't want to pass a filter to this, because we can have multiple raffles per server
         await config.add_content('raffles', entry)
-        await self.bot.say("I have just created ")
+        await self.bot.say("I have just saved your new raffle!")
 
 def setup(bot):
     bot.add_cog(Raffle(bot))
