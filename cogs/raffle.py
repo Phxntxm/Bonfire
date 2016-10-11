@@ -10,7 +10,7 @@ class Raffle:
     def __init__(self, bot):
         self.bot = bot
 
-    async def check_raffles(self)
+    async def check_raffles(self):
         # This is used to periodically check the current raffles, and see if they have ended yet
         # If the raffle has ended, we'll pick a winner from the entrants
         pass
@@ -106,7 +106,7 @@ class Raffle:
         fmt = "Alright, your new raffle will be titled:\n\n{}\n\nHow long would you like this raffle to run for? " \
                    "The format should be [number] [length] for example, `2 days` or `1 hour` or `30 minutes` etc. "\
                    "The minimum for this is 10 minutes, and the maximum is 3 months"
-        await self.bot.say(fmt)
+        await self.bot.say(fmt.format(title))
 
         # Our check to ensure that a proper length of time was passed
         check = lambda m: re.search("\d+ (minutes?|hours?|days?|weeks?|months?)", m.content.lower()) is not None
@@ -117,6 +117,8 @@ class Raffle:
 
         # Lets get the length provided, based on the number and type passed
         num, term = re.search("\d+ (minutes?|hours?|days?|weeks?|months?)", msg.content.lower()).group(0).split(' ')
+        # This should be safe to convert, we already made sure with our check earlier this would match
+        num = int(num)
 
         # Now lets ensure this meets our min/max
         if "minute" in term and (num < 15 or num > 129600):
@@ -135,9 +137,11 @@ class Raffle:
             await self.bot.say("Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
             return
 
+        # Pendulum only accepts the plural version of terms, lets make sure this is added
+        term = term if term.endswith('s') else '{}s'.format(term)
         # If we're in the range, lets just pack this in a dictionary we can pass to set the time we want, then set that
         payload = {term: num}
-        expires = now.add(payload)
+        expires = now.add(**payload)
 
         # Now we're ready to add this as a new raffle
         entry = {'title': title,
@@ -147,7 +151,8 @@ class Raffle:
                         'server_id': server.id}
 
         # We don't want to pass a filter to this, because we can have multiple raffles per server
-        await self.bot.add_content('raffles', entry)
+        await config.add_content('raffles', entry)
+        await self.bot.say("I have just created ")
 
 def setup(bot):
     bot.add_cog(Raffle(bot))
