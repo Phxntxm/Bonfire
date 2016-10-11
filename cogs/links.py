@@ -82,19 +82,21 @@ class Links:
         """Pulls the top urbandictionary.com definition for a term"""
         url = "http://api.urbandictionary.com/v0/define"
         params = {"term": msg}
-        async with self.session.get(url, params=params, headers=self.headers) as r:
-            data = await r.json()
-
-        # Urban dictionary has some long definitions, some might not be able to be sent
         try:
+            async with self.session.get(url, params=params, headers=self.headers) as r:
+                data = await r.json()
+
             # List is the list of definitions found, if it's empty then nothing was found
             if len(data['list']) == 0:
                 await self.bot.say("No result with that term!")
             # If the list is not empty, use the first result and print it's defintion
             else:
                 await self.bot.say(data['list'][0]['definition'])
+        # Urban dictionary has some long definitions, some might not be able to be sent
         except discord.HTTPException:
             await self.bot.say('```Error: Definition is too long for me to send```')
+        except (json.JSONDecodeError, KeyError):
+            await self.bot.say("Sorry but I failed to connect to urban dictionary!")
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
