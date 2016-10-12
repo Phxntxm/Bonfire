@@ -87,7 +87,9 @@ class Mod:
             try:
                 member = converter.convert()
             except commands.converter.BadArgument:
-                await self.bot.say("{} does not appear to be a valid member. If this member is not in this server, please provide their ID".format(member))
+                await self.bot.say(
+                    "{} does not appear to be a valid member. If this member is not in this server, please provide their ID".format(
+                        member))
                 return
         # Now lets try actually banning the member we've been given
         try:
@@ -319,8 +321,8 @@ class Mod:
         if prefix is None:
             fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
         else:
-            fmt = "I have just updated the prefix for this server; you now need to call commands with `{0}`."
-            "For example, you can call this command again with {0}prefix".format(prefix)
+            fmt = "I have just updated the prefix for this server; you now need to call commands with `{0}`. " \
+                  "For example, you can call this command again with {0}prefix".format(prefix)
         await self.bot.say(fmt)
 
     @commands.command(pass_context=True, no_pm=True)
