@@ -315,14 +315,13 @@ class Mod:
 
         if not await config.add_content('prefixes', entry, r_filter):
             await config.update_content('prefixes', entry, r_filter)
-        # For now, cache is not fully implemented, however is needed for prefixes
-        # So we're going to manually trigger an update when this is ran
-        self.bot.loop.create_task(config.cache['prefixes'].update())
 
-        await self.bot.say(
-            "I have just updated the prefix for this server; you now need to call commands with `{0}`."
-            "For example, you can call this command again with {0}prefix".format(
-                prefix))
+        if prefix is None:
+            fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
+        else:
+            fmt = "I have just updated the prefix for this server; you now need to call commands with `{0}`."
+            "For example, you can call this command again with {0}prefix".format(prefix)
+        await self.bot.say(fmt)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(manage_messages=True)
