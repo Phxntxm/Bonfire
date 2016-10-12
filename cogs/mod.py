@@ -307,7 +307,7 @@ class Mod:
     async def prefix(self, ctx, *, prefix: str):
         """This command can be used to set a custom prefix per server"""
         r_filter = {'server_id': ctx.message.server.id}
-        if prefix.lower == "none":
+        if prefix.lower.strip() == "none":
             prefix = None
 
         entry = {'server_id': ctx.message.server.id,
