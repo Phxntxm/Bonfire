@@ -123,7 +123,7 @@ class Raffle:
             await config.update_content('raffles', update, r_filter)
             await self.bot.say("{} you have just entered the raffle!".format(author.mention))
         # Otherwise, make sure the author gave a valid raffle_id
-        elif raffle_id in range(raffle_count):
+        elif raffle_id in range(raffle_count - 1):
             entrants = raffles[raffle_id]['entrants']
 
             # Lets make sure that the user hasn't already entered the raffle
@@ -133,7 +133,7 @@ class Raffle:
             entrants.append(author.id)
 
             # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
-            r_filter = {'id': raffles[1]['id']}
+            r_filter = {'id': raffles[raffle_id]['id']}
             update = {'entrants': entrants}
             await config.update_content('raffles', update, r_filter)
             await self.bot.say("{} you have just entered the raffle!".format(author.mention))
