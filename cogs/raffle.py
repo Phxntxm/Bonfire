@@ -2,18 +2,71 @@ from discord.ext import commands
 from .utils import config
 from .utils import checks
 
-import discord
+import random
 import pendulum
 import re
+import asyncio
+
 
 class Raffle:
     def __init__(self, bot):
         self.bot = bot
+        self.bot.create_task(self.raffle_task())
+
+    async def raffle_task(self):
+        while True:
+            await self.check_raffles()
+            await asyncio.sleep(900)
 
     async def check_raffles(self):
         # This is used to periodically check the current raffles, and see if they have ended yet
         # If the raffle has ended, we'll pick a winner from the entrants
-        pass
+        raffles = await config.get_content('raffles')
+
+        for raffle in raffles:
+            server = self.bot.get_server(raffle['server_id'])
+
+            # Check to see if this cog can find the server in question
+            if server is None:
+                continue
+
+            now = pendulum.utcnow()
+            expires = pendulum.parse(raffle['expires'])
+
+            # Now lets compare and see if this raffle has ended, if not just continue
+            if expires < now:
+                continue
+
+            title = raffle['title']
+            entrants = raffle['entrants']
+            raffle_id = raffle['id']
+
+            # Make sure there are actually entrants
+            if len(entrants) == 0:
+                fmt = 'Sorry, but there were no entrants for the raffle `{}`!'.format(title)
+            else:
+                winner = None
+                count = 0
+                while winner is None:
+                    winner = server.get_member(random.SystemRandom().choice(entrants))
+
+                    # Lets make sure we don't get caught in an infinite loop
+                    # Realistically having more than 25 random entrants found that aren't in the server anymore
+                    # Isn't something that should be an issue
+                    count += 1
+                    if count >= 25:
+                        break
+
+                if winner is None:
+                    fmt = 'I couldn\'t find an entrant that is still in this server, for the raffle `{}`!'.format(title)
+                else:
+                    fmt = 'The raffle `{}` has just ended! The winner is {}!'.format(title, winner.display_name)
+
+            # No matter which one of these matches were met, the raffle has ended and we want to remove it
+            # We don't have to wait for it however, so create a task for it
+            r_filter = {'id': raffle_id}
+            self.bot.loop.create_task(config.remove_content('raffles', r_filter))
+            await self.bot.say(fmt)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -26,12 +79,11 @@ class Raffle:
             return
 
         fmt = "\n\n".join("**Raffle:** {}\n**Title:** {}\n**Total Entrants:** {}\n**Ends:** {} UTC".format(
-                                                                                       num + 1,
-                                                                                       raffle['title'],
-                                                                                       len(raffle['entrants']),
-                                                                                       raffle['expires']) for num, raffle in enumerate(raffles))
+            num + 1,
+            raffle['title'],
+            len(raffle['entrants']),
+            raffle['expires']) for num, raffle in enumerate(raffles))
         await self.bot.say(fmt)
-
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
@@ -80,9 +132,9 @@ class Raffle:
             await self.bot.update_content('raffles', update, r_filter)
             await self.bot.say("{} you have just entered the raffle!".format(author.mention))
         else:
-            fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! "\
-                       "There are currently `{}` raffles running, use {}raffles to view the current running raffles".format(
-                                    raffle_count, ctx.prefix)
+            fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! " \
+                  "There are currently `{}` raffles running, use {}raffles to view the current running raffles".format(
+                      raffle_count, ctx.prefix)
             await self.bot.say(fmt)
 
     @raffle.command(pass_context=True, no_pm=True, name='create', aliases=['start', 'begin', 'add'])
@@ -95,7 +147,8 @@ class Raffle:
         channel = ctx.message.channel
         now = pendulum.utcnow()
 
-        await self.bot.say("Ready to start a new raffle! Please respond with the title you would like to use for this raffle!")
+        await self.bot.say(
+            "Ready to start a new raffle! Please respond with the title you would like to use for this raffle!")
 
         msg = await self.bot.wait_for_message(author=author, channel=channel, timeout=120)
         if msg is None:
@@ -105,8 +158,8 @@ class Raffle:
         title = msg.content
 
         fmt = "Alright, your new raffle will be titled:\n\n{}\n\nHow long would you like this raffle to run for? " \
-                   "The format should be [number] [length] for example, `2 days` or `1 hour` or `30 minutes` etc. "\
-                   "The minimum for this is 10 minutes, and the maximum is 3 months"
+              "The format should be [number] [length] for example, `2 days` or `1 hour` or `30 minutes` etc. " \
+              "The minimum for this is 10 minutes, and the maximum is 3 months"
         await self.bot.say(fmt.format(title))
 
         # Our check to ensure that a proper length of time was passed
@@ -123,19 +176,24 @@ class Raffle:
 
         # Now lets ensure this meets our min/max
         if "minute" in term and (num < 15 or num > 129600):
-            await self.bot.say("Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
+            await self.bot.say(
+                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
             return
         elif "hour" in term and num > 2160:
-            await self.bot.say("Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
+            await self.bot.say(
+                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
             return
         elif "day" in term and num > 90:
-            await self.bot.say("Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
+            await self.bot.say(
+                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
             return
         elif "week" in term and num > 12:
-            await self.bot.say("Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
+            await self.bot.say(
+                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
             return
         elif "month" in term and num > 3:
-            await self.bot.say("Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
+            await self.bot.say(
+                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
             return
 
         # Pendulum only accepts the plural version of terms, lets make sure this is added
@@ -146,14 +204,15 @@ class Raffle:
 
         # Now we're ready to add this as a new raffle
         entry = {'title': title,
-                        'expires': expires.to_datetime_string(),
-                        'entrants': [],
-                        'author': author.id,
-                        'server_id': server.id}
+                 'expires': expires.to_datetime_string(),
+                 'entrants': [],
+                 'author': author.id,
+                 'server_id': server.id}
 
         # We don't want to pass a filter to this, because we can have multiple raffles per server
         await config.add_content('raffles', entry)
         await self.bot.say("I have just saved your new raffle!")
+
 
 def setup(bot):
     bot.add_cog(Raffle(bot))
