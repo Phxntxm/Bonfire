@@ -175,7 +175,7 @@ class Raffle:
         num = int(num)
 
         # Now lets ensure this meets our min/max
-        if "minute" in term and (num < 15 or num > 129600):
+        if "minute" in term and (num < 10 or num > 129600):
             await self.bot.say(
                 "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
             return
