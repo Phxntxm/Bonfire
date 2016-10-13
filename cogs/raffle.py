@@ -11,7 +11,7 @@ import asyncio
 class Raffle:
     def __init__(self, bot):
         self.bot = bot
-        self.bot.create_task(self.raffle_task())
+        self.bot.loop.create_task(self.raffle_task())
 
     async def raffle_task(self):
         while True:
