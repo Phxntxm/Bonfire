@@ -40,7 +40,7 @@ class Raffle:
             expires = pendulum.parse(raffle['expires'])
 
             # Now lets compare and see if this raffle has ended, if not just continue
-            if expires < now:
+            if expires > now:
                 continue
 
             title = raffle['title']
