@@ -6,6 +6,7 @@ import random
 import pendulum
 import re
 import asyncio
+import traceback
 
 
 class Raffle:
@@ -15,7 +16,12 @@ class Raffle:
 
     async def raffle_task(self):
         while True:
-            await self.check_raffles()
+            try:
+                await self.check_raffles()
+            except Exception as error:
+                with open("error_log", 'a') as f:
+                    traceback.print_tb(error.__traceback__, file=f)
+                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
             await asyncio.sleep(900)
 
     async def check_raffles(self):
