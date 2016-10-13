@@ -135,7 +135,7 @@ class Raffle:
             # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
             r_filter = {'id': raffles[1]['id']}
             update = {'entrants': entrants}
-            await self.config('raffles', update, r_filter)
+            await config.update_content('raffles', update, r_filter)
             await self.bot.say("{} you have just entered the raffle!".format(author.mention))
         else:
             fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! " \
