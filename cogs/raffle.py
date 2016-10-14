@@ -29,6 +29,9 @@ class Raffle:
         # If the raffle has ended, we'll pick a winner from the entrants
         raffles = await config.get_content('raffles')
 
+        if raffles is None:
+            return
+
         for raffle in raffles:
             server = self.bot.get_server(raffle['server_id'])
 
