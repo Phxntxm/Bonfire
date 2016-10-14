@@ -11,7 +11,6 @@ battle_outcomes = \
      "As they were battling, {1} was struck by lightning! {0} you lucked out this time!",
      "{1} tried to dive at {0} while fighting, somehow they missed and landed in quicksand."
      "Try paying more attention next time {1}",
-
      "{1} got a little...heated during the battle and ended up getting set on fire. {0} wins by remaining cool",
      "Princess Celestia came in and banished {1} to the moon. Good luck getting into any battles up there",
      "{1} took an arrow to the knee, they are no longer an adventurer. Keep on adventuring {0}",
@@ -19,15 +18,37 @@ battle_outcomes = \
      "{0} had a nice cup of tea with {1} over their conflict, and mutually agreed that {0} was Best Pony",
      "{0} and {1} had an intense staring contest. "
      "Sadly, {1} forgot to breathe and lost much morethan the staring contest",
-
      "It appears {1} is actually a pacifist, they ran away screaming and crying. "
      "Maybe you should have thought of that before getting in a fight?",
-
      "A bunch of parasprites came in and ate up the jetpack while {1} was flying with it. Those pesky critters...",
      "{0} used their charm to seduce {1} to surrender.",
      "{1} slipped on a banana peel and fell into a pit of spikes. That's actually impressive.",
      "{0} realized it was high noon, {1} never even saw it coming.",
-     "{1} spontaneously combusted...lol rip"]
+     "{1} spontaneously combusted...lol rip",
+     "after many turns {0} summons exodia and {1} is sent to the shadow realm",
+     "{0} and {1} sit down for an intense game of chess, in the heat of the moment {0} forgot they were playing a game and summoned a real knight",
+     "{0} challenges {1} to rock paper scissors, unfortunately for {1}, {0} chose scissors and stabbed them",
+     "{0} goes back in time and becomes {1}'s best friend, winning without ever throwing a punch",
+     "{0} trips down some stairs on their way to the battle with {1}",
+     "{0} books {1} a one way ticket to Flugendorf prison",
+     "{1} was already dead",
+     "{1} was crushed under the weight of expectations",
+     "{1} was wearing a redshirt and it was their first day",
+     "{0} and {1} were walking along when suddenly {1} got kidnapped by a flying monkey; hope they had water with them",
+     "{0} brought an army to a fist fight, {1} never saw their opponent once",
+     "{0} used multiple simultaneous devestating defensive deep strikes to overwhelm {1}",
+     "{0} and {1} engage in a dance off; {0} wiped the floor with {1}",
+     "{1} tried to hide in the sand to catch {0} off guard, unfortunately looks like a Giant Antlion had the same idea for him",
+     "{1} was busy playing trash videogames the night before the fight and collapsed before {0}",
+     "{0} threw a sick meme and {1} totally got PRANK'D",
+     "{0} and {1} go on a skiing trip together, turns out {1} forgot how to pizza french-fry",
+     "{0} is the cure and {1} is the disease....well {1} was the disease",
+     "{1} talked their mouth off at {0}...literally...",
+     "Looks like {1} didn't put enough points into kazoo playing, who knew they would have needed it",
+     "{1} was too scared by the illumanti and extra-dimensional talking horses to show up",
+     "{1} didn't press x enough to not die",
+     "{0} and {1} go fishing to settle their debate, {0} caught a sizeable fish and {1} caught a boot older than time",
+     "{0} did a hero landing and {1} was so surprised they gave up immediately"]
 
 hugs = \
     ["*hugs {}.*",
