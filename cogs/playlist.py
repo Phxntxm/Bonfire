@@ -205,8 +205,14 @@ class Music:
         # move_channel needs to be used if we are already in a channel
         except discord.ClientException:
             state = self.get_voice_state(ctx.message.server)
-            await state.voice.move_to(channel)
-            await self.bot.say('Ready to play audio in ' + channel.name)
+            if state.voice is None:
+                voice_channel = self.bot.voice_client_in(ctx.message.server)
+                if voice_channel is not None:
+                    await voice_channel.disconnect()
+                await self.bot.say("Sorry but I failed to connect! Please try again")
+            else:
+                await state.voice.move_to(channel)
+                await self.bot.say('Ready to play audio in ' + channel.name)
         else:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
