@@ -45,7 +45,7 @@ battle_outcomes = \
      "{0} is the cure and {1} is the disease....well {1} was the disease",
      "{1} talked their mouth off at {0}...literally...",
      "Looks like {1} didn't put enough points into kazoo playing, who knew they would have needed it",
-     "{1} was too scared by the illumanti and extra-dimensional talking horses to show up",
+     "{1} was too scared by the illuminati and extra-dimensional talking horses to show up",
      "{1} didn't press x enough to not die",
      "{0} and {1} go fishing to settle their debate, {0} caught a sizeable fish and {1} caught a boot older than time",
      "{0} did a hero landing and {1} was so surprised they gave up immediately"]
