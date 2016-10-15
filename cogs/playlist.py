@@ -256,7 +256,7 @@ class Music:
                 try:
                     state.voice = await self.bot.join_voice_channel(summoned_channel)
                 # Weird timeout error usually caused by the region someone is in
-                except asyncio.TimeoutError:
+                except (asyncio.TimeoutError, discord.ConnectionClosed):
                     await self.bot.say(
                         "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
                         "You can either try again, or try to change the server's"
