@@ -228,6 +228,9 @@ class Core:
         if num > 100:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
             return
+        if num <= 1:
+            await self.bot.say("A {} sided die? You know that's impossible right?".format(num))
+            return
 
         value_str = ", ".join(str(random.SystemRandom().randint(1, num))
                               for i in range(0, int(dice)))
