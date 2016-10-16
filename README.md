@@ -8,9 +8,14 @@ https://discordapp.com/oauth2/authorize?client_id=183748889814237186&scope=bot&p
 This requires the discord.py library, as well as all of it's dependencies.
 https://github.com/Rapptz/discord.py
 
-I also use the pendulum library, which can be installed using pip.
+To save the data for the bot, rethinkdb is what is used:
+https://www.rethinkdb.com/docs/install/
+
+I also use a few libraries that aren't included by default, which can be installed using pip.
 ```
-pip install pendulum
+python3.5 -m pip install rethinkdb pendulum ruamel.yaml Pillow
+# Or on windows
+py -3 -m pip install rethinkdb pendulum ruamel.yaml Pillow
 ```
 
 The only required file to modify would be the config.yml.sample file. The entries are as follows:
