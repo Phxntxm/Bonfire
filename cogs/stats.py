@@ -54,14 +54,14 @@ class Stats:
         member_usage = command_stats['member_usage'].get(ctx.message.author.id, 0)
         server_usage = command_stats['server_usage'].get(ctx.message.server.id, 0)
 
-        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+        try:
             data = {"Command Name": cmd.qualified_name,
                            "Total Usage": total_usage,
                            "Your Usage": member_usage,
                            "This Server's Usage": server_usage}
             banner = await images.create_banner(ctx.message.author, "Command Stats", data)
             await self.bot.upload(banner)
-        else:
+        except (FileNotFoundError, discord.Forbidden):
             fmt = "The command {} has been used a total of {} times\n" \
                   "{} times on this server\n" \
                   "It has been ran by you, {}, {} times".format(cmd.qualified_name, total_usage, server_usage,
@@ -89,11 +89,11 @@ class Stats:
             # Create a string, each command on it's own line, based on the top 5 used commands
             # I'm letting it use the length of the sorted_stats[:5]
             # As this can include, for example, all 3 if there are only 3 entries
-            if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+            try:
                 top_5 = {data[0]: data[1] for data in sorted_stats[:5]}
                 banner = await images.create_banner(ctx.message.author, "Your command usage", top_5)
                 await self.bot.upload(banner)
-            else:
+            except (FileNotFoundError, discord.Forbidden):
                 top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
                 await self.bot.say("Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
         elif re.search('server', option):
@@ -158,12 +158,12 @@ class Stats:
         # Now we only want the first 10 members, so splice this list
         sorted_booped_members = sorted_booped_members[:10]
 
-        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+        try:
             output = {"{0.display_name}".format(ctx.message.server.get_member(m_id)): amt
                                for m_id, amt in sorted_booped_members}
             banner = await images.create_banner(ctx.message.author, "Your booped victims", output)
             await self.bot.upload(banner)
-        else:
+        except (FileNotFoundError, discord.Forbidden):
             output = "\n".join(
                 "{0.display_name}: {1} times".format(ctx.message.server.get_member(m_id), amt) for
                 m_id, amt in sorted_booped_members)
@@ -192,10 +192,10 @@ class Stats:
             if count >= 11:
                 break
 
-        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+        try:
             banner = await images.create_banner(ctx.message.author, "Battling Leaderboard", output)
             await self.bot.upload(banner)
-        else:
+        except (FileNotFoundError, discord.Forbidden):
             fmt = "\n".join("#{}) {}".format(key, value) for key, value in output.items())
             await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
