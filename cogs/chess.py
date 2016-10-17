@@ -225,7 +225,7 @@ class Game:
         # Chess notation is {letter}{number} which a 2D array doesn't support
         # So we're just going to create this based on a normal number array
         # However, we're going to flip it to make the row part of notation easier
-        self.board = [['WR', 'WN', 'WB', 'WQ', 'WK', 'WW', 'WN', 'WR'],
+        self.board = [['WR', 'WN', 'WB', 'WQ', 'WK', 'WB', 'WN', 'WR'],
                                ['WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP'],
                                ['', '', '', '', '', '', '', ''],
                                ['', '', '', '', '', '', '', ''],
