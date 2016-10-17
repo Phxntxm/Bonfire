@@ -137,10 +137,11 @@ class Interaction:
         battles[ctx.message.author.id] = player2.id
         self.battles[ctx.message.server.id] = battles
 
-        fmt = "{0.mention} has challenged you to a battle {1.mention}\n{1.prefix}accept or {1.prefix}decline"
+        fmt = "{0.message.author.mention} has challenged you to a battle {1.mention}\n" \
+              "{0.prefix}accept or {0.prefix}decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
         self.bot.loop.call_later(180, self.battling_off, ctx)
-        await self.bot.say(fmt.format(ctx.message.author, player2))
+        await self.bot.say(fmt.format(ctx, player2))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
