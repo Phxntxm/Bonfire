@@ -86,11 +86,10 @@ class Overwatch:
             if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
                 output_data["Kill Death Ratio"] = "{0:.2f}".format(
                     data['general_stats'].get('eliminations') / data['general_stats'].get('deaths'))
-
-        if ctx.message.channel.is_private or ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+        try:
             banner = await images.create_banner(user, "Overwatch", output_data)
             await self.bot.upload(banner)
-        else:
+        except (FileNotFoundError, discord.Forbidden):
             fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data)
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
