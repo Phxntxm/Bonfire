@@ -1,4 +1,187 @@
+import discord
+from discord.ext import commands
+from .utils import checks
+from .utils import config
+
 import random
+from enum import Enum
+
+class Chess:
+    def __init__(self, bot):
+        self.bot = bot
+        # Our format for games is going to be a little different, because we do want to allow multiple games per server
+        # Format should be {'server_id': [Game, Game, Game]}
+        self.games = {}
+
+    def play(self, player, notation):
+        """Our task to handle a player making their actual move"""
+        game = self.get_game(player)
+
+        # Check if the player is in a game
+        if game is None:
+            return MoveStatus.no_game
+
+        # Check if it's this players turn
+        if not game.can_play:
+            return MoveStatus.wrong_turn
+
+        if '0-0-0' in notation:
+            # Set our piece to the rook, this is what we'll base the move off of
+            colour = 'W' if game.white_turn else 'B'
+            piece = '{}R'.format(colour)
+
+            # Due to the weird way castling works when promoting a pawn, we just want to check the positioning
+            if piece in game.board[7][0]:
+                position = (7, 0)
+            elif piece in game.board[0][0]:
+                position = (0, 0)
+            # If we're trying to castle a rook that's not in these two positions, this is invald
+            else:
+                return MoveStatus.invalid
+
+            # Attempt to castle the rook provided
+            if game.castle(position):
+                return MoveStatus.valid
+            else:
+                return MoveStatus.invalid
+        elif '0-0' in notation:
+            # Set our piece to the rook, this is what we'll base the move off of
+            colour = 'W' if game.white_turn else 'B'
+            piece = '{}R'.format(colour)
+
+            # Due to the weird way castling works when promoting a pawn, we just want to check the positioning
+            if piece in game.board[0][7]:
+                position = (0, 7)
+            elif piece in game.board[7][7]:
+                position = (7, 7)
+            # If we're trying to castle a rook that's not in these two positions, this is invald
+            else:
+                return MoveStatus.invalid
+
+            # Attempt to castle the rook provided
+            if game.castle(position):
+                return MoveStatus.valid
+            else:
+                return MoveStatus.invalid
+        else:
+            # Possible formats: e4, e4Q, e4=Q, Ng4d4 - The last is the only case that we don't need the piece given before
+            try:
+                # Check for the case when there are two peices who can move to the same position
+                multi_move = re.search('(N|R|K|Q|P|B)([a-h][1-8])([a-h][1-8])', notation)
+                piece = multi_move.group(1)
+                original_pos = multi_move.group(2)
+                new_pos = multi_move.group(3)
+            except AttributeError:
+                # Otherwise, we need the piece and position
+                try:
+                    piece = re.search('(king|queen|pawn|bishop|rook|bishop|knight)', notation.lower()).group(1)
+                    position = re.search('[a-h][1-8]=?(Q|R|B|N)?', notation).group(0)
+
+                    if len(position) > 2:
+                        promotion = position[-1:]
+                        position = position[:2]
+                    else:
+                        promotion = None
+                    if game.move(piece, position.upper(), position):
+                        return MoveStatus.valid:
+                    else:
+                        return MoveStatus.invalid
+                except IndexError:
+                    return MoveStatus.invalid
+
+
+    def get_game(self, player):
+        """Provides the game this player is playing, in this server"""
+        server_games = self.games.get(player.server.id, [])
+        for game in server_games:
+            if player in game.challengers.values():
+                return game
+
+        return None
+
+    def in_game(self, player):
+        """Checks to see if a player is playing in a game right now, in this server"""
+        server_games = self.games.get(player.server.id, [])
+        for game in server_games:
+            if player in game.challengers.values():
+                return True
+
+        return False
+
+    def start_game(self, player1, player2):
+        game = Game(player1, player2):
+        try:
+            self.games[player1.server.id].append(game)
+        except KeyError:
+            self.games[player1.server.id] = [game]
+
+        return game
+
+    @commands.group(pass_contxt=True, invoke_without_command=True)
+    @checks.custom_perms(send_messages=True)
+    async def chess(self, ctx, *, move):
+        """Moves a piece based on the notation provided
+        Notation for normal moves are {piece} to {position} based on the algebraic notation of the board (This is on the picture)
+        Example: Knight to d4; Rook to e2, etc.
+        Special moves:
+        - Castling
+            - King side: Notation is: 0-0  (the letter o)
+            - Queen side: Notation is: 0-0-0 (the letter o)
+        - Promoting a pawn (when moving to the other end of the board, you can promote your pawn to a bishop, queen, knight, or rook):
+            - {position}{piece to promote to} i.e. pawn to e8Q (to move the pawn to e8, and promote to a queen)
+        - Taking a  piece:
+            - Provide normal notation (i.e. rook to d4), this code will handle piece taking
+        - En Passant:
+            - Provide normal notation
+        - If two pieces of the same rank can move to the same destination:
+            - Review this first: https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Disambiguating_moves
+            - For the sake of ease, we will only use #3 in our formatting. For example 'Knight to d4' when two of them can go there, should be provided exactly like 'Ng4d4' if the piece you want is on g4, and needs to move to d4. This is an invalid move, but is just for an example
+        - Check/Checkmate
+            - Provide normal notation"""
+        result = self.play(ctx.message.author, move)
+        if result is MoveStatus.invalid:
+            await self.bot.say("That was an invalid move!")
+        elif result is MoveStatus.wrong_turn:
+            await self.bot.say("It is not your turn to play on your game in this server!")
+        elif result is MoveStatus.no_game:
+            await self.bot.say("You are not currently playing a game on this server!")
+        elif result is MoveStatus.valid:
+            game = self.get_game(ctx.message.author)
+            link = game.draw_board()
+            await self.bot.upload(link) 
+
+
+    @commands.command(pass_context=True)
+    @checks.custom_perms(send_messages=True)
+    async def chess_start(self, ctx, player2: discord.Member):
+        """Starts a chess game with another player
+        You can play one game on a single server at a time"""
+
+        # Lets first check our permissions; we're not going to create a text based board
+        # So we need to be able to attach files in order to send the board
+        if not ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+            await self.bot.say("I need to be able to send pictures to provide the board! Please ask someone with mange roles permission, to grant me attach files permission if you want to play this")
+            return
+
+        # Make sure the author and player 2 are not in a game already
+        if self.in_game(ctx.message.author):
+            await self.bot.say("Sorry, but you can only be in one game per server at a time")
+            return
+
+        if self.in_game(player2):
+            await self.bot.say("Sorry, but {} is already in a game on this server!".format(player2.display_name))
+            return
+
+        # Start the game
+        game = self.start_game(ctx.message.author, player2)
+
+class MoveStatus(Enum):
+    invalid                    = 0
+    valid                       = 1
+    wrong_turn            = 2
+    no_game                = 3
+    invalid_promotion = 4
+
 
 class Game:
     def __init__(self, player1, player2):
@@ -33,6 +216,9 @@ class Game:
                                          (7, 0): True,
                                          (7, 7): True}}
 
+    def draw_board(self):
+        """Create an image, and return the image link, based on self.board"""
+        pass
 
     def reset_board(self):
         # Lets face the board with white on the bottom, black on top
@@ -50,13 +236,67 @@ class Game:
 
     # We want to send a different message if it's not this players turn
     # So lets split up 'can_play' and the checks for that actual move
-    def can_player(self, player):
+    def can_play(self, player):
+        """Determined if it's this player's turn or not"""
         if self.white_turn:
             return player == self.challengers.get('white')
         elif not self.white_turn:
             return player == self.challengers.get('black')
 
-    def move(self, piece, pos):
+    def castle(self, pos):
+        # Lets get our king's position, and set our colour based on whose turn it is
+        if self.white_turn:
+            colour = 'white'
+            king_pos = self.w_king_pos
+        else:
+            colour = 'black'
+            king_pos = self.b_king_pos
+
+        if not can_castle[colour][pos]:
+            return False
+
+        # During castling, the row should never change
+        new_king_row = king_pos[0]
+        # Change the column, based on the position. If the rook is in an invalid position
+        # Which should be caught by the can_castle, but still lets make sure, just return False
+        if pos[1] == 0:
+            new_king_column = king_pos[1] - 2
+        elif pos[1] == 7:
+            new_king_column = king_pos[1] + 2
+        else:
+            return False
+        new_king_pos = (new_king_row, new_king_column)
+
+        # Lets now check, if it meets the condition "One may not castle out of, through, or into check"
+        for column_pos in range(king_pos[1], new_king_column + 1):
+            if not self._valid_king_move(king_pos, (king_pos[0], column_pos)):
+                return False
+
+        # Now lets check for the check state, if we're in check we cannot castle
+        if self.check():
+            return False
+
+        # Now lets check if the rook can move to the required position, if not then we can't castle either
+        new_rook_row = pos[0]
+        if pos[1] == 0:
+            new_rook_column = pos[1] + 3
+        elif pos[1] == 7:
+            new_rook_column = pos[1] - 2
+        else:
+            return False
+        new_rook_pos = (new_rook_row, new_rook_column)
+        if not self._valid_rook_move(pos, new_rook_pos):
+            return False
+
+        # Otherwise, we can castle, so lets move both pieces
+        self._move(king_pos, new_king_pos)
+        self._move(pos, new_rook_pos)
+        # This is going to flip the turn twice, so lets flip it manually one more time
+        self.white_turn = not self.white_turn
+        return False
+
+    def move(self, piece, pos, promotion=None):
+        """Moves a piece to the provided position"""
         # First lets transform the position
         pos = (pos[1] - 1, ord(pos[0].upper()) - 65)
 
@@ -68,16 +308,21 @@ class Game:
                                   'rook': 'R',
                                   'pawn': 'P'}
 
-        piece_color = 'W' if self.white_turn else 'B'
-        piece = "{}{}".format(piece_color, piece_map.get(piece))
+        piece_colour = 'W' if self.white_turn else 'B'
+        piece = "{}{}".format(piece_colour, piece_map.get(piece))
 
         # Lets check for a piece that matches the provided one
         for x, row in enumerate(self.board):
             for y, board_piece in enumerate(row):
                 if piece == board_piece:
                     #TODO: Handle when multiple pieces of the same type can move to the same position
+                    # And they haven't provided the specific one
                     if self.valid_move((x, y), pos):
                         self._move(piece, (x, y), pos)
+
+                        if promotion is not None:
+                            piece = "{}{}".format(piece_colour, promotion)
+                            self.board[pos[0]][pos[1]][1] = piece
                         return
 
     # Our internal method for actually moving the piece
@@ -86,6 +331,7 @@ class Game:
         # Otherwise it needs to be None
         if 'P' in piece:
             self.last_pawn_moved = new_pos
+            #TODO: Check here for En Passant, to take the piece one position below
         else:
             self.last_pawn_moved = None
         
@@ -118,9 +364,9 @@ class Game:
         # Now lets do the actual 'moving' of pieces
         # There's nothing special that happens we need to keep track of, when taking an enemy piece
         # So lets just overwrite it, that's it
-        # TODO: The one special case to the above, En Passant
         self.board[new_pos[0]][new_pos[1]] = piece
         self.board[pos[0]][pos[1]] = ''
+        self.white_turn = not self.white_turn
 
     # Next couple methods are going to be used for convenience in order to check some things
     # The idea of how to check for a "Check" is:
@@ -130,6 +376,7 @@ class Game:
     # To do this we need the following convenience methods
 
     def check(self):
+        """Checks our current board, and checks (based on whose turn it is) if we're in a 'check' state"""
         # To check for a check, what we should do is loop through the board
         # Then check if it's the the current players turn's piece, and compare to moving to the king's position 
         for x, row in enumerate(self.board):
@@ -140,6 +387,7 @@ class Game:
                     return True
 
     def checkmate(self):
+        """Checks our current board, and checks (based on whose turn it is) if we're in a 'checkmate' state"""
         # We don't care about our check position, as this doesn't matter to us
         # We can be in chekcmate if we have no other pieces, or are in check
         # So calling check first is not something this method needs to worry about
@@ -156,6 +404,7 @@ class Game:
                     return False
 
     def valid_move(self, pos, new_pos):
+        """Determines if a move from pos to new_pos is valid"""
         # Lets make sure a valid position was given, if not then we obviously can't move that piece (it don't exist brah)
         try:
             piece = self.board[pos[0]][pos[1]]
@@ -318,3 +567,6 @@ class Game:
                 if self.board[i][pos[1]] != '':
                     return False
         return True
+
+def setup(bot):
+    bot.add_cog(Chess(bot))
