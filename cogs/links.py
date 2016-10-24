@@ -33,7 +33,9 @@ class Links:
         safe = 'off' if nsfw_channels else 'on'
 
         params = {'q': query,
-                  'safe': safe}
+                  'safe': safe,
+                  'hl': en,
+                  'cr': 'countryUS'}
 
         # Our format we'll end up using to send to the channel
         fmt = ""
@@ -45,17 +47,17 @@ class Links:
                 return
             
             # Convert to a BeautifulSoup element and loop through each result clasified by h3 tags with a class of 'r'
-            soup = bs(await r.text(), 'html5lib')
+            soup = bs(await r.text(), 'html.parser')
             for element in soup.find_all('h3', class_='r')[:3]:
                 # Get the link's href tag, which looks like q=[url here]&sa
                 # Use a lookahead and lookbehind to find this url exactly
-                url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
+                result_url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
 
                 # Get the next sibling, find the span where the description is, and get the text from this
                 description = element.next_sibling.find('span', class_='st').text
 
                 # Add this to our text we'll use to send
-                fmt += '\n\n**URL**: {}\n**Description**: {}'.format(url, description)
+                fmt += '\n\n**URL**: {}\n**Description**: {}'.format(result_url, description)
 
             fmt = "**Top 3 results for the query** _{}_:{}".format(query, fmt)
             await self.bot.say(fmt)
