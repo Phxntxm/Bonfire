@@ -6,6 +6,7 @@ from .utils import config
 import random
 from enum import Enum
 
+
 class Chess:
     def __init__(self, bot):
         self.bot = bot
@@ -83,12 +84,11 @@ class Chess:
                     else:
                         promotion = None
                     if game.move(piece, position.upper(), position):
-                        return MoveStatus.valid:
+                        return MoveStatus.valid
                     else:
                         return MoveStatus.invalid
                 except IndexError:
                     return MoveStatus.invalid
-
 
     def get_game(self, player):
         """Provides the game this player is playing, in this server"""
@@ -109,7 +109,7 @@ class Chess:
         return False
 
     def start_game(self, player1, player2):
-        game = Game(player1, player2):
+        game = Game(player1, player2)
         try:
             self.games[player1.server.id].append(game)
         except KeyError:
@@ -174,6 +174,8 @@ class Chess:
 
         # Start the game
         game = self.start_game(ctx.message.author, player2)
+        player1 = game.challengers.get('white')
+        await self.bot.say("{} you have started a chess game with {}\n\n{} will be white this game, and is going first.\nIf you need information about the notation used to play, run {}help chess".format(ctx.message.author.display_name, player2.display_name, ctx.prefix))
 
 class MoveStatus(Enum):
     invalid                    = 0
