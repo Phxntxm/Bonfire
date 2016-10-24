@@ -34,7 +34,7 @@ class Links:
 
         params = {'q': query,
                   'safe': safe,
-                  'hl': en,
+                  'hl': 'en',
                   'cr': 'countryUS'}
 
         # Our format we'll end up using to send to the channel
