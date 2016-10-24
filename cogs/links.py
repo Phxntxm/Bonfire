@@ -1,6 +1,7 @@
 from discord.ext import commands
 from .utils import config
 from .utils import checks
+from bs4 import BeautifulSoup as bs
 
 import discord
 import aiohttp
