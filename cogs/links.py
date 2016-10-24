@@ -54,7 +54,10 @@ class Links:
                 result_url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
 
                 # Get the next sibling, find the span where the description is, and get the text from this
-                description = element.next_sibling.find('span', class_='st').text
+                try:
+                    description = element.next_sibling.find('span', class_='st').text
+                except:
+                    description = ""
 
                 # Add this to our text we'll use to send
                 fmt += '\n\n**URL**: {}\n**Description**: {}'.format(result_url, description)
