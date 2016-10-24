@@ -20,9 +20,50 @@ class Links:
         self.headers = {"User-Agent": "Bonfire/1.0.0"}
         self.session = aiohttp.ClientSession()
 
+    @commands.command(aliases=['g'])
+    @checks.custom_perms(send_messages=True)
+    async def google(self, *, query: str):
+        """Searches google for a provided query"""
+        url = "https://www.google.com/search"
+
+        # Turn safe filter on or off, based on whether or not this is a nsfw channel
+        r_filter = {'channel_id': ctx.message.channel.id}
+        nsfw_channels = await config.get_content("nsfw_channels", r_filter)
+        safe = 'off' if nsfw_channels else 'on'
+
+        params = {'q': query,
+                  'safe': safe}
+
+        # Our format we'll end up using to send to the channel
+        fmt = ""
+
+        # First make the request to google to get the results
+        async with aiohttp.get(url, params=params, headers=self.headers) as r:
+            if r.status != 200:
+                await self.bot.say("I failed to connect to google! (That can happen??)")
+                return
+            
+            # Convert to a BeautifulSoup element and loop through each result clasified by h3 tags with a class of 'r'
+            soup = bs(await r.text(), 'html5lib')
+            for element in soup.find_all('h3', class_='r')[:3]:
+                # Get the link's href tag, which looks like q=[url here]&sa
+                # Use a lookahead and lookbehind to find this url exactly
+                url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
+
+                # Get the next sibling, find the span where the description is, and get the text from this
+                description = element.next_sibling.find('span', class_='st').text
+
+                # Add this to our text we'll use to send
+                fmt += '\n\n**URL**: {}\n**Description**: {}'.format(url, description)
+
+            fmt = "**Top 3 results for the query** _{}_:{}".format(query, fmt)
+            await self.bot.say(fmt)
+
+
     @commands.command(aliases=['yt'])
     @checks.custom_perms(send_messages=True)
     async def youtube(self, *, query: str):
+        """Searches youtube for a provided query"""
         key = config.youtube_key
         url = "https://www.googleapis.com/youtube/v3/search"
         params = {'key': key,
