@@ -20,9 +20,9 @@ class Links:
         self.headers = {"User-Agent": "Bonfire/1.0.0"}
         self.session = aiohttp.ClientSession()
 
-    @commands.command(aliases=['g'])
+    @commands.command(pass_context=True, aliases=['g'])
     @checks.custom_perms(send_messages=True)
-    async def google(self, *, query: str):
+    async def google(self, ctx, *, query: str):
         """Searches google for a provided query"""
         url = "https://www.google.com/search"
 
