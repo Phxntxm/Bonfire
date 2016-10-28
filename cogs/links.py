@@ -169,14 +169,17 @@ class Links:
 
             await self.bot.say("Looking up an image with those tags....")
 
-            # Get the response from derpibooru and parse the 'search' result from it
-            async with self.session.get(url, params=params, headers=self.headers) as r:
-                data = await r.json()
 
             try:
-                results = data['search']
+                # Get the response from derpibooru and parse the 'search' result from it
+                async with self.session.get(url, params=params, headers=self.headers) as r:
+                    data = await r.json()
+                    results = data['search']
             except KeyError:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
+                return
+            except json.JSONDecodeError:
+                await self.bot.say("Sorry but I failed to connect to Derpibooru!")
                 return
 
             # The first request we've made ensures there are results

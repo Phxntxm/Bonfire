@@ -29,7 +29,7 @@ battle_outcomes = \
      "{0} and {1} sit down for an intense game of chess, in the heat of the moment {0} forgot they were playing a game and summoned a real knight",
      "{0} challenges {1} to rock paper scissors, unfortunately for {1}, {0} chose scissors and stabbed them",
      "{0} goes back in time and becomes {1}'s best friend, winning without ever throwing a punch",
-     "{0} trips down some stairs on their way to the battle with {1}",
+     "{1} trips down some stairs on their way to the battle with {0}",
      "{0} books {1} a one way ticket to Flugendorf prison",
      "{1} was already dead",
      "{1} was crushed under the weight of expectations",
