@@ -60,7 +60,7 @@ class Links:
                     description = ""
 
                 # Add this to our text we'll use to send
-                fmt += '\n\n**URL**: {}\n**Description**: {}'.format(result_url, description)
+                fmt += '\n\n**URL**: <{}>\n**Description**: {}'.format(result_url, description)
 
             fmt = "**Top 3 results for the query** _{}_:{}".format(query, fmt)
             await self.bot.say(fmt)
@@ -90,7 +90,7 @@ class Links:
         title = result['snippet']['title']
         description = result['snippet']['description']
 
-        fmt = "**Title:** {}\n\n**Description:** {}\n\n**URL:** {}".format(title, description, result_url)
+        fmt = "**Title:** {}\n\n**Description:** {}\n\n**URL:** <{}>".format(title, description, result_url)
         await self.bot.say(fmt)
 
     @commands.command()
@@ -120,7 +120,7 @@ class Links:
         snippet = re.sub('&quot;', '"', snippet)
 
         await self.bot.say(
-            "Here is the best match I found with the query `{}`:\nURL: {}\nSnippet: \n```\n{}```".format(query, url,
+            "Here is the best match I found with the query `{}`:\nURL: <{}>\nSnippet: \n```\n{}```".format(query, url,
                                                                                                          snippet))
 
     @commands.command()
