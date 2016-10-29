@@ -9,6 +9,7 @@ import functools
 import datetime
 import time
 import asyncio
+import re
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -352,6 +353,7 @@ class Music:
         # Create the player, and check if this was successful
         # Here all we want is to get the information of the player
         try:
+            song = re.sub('[<>\[\]]', '', song)
             func = functools.partial(self.ytdl.extract_info, song, download=False)
             info = await self.bot.loop.run_in_executor(None, func)
             if "entries" in info:
