@@ -61,11 +61,11 @@ class Osu:
 
         # A list of the possible values we'll receive, that we want to display
         wanted_info = ['username', 'playcount', 'ranked_score', 'pp_rank', 'level', 'pp_country_rank'
-                                  'accuracy', 'country', 'count_rank_ss', 'count_rank_s', 'count_rank_a']
+                                  'accuracy', 'country', 'pp_country_rank', 'count_rank_s', 'count_rank_a']
 
         # A couple of these aren't the best names to display, so setup a map to change these just a little bit
         key_map = {'playcount': 'play_count',
-                              'count_rank_ss': 'total_ss_ranks',
+                              'count_rank_ss': 'total_SS_ranks',
                               'count_rank_s': 'total_s_ranks',
                               'count_rank_a': 'total_a_ranks'}
 
