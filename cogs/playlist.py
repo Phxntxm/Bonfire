@@ -72,7 +72,7 @@ class VoiceEntry:
 
     def __str__(self):
         fmt = '*{0.title}* uploaded by {0.uploader} and requested by {1.display_name}'
-        duration = self.player.length
+        duration = self.length
         if duration:
             fmt += ' [length: {0[0]}m {0[1]}s]'.format(divmod(round(duration, 0), 60))
         return fmt.format(self.player, self.requester)
