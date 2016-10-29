@@ -21,7 +21,7 @@ async def online_users():
         # In place of requesting for /channel and checking if that is online currently, for each channel
         # This method is in place to just return all online_users
         url = '{}/online/all?key={}'.format(base_url, key)
-        with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
+        with aiohttp.ClientSession(headers={"User-Agent": config.user_agent}) as s:
             async with s.get(url) as response:
                 return await response.json()
     except:
@@ -40,7 +40,7 @@ def check_online(online_channels, channel):
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {"User-Agent": "Bonfire/1.0.0"}
+        self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
 
     async def check_channels(self):

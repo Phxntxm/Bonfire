@@ -61,6 +61,8 @@ da_id = global_config.get("da_id", "")
 da_secret = global_config.get("da_secret", "")
 # The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
+# The User-Agent that we'll use for most requests
+user_agent = global_config.get('user_agent', "")
 
 # The variables needed for sharding
 shard_count = global_config.get('shard_count', 1)

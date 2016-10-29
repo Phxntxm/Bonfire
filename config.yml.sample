@@ -7,6 +7,8 @@ discord_bots_key: 'key'
 carbon_key: 'key'
 twitch_key: 'key'
 
+user_agent: 'User-Agent/1.0.0 (Comment like link to site)'
+
 shard_count: 1
 shard_id: 0
 

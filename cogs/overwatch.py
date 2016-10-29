@@ -22,7 +22,7 @@ class Overwatch:
 
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {"User-Agent": "Bonfire/1.0.0"}
+        self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
 
     @commands.group(no_pm=True)

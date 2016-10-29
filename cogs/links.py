@@ -18,7 +18,7 @@ class Links:
     def __init__(self, bot):
         self.bot = bot
         # Only default headers for all requests we should use sets the User-Agent
-        self.headers = {"User-Agent": "Bonfire/1.0.0"}
+        self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
 
     @commands.command(pass_context=True, aliases=['g'])

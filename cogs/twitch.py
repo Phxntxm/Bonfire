@@ -19,7 +19,7 @@ class Twitch:
         self.bot = bot
         self.key = config.twitch_key
         self.params = {'client_id': self.key}
-        self.headers = {"User-Agent": "Bonfire/1.0.0",
+        self.headers = {"User-Agent": config.user_agent,
                         "Client-ID": self.key}
 
     async def channel_online(self, channel: str):
