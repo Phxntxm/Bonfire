@@ -56,6 +56,8 @@ twitch_key = global_config.get('twitch_key', "")
 steam_key = global_config.get("steam_key", "")
 # The key for youtube API calls
 youtube_key = global_config.get("youtube_key", "")
+# The key for Osu API calls
+osu_key = global_config.get('osu_key', '')
 # The keys needed for deviant art calls
 da_id = global_config.get("da_id", "")
 da_secret = global_config.get("da_secret", "")
