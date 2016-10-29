@@ -90,7 +90,7 @@ class Overwatch:
             banner = await images.create_banner(user, "Overwatch", output_data)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
-            fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data)
+            fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data.items())
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
     @ow.command(pass_context=True, name="add")
