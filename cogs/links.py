@@ -51,7 +51,11 @@ class Links:
             for element in soup.find_all('h3', class_='r')[:3]:
                 # Get the link's href tag, which looks like q=[url here]&sa
                 # Use a lookahead and lookbehind to find this url exactly
-                result_url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
+                try:
+                    result_url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
+                except AttributeError:
+                    await self.bot.say("I couldn't find any results for {}!".format(query))
+                    return
 
                 # Get the next sibling, find the span where the description is, and get the text from this
                 try:
