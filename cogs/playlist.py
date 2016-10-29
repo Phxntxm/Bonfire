@@ -239,7 +239,7 @@ class Music:
             # Otherwise just format this nicely
             progress = divmod(round(progress, 0), 60)
             length = divmod(round(length, 0), 60)
-            fmt = "Current song progress: {0[0]}m {0[1]}s/{1[0]}m {1[1]}s"
+            fmt = "Current song progress: {0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
             await self.bot.say(fmt)
 
 
