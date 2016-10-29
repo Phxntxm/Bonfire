@@ -13,10 +13,12 @@ https://www.rethinkdb.com/docs/install/
 
 I also use a few libraries that aren't included by default, which can be installed using pip.
 ```
-python3.5 -m pip install rethinkdb pendulum ruamel.yaml Pillow
+python3.5 -m pip install rethinkdb pendulum ruamel.yaml BeautifulSoup4 Pillow==3.4.1
 # Or on windows
-py -3 -m pip install rethinkdb pendulum ruamel.yaml Pillow
+py -3 -m pip install rethinkdb pendulum ruamel.yaml BeautifulSoup4 Pillow==3.4.1
 ```
+
+Note: ATM of writing this, Pillow 3.4.2 (the stable version...good job Pillow?) is broken, do not use pip's default to install this. This is why we're using Pillow==3.4.1 above, and not just Pillow
 
 The only required file to modify would be the config.yml.sample file. The entries are as follows:
 
