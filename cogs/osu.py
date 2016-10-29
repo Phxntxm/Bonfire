@@ -99,4 +99,4 @@ class Osu:
             await self.bot.say("```\n{}```".format(_fmt))
 
 def setup(bot):
-    bot.add_cog(Osu(bot)))
+    bot.add_cog(Osu(bot))
