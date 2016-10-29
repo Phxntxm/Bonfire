@@ -92,7 +92,7 @@ class Osu:
         # Attempt to create our banner and upload that
         # If we can't find the images needed, or don't have permissions, just send a message instead
         try:
-            banner = await images.create_banner(user, "Osu User Stats", fmt)
+            banner = await images.create_banner(ctx.message.author, "Osu User Stats", fmt)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
             _fmt = "\n".join("{}: {}".format(k, r) for k, r in fmt.items())
