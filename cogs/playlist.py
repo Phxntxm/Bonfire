@@ -1,11 +1,14 @@
-import asyncio
+from .utils import checks
+
 import discord
 from discord.ext import commands
-from .utils import checks
+
 import youtube_dl
 import math
 import functools
 import datetime
+import time
+import asyncio
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -47,10 +50,28 @@ class VoiceEntry:
         self.requester = message.author
         self.channel = message.channel
         self.player = player
+        self.start_time = None
+
+    @property
+    def length(self):
+        if self.player.duration:
+            return self.player.duration
+    
+    @property
+    def progress(self):
+        if self.start_time:
+            return round(time.time() - self.start_time)
+
+    @property
+    def remaining(self):
+        length = self.length
+        progress = self.progress
+        if length and progress:
+            return length - progress
 
     def __str__(self):
         fmt = '*{0.title}* uploaded by {0.uploader} and requested by {1.display_name}'
-        duration = self.player.duration
+        duration = self.player.length
         if duration:
             fmt += ' [length: {0[0]}m {0[1]}s]'.format(divmod(round(duration, 0), 60))
         return fmt.format(self.player, self.requester)
@@ -125,6 +146,10 @@ class VoiceState:
             # Now we can start actually playing the song
             self.current.player.start()
             self.current.player.volume = self.volume / 100
+
+            # Save the variable for when our time for this song has started
+            self.current.start_time = time.time()
+
             # Wait till the Event has been set, before doing our task again
             await self.play_next_song.wait()
 
@@ -191,6 +216,32 @@ class Music:
             return
         num_members = len(voice_channel.voice_members)
         state.required_skips = math.ceil((num_members + 1) / 3)
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(send_messages=True)
+    async def progress(self, ctx):
+        """Provides the progress of the current song"""
+
+        # Make sure we're playing first
+        state = self.get_voice_state(ctx.message.server)
+        if not state.is_playing():
+            await self.bot.say('Not playing anything.')
+        else:
+            progress = state.current.progress
+            length = state.current.length
+            # Another check, just to make sure; this may happen for a very brief amount of time
+            # Between when the song was requested, and still downloading to play
+            if not progress or not length:
+                await self.bot.say('Not playing anything.')
+                return
+
+            # Otherwise just format this nicely
+            progress = divmod(round(progress, 0), 60)
+            length = divmod(round(length, 0), 60)
+            fmt = "Current song progress: {0[0]}m {0[1]}s/{1[0]}m {1[1]}s"
+            await self.bot.say(fmt)
+
+
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
