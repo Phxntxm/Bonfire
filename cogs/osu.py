@@ -49,7 +49,7 @@ class Osu:
         """Gets beatmap info based on the ID provided"""
         params = {'b': b_id}
         endpoint = 'get_beatmaps'
-        return = await self._request(params, endpoint)
+        return await self._request(params, endpoint)
 
 
     @commands.group(pass_context=True, invoke_without_command=True)
