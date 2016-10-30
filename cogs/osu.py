@@ -114,7 +114,7 @@ class Osu:
         data['max_combo'] = beatmap_data.get('max_combo')
         data['artist'] = beatmap_data.get('artist')
         # Lets round this, no need for such a long number 
-        data['difficulty'] = round(beatmap_data.get('difficultyrating'), 2)
+        data['difficulty'] = round(float(beatmap_data.get('difficultyrating')), 2)
 
         # Now lets create our dictionary needed to create the image 
         # The dict comprehension we're using is simpler than it looks, it's simply they key: value
