@@ -45,6 +45,12 @@ class Osu:
         """Finds a beatmap ID based on the first match of searching a beatmap"""
         pass
 
+    async def get_beatmap(self, b_id):
+        """Gets beatmap info based on the ID provided"""
+        params = {'b': b_id}
+        endpoint = 'get_beatmaps'
+        return = await self._request(params, endpoint)
+
 
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
@@ -67,8 +73,9 @@ class Osu:
             song = 0
 
         # A list of the possible values we'll receive, that we want to display
-        wanted_info = ['username', 'maxcombo', 'count300', 'count100', 'count50', 'countmiss'
-                                   'perfect', 'enabled_mods', 'date', 'rank' 'pp']
+        wanted_info = ['username', 'maxcombo', 'count300', 'count100', 'count50', 'countmiss',
+                                   'perfect', 'enabled_mods', 'date', 'rank' 'pp', 'beatmap_title', 'beatmap_version',
+                                   'max_combo', 'artist', 'difficulty']
 
         # A couple of these aren't the best names to display, so setup a map to change these just a little bit
         key_map = {'maxcombo': 'combo',
@@ -92,6 +99,18 @@ class Osu:
                 return
             else:
                 data = data[len(data) - 1]
+
+        # There's a little bit more info that we need, some info specific to the beatmap. 
+        # Due to this we'll need to make a second request
+        beatmap_data = await self.get_beatmap(data.get('beatmap_id', None))
+
+        # Lets add the extra data we want
+        data['beatmap_title'] = beatmap_data.get('title')
+        data['beatmap_version'] = beatmap_data.get('version')
+        data['max_combo'] = beatmap_data.get('max_combo')
+        data['artist'] = beatmap_data.get('artist')
+        # Lets round this, no need for such a long number 
+        data['difficulty'] = round(beatmap_data.get('difficultyrating'), 2)
 
         # Now lets create our dictionary needed to create the image 
         # The dict comprehension we're using is simpler than it looks, it's simply they key: value
@@ -118,7 +137,7 @@ class Osu:
         If you have only numbers in your username, you will need to provide your ID"""
 
         # A list of the possible values we'll receive, that we want to display
-        wanted_info = ['username', 'playcount', 'ranked_score', 'pp_rank', 'level', 'pp_country_rank'
+        wanted_info = ['username', 'playcount', 'ranked_score', 'pp_rank', 'level', 'pp_country_rank',
                                   'accuracy', 'country', 'pp_country_rank', 'count_rank_s', 'count_rank_a']
 
         # A couple of these aren't the best names to display, so setup a map to change these just a little bit
