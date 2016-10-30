@@ -197,7 +197,7 @@ class Stats:
             banner = await images.create_banner(ctx.message.author, "Battling Leaderboard", output)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
-            fmt = "\n".join("#{}) {}".format(key, value) for key, value in output
+            fmt = "\n".join("#{}) {}".format(key, value) for key, value in output)
             await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)
