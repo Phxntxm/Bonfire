@@ -51,7 +51,7 @@ class Osu:
     async def osu(self, ctx):
         pass
 
-    @osu.command(name='scores', aliases=['score'] pass_context=True)
+    @osu.command(name='scores', aliases=['score'], pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def osu_user_scores(self, ctx, user, song=1):
         """Used to get the top scores for a user
