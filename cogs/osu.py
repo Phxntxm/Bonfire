@@ -51,7 +51,65 @@ class Osu:
     async def osu(self, ctx):
         pass
 
-    @osu.command(pass_context=True)
+    @osu.command(name='scores', aliases=['score'] pass_context=True)
+    @checks.custom_perms(send_messages=True)
+    async def osu_user_scores(self, ctx, user, song=1):
+        """Used to get the top scores for a user
+        You can provide either your Osu ID or your username
+        However, if your username is only numbers, this will confuse the API
+        If you have only numbers in your username, you will need to provide your ID
+        This will by default return the top song, provide song [up to 100] to get that song, in order from best to worst"""
+
+        # To make this easy for the user, it's indexed starting at 1, so lets subtract by 1
+        song -= 1
+        # Make sure the song is not negative however, if so set to 0
+        if song < 0:
+            song = 0
+
+        # A list of the possible values we'll receive, that we want to display
+        wanted_info = ['username', 'maxcombo', 'count300', 'count100', 'count50', 'countmiss'
+                                   'perfect', 'enabled_mods', 'date', 'rank' 'pp']
+
+        # A couple of these aren't the best names to display, so setup a map to change these just a little bit
+        key_map = {'maxcombo': 'combo',
+                              'count300', '300 hits',
+                              'count100', '100 hits',
+                              'count50', '50 hits',
+                              'countmiss', 'misses',
+                              'perfect', 'got_max_combo'}
+
+        params = {'u': user,
+                            'limit': 100}
+        # The endpoint that we're accessing to get this informatin
+        endpoint = 'get_user_best'
+        data = await self._request(params, endpoint)
+
+        try:
+            data = data[song]
+        except IndexError:
+            if len(data) == 0:
+                await self.bot.say("I could not find any top songs for the user {}".format(user))
+                return
+            else:
+                data = data[len(data) - 1]
+
+        # Now lets create our dictionary needed to create the image 
+        # The dict comprehension we're using is simpler than it looks, it's simply they key: value
+        # If the key is in our wanted_info list
+        # We also get the wanted value from the key_map if it exists, using the key itself if it doesn't
+        # We then title it and replace _ with a space to ensure nice formatting
+        fmt = {key_map.get(k, k).title().replace('_', ' '): v for k, v in data.items() if k in wanted_info}
+
+        # Attempt to create our banner and upload that
+        # If we can't find the images needed, or don't have permissions, just send a message instead
+        try:
+            banner = await images.create_banner(ctx.message.author, "Osu User Stats", fmt)
+            await self.bot.upload(banner)
+        except (FileNotFoundError, discord.Forbidden):
+            _fmt = "\n".join("{}: {}".format(k, r) for k, r in fmt.items())
+            await self.bot.say("```\n{}```".format(_fmt))
+
+    @osu.command(name='user', pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def osu_user_info(self, ctx, *, user):
         """Used to get information about a specific user
