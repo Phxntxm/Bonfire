@@ -72,11 +72,11 @@ class Osu:
 
         # A couple of these aren't the best names to display, so setup a map to change these just a little bit
         key_map = {'maxcombo': 'combo',
-                              'count300', '300 hits',
-                              'count100', '100 hits',
-                              'count50', '50 hits',
-                              'countmiss', 'misses',
-                              'perfect', 'got_max_combo'}
+                              'count300': '300 hits',
+                              'count100': '100 hits',
+                              'count50': '50 hits',
+                              'countmiss': 'misses',
+                              'perfect': 'got_max_combo'}
 
         params = {'u': user,
                             'limit': 100}
