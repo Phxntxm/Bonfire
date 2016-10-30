@@ -58,7 +58,7 @@ class Stats:
             data = [("Command Name", cmd.qualified_name),
                            ("Total Usage", total_usage),
                            ("Your Usage", member_usage),
-                           ("This Server's Usage", server_usage)}
+                           ("This Server's Usage", server_usage)]
             banner = await images.create_banner(ctx.message.author, "Command Stats", data)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
