@@ -70,6 +70,7 @@ class Osu:
         If you have only numbers in your username, you will need to provide your ID
         This will by default return the top song, provide song [up to 100] to get that song, in order from best to worst"""
 
+        await self.bot.say("Looking up your Osu information...")
         # To make this easy for the user, it's indexed starting at 1, so lets subtract by 1
         song -= 1
         # Make sure the song is not negative however, if so set to 0
@@ -140,6 +141,7 @@ class Osu:
         However, if your username is only numbers, this will confuse the API
         If you have only numbers in your username, you will need to provide your ID"""
 
+        await self.bot.say("Looking up your Osu information...")
         # A list of the possible values we'll receive, that we want to display
         wanted_info = ['username', 'playcount', 'ranked_score', 'pp_rank', 'level', 'pp_country_rank',
                                   'accuracy', 'country', 'pp_country_rank', 'count_rank_s', 'count_rank_a']
