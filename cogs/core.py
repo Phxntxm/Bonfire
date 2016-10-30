@@ -196,9 +196,15 @@ class Core:
         """Prints a random riddle"""
         # Use the fortune riddles command because it's funny, I promise
         fortune_command = "/usr/bin/fortune riddles"
-        fortune = subprocess.check_output(
-            fortune_command.split()).decode("utf-8")
-        await self.bot.say(fortune)
+        while True:
+            try:
+                fortune = subprocess.check_output(
+                    fortune_command.split()).decode("utf-8")
+                await self.bot.say(fortune)
+            except discord.HTTPException:
+                pass
+            else:
+                break
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
