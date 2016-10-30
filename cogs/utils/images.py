@@ -43,8 +43,9 @@ async def create_banner(member, image_title, data):
 
     # Parse the data we need to create our image
     username = (member.display_name[:23] + '...') if len(member.display_name) > 23 else member.display_name
-    result_keys = list(data.keys())
-    result_values = list(data.values())
+    # Our data will be a list of tuples, so this is how we can get the keys and values we want
+    result_keys = [k for k, v in data]
+    result_values = [v for k, v in data]
     lines_of_text = len(result_keys)
     output_file = "{}/banner_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
     base_height = canvas_height + (lines_of_text * 20)

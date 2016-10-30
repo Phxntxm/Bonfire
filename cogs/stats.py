@@ -55,10 +55,10 @@ class Stats:
         server_usage = command_stats['server_usage'].get(ctx.message.server.id, 0)
 
         try:
-            data = {"Command Name": cmd.qualified_name,
-                           "Total Usage": total_usage,
-                           "Your Usage": member_usage,
-                           "This Server's Usage": server_usage}
+            data = [("Command Name", cmd.qualified_name),
+                           ("Total Usage", total_usage),
+                           ("Your Usage", member_usage),
+                           ("This Server's Usage": server_usage)}
             banner = await images.create_banner(ctx.message.author, "Command Stats", data)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
@@ -90,6 +90,7 @@ class Stats:
             # I'm letting it use the length of the sorted_stats[:5]
             # As this can include, for example, all 3 if there are only 3 entries
             try:
+                top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
                 top_5 = {data[0]: data[1] for data in sorted_stats[:5]}
                 banner = await images.create_banner(ctx.message.author, "Your command usage", top_5)
                 await self.bot.upload(banner)
@@ -159,8 +160,8 @@ class Stats:
         sorted_booped_members = sorted_booped_members[:10]
 
         try:
-            output = {"{0.display_name}".format(ctx.message.server.get_member(m_id)): amt
-                               for m_id, amt in sorted_booped_members}
+            output = [("{0.display_name}".format(ctx.message.server.get_member(m_id)), amt)
+                               for m_id, amt in sorted_booped_members]
             banner = await images.create_banner(ctx.message.author, "Your booped victims", output)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
@@ -181,13 +182,13 @@ class Stats:
         # Sort the members based on their rating
         sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)
 
-        output = {}
+        output = []
         count = 1
         for x in sorted_members:
             member_id = x['member_id']
             rating = x['rating']
             member = ctx.message.server.get_member(member_id)
-            output[count] = "{} (Rating: {})".format(member.display_name, rating)
+            output.append((count, "{} (Rating: {})".format(member.display_name, rating)))
             count += 1
             if count >= 11:
                 break
@@ -196,7 +197,7 @@ class Stats:
             banner = await images.create_banner(ctx.message.author, "Battling Leaderboard", output)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
-            fmt = "\n".join("#{}) {}".format(key, value) for key, value in output.items())
+            fmt = "\n".join("#{}) {}".format(key, value) for key, value in output
             await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
 
     @commands.command(pass_context=True, no_pm=True)

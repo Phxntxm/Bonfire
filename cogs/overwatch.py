@@ -77,20 +77,18 @@ class Overwatch:
                     return
 
             # Same list comprehension as before
-            output_data = {k.title().replace("_", " "): r for k, r in data['general_stats'].items() if
-                           k in check_g_stats}
+            output_data = [(k.title().replace("_", " "), r) for k, r in data['general_stats'].items() if
+                           k in check_g_stats]
 
-            for k, r in data['hero_stats'].items():
-                output_data[k.title().replace("_", " ")] = r
             # Someone was complaining there was no KDR provided, so I made one myself and added that to the list
-            if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
-                output_data["Kill Death Ratio"] = "{0:.2f}".format(
-                    data['general_stats'].get('eliminations') / data['general_stats'].get('deaths'))
+            #if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
+                #output_data["Kill Death Ratio"] = "{0:.2f}".format(
+                    #data['general_stats'].get('eliminations') / data['general_stats'].get('deaths'))
         try:
             banner = await images.create_banner(user, "Overwatch", output_data)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
-            fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data.items())
+            fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data)
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
     @ow.command(pass_context=True, name="add")

@@ -55,7 +55,6 @@ class Osu:
         except IndexError:
             return None
 
-
     @commands.group(pass_context=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
     async def osu(self, ctx):
@@ -122,7 +121,7 @@ class Osu:
         # If the key is in our wanted_info list
         # We also get the wanted value from the key_map if it exists, using the key itself if it doesn't
         # We then title it and replace _ with a space to ensure nice formatting
-        fmt = {key_map.get(k, k).title().replace('_', ' '): v for k, v in data.items() if k in wanted_info}
+        fmt = [(key_map.get(k, k).title().replace('_', ' '), v) for k, v in data.items() if k in wanted_info]
 
         # Attempt to create our banner and upload that
         # If we can't find the images needed, or don't have permissions, just send a message instead
@@ -130,7 +129,7 @@ class Osu:
             banner = await images.create_banner(ctx.message.author, "Osu User Stats", fmt)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
-            _fmt = "\n".join("{}: {}".format(k, r) for k, r in fmt.items())
+            _fmt = "\n".join("{}: {}".format(k, r) for k, r in fmt)
             await self.bot.say("```\n{}```".format(_fmt))
 
     @osu.command(name='user', pass_context=True)
