@@ -11,30 +11,12 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from discord.ext import commands
 from cogs.utils import config
 
-extensions = ['cogs.interaction',
-              'cogs.core',
-              'cogs.mod',
-              'cogs.owner',
-              'cogs.stats',
-              'cogs.playlist',
-              'cogs.twitch',
-              'cogs.picarto',
-              'cogs.overwatch',
-              'cogs.links',
-              'cogs.tags',
-              'cogs.roles',
-              'cogs.strawpoll',
-              'cogs.tictactoe',
-              'cogs.hangman',
-              'cogs.statsupdate',
-              'cogs.da',
-              'cogs.raffle']
-
 opts = {'command_prefix': config.command_prefix,
         'description': config.bot_description,
         'pm_help': None,
         'shard_count': config.shard_count,
-        'shard_id': config.shard_id}
+        'shard_id': config.shard_id,
+        'command_not_found': ''}
 
 bot = commands.Bot(**opts)
 logging.basicConfig(level=logging.INFO, filename='bonfire.log')
@@ -174,6 +156,6 @@ async def on_command_error(error, ctx):
 
 
 if __name__ == '__main__':
-    for e in extensions:
+    for e in config.extensions:
         bot.load_extension(e)
     bot.run(config.bot_token)

@@ -65,6 +65,8 @@ da_secret = global_config.get("da_secret", "")
 dev_server = global_config.get("dev_server", "")
 # The User-Agent that we'll use for most requests
 user_agent = global_config.get('user_agent', "")
+# The extensions to load
+extensions = global_config.get('extensions', [])
 
 # The variables needed for sharding
 shard_count = global_config.get('shard_count', 1)
