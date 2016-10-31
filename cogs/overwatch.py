@@ -56,9 +56,6 @@ class Overwatch:
                 data = await r.json()
 
             output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if k in check_g_stats]
-            for k, r in data['overall_stats'].items():
-                if k in check_o_stats:
-                    output_data[k.title().replace("_", " ")] = r
         else:
             # If there was a hero provided, search for a user's data on that hero
             url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
