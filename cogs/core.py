@@ -118,8 +118,8 @@ class Core:
         fmt['Total Members'] = total_data.get('member_count')
         fmt['Description'] = self.bot.description
 
-        servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
-                                     state.is_playing()])
+        # servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items()
+        #                              if state.is_playing()])
         hm_games = len(
             [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
         ttt_games = len([server_id for server_id,
@@ -131,9 +131,9 @@ class Core:
         information = "\n".join("{}: {}".format(key, result)
                                 for key, result in fmt.items())
         information += "\n"
-        if servers_playing_music:
-            information += "Playing songs in {} different servers\n".format(
-                servers_playing_music)
+        # if servers_playing_music:
+        #    information += "Playing songs in {} different servers\n".format(
+        #        servers_playing_music)
         if hm_games:
             information += "{} different hangman games running\n".format(
                 hm_games)

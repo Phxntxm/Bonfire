@@ -65,7 +65,7 @@ class Chess:
             else:
                 return MoveStatus.invalid
         else:
-            # Possible formats: e4, e4Q, e4=Q, Ng4d4 - The last is the only case that we don't need the piece given before
+            # Possible formats: e4, e4Q, e4=Q, Ng4d4
             try:
                 # Check for the case when there are two peices who can move to the same position
                 multi_move = re.search('(N|R|K|Q|P|B)([a-h][1-8])([a-h][1-8])', notation)
@@ -148,8 +148,7 @@ class Chess:
         elif result is MoveStatus.valid:
             game = self.get_game(ctx.message.author)
             link = game.draw_board()
-            await self.bot.upload(link) 
-
+            await self.bot.upload(link)
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
@@ -160,7 +159,8 @@ class Chess:
         # Lets first check our permissions; we're not going to create a text based board
         # So we need to be able to attach files in order to send the board
         if not ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
-            await self.bot.say("I need to be able to send pictures to provide the board! Please ask someone with mange roles permission, to grant me attach files permission if you want to play this")
+            await self.bot.say(
+                "I need to be able to send pictures to provide the board! Please ask someone with mange roles permission, to grant me attach files permission if you want to play this")
             return
 
         # Make sure the author and player 2 are not in a game already
@@ -175,13 +175,16 @@ class Chess:
         # Start the game
         game = self.start_game(ctx.message.author, player2)
         player1 = game.challengers.get('white')
-        await self.bot.say("{} you have started a chess game with {}\n\n{} will be white this game, and is going first.\nIf you need information about the notation used to play, run {}help chess".format(ctx.message.author.display_name, player2.display_name, ctx.prefix))
+        await self.bot.say(
+            "{} you have started a chess game with {}\n\n{} will be white this game, and is going first.\nIf you need information about the notation used to play, run {}help chess".format(
+                ctx.message.author.display_name, player2.display_name, ctx.prefix))
+
 
 class MoveStatus(Enum):
-    invalid                    = 0
-    valid                       = 1
-    wrong_turn            = 2
-    no_game                = 3
+    invalid = 0
+    valid = 1
+    wrong_turn = 2
+    no_game = 3
     invalid_promotion = 4
 
 
@@ -211,12 +214,12 @@ class Game:
         self.last_pawn_moved = None
 
         # The other special case we can do is castling, if the rook and king have not been moved yet this can be done
-        self.can_castle = {'white':{
-                                         (0, 0): True,
-                                         (0, 7): True},
-                                      'black': {
-                                         (7, 0): True,
-                                         (7, 7): True}}
+        self.can_castle = {'white': {
+            (0, 0): True,
+            (0, 7): True},
+            'black': {
+                (7, 0): True,
+                (7, 7): True}}
 
     def draw_board(self):
         """Create an image, and return the image link, based on self.board"""
@@ -228,13 +231,13 @@ class Game:
         # So we're just going to create this based on a normal number array
         # However, we're going to flip it to make the row part of notation easier
         self.board = [['WR', 'WN', 'WB', 'WQ', 'WK', 'WB', 'WN', 'WR'],
-                               ['WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP'],
-                               ['', '', '', '', '', '', '', ''],
-                               ['', '', '', '', '', '', '', ''],
-                               ['', '', '', '', '', '', '', ''],
-                               ['', '', '', '', '', '', '', ''],
-                               ['BP', 'BP', 'BP', 'BP', 'BP', 'BP', 'BP', 'BP'],
-                               ['BR', 'BN', 'BB', 'BQ', 'BK', 'BB', 'BN', 'BR']]
+                      ['WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP', 'WP'],
+                      ['', '', '', '', '', '', '', ''],
+                      ['', '', '', '', '', '', '', ''],
+                      ['', '', '', '', '', '', '', ''],
+                      ['', '', '', '', '', '', '', ''],
+                      ['BP', 'BP', 'BP', 'BP', 'BP', 'BP', 'BP', 'BP'],
+                      ['BR', 'BN', 'BB', 'BQ', 'BK', 'BB', 'BN', 'BR']]
 
     # We want to send a different message if it's not this players turn
     # So lets split up 'can_play' and the checks for that actual move
@@ -303,12 +306,12 @@ class Game:
         pos = (pos[1] - 1, ord(pos[0].upper()) - 65)
 
         # Now lets transform the piece to what it will be on the board
-        piece_map = {'knight':'N',
-                                  'king': 'K',
-                                  'bishop': 'B',
-                                  'queen': 'Q',
-                                  'rook': 'R',
-                                  'pawn': 'P'}
+        piece_map = {'knight': 'N',
+                     'king': 'K',
+                     'bishop': 'B',
+                     'queen': 'Q',
+                     'rook': 'R',
+                     'pawn': 'P'}
 
         piece_colour = 'W' if self.white_turn else 'B'
         piece = "{}{}".format(piece_colour, piece_map.get(piece))
@@ -317,7 +320,7 @@ class Game:
         for x, row in enumerate(self.board):
             for y, board_piece in enumerate(row):
                 if piece == board_piece:
-                    #TODO: Handle when multiple pieces of the same type can move to the same position
+                    # TODO: Handle when multiple pieces of the same type can move to the same position
                     # And they haven't provided the specific one
                     if self.valid_move((x, y), pos):
                         self._move(piece, (x, y), pos)
@@ -333,10 +336,10 @@ class Game:
         # Otherwise it needs to be None
         if 'P' in piece:
             self.last_pawn_moved = new_pos
-            #TODO: Check here for En Passant, to take the piece one position below
+            # TODO: Check here for En Passant, to take the piece one position below
         else:
             self.last_pawn_moved = None
-        
+
         # If the king has been moved, the player cannot castle anymore
         if 'K' in piece:
             if self.white_turn:
@@ -526,7 +529,8 @@ class Game:
                     return False
 
                 # We cannot hop over a piece, make sure there's nothing in between us
-                if (self.white_turn and self.board[2][new_pos[1]] != '') or (not self.white_turn and self.board[5][new_pos[1]] != ''):
+                if (self.white_turn and self.board[2][new_pos[1]] != '') or (
+                    not self.white_turn and self.board[5][new_pos[1]] != ''):
                     return False
         # If these checks are not met, then our move is valid
         else:
@@ -569,6 +573,7 @@ class Game:
                 if self.board[i][pos[1]] != '':
                     return False
         return True
+
 
 def setup(bot):
     bot.add_cog(Chess(bot))
