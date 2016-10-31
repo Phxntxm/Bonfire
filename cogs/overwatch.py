@@ -55,7 +55,7 @@ class Overwatch:
             async with self.session.get(base_url + "{}/stats/general".format(bt), headers=self.headers) as r:
                 data = await r.json()
 
-            output_data = {k.title().replace("_", " "): r for k, r in data['game_stats'].items() if k in check_g_stats}
+            output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if k in check_g_stats]
             for k, r in data['overall_stats'].items():
                 if k in check_o_stats:
                     output_data[k.title().replace("_", " ")] = r
@@ -79,6 +79,8 @@ class Overwatch:
             # Same list comprehension as before
             output_data = [(k.title().replace("_", " "), r) for k, r in data['general_stats'].items() if
                            k in check_g_stats]
+            for k, r in data['hero_stats'].items():
+                output_data.append((k.title().replace("_", " "), r))
 
             # Someone was complaining there was no KDR provided, so I made one myself and added that to the list
             #if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
