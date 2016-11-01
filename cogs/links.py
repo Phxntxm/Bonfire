@@ -8,10 +8,6 @@ import aiohttp
 import random
 import re
 import math
-import logging
-import traceback
-
-log = logging.getLogger()
 
 MAX_RETRIES = 5
 
@@ -34,7 +30,7 @@ class Links:
         # Attempt to connect up to our max retries
         for x in range(MAX_RETRIES):
             try:
-                async with aiohttp.ClientSession().get(url, headers=self.headers, params=payload) as r:
+                async with aiohttp.get(url, headers=self.headers, params=payload) as r:
                     # If we failed to connect, attempt again
                     if r.status != 200:
                         continue
@@ -45,10 +41,7 @@ class Links:
                         data = await r.text()
                     return data
             # If any error happened when making the request, attempt again
-            except Exception as e:
-                tb = traceback.format_tb(e.__traceback__)
-                log.error(tb)
-                log.error("{0.__class__.__name__}: {0}".format(e))
+            except:
                 continue
 
     @commands.command(pass_context=True, aliases=['g'])
