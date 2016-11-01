@@ -15,6 +15,7 @@ base_url = "https://api.owapi.net/api/v2/u/"
 check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
                  'cards', 'damage_done', 'healing_done', 'multikills']
 check_o_stats = ['wins']
+MAX_RETRIES = 5
 
 
 class Overwatch:
@@ -24,6 +25,26 @@ class Overwatch:
         self.bot = bot
         self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
+
+    async def _request(self, payload, endpoint):
+        """Handles requesting to the API"""
+
+        # Format the URL we'll need based on the base_url, and the endpoint we want to hit
+        url = "{}{}".format(base_url, endpoint)
+
+        # Attempt to connect up to our max retries
+        for x in range(MAX_RETRIES):
+            try:
+                async with aiohttp.ClientSession().get(url, headers=self.headers, params=payload) as r:
+                    # If we failed to connect, attempt again
+                    if r.status != 200:
+                        continue
+
+                    data = await r.json()
+                    return data
+            # If any error happened when making the request, attempt again
+            except:
+                continue
 
     @commands.group(no_pm=True)
     async def ow(self):
@@ -52,37 +73,25 @@ class Overwatch:
 
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
-            async with self.session.get(base_url + "{}/stats/general".format(bt), headers=self.headers) as r:
-                data = await r.json()
+            data = await self._request(None, "{}/stats/general".format(bt))
 
-            output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if k in check_g_stats]
+            output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if
+                           k in check_g_stats]
         else:
             # If there was a hero provided, search for a user's data on that hero
-            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
-            async with self.session.get(url, headers=self.headers) as r:
-                data = await r.json()
-                msg = data.get('msg')
-                # Check if a user has not used the hero provided before
-                if msg == 'hero data not found':
-                    fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
-                    await self.bot.say(fmt)
-                    return
-                # Check if a hero that doesn't exist was provided
-                elif msg == 'bad hero name':
-                    fmt = "{} is not an actual hero!".format(hero.title())
-                    await self.bot.say(fmt)
-                    return
+            endpoint = "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
+            data = await self._request(None, endpoint)
+            if data is None:
+                fmt = "I couldn't find data with that hero, make sure that is a valid hero, " \
+                      "otherwise {} has never used the hero {} before!".format(user.display_name, hero)
+                await self.bot.say(fmt)
+                return
 
             # Same list comprehension as before
             output_data = [(k.title().replace("_", " "), r) for k, r in data['general_stats'].items() if
                            k in check_g_stats]
             for k, r in data['hero_stats'].items():
                 output_data.append((k.title().replace("_", " "), r))
-
-            # Someone was complaining there was no KDR provided, so I made one myself and added that to the list
-            #if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
-                #output_data["Kill Death Ratio"] = "{0:.2f}".format(
-                    #data['general_stats'].get('eliminations') / data['general_stats'].get('deaths'))
         try:
             banner = await images.create_banner(user, "Overwatch", output_data)
             await self.bot.upload(banner)
@@ -101,12 +110,11 @@ class Overwatch:
 
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await self.bot.say("Looking up your profile information....")
-        url = base_url + "{}/stats/general".format(bt)
-
         # All we're doing here is ensuring that the status is 200 when looking up someone's general information
         # If it's not, let them know exactly how to format their tag
-        async with self.session.get(url, headers=self.headers) as r:
-            if not r.status == 200:
+        endpoint = "{}/stats/general".format(bt)
+        data = await self._request(None, endpoint)
+        if data is None:
                 await self.bot.say("Profile does not exist! Battletags are picky, "
                                    "format needs to be `user#xxxx`. Capitalization matters")
                 return

@@ -8,7 +8,8 @@ import aiohttp
 import random
 import re
 import math
-import json
+
+MAX_RETRIES = 5
 
 
 class Links:
@@ -20,6 +21,29 @@ class Links:
         # Only default headers for all requests we should use sets the User-Agent
         self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
+
+    async def _request(self, base_url, payload, endpoint='', convert_json=True):
+        """Handles requesting to the API"""
+
+        # Format the URL we'll need based on the base_url, and the endpoint we want to hit
+        url = "{}{}".format(base_url, endpoint)
+
+        # Attempt to connect up to our max retries
+        for x in range(MAX_RETRIES):
+            try:
+                async with aiohttp.ClientSession().get(url, headers=self.headers, params=payload) as r:
+                    # If we failed to connect, attempt again
+                    if r.status != 200:
+                        continue
+
+                    if convert_json:
+                        data = await r.json()
+                    else:
+                        data = await r.text()
+                    return data
+            # If any error happened when making the request, attempt again
+            except:
+                continue
 
     @commands.command(pass_context=True, aliases=['g'])
     @checks.custom_perms(send_messages=True)
@@ -41,34 +65,34 @@ class Links:
         fmt = ""
 
         # First make the request to google to get the results
-        async with aiohttp.get(url, params=params, headers=self.headers) as r:
-            if r.status != 200:
-                await self.bot.say("I failed to connect to google! (That can happen??)")
+        data = await self._request(url, params, '', convert_json=False)
+        if data is None:
+            await self.bot.say("I failed to connect to google! (That can happen??)")
+            return
+
+        # Convert to a BeautifulSoup element and loop through each result clasified by h3 tags with a class of 'r'
+        soup = bs(data, 'html.parser')
+
+        for element in soup.find_all('h3', class_='r')[:3]:
+            # Get the link's href tag, which looks like q=[url here]&sa
+            # Use a lookahead and lookbehind to find this url exactly
+            try:
+                result_url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
+            except AttributeError:
+                await self.bot.say("I couldn't find any results for {}!".format(query))
                 return
-            
-            # Convert to a BeautifulSoup element and loop through each result clasified by h3 tags with a class of 'r'
-            soup = bs(await r.text(), 'html.parser')
-            for element in soup.find_all('h3', class_='r')[:3]:
-                # Get the link's href tag, which looks like q=[url here]&sa
-                # Use a lookahead and lookbehind to find this url exactly
-                try:
-                    result_url = re.search('(?<=q=).*(?=&sa=)', element.find('a').get('href')).group(0)
-                except AttributeError:
-                    await self.bot.say("I couldn't find any results for {}!".format(query))
-                    return
 
-                # Get the next sibling, find the span where the description is, and get the text from this
-                try:
-                    description = element.next_sibling.find('span', class_='st').text
-                except:
-                    description = ""
+            # Get the next sibling, find the span where the description is, and get the text from this
+            try:
+                description = element.next_sibling.find('span', class_='st').text
+            except:
+                description = ""
 
-                # Add this to our text we'll use to send
-                fmt += '\n\n**URL**: <{}>\n**Description**: {}'.format(result_url, description)
+            # Add this to our text we'll use to send
+            fmt += '\n\n**URL**: <{}>\n**Description**: {}'.format(result_url, description)
 
-            fmt = "**Top 3 results for the query** _{}_:{}".format(query, fmt)
-            await self.bot.say(fmt)
-
+        fmt = "**Top 3 results for the query** _{}_:{}".format(query, fmt)
+        await self.bot.say(fmt)
 
     @commands.command(aliases=['yt'])
     @checks.custom_perms(send_messages=True)
@@ -81,8 +105,10 @@ class Links:
                   'type': 'video',
                   'q': query}
 
-        async with self.session.get(url, params=params, headers=self.headers) as r:
-            data = await r.json()
+        data = await self._request(url, params)
+        if data is None:
+            await self.bot.say("Sorry but I failed to connect to youtube!")
+            return
 
         try:
             result = data['items'][0]
@@ -108,8 +134,11 @@ class Links:
                   "format": "json",
                   "srsearch": query}
 
-        async with self.session.get(base_url, params=params, headers=self.headers) as r:
-            data = await r.json()
+        data = await self._request(base_url, params)
+        if data is None:
+            await self.bot.say("Sorry but I failed to connect to Wikipedia!")
+            return
+
         if len(data['query']['search']) == 0:
             await self.bot.say("I could not find any results with that term, I tried my best :c")
             return
@@ -125,7 +154,7 @@ class Links:
 
         await self.bot.say(
             "Here is the best match I found with the query `{}`:\nURL: <{}>\nSnippet: \n```\n{}```".format(query, url,
-                                                                                                         snippet))
+                                                                                                           snippet))
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
@@ -134,8 +163,9 @@ class Links:
         url = "http://api.urbandictionary.com/v0/define"
         params = {"term": msg}
         try:
-            async with self.session.get(url, params=params, headers=self.headers) as r:
-                data = await r.json()
+            data = await self._request(url, params)
+            if data is None:
+                await self.bot.say("Sorry but I failed to connect to urban dictionary!")
 
             # List is the list of definitions found, if it's empty then nothing was found
             if len(data['list']) == 0:
@@ -145,8 +175,8 @@ class Links:
                 await self.bot.say(data['list'][0]['definition'])
         # Urban dictionary has some long definitions, some might not be able to be sent
         except discord.HTTPException:
-            await self.bot.say('```Error: Definition is too long for me to send```')
-        except (json.JSONDecodeError, KeyError):
+            await self.bot.say('```\nError: Definition is too long for me to send```')
+        except KeyError:
             await self.bot.say("Sorry but I failed to connect to urban dictionary!")
 
     @commands.command(pass_context=True)
@@ -173,17 +203,15 @@ class Links:
 
             await self.bot.say("Looking up an image with those tags....")
 
-
             try:
                 # Get the response from derpibooru and parse the 'search' result from it
-                async with self.session.get(url, params=params, headers=self.headers) as r:
-                    data = await r.json()
-                    results = data['search']
+                data = await self._request(url, params)
+                if data is None:
+                    await self.bot.say("Sorry but I failed to connect to Derpibooru!")
+                    return
+                results = data['search']
             except KeyError:
                 await self.bot.say("No results with that search term, {0}!".format(ctx.message.author.mention))
-                return
-            except json.JSONDecodeError:
-                await self.bot.say("Sorry but I failed to connect to Derpibooru!")
                 return
 
             # The first request we've made ensures there are results
@@ -191,8 +219,10 @@ class Links:
             if len(results) > 0:
                 pages = math.ceil(data['total'] / len(results))
                 params['page'] = random.SystemRandom().randint(1, pages)
-                async with self.session.get(url, params=params, headers=self.headers) as r:
-                    data = await r.json()
+                data = await self._request(url, params)
+                if data is None:
+                    await self.bot.say("Sorry but I failed to connect to Derpibooru!")
+                    return
                 results = data['search']
 
                 index = random.SystemRandom().randint(0, len(results) - 1)
@@ -202,8 +232,8 @@ class Links:
                 return
         else:
             # If no search term was provided, search for a random image
-            async with self.session.get('https://derpibooru.org/images/random') as r:
-                # .url will be the URl we end up at, not the one requested.
+            async with aiohttp.ClientSession().get('https://derpibooru.org/images/random', headers=self.headers) as r:
+                # .url will be the URL we end up at, not the one requested.
                 # https://derpibooru.org/images/random redirects to a random image, so this is exactly what we want
                 image_link = r.url
         await self.bot.say(image_link)
@@ -235,10 +265,8 @@ class Links:
         # safe/explicit based on if this channel is nsfw or not
         params['tags'] += " rating:explicit" if nsfw_channels else " rating:safe"
 
-        try:
-            async with self.session.get(url, params=params, headers=self.headers) as r:
-                data = await r.json()
-        except json.JSONDecodeError:
+        data = await self._request(url, params)
+        if data is None:
             await self.bot.say("Sorry, I had trouble connecting at the moment; please try again later")
             return
 
