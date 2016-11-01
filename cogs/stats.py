@@ -56,9 +56,9 @@ class Stats:
 
         try:
             data = [("Command Name", cmd.qualified_name),
-                           ("Total Usage", total_usage),
-                           ("Your Usage", member_usage),
-                           ("This Server's Usage", server_usage)]
+                    ("Total Usage", total_usage),
+                    ("Your Usage", member_usage),
+                    ("This Server's Usage", server_usage)]
             banner = await images.create_banner(ctx.message.author, "Command Stats", data)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
@@ -91,12 +91,12 @@ class Stats:
             # As this can include, for example, all 3 if there are only 3 entries
             try:
                 top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
-                top_5 = {data[0]: data[1] for data in sorted_stats[:5]}
                 banner = await images.create_banner(ctx.message.author, "Your command usage", top_5)
                 await self.bot.upload(banner)
             except (FileNotFoundError, discord.Forbidden):
                 top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
-                await self.bot.say("Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
+                await self.bot.say(
+                    "Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
         elif re.search('server', option):
             # This is exactly the same as above, except server usage instead of member usage
             server = ctx.message.server
@@ -161,7 +161,7 @@ class Stats:
 
         try:
             output = [("{0.display_name}".format(ctx.message.server.get_member(m_id)), amt)
-                               for m_id, amt in sorted_booped_members]
+                      for m_id, amt in sorted_booped_members]
             banner = await images.create_banner(ctx.message.author, "Your booped victims", output)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
@@ -230,10 +230,17 @@ class Stats:
         entry = [m for m in server_members if m['member_id'] == member.id][0]
         rating = entry['rating']
         record = "{}-{}".format(entry['wins'], entry['losses'])
-        fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
-        fmt = fmt.format(member.display_name, record, server_rank, len(server_members), total_rank, len(all_members),
-                         rating)
-        await self.bot.say('```\n{}```'.format(fmt))
+        try:
+            title = 'Stats for {}'.format(member.display_name)
+            fmt = [('Record', record), ('Server Rank', '{}/{}'.format(server_rank, len(server_members))),
+                   ('Overall Rank', '{}/{}'.format(total_rank, len(all_members))), ('Rating', rating)]
+            banner = await images.create_banner(member, title, fmt)
+            await self.bot.upload(banner)
+        except (FileNotFoundError, discord.Forbidden):
+            fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
+            fmt = fmt.format(member.display_name, record, server_rank, len(server_members), total_rank,
+                             len(all_members), rating)
+            await self.bot.say('```\n{}```'.format(fmt))
 
 
 def setup(bot):
