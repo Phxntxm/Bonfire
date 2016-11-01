@@ -83,6 +83,8 @@ async def on_command_error(error, ctx):
     try:
         if isinstance(error.original, discord.Forbidden):
             return
+        elif isinstance(error.original, discord.HTTPException) and 'empty message' in str(error.original):
+            return
     except AttributeError:
         pass
 
