@@ -9,6 +9,7 @@ import random
 import re
 import math
 import logging
+import traceback
 
 log = logging.getLogger()
 
@@ -23,7 +24,6 @@ class Links:
         self.bot = bot
         # Only default headers for all requests we should use sets the User-Agent
         self.headers = {"User-Agent": config.user_agent}
-        self.session = aiohttp.ClientSession()
 
     async def _request(self, base_url, payload, endpoint='', convert_json=True):
         """Handles requesting to the API"""
@@ -46,6 +46,8 @@ class Links:
                     return data
             # If any error happened when making the request, attempt again
             except Exception as e:
+                tb = traceback.format_tb(e.__traceback__)
+                log.error(tb)
                 log.error("{0.__class__.__name__}: {0}".format(e))
                 continue
 
