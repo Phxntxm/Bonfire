@@ -8,6 +8,9 @@ import aiohttp
 import random
 import re
 import math
+import logging
+
+log = logging.getLogger()
 
 MAX_RETRIES = 5
 
@@ -42,7 +45,8 @@ class Links:
                         data = await r.text()
                     return data
             # If any error happened when making the request, attempt again
-            except:
+            except Exception as e:
+                log.error("{0.__class__.__name__}: {0}".format(e))
                 continue
 
     @commands.command(pass_context=True, aliases=['g'])
@@ -65,9 +69,9 @@ class Links:
         fmt = ""
 
         # First make the request to google to get the results
-        data = await self._request(url, params, '', convert_json=False)
+        data = await self._request(url, params, convert_json=False)
         if data is None:
-            await self.bot.say("I failed to connect to google! (That can happen??)")
+            await self.bot.send_message(ctx.message.channel, "I failed to connect to google! (That can happen??)")
             return
 
         # Convert to a BeautifulSoup element and loop through each result clasified by h3 tags with a class of 'r'
@@ -94,9 +98,9 @@ class Links:
         fmt = "**Top 3 results for the query** _{}_:{}".format(query, fmt)
         await self.bot.say(fmt)
 
-    @commands.command(aliases=['yt'])
+    @commands.command(aliases=['yt'], pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def youtube(self, *, query: str):
+    async def youtube(self, ctx, *, query: str):
         """Searches youtube for a provided query"""
         key = config.youtube_key
         url = "https://www.googleapis.com/youtube/v3/search"
@@ -107,7 +111,7 @@ class Links:
 
         data = await self._request(url, params)
         if data is None:
-            await self.bot.say("Sorry but I failed to connect to youtube!")
+            await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to youtube!")
             return
 
         try:
@@ -123,9 +127,9 @@ class Links:
         fmt = "**Title:** {}\n\n**Description:** {}\n\n**URL:** <{}>".format(title, description, result_url)
         await self.bot.say(fmt)
 
-    @commands.command()
+    @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def wiki(self, *, query: str):
+    async def wiki(self, ctx, *, query: str):
         """Pulls the top match for a specific term, and returns the definition"""
         # All we need to do is search for the term provided, so the action, list, and format never need to change
         base_url = "https://en.wikipedia.org/w/api.php"
@@ -136,7 +140,7 @@ class Links:
 
         data = await self._request(base_url, params)
         if data is None:
-            await self.bot.say("Sorry but I failed to connect to Wikipedia!")
+            await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to Wikipedia!")
             return
 
         if len(data['query']['search']) == 0:
@@ -156,16 +160,16 @@ class Links:
             "Here is the best match I found with the query `{}`:\nURL: <{}>\nSnippet: \n```\n{}```".format(query, url,
                                                                                                            snippet))
 
-    @commands.command()
+    @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def urban(self, *, msg: str):
+    async def urban(self, ctx, *, msg: str):
         """Pulls the top urbandictionary.com definition for a term"""
         url = "http://api.urbandictionary.com/v0/define"
         params = {"term": msg}
         try:
             data = await self._request(url, params)
             if data is None:
-                await self.bot.say("Sorry but I failed to connect to urban dictionary!")
+                await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to urban dictionary!")
 
             # List is the list of definitions found, if it's empty then nothing was found
             if len(data['list']) == 0:
@@ -207,7 +211,7 @@ class Links:
                 # Get the response from derpibooru and parse the 'search' result from it
                 data = await self._request(url, params)
                 if data is None:
-                    await self.bot.say("Sorry but I failed to connect to Derpibooru!")
+                    await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to Derpibooru!")
                     return
                 results = data['search']
             except KeyError:
@@ -267,7 +271,8 @@ class Links:
 
         data = await self._request(url, params)
         if data is None:
-            await self.bot.say("Sorry, I had trouble connecting at the moment; please try again later")
+            await self.bot.send_message(ctx.message.channel,
+                                        "Sorry, I had trouble connecting at the moment; please try again later")
             return
 
         # Try to find an image from the list. If there were no results, we're going to attempt to find
