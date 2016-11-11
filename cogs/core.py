@@ -20,6 +20,13 @@ class Core:
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
+    async def help(self):
+        """This command is used to provide a link to the help URL"""
+        fmt = "This URL can be used to view information about all commands: <{}>".format(config.help_url)
+        await self.bot.say(fmt)
+    
+    @commands.command()
+    @checks.custom_perms(send_messages=True)
     async def motd(self, *, date=None):
         """This command can be used to print the current MOTD (Message of the day)
         This will most likely not be updated every day, however messages will still be pushed to this every now and then"""
