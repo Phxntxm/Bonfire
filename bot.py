@@ -30,8 +30,6 @@ async def on_ready():
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
 
-    bot.remove_command('help')
-
 
 @bot.event
 async def on_message(message):
@@ -120,6 +118,8 @@ async def on_command_error(error, ctx):
 
 
 if __name__ == '__main__':
+    bot.remove_command('help')
+    
     for e in config.extensions:
         bot.load_extension(e)
     bot.run(config.bot_token)
