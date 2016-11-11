@@ -4,13 +4,13 @@ import discord
 from discord.ext import commands
 
 class Music:
-"""
-This cog is simply created in order to add all commands in the playlist cog
-in case 'this' instance of the bot has not loaded the playlist cog.
-This is useful to have the possiblity to split the music and text commands,
-And still use commands that require another command to be passed
-from the instance that hasn't loaded the playlist cog
-"""
+    """
+    This cog is simply created in order to add all commands in the playlist cog
+    in case 'this' instance of the bot has not loaded the playlist cog.
+    This is useful to have the possiblity to split the music and text commands,
+    And still use commands that require another command to be passed
+    from the instance that hasn't loaded the playlist cog
+    """
     def __init__(self, bot):
         self.bot = bot
 
