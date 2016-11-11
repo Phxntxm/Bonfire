@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 @bot.event
 async def on_ready():
     # Change the status upon connection to the default status
-    await bot.change_presence(discord.Game(name=config.default_status, type=0))
+    await bot.change_presence(game=discord.Game(name=config.default_status, type=0))
 
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
@@ -119,7 +119,7 @@ async def on_command_error(error, ctx):
 
 if __name__ == '__main__':
     bot.remove_command('help')
-    
+
     for e in config.extensions:
         bot.load_extension(e)
     bot.run(config.bot_token)
