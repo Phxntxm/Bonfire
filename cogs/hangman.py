@@ -108,7 +108,7 @@ class Hangman:
         return game
 
     @commands.group(aliases=['hm'], pass_context=True, no_pm=True, invoke_without_command=True)
-    @commands.cooldown(1, 30, BucketType.user)
+    @commands.cooldown(1, 7, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def hangman(self, ctx, *, guess):
         """Makes a guess towards the server's currently running hangman game"""
