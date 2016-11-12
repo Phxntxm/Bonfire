@@ -80,6 +80,8 @@ async def process_command(ctx):
 async def on_command_error(error, ctx):
     if isinstance(error, commands.CommandNotFound):
         return
+    if isinstance(error, commands.DisabledCommand):
+        return
     try:
         if isinstance(error.original, discord.Forbidden):
             return
