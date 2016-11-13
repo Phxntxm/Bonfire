@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 import discord
+import traceback
 
 from discord.ext import commands
 from .utils import config
@@ -52,48 +53,53 @@ class Deviantart:
         # People might sub to the same person, so lets cache every person and their last update
         cache = {}
 
-        for entry in content:
-            user = discord.utils.get(self.bot.get_all_members(), id=entry['member_id'])
+        try:
+            for entry in content:
+                user = discord.utils.get(self.bot.get_all_members(), id=entry['member_id'])
 
-            # If we're sharded, we might not be able to find this user.
-            # If the bot is not in the server with the member either
-            if user is None:
-                continue
+                # If we're sharded, we might not be able to find this user.
+                # If the bot is not in the server with the member either
+                if user is None:
+                    continue
 
-            params = self.params.copy()
-            # Now loop through the subscriptions
-            for da_name in entry['subbed']:
-                # Check what the last updated content we sent to this user was
-                # Since we cannot go back in time, if this doesn't match the last uploaded from the user
-                # Assume we need to notify the user of this post
-                last_updated_id = entry['last_updated'].get(da_name, None)
-                # Check if this user has been requested already, if so we don't need to make another request
-                result = cache.get(da_name, None)
-                if result is None:
-                    params['username'] = da_name
-                    async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
-                        data = await response.json()
-                        result = data['results'][0]
-                        cache[da_name] = result
+                params = self.params.copy()
+                # Now loop through the subscriptions
+                for da_name in entry['subbed']:
+                    # Check what the last updated content we sent to this user was
+                    # Since we cannot go back in time, if this doesn't match the last uploaded from the user
+                    # Assume we need to notify the user of this post
+                    last_updated_id = entry['last_updated'].get(da_name, None)
+                    # Check if this user has been requested already, if so we don't need to make another request
+                    result = cache.get(da_name, None)
+                    if result is None:
+                        params['username'] = da_name
+                        async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
+                            data = await response.json()
+                            result = data['results'][0]
+                            cache[da_name] = result
 
-                # This means that our last update to this user, for this author, is not the same
-                if last_updated_id != result['deviationid']:
-                    # First lets check if the last updated ID was None, if so...then we haven't alerted them yet
-                    # We don't want to alert them in this case
-                    # We just want to act like the artist's most recent update was the last notified
-                    # So just notify the user if this is not None
-                    if last_updated_id is not None:
-                        fmt = "There has been a new post by an artist you are subscribed to!\n\n" \
-                              "**Title:** {}\n**User:** {}\n**URL:** {}".format(
-                                result['title'],
-                                result['author']['username'],
-                                result['url'])
-                        await self.bot.send_message(user, fmt)
-                    # Now we can update the user's last updated for this DA
-                    # We want to do this whether or not our last if statement was met
-                    r_filter = {'member_id': user.id}
-                    update = {'last_updated': {da_name: result['deviationid']}}
-                    await config.update_content('deviantart', update, r_filter)
+                    # This means that our last update to this user, for this author, is not the same
+                    if last_updated_id != result['deviationid']:
+                        # First lets check if the last updated ID was None, if so...then we haven't alerted them yet
+                        # We don't want to alert them in this case
+                        # We just want to act like the artist's most recent update was the last notified
+                        # So just notify the user if this is not None
+                        if last_updated_id is not None:
+                            fmt = "There has been a new post by an artist you are subscribed to!\n\n" \
+                                  "**Title:** {}\n**User:** {}\n**URL:** {}".format(
+                                    result['title'],
+                                    result['author']['username'],
+                                    result['url'])
+                            await self.bot.send_message(user, fmt)
+                        # Now we can update the user's last updated for this DA
+                        # We want to do this whether or not our last if statement was met
+                        r_filter = {'member_id': user.id}
+                        update = {'last_updated': {da_name: result['deviationid']}}
+                        await config.update_content('deviantart', update, r_filter)
+        except Exception as e:
+            tb = traceback.format_tb(e)
+            fmt = "{}\n{0.__class__.__name__}: {0}".format(tb, e)
+            log.error(fmt)
 
     @commands.group()
     @checks.custom_perms(send_messages=True)
