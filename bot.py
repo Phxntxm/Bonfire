@@ -19,7 +19,7 @@ opts = {'command_prefix': config.command_prefix,
         'command_not_found': ''}
 
 bot = commands.Bot(**opts)
-logging.basicConfig(level=logging.INFO, filename='bonfire.log')
+logging.basicConfig(level=logging.WARNING, filename='bonfire.log')
 
 
 @bot.event
