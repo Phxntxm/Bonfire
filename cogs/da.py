@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import discord
 import traceback
+import logging
 
 from discord.ext import commands
 from .utils import config

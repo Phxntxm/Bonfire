@@ -4,6 +4,7 @@ import discord
 import re
 import rethinkdb as r
 import traceback
+import logging
 
 from discord.ext import commands
 from .utils import config

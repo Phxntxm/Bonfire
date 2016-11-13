@@ -9,6 +9,7 @@ import json
 import re
 import rethinkdb as r
 import traceback
+import logging
 
 
 log = logging.getLogger()
