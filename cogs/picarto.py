@@ -69,7 +69,7 @@ class Picarto:
                                 continue
                             server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
                             try:
-                                channel_id = server_alerts[0]
+                                channel_id = server_alerts[0]['channel_id']
                             except IndexError:
                                 channel_id = server_id
                             channel = self.bot.get_channel(channel_id)
@@ -92,7 +92,7 @@ class Picarto:
                                 continue
                             server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
                             try:
-                                channel_id = server_alerts[0]
+                                channel_id = server_alerts[0]['channel_id']
                             except IndexError:
                                 channel_id = server_id
                             channel = self.bot.get_channel(channel_id)
