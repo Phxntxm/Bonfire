@@ -8,6 +8,7 @@ import discord
 import json
 import re
 import rethinkdb as r
+import traceback
 
 
 class Twitch:

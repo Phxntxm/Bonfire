@@ -3,6 +3,7 @@ import asyncio
 import discord
 import re
 import rethinkdb as r
+import traceback
 
 from discord.ext import commands
 from .utils import config
