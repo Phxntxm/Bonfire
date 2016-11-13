@@ -75,6 +75,7 @@ class Deviantart:
                         params['username'] = da_name
                         async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
                             data = await response.json()
+                            log.info("DA responded with {}".format(data))
                             result = data['results'][0]
                             cache[da_name] = result
 
