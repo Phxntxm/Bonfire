@@ -77,7 +77,7 @@ class Deviantart:
                         params['username'] = da_name
                         async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
                             data = await response.json()
-                            log.info("DA responded with {}".format(data))
+                            log.warning("DA responded with {}".format(data))
                             result = data['results'][0]
                             cache[da_name] = result
 
@@ -100,7 +100,7 @@ class Deviantart:
                         update = {'last_updated': {da_name: result['deviationid']}}
                         await config.update_content('deviantart', update, r_filter)
         except Exception as e:
-            tb = traceback.format_tb(e)
+            tb = traceback.format_exc()
             fmt = "{}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 

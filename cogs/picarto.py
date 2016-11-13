@@ -106,7 +106,7 @@ class Picarto:
                         await config.update_content('picarto', {'live': 0}, {'member_id': m_id})
                 await asyncio.sleep(30)
         except Exception as e:
-            tb = traceback.format_tb(e)
+            tb = traceback.format_exc()
             fmt = "{}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 
