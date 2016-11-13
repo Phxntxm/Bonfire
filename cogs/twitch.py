@@ -11,6 +11,8 @@ import rethinkdb as r
 import traceback
 
 
+log = logging.getLogger()
+
 class Twitch:
     """Class for some twitch integration
     You can add or remove your twitch stream for your user

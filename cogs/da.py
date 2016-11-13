@@ -8,6 +8,7 @@ from .utils import config
 from .utils import checks
 
 
+log = logging.getLogger()
 class Deviantart:
     def __init__(self, bot):
         self.base_url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
