@@ -45,7 +45,7 @@ class Stats:
         embed.add_field(name='Total Emojis', value=len(server.emojis))
 
         # Get the amount of online members
-        online_members = [m for m in server.members if str(m.status.online) == 'online']
+        online_members = [m for m in server.members if str(m.status) == 'online']
         embed.add_field(name='Total members', value='{}/{}'.format(len(online_members), server.member_count))
         embed.add_field(name='Roles', value=len(server.roles))
 
