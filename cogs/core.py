@@ -142,11 +142,11 @@ class Core:
             count_battles += len(battles)
 
         if hm_games:
-            embed.add_field(text='Total Hangman games running', value=hm_games)
+            embed.add_field(name='Total Hangman games running', value=hm_games)
         if ttt_games:
-            embed.add_field(text='Total TicTacToe games running', value=ttt_games)
+            embed.add_field(name='Total TicTacToe games running', value=ttt_games)
         if count_battles:
-            embed.add_field(text='Total battles games running', value=count_battles)
+            embed.add_field(name='Total battles games running', value=count_battles)
 
         embed.set_footer(text=self.bot.description)
 
