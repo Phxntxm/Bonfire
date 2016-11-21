@@ -38,10 +38,10 @@ class Stats:
 
         # Make sure we only set the icon url if it has been set
         if server.icon_url != "":
-            embed.set_thumbnail(server.icon_url)
+            embed.set_thumbnail(url=server.icon_url)
 
         # Add our fields, these are self-explanatory
-        embed.add_field(name='Region', value=server.region)
+        embed.add_field(name='Region', value=str(server.region))
         embed.add_field(name='Total Emojis', value=len(server.emojis))
 
         # Get the amount of online members
