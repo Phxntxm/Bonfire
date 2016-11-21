@@ -119,39 +119,38 @@ class Core:
             total_data['member_count'] += entry['member_count']
             total_data['server_count'] += entry['server_count']
 
-        fmt['Official Bot Server'] = config.dev_server
-        fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
-        fmt['Total Servers'] = total_data.get('server_count')
-        fmt['Total Members'] = total_data.get('member_count')
-        fmt['Description'] = self.bot.description
+        # Create the original embed object
+        opts = {'title': 'Dev Server',
+                      'description': 'Join the server above for any questions/suggestions about me.'
+                      'url': config.dev_server}
+        embed = discord.Embed(**opts)
 
-        # servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items()
-        #                              if state.is_playing()])
+        # Add the normal values
+        embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
+        embed.add_field(name='Total Servers', value=total_data['server_count'])
+        embed.add_field(name='Total Members', value=total_data['member_count'])
+
+        # Count the variable values; hangman, tictactoe, etc.
         hm_games = len(
             [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
+
         ttt_games = len([server_id for server_id,
                          game in self.bot.get_cog('TicTacToe').boards.items()])
+        
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
             count_battles += len(battles)
 
-        information = "\n".join("{}: {}".format(key, result)
-                                for key, result in fmt.items())
-        information += "\n"
-        # if servers_playing_music:
-        #    information += "Playing songs in {} different servers\n".format(
-        #        servers_playing_music)
         if hm_games:
-            information += "{} different hangman games running\n".format(
-                hm_games)
+            embed.add_field(text='Total Hangman games running', value=hm_games)
         if ttt_games:
-            information += "{} different TicTacToe games running\n".format(
-                ttt_games)
+            embed.add_field(text='Total TicTacToe games running', value=ttt_games)
         if count_battles:
-            information += "{} different battles going on\n".format(
-                count_battles)
+            embed.add_field(text='Total battles games running', value=count_battles)
 
-        await self.bot.say("```\n{}```".format(information))
+        embed.set_footer(text=self.bot.description)
+
+        await self.bot.say(embed=embed)
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
