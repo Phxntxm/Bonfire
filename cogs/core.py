@@ -121,7 +121,7 @@ class Core:
 
         # Create the original embed object
         opts = {'title': 'Dev Server',
-                      'description': 'Join the server above for any questions/suggestions about me.'
+                      'description': 'Join the server above for any questions/suggestions about me.',
                       'url': config.dev_server}
         embed = discord.Embed(**opts)
 
@@ -136,7 +136,7 @@ class Core:
 
         ttt_games = len([server_id for server_id,
                          game in self.bot.get_cog('TicTacToe').boards.items()])
-        
+
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
             count_battles += len(battles)
