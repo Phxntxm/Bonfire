@@ -29,6 +29,34 @@ class Stats:
 
         return cmd
 
+    @commands.command(no_pm=True, pass_context=True)
+    @checks.custom_perms(send_messages=True)
+    async def serverinfo(self, ctx):
+        server = ctx.message.server
+        # Create our embed that we'll use for the information
+        embed = discord.Embed(title=server.name, description="Created on: {}".format(server.created_at.date()))
+
+        # Make sure we only set the icon url if it has been set
+        if server.icon_url != "":
+            embed.set_thumbnail(server.icon_url)
+
+        # Add our fields, these are self-explanatory
+        embed.add_field(name='Region', value=server.region)
+        embed.add_field(name='Total Emojis', value=len(server.emojis))
+
+        # Get the amount of online members
+        online_members = [m for m in server.members if str(m.status.online) == 'online']
+        embed.add_field(name='Total members', value='{}/{}'.format(len(online_members), server.member_count))
+        embed.add_field(name='Roles', value=len(server.roles))
+
+        # Split channels into voice and text channels
+        voice_channels = [c for c in server.channels if str(c.type) == 'voice']
+        text_channels = [c for c in server.channels if str(c.type) == 'text']
+        embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
+        embed.add_field(name='Owner', value=server.owner.display_name)
+
+        await self.bot.say(embed=embed)
+
     @commands.group(no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def command(self):
