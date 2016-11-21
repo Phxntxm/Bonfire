@@ -126,7 +126,6 @@ class Core:
         embed = discord.Embed(**opts)
 
         # Add the normal values
-        embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
         embed.add_field(name='Total Servers', value=total_data['server_count'])
         embed.add_field(name='Total Members', value=total_data['member_count'])
 
@@ -148,6 +147,7 @@ class Core:
         if count_battles:
             embed.add_field(name='Total battles games running', value=count_battles)
 
+        embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
         embed.set_footer(text=self.bot.description)
 
         await self.bot.say(embed=embed)
