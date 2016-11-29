@@ -11,8 +11,8 @@ import rethinkdb as r
 import traceback
 import logging
 
-
 log = logging.getLogger()
+
 
 class Twitch:
     """Class for some twitch integration

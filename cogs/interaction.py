@@ -26,7 +26,8 @@ battle_outcomes = \
      "{0} realized it was high noon, {1} never even saw it coming.",
      "{1} spontaneously combusted...lol rip",
      "after many turns {0} summons exodia and {1} is sent to the shadow realm",
-     "{0} and {1} sit down for an intense game of chess, in the heat of the moment {0} forgot they were playing a game and summoned a real knight",
+     "{0} and {1} sit down for an intense game of chess, in the heat of the moment {0} forgot they were playing a "
+     "game and summoned a real knight",
      "{0} challenges {1} to rock paper scissors, unfortunately for {1}, {0} chose scissors and stabbed them",
      "{0} goes back in time and becomes {1}'s best friend, winning without ever throwing a punch",
      "{1} trips down some stairs on their way to the battle with {0}",
@@ -38,7 +39,8 @@ battle_outcomes = \
      "{0} brought an army to a fist fight, {1} never saw their opponent once",
      "{0} used multiple simultaneous devestating defensive deep strikes to overwhelm {1}",
      "{0} and {1} engage in a dance off; {0} wiped the floor with {1}",
-     "{1} tried to hide in the sand to catch {0} off guard, unfortunately looks like a Giant Antlion had the same idea for him",
+     "{1} tried to hide in the sand to catch {0} off guard, unfortunately looks like a Giant Antlion had the same "
+     "idea for him",
      "{1} was busy playing trash videogames the night before the fight and collapsed before {0}",
      "{0} threw a sick meme and {1} totally got PRANK'D",
      "{0} and {1} go on a skiing trip together, turns out {1} forgot how to pizza french-fry",

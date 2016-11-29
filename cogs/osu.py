@@ -11,6 +11,7 @@ import aiohttp
 base_url = 'https://osu.ppy.sh/api/'
 MAX_RETRIES = 5
 
+
 class Osu:
     def __init__(self, bot):
         self.bot = bot
@@ -81,19 +82,19 @@ class Osu:
 
         # A list of the possible values we'll receive, that we want to display
         wanted_info = ['username', 'maxcombo', 'count300', 'count100', 'count50', 'countmiss',
-                                   'perfect', 'enabled_mods', 'date', 'rank' 'pp', 'beatmap_title', 'beatmap_version',
-                                   'max_combo', 'artist', 'difficulty']
+                       'perfect', 'enabled_mods', 'date', 'rank' 'pp', 'beatmap_title', 'beatmap_version',
+                       'max_combo', 'artist', 'difficulty']
 
         # A couple of these aren't the best names to display, so setup a map to change these just a little bit
         key_map = {'maxcombo': 'combo',
-                              'count300': '300 hits',
-                              'count100': '100 hits',
-                              'count50': '50 hits',
-                              'countmiss': 'misses',
-                              'perfect': 'got_max_combo'}
+                   'count300': '300 hits',
+                   'count100': '100 hits',
+                   'count50': '50 hits',
+                   'countmiss': 'misses',
+                   'perfect': 'got_max_combo'}
 
         params = {'u': user,
-                            'limit': 100}
+                  'limit': 100}
         # The endpoint that we're accessing to get this informatin
         endpoint = 'get_user_best'
         data = await self._request(params, endpoint)
@@ -149,13 +150,13 @@ class Osu:
         await self.bot.say("Looking up your Osu information...")
         # A list of the possible values we'll receive, that we want to display
         wanted_info = ['username', 'playcount', 'ranked_score', 'pp_rank', 'level', 'pp_country_rank',
-                                  'accuracy', 'country', 'pp_country_rank', 'count_rank_s', 'count_rank_a']
+                       'accuracy', 'country', 'pp_country_rank', 'count_rank_s', 'count_rank_a']
 
         # A couple of these aren't the best names to display, so setup a map to change these just a little bit
         key_map = {'playcount': 'play_count',
-                              'count_rank_ss': 'total_SS_ranks',
-                              'count_rank_s': 'total_s_ranks',
-                              'count_rank_a': 'total_a_ranks'}
+                   'count_rank_ss': 'total_SS_ranks',
+                   'count_rank_s': 'total_s_ranks',
+                   'count_rank_a': 'total_a_ranks'}
 
         # The paramaters that we'll send to osu to get the information needed
         params = {'u': user}
@@ -185,6 +186,7 @@ class Osu:
         except (FileNotFoundError, discord.Forbidden):
             _fmt = "\n".join("{}: {}".format(k, r) for k, r in fmt.items())
             await self.bot.say("```\n{}```".format(_fmt))
+
 
 def setup(bot):
     bot.add_cog(Osu(bot))

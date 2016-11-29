@@ -43,14 +43,16 @@ class Core:
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def help(self, ctx, *, message: str = []):
+    async def help(self, ctx, *, message=None):
         """This command is used to provide a link to the help URL"""
 
+        if message is None:
+            message = []
         cmd = self.find_command(message)
 
         if cmd is None:
-            fmt = "This URL can be used to view information about all commands: <{}>. " \
-                       "Run help on a command specifically in order to get information on that command.".format(config.help_url)
+            fmt = "This URL can be used to view information about all commands: <{}>. Run help on a command " \
+                  "specifically in order to get information on that command.".format(config.help_url)
             await self.bot.say(fmt)
         else:
             description = cmd.help
@@ -158,7 +160,6 @@ class Core:
         # fmt is a dictionary so we can set the key to it's output, then print both
         # The only real use of doing it this way is easier editing if the info
         # in this command is changed
-        fmt = {}
 
         bot_data = await config.get_content('bot_data')
         total_data = {'member_count': 0,
@@ -169,8 +170,8 @@ class Core:
 
         # Create the original embed object
         opts = {'title': 'Dev Server',
-                      'description': 'Join the server above for any questions/suggestions about me.',
-                      'url': config.dev_server}
+                'description': 'Join the server above for any questions/suggestions about me.',
+                'url': config.dev_server}
         embed = discord.Embed(**opts)
 
         # Add the normal values

@@ -8,8 +8,9 @@ from discord.ext import commands
 from .utils import config
 from .utils import checks
 
-
 log = logging.getLogger()
+
+
 class Deviantart:
     def __init__(self, bot):
         self.base_url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
@@ -90,9 +91,9 @@ class Deviantart:
                         if last_updated_id is not None:
                             fmt = "There has been a new post by an artist you are subscribed to!\n\n" \
                                   "**Title:** {}\n**User:** {}\n**URL:** {}".format(
-                                    result['title'],
-                                    result['author']['username'],
-                                    result['url'])
+                                  result['title'],
+                                  result['author']['username'],
+                                  result['url'])
                             await self.bot.send_message(user, fmt)
                         # Now we can update the user's last updated for this DA
                         # We want to do this whether or not our last if statement was met

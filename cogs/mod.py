@@ -39,9 +39,9 @@ class Mod:
 
         return cmd
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(no_pm=True)
     @checks.custom_perms(kick_members=True)
-    async def kick(self, ctx, member: discord.Member):
+    async def kick(self, member: discord.Member):
         """Used to kick a member from this server
 
         EXAMPLE: !kick @Member
@@ -97,17 +97,17 @@ class Mod:
                 member = converter.convert()
             except commands.converter.BadArgument:
                 await self.bot.say(
-                    "{} does not appear to be a valid member. If this member is not in this server, please provide their ID".format(
-                        member))
+                    '{} does not appear to be a valid member. If this member is not in this server, please provide '
+                    'their ID'.format(member))
                 return
         # Now lets try actually banning the member we've been given
         try:
             await self.bot.ban(member)
             await self.bot.say("\N{OK HAND SIGN}")
-        except discord.HTTPException:
-            await self.bot.say("Sorry, I failed to ban that user!")
         except discord.Forbidden:
             await self.bot.say("But I can't, muh permissions >:c")
+        except discord.HTTPException:
+            await self.bot.say("Sorry, I failed to ban that user!")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -199,8 +199,8 @@ class Mod:
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions
 
-        EXAMPLE: !perms help
-        RESULT: Hopefully a result saying you just need send_messages permissions; otherwise lol this server's admin doesn't like me"""
+        EXAMPLE: !perms help RESULT: Hopefully a result saying you just need send_messages permissions; otherwise lol
+        this server's admin doesn't like me """
         if command is None:
             await self.bot.say(
                 "Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))

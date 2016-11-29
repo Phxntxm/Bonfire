@@ -3,6 +3,7 @@ from .utils import checks
 import discord
 from discord.ext import commands
 
+
 class Music:
     """
     This cog is simply created in order to add all commands in the playlist cog
@@ -11,6 +12,7 @@ class Music:
     And still use commands that require another command to be passed
     from the instance that hasn't loaded the playlist cog
     """
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -152,6 +154,7 @@ class Music:
         EXAMPLE: !playing
         RESULT: Information about the song that's currently playing!"""
         pass
+
 
 def setup(bot):
     bot.add_cog(Music(bot))
