@@ -47,7 +47,7 @@ class Core:
         """This command is used to provide a link to the help URL"""
 
         if message is None:
-            message = []
+            message = ""
         cmd = self.find_command(message)
 
         if cmd is None:
