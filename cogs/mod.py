@@ -455,7 +455,7 @@ class Mod:
         r_filter = {'server_id': ctx.message.server.id}
         entry = {'server_id': ctx.message.server.id,
                  'rules': [rule]}
-        update = lambda row: row['rules'].append(rule)
+        update = {'rules': r.row['rules'].append(rule)}
         if not await config.update_content('rules', update, r_filter):
             await config.add_content('rules', entry, r_filter)
 
