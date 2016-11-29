@@ -66,6 +66,8 @@ class Core:
             if result:
                 embed.add_field(name="Result", value=result, inline=False)
 
+            await self.bot.say(embed=embed)
+
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def motd(self, *, date=None):
