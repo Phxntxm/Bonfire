@@ -39,11 +39,84 @@ class Mod:
 
         return cmd
 
+    @commands.command(no_pm=True)
+    @checks.custom_perms(kick_members=True)
+    async def kick(self, member: discord.Member):
+        """Used to kick a member from this server
+
+        EXAMPLE: !kick @Member
+        RESULT: They're kicked from the server?"""
+        try:
+            await self.bot.kick(member)
+            await self.bot.say("\N{OK HAND SIGN}")
+        except discord.Forbidden:
+            await self.bot.say("But I can't, muh permissions >:c")
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(ban_members=True)
+    async def unban(self, ctx, member_id: int):
+        """Used to unban a member from this server
+        Due to the fact that I cannot find a user without being in a server with them
+        only the ID should be provided
+
+        EXAMPLE: !unban 353217589321750912
+        RESULT: That dude be unbanned"""
+
+        # Lets only accept an int for this method, in order to ensure only an ID is provided
+        # Due to that though, we need to ensure a string is passed as the member's ID
+        member = discord.Object(id=str(member_id))
+        try:
+            await self.bot.unban(ctx.message.server, member)
+            await self.bot.say("\N{OK HAND SIGN}")
+        except discord.Forbidden:
+            await self.bot.say("But I can't, muh permissions >:c")
+        except discord.HTTPException:
+            await self.bot.say("Sorry, I failed to unban that user!")
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(ban_members=True)
+    async def ban(self, ctx, *, member):
+        """Used to ban a member
+        This can be used to ban someone preemptively as well.
+        Provide the ID of the user and this should ban them without them being in the server
+
+        EXAMPLE: !ban 531251325312
+        RESULT: That dude be banned"""
+
+        # Lets first check if a user ID was provided, as that will be the easiest case to ban
+        if member.isdigit():
+            # First convert it to a discord object based on the ID that was given
+            member = discord.Object(id=member)
+            # Next, to ban from the server the API takes a server obejct and uses that ID
+            # So set "this" server as the member's server. This creates the "fake" member we need
+            member.server = ctx.message.server
+        else:
+            # If no ID was provided, lets try to convert what was given using the internal coverter
+            converter = commands.converter.UserConverter(ctx, member)
+            try:
+                member = converter.convert()
+            except commands.converter.BadArgument:
+                await self.bot.say(
+                    '{} does not appear to be a valid member. If this member is not in this server, please provide '
+                    'their ID'.format(member))
+                return
+        # Now lets try actually banning the member we've been given
+        try:
+            await self.bot.ban(member)
+            await self.bot.say("\N{OK HAND SIGN}")
+        except discord.Forbidden:
+            await self.bot.say("But I can't, muh permissions >:c")
+        except discord.HTTPException:
+            await self.bot.say("Sorry, I failed to ban that user!")
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def alerts(self, ctx, channel: discord.Channel):
         """This command is used to set a channel as the server's 'notifications' channel
-        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel"""
+        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel
+
+        EXAMPLE: !alerts #alerts
+        RESULT: No more alerts spammed in #general!"""
         r_filter = {'server_id': ctx.message.server.id}
         entry = {'server_id': ctx.message.server.id,
                  'channel_id': channel.id}
@@ -57,7 +130,10 @@ class Mod:
     async def usernotify(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
         This will save what channel you run this command in, that will be the channel used to send the notification to
-        Provide on, yes, or true to set it on; otherwise it will be turned off"""
+        Provide on, yes, or true to set it on; otherwise it will be turned off
+
+        EXAMPLE: !usernotify on
+        RESULT: Annying join/leave notifications! Yay!"""
         # Join/Leave notifications can be kept separate from normal alerts
         # So we base this channel on it's own and not from alerts
         # When mod logging becomes available, that will be kept to it's own channel if wanted as well
@@ -70,37 +146,46 @@ class Mod:
         fmt = "notify" if on_off else "not notify"
         await self.bot.say("This server will now {} if someone has joined or left".format(fmt))
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group(pass_context=True)
     async def nsfw(self, ctx):
         """Handles adding or removing a channel as a nsfw channel"""
         # This command isn't meant to do anything, so just send an error if an invalid subcommand is passed
         if ctx.invoked_subcommand is None:
             await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
 
-    @nsfw.command(name="add", pass_context=True, no_pm=True)
+    @nsfw.command(name="add", pass_context=True)
     @checks.custom_perms(kick_members=True)
     async def nsfw_add(self, ctx):
-        """Registers this channel as a 'nsfw' channel"""
+        """Registers this channel as a 'nsfw' channel
+
+        EXAMPLE: !nsfw add
+        RESULT: ;)"""
         r_filter = {'channel_id': ctx.message.channel.id}
         if await config.add_content('nsfw_channels', r_filter, r_filter):
             await self.bot.say("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
         else:
             await self.bot.say("This channel is already registered as 'nsfw'!")
 
-    @nsfw.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
+    @nsfw.command(name="remove", aliases=["delete"], pass_context=True)
     @checks.custom_perms(kick_members=True)
     async def nsfw_remove(self, ctx):
-        """Removes this channel as a 'nsfw' channel"""
+        """Removes this channel as a 'nsfw' channel
+
+        EXAMPLE: !nsfw remove
+        RESULT: ;("""
         r_filter = {'channel_id': ctx.message.channel.id}
         if await config.remove_content('nsfw_channels', r_filter):
             await self.bot.say("This channel has just been unregistered as a nsfw channel")
         else:
             await self.bot.say("This channel is not registered as a ''nsfw' channel!")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
     @checks.custom_perms(kick_members=True)
     async def say(self, ctx, *, msg: str):
-        """Tells the bot to repeat what you say"""
+        """Tells the bot to repeat what you say
+
+        EXAMPLE: !say I really like orange juice
+        RESULT: I really like orange juice"""
         fmt = "\u200B{}".format(msg)
         await self.bot.say(fmt)
         try:
@@ -112,7 +197,10 @@ class Mod:
     @checks.custom_perms(send_messages=True)
     async def perms(self, ctx, *, command: str = None):
         """This command can be used to print the current allowed permissions on a specific command
-        This supports groups as well as subcommands; pass no argument to print a list of available permissions"""
+        This supports groups as well as subcommands; pass no argument to print a list of available permissions
+
+        EXAMPLE: !perms help RESULT: Hopefully a result saying you just need send_messages permissions; otherwise lol
+        this server's admin doesn't like me """
         if command is None:
             await self.bot.say(
                 "Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
@@ -166,7 +254,10 @@ class Mod:
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'
-        If you want to open the command to everyone, provide 'none' as the permission"""
+        If you want to open the command to everyone, provide 'none' as the permission
+
+        EXAMPLE: !perms add skip ban_members
+        RESULT: No more random people voting to skip a song"""
 
         # Since subcommands exist, base the last word in the list as the permission, and the rest of it as the command
         command = " ".join(msg[0:len(msg) - 1])
@@ -174,7 +265,8 @@ class Mod:
             permissions = msg[len(msg) - 1]
         except IndexError:
             await self.bot.say("Please provide the permissions you want to setup, the format for this must be in:\n"
-                                           "`perms add <command> <permission>`")
+                               "`perms add <command> <permission>`")
+            return
 
         # If a user can run a command, they have to have send_messages permissions; so use this as the base
         if permissions.lower() == "none":
@@ -226,7 +318,10 @@ class Mod:
     @perms.command(name="remove", aliases=["delete"], pass_context=True, no_pm=True)
     @commands.has_permissions(manage_server=True)
     async def remove_perms(self, ctx, *, command: str):
-        """Removes the custom permissions setup on the command specified"""
+        """Removes the custom permissions setup on the command specified
+
+        EXAMPLE: !perms remove play
+        RESULT: Freedom!"""
 
         cmd = self.find_command(command)
 
@@ -245,9 +340,12 @@ class Mod:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(manage_server=True)
     async def prefix(self, ctx, *, prefix: str):
-        """This command can be used to set a custom prefix per server"""
+        """This command can be used to set a custom prefix per server
+
+        EXAMPLE: !prefix new_prefix
+        RESULT: You probably screwing it up and not realizing you now need to do new_prefixprefix"""
         r_filter = {'server_id': ctx.message.server.id}
-        if prefix.lower == "none":
+        if prefix.lower().strip() == "none":
             prefix = None
 
         entry = {'server_id': ctx.message.server.id,
@@ -255,19 +353,21 @@ class Mod:
 
         if not await config.add_content('prefixes', entry, r_filter):
             await config.update_content('prefixes', entry, r_filter)
-        # For now, cache is not fully implemented, however is needed for prefixes
-        # So we're going to manually trigger an update when this is ran
-        self.bot.loop.create_task(config.cache['prefixes'].update())
 
-        await self.bot.say(
-            "I have just updated the prefix for this server; you now need to call commands with `{0}`."
-            "For example, you can call this command again with {0}prefix".format(
-                prefix))
+        if prefix is None:
+            fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
+        else:
+            fmt = "I have just updated the prefix for this server; you now need to call commands with `{0}`. " \
+                  "For example, you can call this command again with {0}prefix".format(prefix)
+        await self.bot.say(fmt)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(manage_messages=True)
     async def purge(self, ctx, limit: int = 100):
-        """This command is used to a purge a number of messages from the channel"""
+        """This command is used to a purge a number of messages from the channel
+
+        EXAMPLE: !purge 50
+        RESULT: -50 messages in this channel"""
         if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
             await self.bot.say("I do not have permission to delete messages...")
             return
@@ -278,7 +378,10 @@ class Mod:
     async def prune(self, ctx, limit: int = 100):
         """This command can be used to prune messages from certain members
         Mention any user you want to prune messages from; if no members are mentioned, the messages removed will be mine
-        If no limit is provided, then 100 will be used. This is also the max limit we can use"""
+        If no limit is provided, then 100 will be used. This is also the max limit we can use
+
+        EXAMPLE: !prune 50
+        RESULT: 50 of my messages are removed from this channel"""
         # We can only get logs from 100 messages at a time, so make sure we are not above that threshold
         if limit > 100:
             limit = 100
@@ -315,7 +418,10 @@ class Mod:
     @commands.group(aliases=['rule'], pass_context=True, no_pm=True, invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
     async def rules(self, ctx, rule: int = None):
-        """This command can be used to view the current rules on the server"""
+        """This command can be used to view the current rules on the server
+
+        EXAMPLE: !rules 5
+        RESULT: Rule 5 is printed"""
         r_filter = {'server_id': ctx.message.server.id}
         rules = await config.get_content('rules', r_filter)
         try:
@@ -342,11 +448,14 @@ class Mod:
     @rules.command(name='add', aliases=['create'], pass_context=True, no_pm=True)
     @checks.custom_perms(manage_server=True)
     async def rules_add(self, ctx, *, rule: str):
-        """Adds a rule to this server's rules"""
+        """Adds a rule to this server's rules
+
+        EXAMPLE: !rules add No fun allowed in this server >:c
+        RESULT: No more fun...unless they break the rules!"""
         r_filter = {'server_id': ctx.message.server.id}
         entry = {'server_id': ctx.message.server.id,
                  'rules': [rule]}
-        update = lambda row: row['rules'].append(rule)
+        update = {'rules': r.row['rules'].append(rule)}
         if not await config.update_content('rules', update, r_filter):
             await config.add_content('rules', entry, r_filter)
 
@@ -356,7 +465,10 @@ class Mod:
     @checks.custom_perms(manage_server=True)
     async def rules_delete(self, ctx, rule: int):
         """Removes one of the rules from the list of this server's rules
-        Provide a number to delete that rule"""
+        Provide a number to delete that rule
+
+        EXAMPLE: !rules delete 5
+        RESULT: Freedom from opression!"""
         r_filter = {'server_id': ctx.message.server.id}
         update = {'rules': r.row['rules'].delete_at(rule - 1)}
         if not await config.update_content('rules', update, r_filter):

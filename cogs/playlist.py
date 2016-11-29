@@ -1,11 +1,15 @@
-import asyncio
+from .utils import checks
+
 import discord
 from discord.ext import commands
-from .utils import checks
+
 import youtube_dl
 import math
 import functools
 import datetime
+import time
+import asyncio
+import re
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -47,10 +51,28 @@ class VoiceEntry:
         self.requester = message.author
         self.channel = message.channel
         self.player = player
+        self.start_time = None
+
+    @property
+    def length(self):
+        if self.player.duration:
+            return self.player.duration
+
+    @property
+    def progress(self):
+        if self.start_time:
+            return round(time.time() - self.start_time)
+
+    @property
+    def remaining(self):
+        length = self.length
+        progress = self.progress
+        if length and progress:
+            return length - progress
 
     def __str__(self):
         fmt = '*{0.title}* uploaded by {0.uploader} and requested by {1.display_name}'
-        duration = self.player.duration
+        duration = self.length
         if duration:
             fmt += ' [length: {0[0]}m {0[1]}s]'.format(divmod(round(duration, 0), 60))
         return fmt.format(self.player, self.requester)
@@ -125,6 +147,10 @@ class VoiceState:
             # Now we can start actually playing the song
             self.current.player.start()
             self.current.player.volume = self.volume / 100
+
+            # Save the variable for when our time for this song has started
+            self.current.start_time = time.time()
+
             # Wait till the Event has been set, before doing our task again
             await self.play_next_song.wait()
 
@@ -194,6 +220,30 @@ class Music:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
+    async def progress(self, ctx):
+        """Provides the progress of the current song"""
+
+        # Make sure we're playing first
+        state = self.get_voice_state(ctx.message.server)
+        if not state.is_playing():
+            await self.bot.say('Not playing anything.')
+        else:
+            progress = state.current.progress
+            length = state.current.length
+            # Another check, just to make sure; this may happen for a very brief amount of time
+            # Between when the song was requested, and still downloading to play
+            if not progress or not length:
+                await self.bot.say('Not playing anything.')
+                return
+
+            # Otherwise just format this nicely
+            progress = divmod(round(progress, 0), 60)
+            length = divmod(round(length, 0), 60)
+            fmt = "Current song progress: {0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
+            await self.bot.say(fmt)
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(send_messages=True)
     async def join(self, ctx, *, channel: discord.Channel):
         """Joins a voice channel."""
         try:
@@ -205,8 +255,14 @@ class Music:
         # move_channel needs to be used if we are already in a channel
         except discord.ClientException:
             state = self.get_voice_state(ctx.message.server)
-            await state.voice.move_to(channel)
-            await self.bot.say('Ready to play audio in ' + channel.name)
+            if state.voice is None:
+                voice_channel = self.bot.voice_client_in(ctx.message.server)
+                if voice_channel is not None:
+                    await voice_channel.disconnect()
+                await self.bot.say("Sorry but I failed to connect! Please try again")
+            else:
+                await state.voice.move_to(channel)
+                await self.bot.say('Ready to play audio in ' + channel.name)
         else:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
@@ -250,10 +306,11 @@ class Music:
                 try:
                     state.voice = await self.bot.join_voice_channel(summoned_channel)
                 # Weird timeout error usually caused by the region someone is in
-                except asyncio.TimeoutError:
+                except (asyncio.TimeoutError, discord.ConnectionClosed, ConnectionResetError):
                     await self.bot.say(
                         "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
-                        "You can either try again, or try to change the server's region and see if that fixes the issue")
+                        "You can either try again, or try to change the server's"
+                        " region and see if that fixes the issue")
                     return False
         # Return true if nothing has failed, so that we can invoke this, and ensure we succeeded
         return True
@@ -294,6 +351,7 @@ class Music:
         # Create the player, and check if this was successful
         # Here all we want is to get the information of the player
         try:
+            song = re.sub('[<>\[\]]', '', song)
             func = functools.partial(self.ytdl.extract_info, song, download=False)
             info = await self.bot.loop.run_in_executor(None, func)
             if "entries" in info:
@@ -324,10 +382,14 @@ class Music:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
-    async def volume(self, ctx, value: int):
+    async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song."""
 
         state = self.get_voice_state(ctx.message.server)
+        if value is None:
+            volume = state.volume
+            await self.bot.say("Current volume is {}".format(volume))
+            return
         if value > 200:
             await self.bot.say("Sorry but the max volume is 200")
             return

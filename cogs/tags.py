@@ -13,17 +13,26 @@ class Tags:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def tags(self, ctx):
-        """Prints all the custom tags that this server currently has"""
+        """Prints all the custom tags that this server currently has
+
+        EXAMPLE: !tags
+        RESULT: All tags setup on this server"""
         tags = await config.get_content('tags', {'server_id': ctx.message.server.id})
         # Simple generator that adds a tag to the list to print, if the tag is for this server
-        fmt = "\n".join("{}".format(tag['tag']) for tag in tags)
-        await self.bot.say('```\n{}```'.format(fmt))
+        try:
+            fmt = "\n".join("{}".format(tag['tag']) for tag in tags)
+            await self.bot.say('```\n{}```'.format(fmt))
+        except TypeError:
+            await self.bot.say("There are not tags setup on this server!")
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
-         The format to call a custom tag is !tag <tag>"""
+         The format to call a custom tag is !tag <tag>
+
+         EXAMPLE: !tag butts
+         RESULT: Whatever you setup for the butts tag!!"""
         r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
         tags = await config.get_content('tags', r_filter)
         if tags is None:
@@ -36,7 +45,10 @@ class Tags:
     @checks.custom_perms(kick_members=True)
     async def add_tag(self, ctx, *, result: str):
         """Use this to add a new tag that can be used in this server
-        Format to add a tag is !tag add <tag> - <result>"""
+        Format to add a tag is !tag add <tag> - <result>
+
+        EXAMPLE: !tag add this is my new tag - This is what it will be
+        RESULT: A tag that can be called by '!tag this is my new tag' and will output 'This is what it will be'"""
         try:
             # Use regex to get the matche for everything before and after a -
             match = re.search("(.*) - (.*)", result)
@@ -67,7 +79,10 @@ class Tags:
     @checks.custom_perms(kick_members=True)
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag from use for this server
-        Format to delete a tag is !tag delete <tag>"""
+        Format to delete a tag is !tag delete <tag>
+
+        EXAMPLE: !tag delete stupid_tag
+        RESULT: Deletes that stupid tag"""
         r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
         if await config.remove_content('tags', r_filter):
             await self.bot.say('I have just removed the tag `{}`'.format(tag))

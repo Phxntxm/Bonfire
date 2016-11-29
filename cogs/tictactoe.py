@@ -115,7 +115,10 @@ class TicTacToe:
         """Updates the current server's tic-tac-toe board
         You obviously need to be one of the players to use this
         It also needs to be your turn
-        Provide top, left, bottom, right, middle as you want to mark where to play on the board"""
+        Provide top, left, bottom, right, middle as you want to mark where to play on the board
+
+        EXAMPLE: !tictactoe middle top
+        RESULT: Your piece is placed in the very top space, in the middle"""
         player = ctx.message.author
         board = self.boards.get(ctx.message.server.id)
         # Need to make sure the board exists before allowing someone to play
@@ -205,7 +208,10 @@ class TicTacToe:
     @tictactoe.command(name='start', aliases=['challenge', 'create'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def start_game(self, ctx, player2: discord.Member):
-        """Starts a game of tictactoe with another player"""
+        """Starts a game of tictactoe with another player
+
+        EXAMPLE: !tictactoe start @OtherPerson
+        RESULT: A new game of tictactoe"""
         player1 = ctx.message.author
         # For simplicities sake, only allow one game on a server at a time.
         # Things can easily get confusing (on the server's end) if we allow more than one
@@ -216,6 +222,9 @@ class TicTacToe:
         if player2 == ctx.message.server.me:
             await self.bot.say("You want to play? Alright lets play.\n\nI win, so quick you didn't even notice it.")
             return
+        if player2 == player1:
+            await self.bot.say("You can't play yourself, I won't allow it. Go find some friends")
+            return
 
         # Create the board and return who has been decided to go first
         x_player = self.create(ctx.message.server.id, player1, player2)
@@ -225,7 +234,7 @@ class TicTacToe:
 
         # We don't need to do anything weird with assigning x_player to something
         # it is already a member object, just use it
-        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first!" \
+        fmt += "I have decided at random, and {} is going to be x's this game. It is your turn first! " \
                "Use the {}tictactoe command, and a position, to choose where you want to play"\
             .format(x_player.display_name, ctx.prefix)
         await self.bot.say(fmt)
@@ -235,7 +244,10 @@ class TicTacToe:
     async def stop_game(self, ctx):
         """Force stops a game of tictactoe
         This should realistically only be used in a situation like one player leaves
-        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that"""
+        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that
+
+        EXAMPLE: !tictactoe stop
+        RESULT: No more tictactoe!"""
         if self.boards.get(ctx.message.server.id) is None:
             await self.bot.say("There are no tictactoe games running on this server!")
             return

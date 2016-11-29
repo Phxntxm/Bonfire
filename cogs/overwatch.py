@@ -14,7 +14,8 @@ base_url = "https://api.owapi.net/api/v2/u/"
 # This sets an easy way to use list comprehension later, to print all possible things we want, if it exists
 check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
                  'cards', 'damage_done', 'healing_done', 'multikills']
-check_o_stats = ['wins', 'losses']
+check_o_stats = ['wins']
+MAX_RETRIES = 5
 
 
 class Overwatch:
@@ -22,8 +23,28 @@ class Overwatch:
 
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {"User-Agent": "Bonfire/1.0.0"}
+        self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
+
+    async def _request(self, payload, endpoint):
+        """Handles requesting to the API"""
+
+        # Format the URL we'll need based on the base_url, and the endpoint we want to hit
+        url = "{}{}".format(base_url, endpoint)
+
+        # Attempt to connect up to our max retries
+        for x in range(MAX_RETRIES):
+            try:
+                async with aiohttp.ClientSession().get(url, headers=self.headers, params=payload) as r:
+                    # If we failed to connect, attempt again
+                    if r.status != 200:
+                        continue
+
+                    data = await r.json()
+                    return data
+            # If any error happened when making the request, attempt again
+            except:
+                continue
 
     @commands.group(no_pm=True)
     async def ow(self):
@@ -33,11 +54,14 @@ class Overwatch:
         Capitalization also matters"""
         pass
 
-    @ow.command(name="stats", pass_context=True, no_pm=True)
+    @ow.command(name="stats", pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def ow_stats(self, ctx, user: discord.Member = None, hero: str = ""):
         """Prints out a basic overview of a member's stats
-        Provide a hero after the member to get stats for that specific hero"""
+        Provide a hero after the member to get stats for that specific hero
+
+        EXAMPLE: !ow stats @OtherPerson Junkrat
+        RESULT: Whether or not you should unfriend this person because they're a dirty rat"""
         user = user or ctx.message.author
         r_filter = {'member_id': user.id}
         ow_stats = await config.get_content('overwatch', r_filter)
@@ -52,52 +76,39 @@ class Overwatch:
 
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
-            async with self.session.get(base_url + "{}/stats/general".format(bt), headers=self.headers) as r:
-                data = await r.json()
+            data = await self._request(None, "{}/stats/general".format(bt))
 
-            output_data = {k.title().replace("_", " "): r for k, r in data['game_stats'].items() if k in check_g_stats}
-            for k, r in data['overall_stats'].items():
-                if k in check_o_stats:
-                    output_data[k.title().replace("_", " ")] = r
+            output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if
+                           k in check_g_stats]
         else:
             # If there was a hero provided, search for a user's data on that hero
-            url = base_url + "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
-            async with self.session.get(url, headers=self.headers) as r:
-                data = await r.json()
-                msg = data.get('msg')
-                # Check if a user has not used the hero provided before
-                if msg == 'hero data not found':
-                    fmt = "{} has not used the hero {} before!".format(user.name, hero.title())
-                    await self.bot.say(fmt)
-                    return
-                # Check if a hero that doesn't exist was provided
-                elif msg == 'bad hero name':
-                    fmt = "{} is not an actual hero!".format(hero.title())
-                    await self.bot.say(fmt)
-                    return
+            endpoint = "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
+            data = await self._request(None, endpoint)
+            if data is None:
+                fmt = "I couldn't find data with that hero, make sure that is a valid hero, " \
+                      "otherwise {} has never used the hero {} before!".format(user.display_name, hero)
+                await self.bot.say(fmt)
+                return
 
             # Same list comprehension as before
-            output_data = {k.title().replace("_", " "): r for k, r in data['general_stats'].items() if
-                           k in check_g_stats}
-
+            output_data = [(k.title().replace("_", " "), r) for k, r in data['general_stats'].items() if
+                           k in check_g_stats]
             for k, r in data['hero_stats'].items():
-                output_data[k.title().replace("_", " ")] = r
-            # Someone was complaining there was no KDR provided, so I made one myself and added that to the list
-            if data['general_stats'].get('eliminations') and data['general_stats'].get('deaths'):
-                output_data["Kill Death Ratio"] = "{0:.2f}".format(
-                    data['general_stats'].get('eliminations') / data['general_stats'].get('deaths'))
-
-        if ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
+                output_data.append((k.title().replace("_", " "), r))
+        try:
             banner = await images.create_banner(user, "Overwatch", output_data)
             await self.bot.upload(banner)
-        else:
+        except (FileNotFoundError, discord.Forbidden):
             fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data)
             await self.bot.say("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
-    @ow.command(pass_context=True, name="add", no_pm=True)
+    @ow.command(pass_context=True, name="add")
     @checks.custom_perms(send_messages=True)
     async def add(self, ctx, bt: str):
-        """Saves your battletag for looking up information"""
+        """Saves your battletag for looking up information
+
+        EXAMPLE: !ow add Username#1234
+        RESULT: Your battletag is now saved"""
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists
         bt = bt.replace("#", "-")
@@ -105,12 +116,11 @@ class Overwatch:
 
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await self.bot.say("Looking up your profile information....")
-        url = base_url + "{}/stats/general".format(bt)
-
         # All we're doing here is ensuring that the status is 200 when looking up someone's general information
         # If it's not, let them know exactly how to format their tag
-        async with self.session.get(url, headers=self.headers) as r:
-            if not r.status == 200:
+        endpoint = "{}/stats/general".format(bt)
+        data = await self._request(None, endpoint)
+        if data is None:
                 await self.bot.say("Profile does not exist! Battletags are picky, "
                                    "format needs to be `user#xxxx`. Capitalization matters")
                 return
@@ -123,10 +133,13 @@ class Overwatch:
             await config.update_content('overwatch', update, r_filter)
         await self.bot.say("I have just saved your battletag {}".format(ctx.message.author.mention))
 
-    @ow.command(pass_context=True, name="delete", aliases=['remove'], no_pm=True)
+    @ow.command(pass_context=True, name="delete", aliases=['remove'])
     @checks.custom_perms(send_messages=True)
     async def delete(self, ctx):
-        """Removes your battletag from the records"""
+        """Removes your battletag from the records
+
+        EXAMPLE: !ow delete
+        RESULT: Your battletag is no longer saved"""
         r_filter = {'member_id': ctx.message.author.id}
         if await config.remove_content('overwatch', r_filter):
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))

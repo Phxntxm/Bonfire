@@ -18,11 +18,109 @@ class Core:
     def __init__(self, bot):
         self.bot = bot
 
+    def find_command(self, command):
+        # This method ensures the command given is valid. We need to loop through commands
+        # As self.bot.commands only includes parent commands
+        # So we are splitting the command in parts, looping through the commands
+        # And getting the subcommand based on the next part
+        # If we try to access commands of a command that isn't a group
+        # We'll hit an AttributeError, meaning an invalid command was given
+        # If we loop through and don't find anything, cmd will still be None
+        # And we'll report an invalid was given as well
+        cmd = None
+
+        for part in command.split():
+            try:
+                if cmd is None:
+                    cmd = self.bot.commands.get(part)
+                else:
+                    cmd = cmd.commands.get(part)
+            except AttributeError:
+                cmd = None
+                break
+
+        return cmd
+
+    @commands.command(pass_context=True)
+    @checks.custom_perms(send_messages=True)
+    async def help(self, ctx, *, message=None):
+        """This command is used to provide a link to the help URL"""
+
+        if message is None:
+            message = ""
+        cmd = self.find_command(message)
+
+        if cmd is None:
+            fmt = "This URL can be used to view information about all commands: <{}>. Run help on a command " \
+                  "specifically in order to get information on that command.".format(config.help_url)
+            await self.bot.say(fmt)
+        else:
+            description = cmd.help
+            example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
+            result = [x.replace('RESULT: ', '') for x in description.split('\n') if 'RESULT:' in x]
+            description = [x for x in description.split('\n') if x and 'EXAMPLE:' not in x and 'RESULT:' not in x]
+
+            embed = discord.Embed(title=cmd.qualified_name)
+            embed.set_thumbnail(url=ctx.message.server.me.avatar_url)
+            embed.add_field(name="Description", value="\n".join(description), inline=False)
+            if example:
+                embed.add_field(name="Example", value="\n".join(example), inline=False)
+            if result:
+                embed.add_field(name="Result", value="\n".join(result), inline=False)
+
+            await self.bot.say(embed=embed)
+
+    @commands.command()
+    @checks.custom_perms(send_messages=True)
+    async def motd(self, *, date=None):
+        """This command can be used to print the current MOTD (Message of the day)
+        This will most likely not be updated every day, however messages will still be pushed to this every now and then
+
+        EXAMPLE: !motd
+        RESULT: 'This is an example message of the day!'"""
+        if date is None:
+            motd = await config.get_content('motd')
+            try:
+                # Lets set this to the first one in the list first
+                latest_motd = motd[0]
+                for entry in motd:
+                    d = pendulum.parse(entry['date'])
+
+                    # Check if the date for this entry is newer than our currently saved latest entry
+                    if d > pendulum.parse(latest_motd['date']):
+                        latest_motd = entry
+
+                date = latest_motd['date']
+                motd = latest_motd['motd']
+            # This will be hit if we do not have any entries for motd
+            except TypeError:
+                await self.bot.say("No message of the day!")
+            else:
+                fmt = "Last updated: {}\n\n{}".format(date, motd)
+                await self.bot.say(fmt)
+        else:
+            try:
+                r_filter = pendulum.parse(date)
+                motd = await config.get_content('motd', r_filter)
+                date = motd[0]['date']
+                motd = motd[0]['motd']
+                fmt = "Message of the day for {}:\n\n{}".format(date, motd)
+                await self.bot.say(fmt)
+            # This one will be hit if we return None for that day
+            except TypeError:
+                await self.bot.say("No message of the day for {}!".format(date))
+            # This will be hit if pendulum fails to parse the date passed
+            except ValueError:
+                now = pendulum.utcnow().to_date_string()
+                await self.bot.say("Invalid date format! Try like {}".format(now))
+
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def calendar(self, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
-        Provide month and year to print the calendar of that year and month"""
+        Provide month and year to print the calendar of that year and month
+
+        EXAMPLE: !calendar january 2011"""
 
         # calendar takes in a number for the month, not the words
         # so we need this dictionary to transform the word to the number
@@ -62,7 +160,6 @@ class Core:
         # fmt is a dictionary so we can set the key to it's output, then print both
         # The only real use of doing it this way is easier editing if the info
         # in this command is changed
-        fmt = {}
 
         bot_data = await config.get_content('bot_data')
         total_data = {'member_count': 0,
@@ -71,50 +168,55 @@ class Core:
             total_data['member_count'] += entry['member_count']
             total_data['server_count'] += entry['server_count']
 
-        fmt['Official Bot Server'] = config.dev_server
-        fmt['Uptime'] = (pendulum.utcnow() - self.bot.uptime).in_words()
-        fmt['Total Servers'] = total_data.get('server_count')
-        fmt['Total Members'] = total_data.get('member_count')
-        fmt['Description'] = self.bot.description
+        # Create the original embed object
+        opts = {'title': 'Dev Server',
+                'description': 'Join the server above for any questions/suggestions about me.',
+                'url': config.dev_server}
+        embed = discord.Embed(**opts)
 
-        servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
-                                     state.is_playing()])
+        # Add the normal values
+        embed.add_field(name='Total Servers', value=total_data['server_count'])
+        embed.add_field(name='Total Members', value=total_data['member_count'])
+
+        # Count the variable values; hangman, tictactoe, etc.
         hm_games = len(
             [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
+
         ttt_games = len([server_id for server_id,
-                        game in self.bot.get_cog('TicTacToe').boards.items()])
+                         game in self.bot.get_cog('TicTacToe').boards.items()])
+
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
             count_battles += len(battles)
 
-        information = "\n".join("{}: {}".format(key, result)
-                                for key, result in fmt.items())
-        information += "\n"
-        if servers_playing_music:
-            information += "Playing songs in {} different servers\n".format(
-                servers_playing_music)
         if hm_games:
-            information += "{} different hangman games running\n".format(
-                hm_games)
+            embed.add_field(name='Total Hangman games running', value=hm_games)
         if ttt_games:
-            information += "{} different TicTacToe games running\n".format(
-                ttt_games)
+            embed.add_field(name='Total TicTacToe games running', value=ttt_games)
         if count_battles:
-            information += "{} different battles going on\n".format(
-                count_battles)
+            embed.add_field(name='Total battles games running', value=count_battles)
 
-        await self.bot.say("```\n{}```".format(information))
+        embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
+        embed.set_footer(text=self.bot.description)
+
+        await self.bot.say(embed=embed)
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def uptime(self):
-        """Provides a printout of the current bot's uptime"""
+        """Provides a printout of the current bot's uptime
+
+        EXAMPLE: !uptime
+        RESULT: A BAJILLION DAYS"""
         await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
 
     @commands.command(aliases=['invite'])
     @checks.custom_perms(send_messages=True)
     async def addbot(self):
-        """Provides a link that you can use to add me to a server"""
+        """Provides a link that you can use to add me to a server
+
+        EXAMPLE: !addbot
+        RESULT: http://discord.gg/yo_mama"""
         perms = discord.Permissions.none()
         perms.read_messages = True
         perms.send_messages = True
@@ -133,10 +235,11 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def doggo(self):
         """Use this to print a random doggo image.
-        Doggo is love, doggo is life."""
+
+        EXAMPLE: !doggo
+        RESULT: A beautiful picture of a dog o3o"""
         # Find a random image based on how many we currently have
-        f = glob.glob(
-            'images/doggo*')[random.SystemRandom().randint(0, len(glob.glob('images/doggo*')) - 1)]
+        f = random.SystemRandom().choice(glob.glob('images/doggo*'))
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
@@ -144,28 +247,41 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def snek(self):
         """Use this to print a random snek image.
-        Sneks are o3o"""
+
+        EXAMPLE: !snek
+        RESULT: A beautiful picture of a snek o3o"""
         # Find a random image based on how many we currently have
-        f = glob.glob(
-            'images/snek*')[random.SystemRandom().randint(0, len(glob.glob('images/snek*')) - 1)]
+        f = random.SystemRandom().choice(glob.glob('images/snek*'))
         with open(f, 'rb') as f:
             await self.bot.upload(f)
 
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def joke(self):
-        """Prints a random riddle"""
+        """Prints a random riddle
+
+        EXAMPLE: !joke
+        RESULT: An absolutely terrible joke."""
         # Use the fortune riddles command because it's funny, I promise
         fortune_command = "/usr/bin/fortune riddles"
-        fortune = subprocess.check_output(
-            fortune_command.split()).decode("utf-8")
-        await self.bot.say(fortune)
+        while True:
+            try:
+                fortune = subprocess.check_output(
+                    fortune_command.split()).decode("utf-8")
+                await self.bot.say(fortune)
+            except discord.HTTPException:
+                pass
+            else:
+                break
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
-        Format should be #d#"""
+        Format should be #d#
+
+        EXAMPLE: !roll d50
+        RESULT: 51 :^)"""
         # Use regex to get the notation based on what was provided
         try:
             # We do not want to try to convert the dice, because we want d# to
@@ -188,6 +304,9 @@ class Core:
             return
         if num > 100:
             await self.bot.say("What die has more than 100 sides? Please, calm down")
+            return
+        if num <= 1:
+            await self.bot.say("A {} sided die? You know that's impossible right?".format(num))
             return
 
         value_str = ", ".join(str(random.SystemRandom().randint(1, num))

@@ -8,8 +8,10 @@ GitAutoDeploy.conf.json
 .htaccess
 autoupdate.php
 error_log
-images/*
+images/banner/tmp/*
 .ftpquota
 bonfire.log
 *.sublime-*
 cert.pem
+.bash*
+.cache

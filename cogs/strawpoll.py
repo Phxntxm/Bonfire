@@ -31,10 +31,13 @@ class Strawpoll:
                         'Content-Type': 'application/json'}
         self.session = aiohttp.ClientSession()
 
-    @commands.group(aliases=['strawpoll', 'poll', 'polls'], pass_context=True, invoke_without_command=True)
+    @commands.group(aliases=['strawpoll', 'poll', 'polls'], pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def strawpolls(self, ctx, poll_id: str = None):
-        """This command can be used to show a strawpoll setup on this server"""
+        """This command can be used to show a strawpoll setup on this server
+
+        EXAMPLE: !strawpolls
+        RESULT: A list of all polls setup on this server"""
         # Strawpolls cannot be 'deleted' so to handle whether a poll is running or not on a server
         # Just save the poll, which can then be removed when it should not be "running" anymore
         r_filter = {'server_id': ctx.message.server.id}
@@ -77,7 +80,7 @@ class Strawpoll:
                                                                                             created_ago, fmt_options)
             await self.bot.say("```\n{}```".format(fmt))
 
-    @strawpolls.command(name='create', aliases=['setup', 'add'], pass_context=True)
+    @strawpolls.command(name='create', aliases=['setup', 'add'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def create_strawpoll(self, ctx, title, *, options):
         """This command is used to setup a new strawpoll
@@ -131,10 +134,13 @@ class Strawpoll:
             await config.add_content('strawpolls', entry, {'poll_id': poll_id})
         await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(poll_id))
 
-    @strawpolls.command(name='delete', aliases=['remove', 'stop'], pass_context=True)
+    @strawpolls.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def remove_strawpoll(self, ctx, poll_id):
-        """This command can be used to delete one of the existing strawpolls"""
+        """This command can be used to delete one of the existing strawpolls
+
+        EXAMPLE: !strawpoll remove 5
+        RESULT: No more strawpoll 5~"""
         r_filter = {'server_id': ctx.message.server.id}
         content = await config.get_content('strawpolls', r_filter)
         try:

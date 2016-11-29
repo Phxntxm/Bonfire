@@ -1,6 +1,7 @@
 import aiohttp
 import datetime
 import os
+from shutil import copyfile
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
@@ -9,7 +10,7 @@ tmp_path = "images/banner/tmp"
 whitneyMedium = "/usr/share/fonts/whitney-medium.ttf"
 whitneyBold = "/usr/share/fonts/whitney-bold.ttf"
 header_height = 125
-base_height = 345
+canvas_height = 145
 banner_background = "{}/bannerTop2.png".format(base_path)
 banner_bot = "{}/bannerBot.png".format(base_path)
 
@@ -28,18 +29,26 @@ async def create_banner(member, image_title, data):
     # Open up the avatar, save it as a temporary file
     avatar_url = member.avatar_url
     avatar_path = "{}/avatar_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
-    with aiohttp.ClientSession() as s:
-        async with s.get(avatar_url) as r:
-            val = await r.read()
-            with open(avatar_path, "wb") as f:
-                f.write(val)
+    # Ensure the user has an avatar
+    if avatar_url != "":
+        with aiohttp.ClientSession() as s:
+            async with s.get(avatar_url) as r:
+                val = await r.read()
+                with open(avatar_path, "wb") as f:
+                    f.write(val)
+    # Otherwise use the default avatar
+    else:
+        avatar_src_path = "{}/default_avatar.png".format(base_path)
+        copyfile(avatar_src_path, avatar_path)
 
     # Parse the data we need to create our image
     username = (member.display_name[:23] + '...') if len(member.display_name) > 23 else member.display_name
-    result_keys = list(data.keys())
-    result_values = list(data.values())
+    # Our data will be a list of tuples, so this is how we can get the keys and values we want
+    result_keys = [k for k, v in data]
+    result_values = [v for k, v in data]
     lines_of_text = len(result_keys)
     output_file = "{}/banner_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
+    base_height = canvas_height + (lines_of_text * 20)
 
     # This is the background to the avatar
     mask = Image.open('{}/mask.png'.format(base_path)).convert('L')
@@ -81,16 +90,16 @@ async def create_banner(member, image_title, data):
 
     # Loop through and place all the data in the image
     for current_line in range(lines_of_text):
-        font = ImageFont.truetype(whitneyMedium, 48)
-        text_bar = Image.new("RGB", (1050, 60), "#36393e").convert("RGBA")
+        font = ImageFont.truetype(whitneyMedium, 96)
+        text_bar = Image.new("RGB", (2100, 120), "#36393e").convert("RGBA")
         draw = ImageDraw.Draw(text_bar)
         text = "{}: ".format(result_keys[current_line])
         stat_text = "{}".format(result_values[current_line])
         stat_offset = draw.textsize(text, font=font, spacing=0)
 
-        font = ImageFont.truetype(whitneyMedium, 48)
-        draw.text((180, -2), text, (255, 255, 255), font=font, align="center")
-        draw.text((180 + stat_offset[0], -2), stat_text, (0, 201, 252), font=font)
+        font = ImageFont.truetype(whitneyMedium, 96)
+        draw.text((360, -4), text, (255, 255, 255), font=font, align="center")
+        draw.text((360 + stat_offset[0], -4), stat_text, (0, 402, 504), font=font)
         save_me = text_bar.resize((350, 20), Image.ANTIALIAS)
         offset += 20
         base_image.paste(save_me, (0, offset), save_me)

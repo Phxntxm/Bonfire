@@ -16,7 +16,10 @@ class Roles:
     @checks.custom_perms(send_messages=True)
     async def role(self, ctx):
         """This command can be used to modify the roles on the server.
-        Pass no subcommands and this will print the roles currently available on this server"""
+        Pass no subcommands and this will print the roles currently available on this server
+
+        EXAMPLE: !role
+        RESULT: A list of all your roles"""
         # Simply get a list of all roles in this server and send them
         server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
         await self.bot.say("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
@@ -24,12 +27,15 @@ class Roles:
     @role.command(name='remove', pass_context=True, no_pm=True)
     @checks.custom_perms(manage_roles=True)
     async def remove_role(self, ctx):
-        """Use this to remove roles from a number of members"""
+        """Use this to remove roles from a number of members
+
+        EXAMPLE: !role remove @Jim @Bot @Joe
+        RESULT: A follow-along to remove the role(s) you want to, from these 3 members"""
         # No use in running through everything if the bot cannot manage roles
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't manage roles in this server, do you not trust  me? :c")
             return
-        
+
         server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
         # First get the list of all mentioned users
         members = ctx.message.mentions
@@ -45,7 +51,7 @@ class Roles:
                 return
             # Override members if everything has gone alright, and then continue
             members = msg.mentions
-        
+
         # This allows the user to remove multiple roles from the list of users, if they want.
         await self.bot.say("Alright, please provide the roles you would like to remove from this member. "
                            "Make sure the roles, if more than one is provided, are separate by commas. "
@@ -55,7 +61,7 @@ class Roles:
         if msg is None:
             await self.bot.say("You took too long. I'm impatient, don't make me wait")
             return
-        
+
         # Split the content based on commas, using regex so we can split if a space was not provided or if it was
         role_names = re.split(', ?', msg.content)
         roles = []
@@ -64,12 +70,12 @@ class Roles:
             _role = discord.utils.get(server_roles, name=role)
             if _role is not None:
                 roles.append(_role)
-        
+
         # If no valid roles were given, let them know that and return
         if len(roles) == 0:
             await self.bot.say("Please provide a valid role next time!")
             return
-        
+
         # Otherwise, remove the roles from each member given
         for member in members:
             await self.bot.remove_roles(member, *roles)
@@ -81,12 +87,15 @@ class Roles:
     async def add_role(self, ctx):
         """Use this to add a role to multiple members.
         Provide the list of members, and I'll ask for the role
-        If no members are provided, I'll first ask for them"""
+        If no members are provided, I'll first ask for them
+
+        EXAMPLE: !role add @Bob @Joe @jim
+        RESULT: A follow along to add the roles you want to these 3"""
         # No use in running through everything if the bot cannot manage roles
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't manage roles in this server, do you not trust  me? :c")
             return
-        
+
         # This is exactly the same as removing roles, except we call add_roles instead.
         server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
         members = ctx.message.mentions
@@ -129,12 +138,15 @@ class Roles:
     @role.command(name='delete', pass_context=True, no_pm=True)
     @checks.custom_perms(manage_roles=True)
     async def delete_role(self, ctx, *, role: discord.Role = None):
-        """This command can be used to delete one of the roles from the server"""
+        """This command can be used to delete one of the roles from the server
+
+        EXAMPLE: !role delete StupidRole
+        RESULT: No more role called StupidRole"""
         # No use in running through everything if the bot cannot manage roles
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't delete roles in this server, do you not trust  me? :c")
             return
-        
+
         # If no role was given, get the current roles on the server and ask which ones they'd like to remove
         if role is None:
             server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
@@ -142,7 +154,7 @@ class Roles:
             await self.bot.say(
                 "Which role would you like to remove from the server? Here is a list of this server's roles:"
                 "```\n{}```".format("\n".join([r.name for r in server_roles])))
-            
+
             # For this method we're only going to delete one role at a time
             # This check attempts to find a role based on the content provided, if it can't find one it returns None
             # We can use that fact to simply use just that as our check
@@ -163,7 +175,10 @@ class Roles:
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server
         A prompt will follow asking what settings you would like for this new role
-        I'll then ask if you'd like to set anyone to use this role"""
+        I'll then ask if you'd like to set anyone to use this role
+
+        EXAMPLE: !role create
+        RESULT: A follow along in order to create a new role"""
         # No use in running through everything if the bot cannot create the role
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't create roles in this server, do you not trust  me? :c")
@@ -175,7 +190,7 @@ class Roles:
         channel = ctx.message.channel
 
         # A couple checks that will be used in the wait_for_message's
-        num_separated_check = lambda m: re.search("\d(,| )", m.content) is not None
+        num_separated_check = lambda m: re.search("(\d(, ?| )?|[nN]one)", m.content) is not None
         yes_no_check = lambda m: re.search("(yes|no)", m.content.lower()) is not None
         members_check = lambda m: len(m.mentions) > 0
 
@@ -203,9 +218,6 @@ class Roles:
 
         # Check if any integer's were provided that are within the length of the list of permissions
         num_permissions = [int(i) for i in re.split(' ?,?', msg.content) if i.isdigit() and int(i) < len(all_perms)]
-        if len(num_permissions) == 0:
-            await self.bot.say("You did not provide any valid numbers! Try better next time.")
-            return
 
         # Check if this role should be in a separate section on the sidebard, i.e. hoisted
         await self.bot.say("Do you want this role to be in a separate section on the sidebar? (yes or no)")
@@ -244,7 +256,7 @@ class Roles:
         # There's no need to mention the users, so don't send a failure message if they didn't, just return
         if msg is None:
             return
-        
+
         # Otherwise members were mentioned, add the new role to them now
         for member in msg.mentions:
             await self.bot.add_roles(member, role)

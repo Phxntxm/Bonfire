@@ -3,11 +3,14 @@ import asyncio
 import discord
 import re
 import rethinkdb as r
+import traceback
+import logging
 
 from discord.ext import commands
 from .utils import config
 from .utils import checks
 
+log = logging.getLogger()
 base_url = 'https://ptvappapi.picarto.tv'
 
 # This is a public key for use, I don't care if this is seen
@@ -21,7 +24,7 @@ async def online_users():
         # In place of requesting for /channel and checking if that is online currently, for each channel
         # This method is in place to just return all online_users
         url = '{}/online/all?key={}'.format(base_url, key)
-        with aiohttp.ClientSession(headers={"User-Agent": "Bonfire/1.0.0"}) as s:
+        with aiohttp.ClientSession(headers={"User-Agent": config.user_agent}) as s:
             async with s.get(url) as response:
                 return await response.json()
     except:
@@ -40,72 +43,80 @@ def check_online(online_channels, channel):
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {"User-Agent": "Bonfire/1.0.0"}
+        self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
 
     async def check_channels(self):
         await self.bot.wait_until_ready()
         # This is a loop that runs every 30 seconds, checking if anyone has gone online
-        while not self.bot.is_closed:
-            r_filter = {'notifications_on': 1}
-            picarto = await config.get_content('picarto', r_filter)
-            # Get all online users before looping, so that only one request is needed
-            online_users_list = await online_users()
-            old_online_users = {data['member_id']: data for data in picarto if data['live']}
-            old_offline_users = {data['member_id']: data for data in picarto if not data['live']}
+        try:
+            while not self.bot.is_closed:
+                r_filter = {'notifications_on': 1}
+                picarto = await config.get_content('picarto', r_filter)
+                # Get all online users before looping, so that only one request is needed
+                online_users_list = await online_users()
+                old_online_users = {data['member_id']: data for data in picarto if data['live']}
+                old_offline_users = {data['member_id']: data for data in picarto if not data['live']}
 
-            for m_id, result in old_offline_users.items():
-                # Get their url and their user based on that url
-                url = result['picarto_url']
-                user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                # Check if they are online right now
-                if check_online(online_users_list, user):
-                    for server_id in result['servers']:
-                        # Get the channel to send the message to, based on the saved alert's channel
-                        server = self.bot.get_server(server_id)
-                        if server is None:
-                            continue
-                        server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
-                        try:
-                            channel_id = server_alerts[0]
-                        except IndexError:
-                            channel_id = server_id
-                        channel = self.bot.get_channel(channel_id)
-                        # Get the member that has just gone live
-                        member = discord.utils.get(server.members, id=m_id)
+                for m_id, result in old_offline_users.items():
+                    # Get their url and their user based on that url
+                    url = result['picarto_url']
+                    user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
+                    # Check if they are online right now
+                    if check_online(online_users_list, user):
+                        for server_id in result['servers']:
+                            # Get the channel to send the message to, based on the saved alert's channel
+                            server = self.bot.get_server(server_id)
+                            if server is None:
+                                continue
+                            server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
+                            try:
+                                channel_id = server_alerts[0]['channel_id']
+                            except IndexError:
+                                channel_id = server_id
+                            channel = self.bot.get_channel(channel_id)
+                            # Get the member that has just gone live
+                            member = discord.utils.get(server.members, id=m_id)
 
-                        fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
-                        await self.bot.send_message(channel, fmt)
-                    await config.update_content('picarto', {'live': 1}, {'member_id': m_id})
-            for m_id, result in old_online_users.items():
-                # Get their url and their user based on that url
-                url = result['picarto_url']
-                user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                # Check if they are online right now
-                if not check_online(online_users_list, user):
-                    for server_id in result['servers']:
-                        # Get the channel to send the message to, based on the saved alert's channel
-                        server = self.bot.get_server(server_id)
-                        if server is None:
-                            continue
-                        server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
-                        try:
-                            channel_id = server_alerts[0]
-                        except IndexError:
-                            channel_id = server_id
-                        channel = self.bot.get_channel(channel_id)
-                        # Get the member that has just gone live
-                        member = discord.utils.get(server.members, id=m_id)
-                        fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
-                            member.display_name, url)
-                        await self.bot.send_message(channel, fmt)
-                    await config.update_content('picarto', {'live': 0}, {'member_id': m_id})
-            await asyncio.sleep(30)
+                            fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
+                            await self.bot.send_message(channel, fmt)
+                        await config.update_content('picarto', {'live': 1}, {'member_id': m_id})
+                for m_id, result in old_online_users.items():
+                    # Get their url and their user based on that url
+                    url = result['picarto_url']
+                    user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
+                    # Check if they are online right now
+                    if not check_online(online_users_list, user):
+                        for server_id in result['servers']:
+                            # Get the channel to send the message to, based on the saved alert's channel
+                            server = self.bot.get_server(server_id)
+                            if server is None:
+                                continue
+                            server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
+                            try:
+                                channel_id = server_alerts[0]['channel_id']
+                            except IndexError:
+                                channel_id = server_id
+                            channel = self.bot.get_channel(channel_id)
+                            # Get the member that has just gone live
+                            member = discord.utils.get(server.members, id=m_id)
+                            fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
+                                member.display_name, url)
+                            await self.bot.send_message(channel, fmt)
+                        await config.update_content('picarto', {'live': 0}, {'member_id': m_id})
+                await asyncio.sleep(30)
+        except Exception as e:
+            tb = traceback.format_exc()
+            fmt = "{}\n{0.__class__.__name__}: {0}".format(tb, e)
+            log.error(fmt)
 
-    @commands.group(pass_context=True, invoke_without_command=True)
+    @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def picarto(self, ctx, member: discord.Member = None):
-        """This command can be used to view Picarto stats about a certain member"""
+        """This command can be used to view Picarto stats about a certain member
+
+        EXAMPLE: !picarto @otherPerson
+        RESULT: Info about their picarto stream"""
         # If member is not given, base information on the author
         member = member or ctx.message.author
         r_filter = {'member_id': member.id}
@@ -140,7 +151,10 @@ class Picarto:
     @picarto.command(name='add', pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def add_picarto_url(self, ctx, url: str):
-        """Saves your user's picarto URL"""
+        """Saves your user's picarto URL
+
+        EXAMPLE: !picarto add MyUsername
+        RESULT: Your picarto stream is saved, and notifications should go to this server"""
         # This uses a lookbehind to check if picarto.tv exists in the url given
         # If it does, it matches picarto.tv/user and sets the url as that
         # Then (in the else) add https://www. to that
@@ -195,7 +209,10 @@ class Picarto:
     @checks.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to turn picarto notifications on or off
-        Call this command by itself, to add this server to the list of servers to be notified"""
+        Call this command by itself, to add this server to the list of servers to be notified
+
+        EXAMPLE: !picarto notify
+        RESULT: This server will now be notified of you going live"""
         r_filter = {'member_id': ctx.message.author.id}
         result = await config.get_content('picarto', r_filter)
         # Check if this user is saved at all
@@ -213,7 +230,10 @@ class Picarto:
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
-        """Turns picarto notifications on"""
+        """Turns picarto notifications on
+
+        EXAMPLE: !picarto notify on
+        RESULT: Notifications are sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
         await config.update_content('picarto', {'notifications_on': 1}, r_filter)
         await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
@@ -222,7 +242,10 @@ class Picarto:
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
-        """Turns picarto notifications off"""
+        """Turns picarto notifications off
+
+        EXAMPLE: !picarto notify off
+        RESULT: No more notifications sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
         await config.update_content('picarto', {'notifications_on': 0}, r_filter)
         await self.bot.say(

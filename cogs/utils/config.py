@@ -52,20 +52,30 @@ discord_bots_key = global_config.get('discord_bots_key', "")
 carbon_key = global_config.get('carbon_key', "")
 # The client ID for twitch requsets
 twitch_key = global_config.get('twitch_key', "")
-# The invite link for the server made for the bot
-dev_server = global_config.get("dev_server", "")
-
-# The variables needed for sharding
-shard_count = global_config.get('shard_count', '')
-shard_id = global_config.get('shard_id', '')
-
-# A list of all the outputs for the battle command
-battle_wins = global_config.get("battleWins", [])
-# The default status the bot will use
-default_status = global_config.get("default_status", "")
 # The steam API key
 steam_key = global_config.get("steam_key", "")
+# The key for youtube API calls
+youtube_key = global_config.get("youtube_key", "")
+# The key for Osu API calls
+osu_key = global_config.get('osu_key', '')
+# The keys needed for deviant art calls
+da_id = global_config.get("da_id", "")
+da_secret = global_config.get("da_secret", "")
+# The invite link for the server made for the bot
+dev_server = global_config.get("dev_server", "")
+# The User-Agent that we'll use for most requests
+user_agent = global_config.get('user_agent', "")
+# The extensions to load
+extensions = global_config.get('extensions', [])
 
+# The variables needed for sharding
+shard_count = global_config.get('shard_count', 1)
+shard_id = global_config.get('shard_id', 0)
+
+# The default status the bot will use
+default_status = global_config.get("default_status", "")
+# The URL that will be used to link to for the help command
+help_url = global_config.get("help_url", "")
 # The rethinkdb hostname
 db_host = global_config.get('db_host', 'localhost')
 # The rethinkdb database name
@@ -99,6 +109,10 @@ cache = {}
 # We still need 'cache' for prefixes and custom permissions however, so for now, just include that
 cache['prefixes'] = Cache('prefixes')
 cache['custom_permissions'] = Cache('custom_permissions')
+
+async def update_cache():
+    for value in cache.values():
+        await value.update()
 
 async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate
@@ -194,7 +208,7 @@ async def add_content(table, content, r_filter=None):
         return True
     except r.ReqlOpFailedError:
         # This means the table does not exist
-        await r.create_table(table).run(conn)
+        await r.table_create(table).run(conn)
         await r.table(table).insert(content).run(conn)
         await conn.close()
         return True
@@ -211,6 +225,8 @@ async def remove_content(table, r_filter=None):
         result = {}
         pass
     await conn.close()
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return result.get('deleted', 0) > 0
 
 
@@ -229,6 +245,8 @@ async def update_content(table, content, r_filter=None):
         await conn.close()
         result = {}
     await conn.close()
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
@@ -244,22 +262,26 @@ async def replace_content(table, content, r_filter=None):
         await conn.close()
         result = {}
     await conn.close()
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
-async def get_content(key: str, r_filter=None):
+async def get_content(table: str, r_filter=None):
     if r_filter is None:
         r_filter = {}
     r.set_loop_type("asyncio")
     conn = await r.connect(**db_opts)
     try:
-        cursor = await r.table(key).filter(r_filter).run(conn)
+        cursor = await r.table(table).filter(r_filter).run(conn)
         content = await _convert_to_list(cursor)
         if len(content) == 0:
             content = None
     except (IndexError, r.ReqlOpFailedError):
         content = None
     await conn.close()
+    if table == 'prefixes' or table == 'custom_permissions':
+        loop.create_task(cache[table].update())
     return content
 
 

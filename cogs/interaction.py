@@ -5,6 +5,75 @@ from .utils import checks
 import discord
 import random
 
+battle_outcomes = \
+    ["A meteor fell on {1}, {0} is left standing and has been declared the victor!",
+     "{0} has bucked {1} into a tree, even Big Mac would be impressed at that kick!",
+     "As they were battling, {1} was struck by lightning! {0} you lucked out this time!",
+     "{1} tried to dive at {0} while fighting, somehow they missed and landed in quicksand."
+     "Try paying more attention next time {1}",
+     "{1} got a little...heated during the battle and ended up getting set on fire. {0} wins by remaining cool",
+     "Princess Celestia came in and banished {1} to the moon. Good luck getting into any battles up there",
+     "{1} took an arrow to the knee, they are no longer an adventurer. Keep on adventuring {0}",
+     "Common sense should make it obvious not to get into battle with {0}. Apparently {1} didn't get the memo",
+     "{0} had a nice cup of tea with {1} over their conflict, and mutually agreed that {0} was Best Pony",
+     "{0} and {1} had an intense staring contest. "
+     "Sadly, {1} forgot to breathe and lost much morethan the staring contest",
+     "It appears {1} is actually a pacifist, they ran away screaming and crying. "
+     "Maybe you should have thought of that before getting in a fight?",
+     "A bunch of parasprites came in and ate up the jetpack while {1} was flying with it. Those pesky critters...",
+     "{0} used their charm to seduce {1} to surrender.",
+     "{1} slipped on a banana peel and fell into a pit of spikes. That's actually impressive.",
+     "{0} realized it was high noon, {1} never even saw it coming.",
+     "{1} spontaneously combusted...lol rip",
+     "after many turns {0} summons exodia and {1} is sent to the shadow realm",
+     "{0} and {1} sit down for an intense game of chess, in the heat of the moment {0} forgot they were playing a "
+     "game and summoned a real knight",
+     "{0} challenges {1} to rock paper scissors, unfortunately for {1}, {0} chose scissors and stabbed them",
+     "{0} goes back in time and becomes {1}'s best friend, winning without ever throwing a punch",
+     "{1} trips down some stairs on their way to the battle with {0}",
+     "{0} books {1} a one way ticket to Flugendorf prison",
+     "{1} was already dead",
+     "{1} was crushed under the weight of expectations",
+     "{1} was wearing a redshirt and it was their first day",
+     "{0} and {1} were walking along when suddenly {1} got kidnapped by a flying monkey; hope they had water with them",
+     "{0} brought an army to a fist fight, {1} never saw their opponent once",
+     "{0} used multiple simultaneous devestating defensive deep strikes to overwhelm {1}",
+     "{0} and {1} engage in a dance off; {0} wiped the floor with {1}",
+     "{1} tried to hide in the sand to catch {0} off guard, unfortunately looks like a Giant Antlion had the same "
+     "idea for him",
+     "{1} was busy playing trash videogames the night before the fight and collapsed before {0}",
+     "{0} threw a sick meme and {1} totally got PRANK'D",
+     "{0} and {1} go on a skiing trip together, turns out {1} forgot how to pizza french-fry",
+     "{0} is the cure and {1} is the disease....well {1} was the disease",
+     "{1} talked their mouth off at {0}...literally...",
+     "Looks like {1} didn't put enough points into kazoo playing, who knew they would have needed it",
+     "{1} was too scared by the illuminati and extra-dimensional talking horses to show up",
+     "{1} didn't press x enough to not die",
+     "{0} and {1} go fishing to settle their debate, {0} caught a sizeable fish and {1} caught a boot older than time",
+     "{0} did a hero landing and {1} was so surprised they gave up immediately"]
+
+hugs = \
+    ["*hugs {}.*",
+     "*tackles {} for a hug.*",
+     "*drags {} into her dungeon where hugs ensue*",
+     "*pulls {} to the side for a warm hug*",
+     "*goes out to buy a big enough blanket to embrace {}*",
+     "*hard codes an electric hug to {}*",
+     "*hires mercenaries to take {} out....to a nice dinner*",
+     "*pays $10 to not touch {}*",
+     "*clones herself to create a hug pile with {}*",
+     "*orders an airstrike of hugs {}*",
+     "*glomps {}*",
+     "*hears a knock at her door, opens it, finds {} and hugs them excitedly*",
+     "*goes in for a punch but misses and ends up hugging {}*",
+     "*hugs {} from behind*",
+     "*denies a hug from {}*",
+     "*does a hug to {}*",
+     "*lets {} cuddle nonchalantly*",
+     "*cuddles {}*",
+     "*burrows underground and pops up underneath {} she hugs their legs.*",
+     "*approaches {} after having gone to the gym for several months and almost crushes them.*"]
+
 
 class Interaction:
     """Commands that interact with another user"""
@@ -38,11 +107,27 @@ class Interaction:
         self.battles[ctx.message.server.id] = {p1: p2 for p1, p2 in battles.items() if
                                                not p2 == player_id and not p1 == player_id}
 
-    @commands.group(pass_context=True, no_pm=True, invoke_without_command=True, enabled=False)
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(send_messages=True)
+    async def hug(self, ctx, user: discord.Member = None):
+        """Makes me hug a person!
+
+        EXAMPLE: !hug @Someone
+        RESULT: I hug the shit out of that person"""
+        if user is None:
+            user = ctx.message.author
+
+        fmt = random.SystemRandom().choice(hugs)
+        await self.bot.say(fmt.format(user.display_name))
+
+    @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
-        """Challenges the mentioned user to a battle"""
+        """Challenges the mentioned user to a battle
+
+        EXAMPLE: !battle @player2
+        RESULT: A battle to the death"""
         if ctx.message.author.id == player2.id:
             ctx.command.reset_cooldown(ctx)
             await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
@@ -61,17 +146,21 @@ class Interaction:
         battles[ctx.message.author.id] = player2.id
         self.battles[ctx.message.server.id] = battles
 
-        fmt = "{0.mention} has challenged you to a battle {1.mention}\n!accept or !decline"
+        fmt = "{0.message.author.mention} has challenged you to a battle {1.mention}\n" \
+              "{0.prefix}accept or {0.prefix}decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
         self.bot.loop.call_later(180, self.battling_off, ctx)
-        await self.bot.say(fmt.format(ctx.message.author, player2))
+        await self.bot.say(fmt.format(ctx, player2))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def accept(self, ctx):
-        """Accepts the battle challenge"""
+        """Accepts the battle challenge
+
+        EXAMPLE: !accept
+        RESULT: Hopefully the other person's death"""
         # This is a check to make sure that the author is the one being BATTLED
-        # And not the one that started the battle 
+        # And not the one that started the battle
         battles = self.battles.get(ctx.message.server.id) or {}
         p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
@@ -82,7 +171,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # Get a random win message from our list
-        fmt = config.battle_wins[random.SystemRandom().randint(0, len(config.battle_wins) - 1)]
+        fmt = random.SystemRandom().choice(battle_outcomes)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
         self.battling_off(ctx)
 
@@ -98,9 +187,12 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def decline(self, ctx):
-        """Declines the battle challenge"""
+        """Declines the battle challenge
+
+        EXAMPLE: !decline
+        RESULT: You chicken out"""
         # This is a check to make sure that the author is the one being BATTLED
-        # And not the one that started the battle 
+        # And not the one that started the battle
         battles = self.battles.get(ctx.message.server.id) or {}
         p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
         if len(p1) == 0:
@@ -117,8 +209,11 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
-    async def boop(self, ctx, boopee: discord.Member=None):
-        """Boops the mentioned person"""
+    async def boop(self, ctx, boopee: discord.Member = None):
+        """Boops the mentioned person
+
+        EXAMPLE: !boop @OtherPerson
+        RESULT: You do a boop o3o"""
         booper = ctx.message.author
         if boopee is None:
             ctx.command.reset_cooldown(ctx)

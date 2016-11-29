@@ -33,7 +33,7 @@ class StatsUpdate:
 
         async with self.session.post(carbonitex_url, data=carbon_payload) as resp:
             log.info('Carbonitex statistics returned {} for {}'.format(resp.status, carbon_payload))
-            
+
         payload = json.dumps({
             'server_count': server_count
         })
@@ -76,6 +76,42 @@ class StatsUpdate:
         if not await config.update_content('bot_data', entry, r_filter):
             await config.add_content('bot_data', entry, r_filter)
         self.bot.loop.create_task(self.update())
+
+    async def on_member_join(self, member):
+        server = member.server
+        r_filter = {'server_id': server.id}
+        notifications = await config.get_content('user_notifications', r_filter)
+
+        try:
+            channel_id = notifications[0]['channel_id']
+        except TypeError:
+            return
+
+        # By default, notifications should be off unless explicitly turned on
+        if not channel_id:
+            return
+
+        channel = server.get_channel(channel_id)
+        await self.bot.send_message(channel, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
+
+    async def on_member_remove(self, member):
+        server = member.server
+        r_filter = {'server_id': server.id}
+        notifications = await config.get_content('user_notifications', r_filter)
+
+        try:
+            channel_id = notifications[0]['channel_id']
+        except TypeError:
+            return
+
+        # By default, notifications should be off unless explicitly turned on
+        if not channel_id:
+            return
+
+        channel = server.get_channel(channel_id)
+        await self.bot.send_message(channel,
+                                    "{0} has left the server, I hope it wasn't because of something I said :c".format(
+                                        member.display_name))
 
 
 def setup(bot):
