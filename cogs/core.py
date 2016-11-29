@@ -18,18 +18,62 @@ class Core:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    def find_command(self, command):
+        # This method ensures the command given is valid. We need to loop through commands
+        # As self.bot.commands only includes parent commands
+        # So we are splitting the command in parts, looping through the commands
+        # And getting the subcommand based on the next part
+        # If we try to access commands of a command that isn't a group
+        # We'll hit an AttributeError, meaning an invalid command was given
+        # If we loop through and don't find anything, cmd will still be None
+        # And we'll report an invalid was given as well
+        cmd = None
+
+        for part in command.split():
+            try:
+                if cmd is None:
+                    cmd = self.bot.commands.get(part)
+                else:
+                    cmd = cmd.commands.get(part)
+            except AttributeError:
+                cmd = None
+                break
+
+        return cmd
+
+    @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def help(self):
+    async def help(self, ctx, *, message: str):
         """This command is used to provide a link to the help URL"""
-        fmt = "This URL can be used to view information about all commands: <{}>".format(config.help_url)
-        await self.bot.say(fmt)
-    
+
+        cmd = self.find_command(message)
+
+        if cmd is None:
+            fmt = "This URL can be used to view information about all commands: <{}>. " \
+                       "Run help on a command specifically in order to get information on that command.".format(config.help_url)
+            await self.bot.say(fmt)
+        else:
+            description = cmd.help
+            example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
+            result = [x.replace('RESULT: ', '') for x in description.split('\n') if 'RESULT:' in x]
+            description = [x for x in description.split('\n') if x and 'EXAMPLE:' not in x and 'RESULT:' not in x]
+
+            embed = discord.Embed(title=cmd.qualified_name)
+            embed.set_thumbnail(url=ctx.message.server.me.avatar_url)
+            embed.add_field(name="Description", value=description, inline=False)
+            if example:
+                embed.add_field(name="Example", value=example, inline=False)
+            if result:
+                embed.add_field(name="Result", value=result, inline=False)
+
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def motd(self, *, date=None):
         """This command can be used to print the current MOTD (Message of the day)
-        This will most likely not be updated every day, however messages will still be pushed to this every now and then"""
+        This will most likely not be updated every day, however messages will still be pushed to this every now and then
+
+        EXAMPLE: !motd
+        RESULT: 'This is an example message of the day!'"""
         if date is None:
             motd = await config.get_content('motd')
             try:
@@ -70,7 +114,9 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def calendar(self, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
-        Provide month and year to print the calendar of that year and month"""
+        Provide month and year to print the calendar of that year and month
+
+        EXAMPLE: !calendar january 2011"""
 
         # calendar takes in a number for the month, not the words
         # so we need this dictionary to transform the word to the number
@@ -155,13 +201,19 @@ class Core:
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def uptime(self):
-        """Provides a printout of the current bot's uptime"""
+        """Provides a printout of the current bot's uptime
+
+        EXAMPLE: !uptime
+        RESULT: A BAJILLION DAYS"""
         await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
 
     @commands.command(aliases=['invite'])
     @checks.custom_perms(send_messages=True)
     async def addbot(self):
-        """Provides a link that you can use to add me to a server"""
+        """Provides a link that you can use to add me to a server
+
+        EXAMPLE: !addbot
+        RESULT: http://discord.gg/yo_mama"""
         perms = discord.Permissions.none()
         perms.read_messages = True
         perms.send_messages = True
@@ -180,7 +232,9 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def doggo(self):
         """Use this to print a random doggo image.
-        Doggo is love, doggo is life."""
+
+        EXAMPLE: !doggo
+        RESULT: A beautiful picture of a dog o3o"""
         # Find a random image based on how many we currently have
         f = random.SystemRandom().choice(glob.glob('images/doggo*'))
         with open(f, 'rb') as f:
@@ -190,7 +244,9 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def snek(self):
         """Use this to print a random snek image.
-        Sneks are o3o"""
+
+        EXAMPLE: !snek
+        RESULT: A beautiful picture of a snek o3o"""
         # Find a random image based on how many we currently have
         f = random.SystemRandom().choice(glob.glob('images/snek*'))
         with open(f, 'rb') as f:
@@ -199,7 +255,10 @@ class Core:
     @commands.command()
     @checks.custom_perms(send_messages=True)
     async def joke(self):
-        """Prints a random riddle"""
+        """Prints a random riddle
+
+        EXAMPLE: !joke
+        RESULT: An absolutely terrible joke."""
         # Use the fortune riddles command because it's funny, I promise
         fortune_command = "/usr/bin/fortune riddles"
         while True:
@@ -216,7 +275,10 @@ class Core:
     @checks.custom_perms(send_messages=True)
     async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
-        Format should be #d#"""
+        Format should be #d#
+
+        EXAMPLE: !roll d50
+        RESULT: 51 :^)"""
         # Use regex to get the notation based on what was provided
         try:
             # We do not want to try to convert the dice, because we want d# to
