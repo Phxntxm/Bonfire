@@ -43,7 +43,7 @@ class Core:
 
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
-    async def help(self, ctx, *, message: str):
+    async def help(self, ctx, *, message: str = []):
         """This command is used to provide a link to the help URL"""
 
         cmd = self.find_command(message)
@@ -60,11 +60,11 @@ class Core:
 
             embed = discord.Embed(title=cmd.qualified_name)
             embed.set_thumbnail(url=ctx.message.server.me.avatar_url)
-            embed.add_field(name="Description", value=description, inline=False)
+            embed.add_field(name="Description", value=description[0], inline=False)
             if example:
-                embed.add_field(name="Example", value=example, inline=False)
+                embed.add_field(name="Example", value=example[0], inline=False)
             if result:
-                embed.add_field(name="Result", value=result, inline=False)
+                embed.add_field(name="Result", value=result[0], inline=False)
 
             await self.bot.say(embed=embed)
 
