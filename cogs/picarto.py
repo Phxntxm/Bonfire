@@ -113,7 +113,10 @@ class Picarto:
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def picarto(self, ctx, member: discord.Member = None):
-        """This command can be used to view Picarto stats about a certain member"""
+        """This command can be used to view Picarto stats about a certain member
+
+        EXAMPLE: !picarto @otherPerson
+        RESULT: Info about their picarto stream"""
         # If member is not given, base information on the author
         member = member or ctx.message.author
         r_filter = {'member_id': member.id}
@@ -148,7 +151,10 @@ class Picarto:
     @picarto.command(name='add', pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def add_picarto_url(self, ctx, url: str):
-        """Saves your user's picarto URL"""
+        """Saves your user's picarto URL
+
+        EXAMPLE: !picarto add MyUsername
+        RESULT: Your picarto stream is saved, and notifications should go to this server"""
         # This uses a lookbehind to check if picarto.tv exists in the url given
         # If it does, it matches picarto.tv/user and sets the url as that
         # Then (in the else) add https://www. to that
@@ -203,7 +209,10 @@ class Picarto:
     @checks.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to turn picarto notifications on or off
-        Call this command by itself, to add this server to the list of servers to be notified"""
+        Call this command by itself, to add this server to the list of servers to be notified
+
+        EXAMPLE: !picarto notify
+        RESULT: This server will now be notified of you going live"""
         r_filter = {'member_id': ctx.message.author.id}
         result = await config.get_content('picarto', r_filter)
         # Check if this user is saved at all
@@ -221,7 +230,10 @@ class Picarto:
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
-        """Turns picarto notifications on"""
+        """Turns picarto notifications on
+
+        EXAMPLE: !picarto notify on
+        RESULT: Notifications are sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
         await config.update_content('picarto', {'notifications_on': 1}, r_filter)
         await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
@@ -230,7 +242,10 @@ class Picarto:
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
-        """Turns picarto notifications off"""
+        """Turns picarto notifications off
+
+        EXAMPLE: !picarto notify off
+        RESULT: No more notifications sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
         await config.update_content('picarto', {'notifications_on': 0}, r_filter)
         await self.bot.say(

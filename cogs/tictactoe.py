@@ -115,7 +115,10 @@ class TicTacToe:
         """Updates the current server's tic-tac-toe board
         You obviously need to be one of the players to use this
         It also needs to be your turn
-        Provide top, left, bottom, right, middle as you want to mark where to play on the board"""
+        Provide top, left, bottom, right, middle as you want to mark where to play on the board
+
+        EXAMPLE: !tictactoe middle top
+        RESULT: Your piece is placed in the very top space, in the middle"""
         player = ctx.message.author
         board = self.boards.get(ctx.message.server.id)
         # Need to make sure the board exists before allowing someone to play
@@ -205,7 +208,10 @@ class TicTacToe:
     @tictactoe.command(name='start', aliases=['challenge', 'create'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def start_game(self, ctx, player2: discord.Member):
-        """Starts a game of tictactoe with another player"""
+        """Starts a game of tictactoe with another player
+
+        EXAMPLE: !tictactoe start @OtherPerson
+        RESULT: A new game of tictactoe"""
         player1 = ctx.message.author
         # For simplicities sake, only allow one game on a server at a time.
         # Things can easily get confusing (on the server's end) if we allow more than one
@@ -238,7 +244,10 @@ class TicTacToe:
     async def stop_game(self, ctx):
         """Force stops a game of tictactoe
         This should realistically only be used in a situation like one player leaves
-        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that"""
+        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that
+
+        EXAMPLE: !tictactoe stop
+        RESULT: No more tictactoe!"""
         if self.boards.get(ctx.message.server.id) is None:
             await self.bot.say("There are no tictactoe games running on this server!")
             return

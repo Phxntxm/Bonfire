@@ -80,7 +80,10 @@ class Raffle:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def raffles(self, ctx):
-        """Used to print the current running raffles on the server"""
+        """Used to print the current running raffles on the server
+
+        EXAMPLE: !raffles
+        RESULT: A list of the raffles setup on this server"""
         r_filter = {'server_id': ctx.message.server.id}
         raffles = await config.get_content('raffles', r_filter)
         if raffles is None:
@@ -98,7 +101,10 @@ class Raffle:
     @checks.custom_perms(send_messages=True)
     async def raffle(self, ctx, raffle_id: int = 0):
         """Used to enter a raffle running on this server
-        If there is more than one raffle running, provide an ID of the raffle you want to enter"""
+        If there is more than one raffle running, provide an ID of the raffle you want to enter
+
+        EXAMPLE: !raffle 1
+        RESULT: You've entered the first raffle!"""
         # Lets let people use 1 - (length of raffles) and handle 0 base ourselves
         raffle_id -= 1
         r_filter = {'server_id': ctx.message.server.id}
@@ -149,7 +155,10 @@ class Raffle:
     @raffle.command(pass_context=True, no_pm=True, name='create', aliases=['start', 'begin', 'add'])
     @checks.custom_perms(kick_members=True)
     async def raffle_create(self, ctx):
-        """This is used in order to create a new server raffle"""
+        """This is used in order to create a new server raffle
+
+        EXAMPLE: !raffle create
+        RESULT: A follow-along for setting up a new raffle"""
 
         author = ctx.message.author
         server = ctx.message.server

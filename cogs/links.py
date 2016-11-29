@@ -47,7 +47,10 @@ class Links:
     @commands.command(pass_context=True, aliases=['g'])
     @checks.custom_perms(send_messages=True)
     async def google(self, ctx, *, query: str):
-        """Searches google for a provided query"""
+        """Searches google for a provided query
+
+        EXAMPLE: !g Random cat pictures!
+        RESULT: Links to sites with random cat pictures!"""
         url = "https://www.google.com/search"
 
         # Turn safe filter on or off, based on whether or not this is a nsfw channel
@@ -96,7 +99,10 @@ class Links:
     @commands.command(aliases=['yt'], pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def youtube(self, ctx, *, query: str):
-        """Searches youtube for a provided query"""
+        """Searches youtube for a provided query
+
+        EXAMPLE: !youtube Cat videos!
+        RESULT: Cat videos!"""
         key = config.youtube_key
         url = "https://www.googleapis.com/youtube/v3/search"
         params = {'key': key,
@@ -125,7 +131,10 @@ class Links:
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def wiki(self, ctx, *, query: str):
-        """Pulls the top match for a specific term, and returns the definition"""
+        """Pulls the top match for a specific term from wikipedia, and returns the result
+
+        EXAMPLE: !wiki Test
+        RESULT: A link to the wikipedia article for the word test"""
         # All we need to do is search for the term provided, so the action, list, and format never need to change
         base_url = "https://en.wikipedia.org/w/api.php"
         params = {"action": "query",
@@ -158,7 +167,10 @@ class Links:
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def urban(self, ctx, *, msg: str):
-        """Pulls the top urbandictionary.com definition for a term"""
+        """Pulls the top urbandictionary.com definition for a term
+
+        EXAMPLE: !urban a normal phrase
+        RESULT: Probably something lewd; this is urban dictionary we're talking about"""
         url = "http://api.urbandictionary.com/v0/define"
         params = {"term": msg}
         try:
@@ -181,7 +193,10 @@ class Links:
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def derpi(self, ctx, *search: str):
-        """Provides a random image from the first page of derpibooru.org for the following term"""
+        """Provides a random image from the first page of derpibooru.org for the following term
+
+        EXAMPLE: !derpi Rainbow Dash
+        RESULT: A picture of Rainbow Dash!"""
         if len(search) > 0:
             url = 'https://derpibooru.org/search.json'
 
@@ -242,7 +257,10 @@ class Links:
     async def e621(self, ctx, *, tags: str):
         """Searches for a random image from e621.net
         Format for the search terms need to be 'search term 1, search term 2, etc.'
-        If the channel the command is ran in, is registered as a nsfw channel, this image will be explicit"""
+        If the channel the command is ran in, is registered as a nsfw channel, this image will be explicit
+
+        EXAMPLE: !e621 dragon
+        RESULT: A picture of a dragon (hopefully, screw your tagging system e621)"""
 
         # This changes the formatting for queries, so we don't
         # Have to use e621's stupid formatting when using the command

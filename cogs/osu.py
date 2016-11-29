@@ -67,7 +67,10 @@ class Osu:
         You can provide either your Osu ID or your username
         However, if your username is only numbers, this will confuse the API
         If you have only numbers in your username, you will need to provide your ID
-        This will by default return the top song, provide song [up to 100] to get that song, in order from best to worst"""
+        This will by default return the top song, provide song [up to 100] to get that song, in order from best to worst
+
+        EXAMPLE: !osu MyUsername 5
+        RESULT: Info about your 5th best song"""
 
         await self.bot.say("Looking up your Osu information...")
         # To make this easy for the user, it's indexed starting at 1, so lets subtract by 1
@@ -138,7 +141,10 @@ class Osu:
         """Used to get information about a specific user
         You can provide either your Osu ID or your username
         However, if your username is only numbers, this will confuse the API
-        If you have only numbers in your username, you will need to provide your ID"""
+        If you have only numbers in your username, you will need to provide your ID
+
+        EXAMPLE: !osu user MyUserName
+        RESULT: Info about your user"""
 
         await self.bot.say("Looking up your Osu information...")
         # A list of the possible values we'll receive, that we want to display

@@ -16,7 +16,10 @@ class Roles:
     @checks.custom_perms(send_messages=True)
     async def role(self, ctx):
         """This command can be used to modify the roles on the server.
-        Pass no subcommands and this will print the roles currently available on this server"""
+        Pass no subcommands and this will print the roles currently available on this server
+
+        EXAMPLE: !role
+        RESULT: A list of all your roles"""
         # Simply get a list of all roles in this server and send them
         server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
         await self.bot.say("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
@@ -24,7 +27,10 @@ class Roles:
     @role.command(name='remove', pass_context=True, no_pm=True)
     @checks.custom_perms(manage_roles=True)
     async def remove_role(self, ctx):
-        """Use this to remove roles from a number of members"""
+        """Use this to remove roles from a number of members
+
+        EXAMPLE: !role remove @Jim @Bot @Joe
+        RESULT: A follow-along to remove the role(s) you want to, from these 3 members"""
         # No use in running through everything if the bot cannot manage roles
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't manage roles in this server, do you not trust  me? :c")
@@ -81,7 +87,10 @@ class Roles:
     async def add_role(self, ctx):
         """Use this to add a role to multiple members.
         Provide the list of members, and I'll ask for the role
-        If no members are provided, I'll first ask for them"""
+        If no members are provided, I'll first ask for them
+
+        EXAMPLE: !role add @Bob @Joe @jim
+        RESULT: A follow along to add the roles you want to these 3"""
         # No use in running through everything if the bot cannot manage roles
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't manage roles in this server, do you not trust  me? :c")
@@ -129,7 +138,10 @@ class Roles:
     @role.command(name='delete', pass_context=True, no_pm=True)
     @checks.custom_perms(manage_roles=True)
     async def delete_role(self, ctx, *, role: discord.Role = None):
-        """This command can be used to delete one of the roles from the server"""
+        """This command can be used to delete one of the roles from the server
+
+        EXAMPLE: !role delete StupidRole
+        RESULT: No more role called StupidRole"""
         # No use in running through everything if the bot cannot manage roles
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't delete roles in this server, do you not trust  me? :c")
@@ -163,7 +175,10 @@ class Roles:
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server
         A prompt will follow asking what settings you would like for this new role
-        I'll then ask if you'd like to set anyone to use this role"""
+        I'll then ask if you'd like to set anyone to use this role
+
+        EXAMPLE: !role create
+        RESULT: A follow along in order to create a new role"""
         # No use in running through everything if the bot cannot create the role
         if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
             await self.bot.say("I can't create roles in this server, do you not trust  me? :c")

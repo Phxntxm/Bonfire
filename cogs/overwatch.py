@@ -58,7 +58,10 @@ class Overwatch:
     @checks.custom_perms(send_messages=True)
     async def ow_stats(self, ctx, user: discord.Member = None, hero: str = ""):
         """Prints out a basic overview of a member's stats
-        Provide a hero after the member to get stats for that specific hero"""
+        Provide a hero after the member to get stats for that specific hero
+
+        EXAMPLE: !ow stats @OtherPerson Junkrat
+        RESULT: Whether or not you should unfriend this person because they're a dirty rat"""
         user = user or ctx.message.author
         r_filter = {'member_id': user.id}
         ow_stats = await config.get_content('overwatch', r_filter)
@@ -102,7 +105,10 @@ class Overwatch:
     @ow.command(pass_context=True, name="add")
     @checks.custom_perms(send_messages=True)
     async def add(self, ctx, bt: str):
-        """Saves your battletag for looking up information"""
+        """Saves your battletag for looking up information
+
+        EXAMPLE: !ow add Username#1234
+        RESULT: Your battletag is now saved"""
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists
         bt = bt.replace("#", "-")
@@ -130,7 +136,10 @@ class Overwatch:
     @ow.command(pass_context=True, name="delete", aliases=['remove'])
     @checks.custom_perms(send_messages=True)
     async def delete(self, ctx):
-        """Removes your battletag from the records"""
+        """Removes your battletag from the records
+
+        EXAMPLE: !ow delete
+        RESULT: Your battletag is no longer saved"""
         r_filter = {'member_id': ctx.message.author.id}
         if await config.remove_content('overwatch', r_filter):
             await self.bot.say("I no longer have your battletag saved {}".format(ctx.message.author.mention))

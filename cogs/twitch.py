@@ -106,7 +106,10 @@ class Twitch:
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def twitch(self, ctx, *, member: discord.Member = None):
-        """Use this command to check the twitch info of a user"""
+        """Use this command to check the twitch info of a user
+
+        EXAMPLE: !twitch @OtherPerson
+        RESULT: Information about their twitch URL"""
         if member is None:
             member = ctx.message.author
 
@@ -132,7 +135,10 @@ class Twitch:
     @twitch.command(name='add', pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def add_twitch_url(self, ctx, url: str):
-        """Saves your user's twitch URL"""
+        """Saves your user's twitch URL
+
+        EXAMPLE: !twitch add MyTwitchName
+        RESULT: Saves your twitch URL; notifications will be sent to this server when you go live"""
         # This uses a lookbehind to check if twitch.tv exists in the url given
         # If it does, it matches twitch.tv/user and sets the url as that
         # Then (in the else) add https://www. to that
@@ -174,7 +180,10 @@ class Twitch:
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def remove_twitch_url(self, ctx):
-        """Removes your twitch URL"""
+        """Removes your twitch URL
+
+        EXAMPLE: !twitch remove
+        RESULT: I stop saving your twitch URL"""
         # Just try to remove it, if it doesn't exist, nothing is going to happen
         r_filter = {'member_id': ctx.message.author.id}
         await config.remove_content('twitch', r_filter)
@@ -184,7 +193,10 @@ class Twitch:
     @checks.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to modify notification settings for your twitch user
-        Call this command by itself to add 'this' server as one that will be notified when you on/offline"""
+        Call this command by itself to add 'this' server as one that will be notified when you on/offline
+
+        EXAMPLE: !twitch notify
+        RESULT: This server will now be notified when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
         result = await config.get_content('twitch', r_filter)
         # Check if this user is saved at all
@@ -201,7 +213,10 @@ class Twitch:
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
-        """Turns twitch notifications on"""
+        """Turns twitch notifications on
+
+        EXAMPLE: !twitch notify on
+        RESULT: Notifications will be sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
         if await config.update_content('twitch', {"notifications_on": 1}, r_filter):
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
@@ -212,7 +227,10 @@ class Twitch:
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
-        """Turns twitch notifications off"""
+        """Turns twitch notifications off
+
+        EXAMPLE: !twitch notify off
+        RESULT: Notifications will not be sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
         if await config.update_content('twitch', {"notifications_on": 1}, r_filter):
             await self.bot.say(

@@ -137,7 +137,9 @@ class Chess:
             - Review this first: https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Disambiguating_moves
             - For the sake of ease, we will only use #3 in our formatting. For example 'Knight to d4' when two of them can go there, should be provided exactly like 'Ng4d4' if the piece you want is on g4, and needs to move to d4. This is an invalid move, but is just for an example
         - Check/Checkmate
-            - Provide normal notation"""
+            - Provide normal notation
+
+            EXAMPLE: !rook to d4"""
         result = self.play(ctx.message.author, move)
         if result is MoveStatus.invalid:
             await self.bot.say("That was an invalid move!")
@@ -154,7 +156,10 @@ class Chess:
     @checks.custom_perms(send_messages=True)
     async def chess_start(self, ctx, player2: discord.Member):
         """Starts a chess game with another player
-        You can play one game on a single server at a time"""
+        You can play one game on a single server at a time
+
+        EXAMPLE: !chess start @Victim
+        RESULT: A new chess game! Good luck~"""
 
         # Lets first check our permissions; we're not going to create a text based board
         # So we need to be able to attach files in order to send the board

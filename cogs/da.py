@@ -115,7 +115,10 @@ class Deviantart:
     @checks.custom_perms(send_messages=True)
     async def da_sub(self, ctx, *, username):
         """This can be used to add a feed to your notifications.
-        Provide a username, and when posts are made from this user, you will be notified"""
+        Provide a username, and when posts are made from this user, you will be notified
+
+        EXAMPLE: !da sub MyFavoriteArtistEva<3
+        RESULT: Notifications of amazing pics c:"""
         r_filter = {'member_id': ctx.message.author.id}
         content = await config.get_content('deviantart', r_filter)
         # TODO: Ensure the user provided is a real user
@@ -138,7 +141,10 @@ class Deviantart:
     @da.command(pass_context=True, name='unsub', aliases=['delete', 'remove', 'unsubscribe'])
     @checks.custom_perms(send_messages=True)
     async def da_unsub(self, ctx, *, username):
-        """This command can be used to unsub from the specified user"""
+        """This command can be used to unsub from the specified user
+
+        EXAMPLE: !da unsub TheArtistWhoBetrayedMe
+        RESULT: No more pics from that terrible person!"""
         r_filter = {'member_id': ctx.message.author.id}
         content = await config.get_content('deviantart', r_filter)
 

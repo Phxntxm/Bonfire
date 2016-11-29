@@ -111,7 +111,10 @@ class Hangman:
     @commands.cooldown(1, 7, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def hangman(self, ctx, *, guess):
-        """Makes a guess towards the server's currently running hangman game"""
+        """Makes a guess towards the server's currently running hangman game
+
+        EXAMPLE: !hangman e (or) !hangman The Phrase!
+        RESULT: Hopefully a win!"""
         game = self.games.get(ctx.message.server.id)
         if not game:
             ctx.command.reset_cooldown(ctx)
@@ -154,7 +157,10 @@ class Hangman:
     async def create_hangman(self, ctx):
         """This is used to create a new hangman game
         Due to the fact that I might not be able to delete a message, I will PM you and ask for the phrase you want.
-        The phrase needs to be under 30 characters"""
+        The phrase needs to be under 30 characters
+
+        EXAMPLE: !hangman start
+        RESULT: This is pretty obvious .-."""
 
         # Only have one hangman game per server, since anyone
         # In a server (except the creator) can guess towards the current game
@@ -172,7 +178,10 @@ class Hangman:
     async def stop_game(self, ctx):
         """Force stops a game of hangman
         This should realistically only be used in a situation like one player leaves
-        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that"""
+        Hopefully a moderator will not abuse it, but there's not much we can do to avoid that
+
+        EXAMPLE: !hangman stop
+        RESULT: No more men being hung"""
         if self.games.get(ctx.message.server.id) is None:
             await self.bot.say("There are no Hangman games running on this server!")
             return

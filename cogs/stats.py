@@ -32,6 +32,10 @@ class Stats:
     @commands.command(no_pm=True, pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def serverinfo(self, ctx):
+        """Provides information about the server
+
+        EXAMPLE: !serverinfo
+        RESULT: Information about your server!"""
         server = ctx.message.server
         # Create our embed that we'll use for the information
         embed = discord.Embed(title=server.name, description="Created on: {}".format(server.created_at.date()))
@@ -65,7 +69,10 @@ class Stats:
     @command.command(no_pm=True, pass_context=True, name="stats")
     @checks.custom_perms(send_messages=True)
     async def command_stats(self, ctx, *, command):
-        """This command can be used to view some usage stats about a specific command"""
+        """This command can be used to view some usage stats about a specific command
+
+        EXAMPLE: !command stats play
+        RESULT: The realization that this is the only reason people use me ;-;"""
         cmd = self.find_command(command)
         if cmd is None:
             await self.bot.say("`{}` is not a valid command".format(command))
@@ -102,7 +109,10 @@ class Stats:
     async def command_leaderboard(self, ctx, option="server"):
         """This command can be used to print a leaderboard of commands
         Provide 'server' to print a leaderboard for this server
-        Provide 'me' to print a leaderboard for your own usage"""
+        Provide 'me' to print a leaderboard for your own usage
+
+        EXAMPLE: !command leaderboard me
+        RESULT: The realization of how little of a life you have"""
         if re.search('(author|me)', option):
             author = ctx.message.author
             # First lets get all the command usage
@@ -142,7 +152,10 @@ class Stats:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def mostboops(self, ctx):
-        """Shows the person you have 'booped' the most, as well as how many times"""
+        """Shows the person you have 'booped' the most, as well as how many times
+
+        EXAMPLE: !mostboops
+        RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
         r_filter = {'member_id': ctx.message.author.id}
         boops = await config.get_content('boops', r_filter)
         if boops is None:
@@ -170,7 +183,10 @@ class Stats:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def listboops(self, ctx):
-        """Lists all the users you have booped and the amount of times"""
+        """Lists all the users you have booped and the amount of times
+
+        EXAMPLE: !listboops
+        RESULT: The list of your booped members!"""
         r_filter = {'member_id': ctx.message.author.id}
         boops = await config.get_content('boops', r_filter)
         if boops is None:
@@ -201,7 +217,10 @@ class Stats:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def leaderboard(self, ctx):
-        """Prints a leaderboard of everyone in the server's battling record"""
+        """Prints a leaderboard of everyone in the server's battling record
+
+        EXAMPLE: !leaderboard
+        RESULT: A leaderboard of this server's battle records"""
         # Create a list of the ID's of all members in this server, for comparison to the records saved
         server_member_ids = [member.id for member in ctx.message.server.members]
         battles = await config.get_content('battle_records')
@@ -231,7 +250,10 @@ class Stats:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def stats(self, ctx, member: discord.Member = None):
-        """Prints the battling stats for you, or the user provided"""
+        """Prints the battling stats for you, or the user provided
+
+        EXAMPLE: !stats @OtherPerson
+        RESULT: How good they are at winning a completely luck based game"""
         member = member or ctx.message.author
 
         # For this one, we don't want to pass a filter, as we do need all battle records

@@ -108,6 +108,10 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def hug(self, ctx, user: discord.Member = None):
+        """Makes me hug a person!
+
+        EXAMPLE: !hug @Someone
+        RESULT: I hug the shit out of that person"""
         if user is None:
             user = ctx.message.author
 
@@ -118,7 +122,10 @@ class Interaction:
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
-        """Challenges the mentioned user to a battle"""
+        """Challenges the mentioned user to a battle
+
+        EXAMPLE: !battle @player2
+        RESULT: A battle to the death"""
         if ctx.message.author.id == player2.id:
             ctx.command.reset_cooldown(ctx)
             await self.bot.say("Why would you want to battle yourself? Suicide is not the answer")
@@ -146,7 +153,10 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def accept(self, ctx):
-        """Accepts the battle challenge"""
+        """Accepts the battle challenge
+
+        EXAMPLE: !accept
+        RESULT: Hopefully the other person's death"""
         # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle
         battles = self.battles.get(ctx.message.server.id) or {}
@@ -175,7 +185,10 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def decline(self, ctx):
-        """Declines the battle challenge"""
+        """Declines the battle challenge
+
+        EXAMPLE: !decline
+        RESULT: You chicken out"""
         # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle
         battles = self.battles.get(ctx.message.server.id) or {}
@@ -195,7 +208,10 @@ class Interaction:
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member = None):
-        """Boops the mentioned person"""
+        """Boops the mentioned person
+
+        EXAMPLE: !boop @OtherPerson
+        RESULT: You do a boop o3o"""
         booper = ctx.message.author
         if boopee is None:
             ctx.command.reset_cooldown(ctx)
