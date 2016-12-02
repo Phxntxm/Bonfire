@@ -16,6 +16,6 @@ def _get_all_commands(command):
     yield command.qualified_name
     try:
         for cmd in command.commands:
-            yield from _get_all_commands(cmd):
+            yield from _get_all_commands(cmd)
     except AttributeError:
         pass
