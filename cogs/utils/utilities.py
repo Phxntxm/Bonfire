@@ -15,7 +15,7 @@ def get_all_commands(bot):
 def _get_all_commands(command):
     yield command.qualified_name
     try:
-        for cmd in command.commands:
+        for cmd in command.commands.values():
             yield from _get_all_commands(cmd)
     except AttributeError:
         pass
