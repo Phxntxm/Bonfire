@@ -209,7 +209,7 @@ class Interaction:
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
-    async def boop(self, ctx, boopee: discord.Member = None):
+    async def boop(self, ctx, boopee: discord.Member = None, *, message = ""):
         """Boops the mentioned person
 
         EXAMPLE: !boop @OtherPerson
@@ -219,6 +219,9 @@ class Interaction:
             ctx.command.reset_cooldown(ctx)
             await self.bot.say("You try to boop the air, the air boops back. Be afraid....")
             return
+        # To keep formatting easier, keep it either "" or the message with a space in front
+        if message is not None:
+            message = " " + message
         if boopee.id == booper.id:
             ctx.command.reset_cooldown(ctx)
             await self.bot.say("You can't boop yourself! Silly...")
@@ -244,8 +247,8 @@ class Interaction:
             await config.add_content('boops', entry, r_filter)
             amount = 1
 
-        fmt = "{0.mention} has just booped you {1.mention}! That's {2} times now!"
-        await self.bot.say(fmt.format(booper, boopee, amount))
+        fmt = "{0.mention} has just booped {1.mention}{3}! That's {2} times now!"
+        await self.bot.say(fmt.format(booper, boopee, amount, message))
 
 
 def setup(bot):
