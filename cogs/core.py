@@ -144,8 +144,8 @@ class Core:
             embed = self.create_help_embed()
             msg = await self.bot.say(embed=embed)
 
-            await self.bot.add_reaction(msg, '\N{BLACK RIGHTWARDS ARROW}')
             await self.bot.add_reaction(msg, '\N{LEFTWARDS BLACK ARROW}')
+            await self.bot.add_reaction(msg, '\N{BLACK RIGHTWARDS ARROW}')
             # The only thing we need to record about this message, is the page number, starting at 1
             self.help_embeds[msg.id] = 1
         else:
