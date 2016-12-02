@@ -81,8 +81,8 @@ class Core:
         embed = discord.Embed(**opts)
 
         # Add each field for the commands for this page
-        for cmd in determine_commands(page):
-            embed.add_field(cmd.qualified_name)
+        fmt = "\n".join(self.determine_commands(page))
+        embed.add_field(name="Commands", value=fmt, inline=False)
 
         return embed
 
