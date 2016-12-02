@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from .utils import checks
 from .utils import config
+from .utils import utilities
 
 import subprocess
 import glob
@@ -10,6 +11,7 @@ import re
 import calendar
 import pendulum
 import datetime
+import math
 
 
 class Core:
@@ -17,6 +19,72 @@ class Core:
 
     def __init__(self, bot):
         self.bot = bot
+        # This is a dictionary used to hold information about which page a certain help message is on
+        self.help_embeds = {}
+        self.results_per_page = 10
+        self.commands = None
+
+    def determine_commands(self, page):
+        """Returns the list of commands to use per page"""
+
+        end_index = self.results_per_page * page
+        start_index = end_index - self.results_per_page
+
+        return self.commands[start_index:end_index]
+
+    def prev_page(self, message_id):
+        """Goes to the previus page"""
+        total_commands = len(self.commands)
+        # Increase the page count by one
+        page = self.help_embeds.get(message_id) - 1
+
+        total_pages = math.ceil(total_commands / self.results_per_page)
+
+        # If we hit the zeroith page, set to the very last page
+        if page <= 0:
+            page = total_pages
+
+    def next_page(self, message_id):
+        """Goes to the next page for this message"""
+        total_commands = len(self.commands)
+        # Increase the page count by one
+        page = self.help_embeds.get(message_id) + 1
+
+        total_pages = math.ceil(total_commands / self.results_per_page)
+
+        # Make sure we don't reach past what we should; if we do, reset to page 1
+        if page > total_pages:
+            page = 1
+
+        # Set the new page
+        self.help_embeds[message_id] = page
+        # Now create our new embed
+        return create_help_embed(message_id)
+
+    def create_help_embed(self, message_id=None):
+        # If no message ID is provided (we're sending a new help command)
+        # Set the page to 1
+        if message_id is None:
+            page = 1
+        else:
+            page = self.help_embeds.get(message_id)
+
+        # Refresh our command list
+        self.commands = utilities.get_all_commands(self.bot)
+
+        # Calculate the total amount of pages needed
+        total_commands = len(self.commands)
+        total_pages = math.ceil(total_commands / self.results_per_page)
+        # First create the embed object
+        opts = {"title": "Command List [{}/{}]".format(page, total_pages),
+                "description": "Run help on a specific command for more information on it!"}
+        embed = discord.Embed(**opts)
+
+        # Add each field for the commands for this page
+        for cmd in determine_commands(page):
+            embed.add_field(cmd.qualified_name)
+
+        return embed
 
     def find_command(self, command):
         # This method ensures the command given is valid. We need to loop through commands
@@ -51,9 +119,10 @@ class Core:
         cmd = self.find_command(message)
 
         if cmd is None:
-            fmt = "This URL can be used to view information about all commands: <{}>. Run help on a command " \
-                  "specifically in order to get information on that command.".format(config.help_url)
-            await self.bot.say(fmt)
+            embed = self.create_help_embed()
+            msg = await self.bot.say(embed = embed)
+            # The only thing we need to record about this message, is the page number, starting at 1
+            self.help_embeds[msg.id] = 1
         else:
             description = cmd.help
             example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
