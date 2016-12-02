@@ -15,7 +15,7 @@ def get_all_commands(bot):
 def _get_all_commands(command):
     yield command.qualified_name
     try:
-        non_aliases = set(cmd.qualified_name for cmd in command.commands.values())
+        non_aliases = set(cmd.name for cmd in command.commands.values())
         for cmd_name in non_aliases:
             yield from _get_all_commands(command.commands[cmd_name])
     except AttributeError:
