@@ -1,6 +1,6 @@
 def get_all_commands(bot):
     # First lets create a set of all the parent names
-    parent_command_names = set(cmd.qualified_name for cmd in bot.commands)
+    parent_command_names = set(cmd.qualified_name for cmd in bot.commands.values())
     all_commands = []
 
     # Now lets loop through and get all the child commands for each command
