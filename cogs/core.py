@@ -24,6 +24,24 @@ class Core:
         self.results_per_page = 10
         self.commands = None
 
+    async def on_reaction_add(self, reaction, user):
+        # Make sure that this is a normal user who pressed the button
+        # Also make sure that this is even a message we should be paying attention to
+        if user.bot or reaction.message.id not in self.help_embeds:
+            return
+
+        # If right is clicked
+        if '\u27A1' in reaction.emoji:
+            embed = self.next_page(reaction.message.id)
+        # If left is clicked
+        elif '\u2B05' in reaction.emoji:
+            embed = self.prev_page(reaction.message.id)
+        else:
+            return
+
+        await self.bot.edit_message(reaction.message, embed=embed)
+        await self.bot.remove_reaction(reaction.message, reaction.emoji, user)
+
     def determine_commands(self, page):
         """Returns the list of commands to use per page"""
 
@@ -43,6 +61,10 @@ class Core:
         # If we hit the zeroith page, set to the very last page
         if page <= 0:
             page = total_pages
+        # Set the new page
+        self.help_embeds[message_id] = page
+        # Now create our new embed
+        return self.create_help_embed(message_id)
 
     def next_page(self, message_id):
         """Goes to the next page for this message"""
@@ -59,7 +81,7 @@ class Core:
         # Set the new page
         self.help_embeds[message_id] = page
         # Now create our new embed
-        return create_help_embed(message_id)
+        return self.create_help_embed(message_id)
 
     def create_help_embed(self, message_id=None):
         # If no message ID is provided (we're sending a new help command)
@@ -120,7 +142,10 @@ class Core:
 
         if cmd is None:
             embed = self.create_help_embed()
-            msg = await self.bot.say(embed = embed)
+            msg = await self.bot.say(embed=embed)
+
+            await self.bot.add_reaction(msg, '\N{BLACK RIGHTWARDS ARROW}')
+            await self.bot.add_reaction(msg, '\N{LEFTWARDS BLACK ARROW}')
             # The only thing we need to record about this message, is the page number, starting at 1
             self.help_embeds[msg.id] = 1
         else:
@@ -251,8 +276,7 @@ class Core:
         hm_games = len(
             [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
 
-        ttt_games = len([server_id for server_id,
-                         game in self.bot.get_cog('TicTacToe').boards.items()])
+        ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
 
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
