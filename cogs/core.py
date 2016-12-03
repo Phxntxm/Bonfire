@@ -92,7 +92,7 @@ class Core:
             page = self.help_embeds.get(message_id)
 
         # Refresh our command list
-        self.commands = utilities.get_all_commands(self.bot)
+        self.commands = sorted(utilities.get_all_commands(self.bot))
 
         # Calculate the total amount of pages needed
         total_commands = len(self.commands)
