@@ -60,7 +60,7 @@ class Stats:
         embed.add_field(name='Owner', value=server.owner.display_name)
 
         # Add the shard ID
-        embed.set_footer(text="Server is on shard: {}/{}".format(self.bot.shard_id, self.bot.shard_count))
+        embed.set_footer(text="Server is on shard: {}/{}".format(self.bot.shard_id+1, self.bot.shard_count))
 
         await self.bot.say(embed=embed)
 
