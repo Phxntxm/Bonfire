@@ -20,3 +20,26 @@ def _get_all_commands(command):
             yield from _get_all_commands(command.commands[cmd_name])
     except AttributeError:
         pass
+
+def find_command(bot, command):
+    # This method ensures the command given is valid. We need to loop through commands
+    # As bot.commands only includes parent commands
+    # So we are splitting the command in parts, looping through the commands
+    # And getting the subcommand based on the next part
+    # If we try to access commands of a command that isn't a group
+    # We'll hit an AttributeError, meaning an invalid command was given
+    # If we loop through and don't find anything, cmd will still be None
+    # And we'll report an invalid was given as well
+    cmd = None
+
+    for part in command.split():
+        try:
+            if cmd is None:
+                cmd = bot.commands.get(part)
+            else:
+                cmd = cmd.commands.get(part)
+        except AttributeError:
+            cmd = None
+            break
+
+    return cmd
