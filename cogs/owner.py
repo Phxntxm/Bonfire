@@ -33,64 +33,6 @@ class Owner:
             await config.update_content('motd', entry, r_filter)
         await self.bot.say("New motd update for {}!".format(date))
 
-    @commands.command()
-    @commands.check(checks.is_owner)
-    async def running(self):
-        """This command detects all things currently running
-        This includes music played, tictactoe games, hangman games, and battles"""
-        servers_playing_music = len([server_id for server_id, state in self.bot.get_cog('Music').voice_states.items() if
-                                     state.is_playing()])
-        hm_games = len([server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
-        ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
-        count_battles = 0
-        for battles in self.bot.get_cog('Interaction').battles.values():
-            count_battles += len(battles)
-        fmt = ""
-        if servers_playing_music:
-            fmt += "Playing songs in {} different servers\n".format(servers_playing_music)
-        if hm_games:
-            fmt += "{} different hangman games running\n".format(hm_games)
-        if ttt_games:
-            fmt += "{} different TicTacToe games running\n".format(ttt_games)
-        if count_battles:
-            fmt += "{} different battles going on\n".format(count_battles)
-
-        if not fmt:
-            fmt = "Nothing currently running!"
-        await self.bot.say(fmt)
-
-    @commands.command()
-    @commands.check(checks.is_owner)
-    async def adddoggo(self, url: str):
-        """Saves a URL as an image to add for the doggo command"""
-        # Save the local path based on how many images there currently are
-        local_path = 'images/doggo{}.jpg'.format(len(glob.glob('images/doggo*')))
-
-        # "read" the image and save as bytes
-        with aiohttp.ClientSession() as s:
-            async with s.get(url) as r:
-                val = await r.read()
-                with open(local_path, "wb") as f:
-                    f.write(val)
-        await self.bot.say(
-            "Just saved a new doggo image! I now have {} doggo images!".format(len(glob.glob('images/doggo*'))))
-
-    @commands.command()
-    @commands.check(checks.is_owner)
-    async def addsnek(self, url: str):
-        """Saves a URL as an image to add for the snek command"""
-        # Save the local path based on how many images there currently are
-        local_path = 'images/snek{}.jpg'.format(len(glob.glob('images/snek*')))
-
-        # "read" the image and save as bytes
-        with aiohttp.ClientSession() as s:
-            async with s.get(url) as r:
-                val = await r.read()
-                with open(local_path, "wb") as f:
-                    f.write(val)
-        await self.bot.say(
-            "Just saved a new snek image! I now have {} snek images!".format(len(glob.glob('images/snek*'))))
-
     @commands.command(pass_context=True)
     @commands.check(checks.is_owner)
     async def debug(self, ctx):
@@ -128,14 +70,6 @@ class Owner:
         await self.bot.say(fmt.format(ctx.message))
         await self.bot.logout()
         await self.bot.close()
-
-    @commands.command()
-    @commands.check(checks.is_owner)
-    async def avatar(self, content: str):
-        """Changes the avatar for the bot to the filename following the command"""
-        file = 'images/' + content
-        with open(file, 'rb') as fp:
-            await self.bot.edit_profile(avatar=fp.read())
 
     @commands.command()
     @commands.check(checks.is_owner)
