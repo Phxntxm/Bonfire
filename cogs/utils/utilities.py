@@ -54,15 +54,12 @@ def find_command(bot, command):
 async def download_image(url):
     """Returns a file-like object based on the URL provided"""
     headers = {'User-Agent': config.user_agent}
-    try:
-        # Simply download the image
-        with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(url) as r:
-                image_bytes = r.read()
-        # Then wrap it in a BytesIO object, to be used like an actual file
-        return io.BytesIO(image_bytes)
-    except:
-        return
+    # Simply download the image
+    with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(url) as r:
+            # Then wrap it in a BytesIO object, to be used like an actual file
+            image = io.BytesIO(await r.read())
+    return image
 
 async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate
