@@ -123,7 +123,7 @@ class Interaction:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
-    async def avatar(self, ctx, ,member: discord.Member = None):
+    async def avatar(self, ctx, member: discord.Member = None):
         """Provides an image for the provided person's avatar (yours if no other member is provided)
 
         EXAMPLE: !avatar @person
