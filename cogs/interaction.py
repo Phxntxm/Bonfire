@@ -2,6 +2,7 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 from .utils import config
 from .utils import checks
+from .utils import utilities
 import discord
 import random
 
@@ -120,6 +121,24 @@ class Interaction:
         fmt = random.SystemRandom().choice(hugs)
         await self.bot.say(fmt.format(user.display_name))
 
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.custom_perms(send_messages=True)
+    async def avatar(self, ctx, ,member: discord.Member = None):
+        """Provides an image for the provided person's avatar (yours if no other member is provided)
+
+        EXAMPLE: !avatar @person
+        RESULT: A full image of that person's avatar"""
+
+        if member is None:
+            member = ctx.message.author
+
+        url = member.avatar_url
+        if ctx.message.server.me.permissions_in(ctx.message.channel).attach_files:
+            file = await utilities.download_image(url)
+            await self.bot.upload(file)
+        else:
+            await self.bot.say(url)
+
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
     @checks.custom_perms(send_messages=True)
@@ -179,10 +198,10 @@ class Interaction:
         # All we need to do is change what order the challengers are printed/added as a paramater
         if random.SystemRandom().randint(0, 1):
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
-            await config.update_records('battle_records', battleP1, battleP2)
+            await utilities.update_records('battle_records', battleP1, battleP2)
         else:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
-            await config.update_records('battle_records', battleP2, battleP1)
+            await utilities.update_records('battle_records', battleP2, battleP1)
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
