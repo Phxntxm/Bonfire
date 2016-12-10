@@ -114,65 +114,6 @@ async def update_cache():
     for value in cache.values():
         await value.update()
 
-async def update_records(key, winner, loser):
-    # We're using the Harkness scale to rate
-    # http://opnetchessclub.wikidot.com/harkness-rating-system
-    r_filter = lambda row: (row['member_id'] == winner.id) | (row['member_id'] == loser.id)
-    matches = await get_content(key, r_filter)
-
-    winner_stats = {}
-    loser_stats = {}
-    try:
-        for stat in matches:
-            if stat.get('member_id') == winner.id:
-                winner_stats = stat
-            elif stat.get('member_id') == loser.id:
-                loser_stats = stat
-    except TypeError:
-        pass
-
-    winner_rating = winner_stats.get('rating') or 1000
-    loser_rating = loser_stats.get('rating') or 1000
-
-    # The scale is based off of increments of 25, increasing the change by 1 for each increment
-    # That is all this loop does, increment the "change" for every increment of 25
-    # The change caps off at 300 however, so break once we are over that limit
-    difference = abs(winner_rating - loser_rating)
-    rating_change = 0
-    count = 25
-    while count <= difference:
-        if count > 300:
-            break
-        rating_change += 1
-        count += 25
-
-    # 16 is the base change, increased or decreased based on whoever has the higher current rating
-    if winner_rating > loser_rating:
-        winner_rating += 16 - rating_change
-        loser_rating -= 16 - rating_change
-    else:
-        winner_rating += 16 + rating_change
-        loser_rating -= 16 + rating_change
-
-    # Just increase wins/losses for each person, making sure it's at least 0
-    winner_wins = winner_stats.get('wins', 0)
-    winner_losses = winner_stats.get('losses', 0)
-    loser_wins = loser_stats.get('wins', 0)
-    loser_losses = loser_stats.get('losses', 0)
-    winner_wins += 1
-    loser_losses += 1
-
-    # Now save the new wins, losses, and ratings
-    winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
-    loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
-
-    if not await update_content(key, winner_stats, {'member_id': winner.id}):
-        winner_stats['member_id'] = winner.id
-        await add_content(key, winner_stats, {'member_id': winner.id})
-    if not await update_content(key, loser_stats, {'member_id': loser.id}):
-        loser_stats['member_id'] = loser.id
-        await add_content(key, loser_stats, {'member_id': loser.id})
-
 
 def command_prefix(bot, message):
     # We do not want to make a query for every message that is sent

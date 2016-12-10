@@ -3,6 +3,7 @@ import discord
 
 from .utils import config
 from .utils import checks
+from .utils import utilities
 
 import re
 import random
@@ -191,7 +192,7 @@ class TicTacToe:
             await self.bot.say("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name,
                                                                                                     loser.display_name))
             # Handle updating ratings based on the winner and loser
-            await config.update_records('tictactoe', winner, loser)
+            await utilities.update_records('tictactoe', winner, loser)
             # This game has ended, delete it so another one can be made
             del self.boards[ctx.message.server.id]
         else:
