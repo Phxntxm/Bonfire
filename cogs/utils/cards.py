@@ -10,6 +10,16 @@ class Deck:
         # This is EXACTLY what a deck of normal playing cards is, so it's perfect
         if prefill:
             self.deck = list(itertools.product(suits, faces))
+        else:
+            self.deck = []
+
+    def __iter__(self):
+        for card in self.deck:
+            yield card
+    @property
+    def count(self):
+        """A property to provide how many cards are currently in the deck"""
+        return len(self.deck)
 
     @property
     def empty(self):
