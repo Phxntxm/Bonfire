@@ -59,11 +59,16 @@ class Tags:
             await self.bot.say(
                 "Please provide the format for the tag in: {}tag add <tag> - <result>".format(ctx.prefix))
             return
+        # If our regex failed to find the content (aka they provided the wrong format)
         if len(tag) == 0 or len(tag_result) == 0:
             await self.bot.say(
                 "Please provide the format for the tag in: {}tag add <tag> - <result>".format(ctx.prefix))
             return
 
+        # Make sure the tag created does not mention everyone/here
+        if '@everyone' in tag_result or '@here' in tag_result:
+            await self.bot.say("You cannot create a tag that mentions everyone!")
+            return
         entry = {'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result}
         r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
         # Try to create new entry first, if that fails (it already exists) then we update it
