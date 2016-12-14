@@ -39,6 +39,16 @@ class Mod:
 
         return cmd
 
+    @commands.command(pass_context=True, no_pm=True, aliases=['nick'])
+    @checks.custom_perms(kick_members=True)
+    async def nickname(self, ctx, *, name=None):
+        """Used to set the nickname for Bonfire (provide no nickname and it will reset)
+
+        EXAMPLE: !nick Music Bot
+        RESULT: My nickname is now music bot"""
+        await self.bot.change_nickname(ctx.message.server.me, name)
+        await self.bot.say("\N{OK HAND SIGN}")
+
     @commands.command(no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def kick(self, member: discord.Member):
