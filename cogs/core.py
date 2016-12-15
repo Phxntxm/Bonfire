@@ -273,10 +273,11 @@ class Core:
         embed.add_field(name='Total Members', value=total_data['member_count'])
 
         # Count the variable values; hangman, tictactoe, etc.
-        hm_games = len(
-            [server_id for server_id, game in self.bot.get_cog('Hangman').games.items()])
+        hm_games = len(self.bot.get_cog('Hangman').games)
 
-        ttt_games = len([server_id for server_id, game in self.bot.get_cog('TicTacToe').boards.items()])
+        ttt_games = len(self.bot.get_cog('TicTacToe').boards)
+
+        bj_games = len(self.bot.get_cog('Blackjack').games)
 
         count_battles = 0
         for battles in self.bot.get_cog('Interaction').battles.values():
@@ -288,6 +289,8 @@ class Core:
             embed.add_field(name='Total TicTacToe games running', value=ttt_games)
         if count_battles:
             embed.add_field(name='Total battles games running', value=count_battles)
+        if bj_games:
+            embed.add_field(name='Total blackjack games running', value=bj_games)
 
         embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
         embed.set_footer(text=self.bot.description)
