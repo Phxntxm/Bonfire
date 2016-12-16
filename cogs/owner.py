@@ -9,6 +9,7 @@ import discord
 import inspect
 import aiohttp
 import pendulum
+import asyncio
 
 getter = re.compile(r'`(?!`)(.*?)`')
 multi = re.compile(r'```(.*?)```', re.DOTALL)
