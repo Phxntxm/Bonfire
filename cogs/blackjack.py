@@ -25,6 +25,11 @@ class Blackjack:
         self.bot = bot
         self.games = {}
 
+    def __unload(self):
+        # Simply cancel every task
+        for game in self.games.values():
+            game.task.cancel()
+
     def create_game(self, message):
         game = Game(self.bot, message)
         self.games[message.server.id] = game
@@ -78,7 +83,6 @@ class Blackjack:
             await self.bot.say("You have left the game, and will be removed at the end of this round")
         else:
             await self.bot.say("Either you have already bet, or you are not even playing right now!")
-
 
 def FOIL(a, b):
     """Uses FOIL to calculate a new possible total (who knew math would come in handy?!)
@@ -188,7 +192,7 @@ class Game:
         self.max_bet = 500
         self.bet = 0
 
-        self.bot.loop.create_task(self.game_task())
+        self.task = self.bot.loop.create_task(self.game_task())
 
     async def game_task(self):
         """The task to handle the entire game"""
@@ -438,6 +442,12 @@ class Game:
         # Include the new players
         self.players.extend(self._added_players)
         self._added_players.clear()
+
+        # What we want to do is remove any players that are in the game and have left the server
+        for entry in self.players:
+            m = entry['player'].member
+            if m not in self.channel.server:
+                self._removed_players.append(entry['player'])
 
         # Remove the players who left
         self.players = [p for p in self.players if p['player'] not in self._removed_players]
