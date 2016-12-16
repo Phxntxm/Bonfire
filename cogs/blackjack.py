@@ -84,6 +84,24 @@ class Blackjack:
         else:
             await self.bot.say("Either you have already bet, or you are not even playing right now!")
 
+    @blackjack.command(pass_context=True, no_pm=True, name='forcestop')
+    @utils.custom_perms(manage_server=True)
+    async def blackjack_leave(self, ctx):
+        """Forces the game to stop, mostly for use if someone has gone afk 
+
+        EXAMPLE: !blackjack forcestop
+        RESULT: No more blackjack spam"""
+
+        # Get this server's game if it exists
+        game = self.games.get(ctx.message.server.id)
+
+        if game is None:
+            await self.bot.say("There are currently no games of Blackjack running!")
+            return
+
+        game.task.cancel()
+        await self.bot.say("The blackjack game running here has just ended")
+
 def FOIL(a, b):
     """Uses FOIL to calculate a new possible total (who knew math would come in handy?!)
 
