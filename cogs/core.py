@@ -183,7 +183,7 @@ class Core:
             if result:
                 embed.add_field(name="Result", value="\n".join(result), inline=False)
             if _subcommands:
-                embed.add_field(name='Subcommands', "\n".join(subcommands), inline=False)
+                embed.add_field(name='Subcommands', value="\n".join(subcommands), inline=False)
 
             await self.bot.say(embed=embed)
 
