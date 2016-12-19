@@ -172,7 +172,7 @@ class Core:
             result = [x.replace('RESULT: ', '') for x in description.split('\n') if 'RESULT:' in x]
             description = [x for x in description.split('\n') if x and 'EXAMPLE:' not in x and 'RESULT:' not in x]
             # Also get the subcommands for this command, if they exist
-            subcommands = [x for x in utilities._get_all_commands(cmd) if x != cmd]
+            subcommands = [x for x in utilities._get_all_commands(cmd) if x.qualified_name != cmd.qualified_name]
 
             # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
             embed = discord.Embed(title=cmd.qualified_name)
