@@ -144,12 +144,12 @@ class Core:
         RESULT: This information"""
 
         cmd = None
+        page = 1
         if message is None:
             message = ""
         else:
             # If something is provided, it can either be the page number or a command
             # Try to convert to an int (the page number), if not, then a command should have been provided
-            page = 1
             try:
                 page = int(message)
             except:
