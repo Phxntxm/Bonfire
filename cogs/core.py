@@ -64,7 +64,7 @@ class Core:
         # Set the new page
         self.help_embeds[message_id] = page
         # Now create our new embed
-        return self.create_help_embed(message_id)
+        return self.create_help_embed(message_id=message_id)
 
     def next_page(self, message_id):
         """Goes to the next page for this message"""
@@ -81,14 +81,11 @@ class Core:
         # Set the new page
         self.help_embeds[message_id] = page
         # Now create our new embed
-        return self.create_help_embed(message_id)
+        return self.create_help_embed(message_id=message_id)
 
-    def create_help_embed(self, message_id=None):
-        # If no message ID is provided (we're sending a new help command)
-        # Set the page to 1
-        if message_id is None:
-            page = 1
-        else:
+    def create_help_embed(self, message_id=None, page=1):
+        # If a message_id is provided, we need to get the new page (this is being sent by next/prev page buttons)
+        if message_id is not None:
             page = self.help_embeds.get(message_id)
 
         # Refresh our command list
@@ -97,6 +94,11 @@ class Core:
         # Calculate the total amount of pages needed
         total_commands = len(self.commands)
         total_pages = math.ceil(total_commands / self.results_per_page)
+
+        # Lets make sure that if a page was provided, it is within our range of pages available
+        if page < 1 or page > total_pages:
+            page = 1
+
         # First create the embed object
         opts = {"title": "Command List [{}/{}]".format(page, total_pages),
                 "description": "Run help on a specific command for more information on it!"}
@@ -134,20 +136,34 @@ class Core:
     @commands.command(pass_context=True)
     @checks.custom_perms(send_messages=True)
     async def help(self, ctx, *, message=None):
-        """This command is used to provide a link to the help URL"""
+        """This command is used to provide a link to the help URL.
+        This can be called on a command to provide more information about that command
+        You can also provide a page number to pull up that page instead of the first page
+
+        EXAMPLE: !help help
+        RESULT: This information"""
 
         if message is None:
             message = ""
-        cmd = self.find_command(message)
+        else:
+            # If something is provided, it can either be the page number or a command
+            # Try to convert to an int (the page number), if not, then a command should have been provided
+            cmd = None
+            page = 1
+            try:
+                page = int(message)
+            except:
+                cmd = self.find_command(message)
 
         if cmd is None:
-            embed = self.create_help_embed()
+            embed = self.create_help_embed(page=page)
             msg = await self.bot.say(embed=embed)
 
+            # Add the arrows for previous and next page
             await self.bot.add_reaction(msg, '\N{LEFTWARDS BLACK ARROW}')
             await self.bot.add_reaction(msg, '\N{BLACK RIGHTWARDS ARROW}')
             # The only thing we need to record about this message, is the page number, starting at 1
-            self.help_embeds[msg.id] = 1
+            self.help_embeds[msg.id] = page
         else:
             description = cmd.help
             example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
