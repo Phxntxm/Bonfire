@@ -86,7 +86,7 @@ class Blackjack:
 
     @blackjack.command(pass_context=True, no_pm=True, name='forcestop')
     @utils.custom_perms(manage_server=True)
-    async def blackjack_leave(self, ctx):
+    async def blackjack_stop(self, ctx):
         """Forces the game to stop, mostly for use if someone has gone afk 
 
         EXAMPLE: !blackjack forcestop
@@ -464,7 +464,7 @@ class Game:
         # What we want to do is remove any players that are in the game and have left the server
         for entry in self.players:
             m = entry['player'].member
-            if m not in self.channel.server:
+            if m not in self.channel.server.members:
                 self._removed_players.append(entry['player'])
 
         # Remove the players who left
