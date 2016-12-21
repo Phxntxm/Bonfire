@@ -72,7 +72,7 @@ class Picarto:
                             server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
                             try:
                                 channel_id = server_alerts[0]['channel_id']
-                            except IndexError:
+                            except (IndexError, TypeError):
                                 channel_id = server_id
                             channel = self.bot.get_channel(channel_id)
                             # Get the member that has just gone live
@@ -107,7 +107,7 @@ class Picarto:
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
-            fmt = "{}\n{0.__class__.__name__}: {0}".format(tb, e)
+            fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)

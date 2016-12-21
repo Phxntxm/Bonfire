@@ -65,9 +65,10 @@ class Twitch:
                             if server is None:
                                 continue
                             server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
-                            channel_id = server_id
-                            if len(server_alerts) > 0:
-                                channel_id = server_alerts[0].get('channel_id')
+                            try:
+                                channel_id = server_alerts[0]['channel_id']
+                            except (IndexError, TypeError):
+                                channel_id = server_id
                             channel = self.bot.get_channel(channel_id)
                             # Get the member that has just gone live
                             member = discord.utils.get(server.members, id=m_id)
