@@ -1,4 +1,5 @@
-from .utils import checks
+from .utils import *
+from .voice_utilities import *
 
 import discord
 from discord.ext import commands
@@ -14,78 +15,14 @@ import re
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
 
-
-class VoicePlayer:
-    # This does not need to match up too closely to the StreamPlayer that is "technically" used here
-    # This is more of a placeholder, just to keep the information that will be requested
-    # Before the video is actually downloaded, which happens in our audio player task
-    # For example, is_done() will not exist on this object, which could be called later
-    # However, it should not ever be, as we overwrite this object with the StreamPlayer in our audio task
-    def __init__(self, song, **kwargs):
-        self.url = song
-        self.views = kwargs.get('view_count')
-        self.is_live = bool(kwargs.get('is_live'))
-        self.likes = kwargs.get('likes')
-        self.dislikes = kwargs.get('dislikes')
-        self.duration = kwargs.get('duration')
-        self.uploader = kwargs.get('uploader')
-        if 'twitch' in song:
-            self.title = kwargs.get('description')
-            self.description = None
-        else:
-            self.title = kwargs.get('title')
-            self.description = kwargs.get('description')
-
-        date = kwargs.get('upload_date')
-        if date:
-            try:
-                date = datetime.datetime.strptime(date, '%Y%M%d').date()
-            except ValueError:
-                date = None
-
-        self.upload_date = date
-
-
-class VoiceEntry:
-    def __init__(self, message, player):
-        self.requester = message.author
-        self.channel = message.channel
-        self.player = player
-        self.start_time = None
-
-    @property
-    def length(self):
-        if self.player.duration:
-            return self.player.duration
-
-    @property
-    def progress(self):
-        if self.start_time:
-            return round(time.time() - self.start_time)
-
-    @property
-    def remaining(self):
-        length = self.length
-        progress = self.progress
-        if length and progress:
-            return length - progress
-
-    def __str__(self):
-        fmt = '*{0.title}* uploaded by {0.uploader} and requested by {1.display_name}'
-        duration = self.length
-        if duration:
-            fmt += ' [length: {0[0]}m {0[1]}s]'.format(divmod(round(duration, 0), 60))
-        return fmt.format(self.player, self.requester)
-
-
 class VoiceState:
-    def __init__(self, bot):
+    def __init__(self, bot, downloader):
         self.current = None
         self.voice = None
         self.bot = bot
         self.play_next_song = asyncio.Event()
         # This is the queue that holds all VoiceEntry's
-        self.songs = asyncio.Queue(maxsize=10)
+        self.songs = Playlist(bot)
         self.required_skips = 0
         # a set of user_ids that voted
         self.skip_votes = set()
@@ -96,6 +33,7 @@ class VoiceState:
             'quiet': True
         }
         self.volume = 50
+        self.downloader = downloader
 
     def is_playing(self):
         # If our VoiceClient or current VoiceEntry do not exist, then we are not playing a song
@@ -130,20 +68,27 @@ class VoiceState:
             self.play_next_song.clear()
             # Clear the votes skip that were for the last song
             self.skip_votes.clear()
-            # Set current to none while we are waiting for the next song in the queue
-            # If we don't do this and we hit the end of the queue
-            # our current song will remain the song that just finished
-            self.current = None
             # Now wait for the next song in the queue
-            self.current = await self.songs.get()
-            # Tell the channel that requested the new song that we are now playing
-            try:
-                await self.bot.send_message(self.current.channel, 'Now playing ' + str(self.current))
-            except discord.Forbidden:
-                pass
-            # Create the player object; this automatically creates the ffmpeg player
-            self.current.player = await self.voice.create_ytdl_player(self.current.player.url, ytdl_options=self.opts,
-                                                                      after=self.toggle_next)
+            self.current = await self.songs.get_next_entry()
+
+            # Make sure we find a song
+            while (self.current is None):
+                await asyncio.sleep(1)
+                self.current = await self.songs.get_next_entry()
+
+            # At this point we're sure we have a song, however it needs to be downloaded
+            while(not getattr(self.current, 'filename')):
+                print("Downloading...")
+                await asyncio.sleep(1)
+
+            # Create the player object
+            self.current.player = self.voice.create_ffmpeg_player(
+                                                                        self.current.filename,
+                                                                        before_options="-nostdin",
+                                                                        options="-vn -b:a 128k",
+                                                                        after=self.toggle_next
+                                                                        )
+
             # Now we can start actually playing the song
             self.current.player.start()
             self.current.player.volume = self.volume / 100
@@ -163,15 +108,9 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
-        self.opts = {
-            'format': 'webm[abr>0]/bestaudio/best',
-            'prefer_ffmpeg': True,
-            'default_search': 'auto',
-            'quiet': True
-        }
-        # We want to create our own YoutubeDL object to avoid downloading a video when first searching it
-        # We will download the actual video, in our audio_player_task, for which we can just use create_ytdl_player
-        self.ytdl = youtube_dl.YoutubeDL(self.opts)
+        down = Downloader(download_folder='audio_tmp')
+        self.downloader = down
+        self.bot.downloader = down
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
@@ -181,22 +120,28 @@ class Music:
         # We create the voice state when checked
         # This only creates the state, we are still not playing anything, which can then be handled separately
         if state is None:
-            state = VoiceState(self.bot)
+            state = VoiceState(self.bot, self.downloader)
             self.voice_states[server.id] = state
 
         return state
 
     async def create_voice_client(self, channel):
         # First join the channel and get the VoiceClient that we'll use to save per server
-        try:
-            voice = await self.bot.join_voice_channel(channel)
-        except asyncio.TimeoutError:
-            await self.bot.say(
-                "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
-                "You can either try again, or try to change the server's region and see if that fixes the issue")
-            return
-        state = self.get_voice_state(channel.server)
-        state.voice = voice
+        server = channel.server
+        state = self.get_voice_state(server)
+        voice = self.bot.voice_client_in(server)
+
+        if voice is None:
+            state.voice = await self.bot.join_voice_channel(channel)
+            return True
+        elif voice.channel == channel:
+            state.voice = voice
+            return True
+        else:
+            await voice.disconnect()
+            state.voice = await self.bot.join_voice_channel(channel)
+            return True
+
 
     def __unload(self):
         # If this is unloaded, cancel all players and disconnect from all channels
@@ -251,18 +196,6 @@ class Music:
         # Check if the channel given was an actual voice channel
         except discord.InvalidArgument:
             await self.bot.say('This is not a voice channel...')
-        # Check if we failed to join a channel, which means we are already in a channel.
-        # move_channel needs to be used if we are already in a channel
-        except discord.ClientException:
-            state = self.get_voice_state(ctx.message.server)
-            if state.voice is None:
-                voice_channel = self.bot.voice_client_in(ctx.message.server)
-                if voice_channel is not None:
-                    await voice_channel.disconnect()
-                await self.bot.say("Sorry but I failed to connect! Please try again")
-            else:
-                await state.voice.move_to(channel)
-                await self.bot.say('Ready to play audio in ' + channel.name)
         else:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
@@ -277,43 +210,15 @@ class Music:
             await self.bot.say('You are not in a voice channel.')
             return False
 
-        # Check if we're in a channel already, if we are then we just need to move channels
-        # Otherwse, we need to create an actual voice state
-        state = self.get_voice_state(ctx.message.server)
-        # Discord's voice connecting is not very reliable, so we need to implement
-        # a couple different workarounds here in case something goes wrong
+        # Then simply create a voice client
+        success = await self.create_voice_client(summoned_channel)
 
-        # First check if we have a voice connection saved
-        if state.voice is not None:
-            # Check if our saved voice connection doesn't actually exist
-            if self.bot.voice_client_in(ctx.message.server) is None:
-                await state.voice.disconnect()
-                await self.bot.say("I had an issue connecting to the channel, please try again")
-                return False
-            # If it does exist, then we are in a voice channel already, and need to move to the new channel
-            else:
-                await state.voice.move_to(summoned_channel)
-        # Otherwise, our connection is not detected by this cog
-        else:
-            # Check if there is actually a voice connection though
-            voice_channel = self.bot.voice_client_in(ctx.message.server)
-            if voice_channel is not None:
-                await voice_channel.disconnect()
-                await self.bot.say("I had an issue connecting to the channel, please try again")
-                return False
-            # In this case, nothing has gone wrong, and we aren't in a channel, so we can join it
-            else:
-                try:
-                    state.voice = await self.bot.join_voice_channel(summoned_channel)
-                # Weird timeout error usually caused by the region someone is in
-                except (asyncio.TimeoutError, discord.ConnectionClosed, ConnectionResetError):
-                    await self.bot.say(
-                        "Sorry, I couldn't connect! This can sometimes be caused by the server region you are in. "
-                        "You can either try again, or try to change the server's"
-                        " region and see if that fixes the issue")
-                    return False
-        # Return true if nothing has failed, so that we can invoke this, and ensure we succeeded
-        return True
+        if success:
+            try:
+                await self.bot.say('Ready to play audio in ' + summoned_channel.name)
+            except discord.Forbidden:
+                pass
+        return success
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -336,7 +241,7 @@ class Music:
                 return
 
         # If the queue is full, we ain't adding anything to it
-        if state.songs.full():
+        if state.songs.full:
             await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
             return
 
@@ -350,35 +255,19 @@ class Music:
 
         # Create the player, and check if this was successful
         # Here all we want is to get the information of the player
-        try:
-            song = re.sub('[<>\[\]]', '', song)
-            func = functools.partial(self.ytdl.extract_info, song, download=False)
-            info = await self.bot.loop.run_in_executor(None, func)
-            if "entries" in info:
-                info = info['entries'][0]
-            player = VoicePlayer(song, **info)
-            # player = await state.voice.create_ytdl_player(song, ytdl_options=state.opts, after=state.toggle_next)
-        except youtube_dl.DownloadError:
-            fmt = "Sorry, either I had an issue downloading that video, or that's not a supported URL!"
-            await self.bot.send_message(ctx.message.channel, fmt)
-            return
-        except IndexError:
-            fmt = "Sorry, but there's no result with that search time! Try something else"
-            await self.bot.send_message(ctx.message.channel, fmt)
-            return
-        except ValueError:
-            fmt = "Brackets are my enemy; please remove them or else!\n" \
-                  "(Youtube_dl errors when brackets are used, try running this again without the brackets)"
-            await self.bot.send_message(ctx.message.channel, fmt)
-            return
+        song = re.sub('[<>\[\]]', '', song)
 
-        # Now we can create a VoiceEntry and queue it
-        entry = VoiceEntry(ctx.message, player)
-        await state.songs.put(entry)
         try:
-            await self.bot.say('Enqueued ' + str(entry))
-        except discord.Forbidden:
-            pass
+            _entry = await state.songs.add_entry(song, ctx.message.author)
+        except WrongEntryTypeError:
+            # This means that a song was attempted to be searched, instead of a link provided
+            info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
+
+            song = info.get('entries', [])[0]['webpage_url']
+            _entry = await state.songs.add_entry(song, ctx.message.author)
+            if 'ytsearch' in info.get('url', ''):
+                print(info)
+        await self.bot.say('Enqueued ' + str(_entry))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -450,13 +339,14 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing any music right now...')
             return
-        queue = state.songs._queue
+
+        queue = state.songs.entries
         if len(queue) == 0:
             await self.bot.say("Nothing currently in the queue")
             return
 
-        # Start off by adding the length of the current song
-        count = state.current.player.duration
+        # Start off by adding the remaining length of the current song
+        count = state.current.remaining
         found = False
         # Loop through the songs in the queue, until the author is found as the requester
         # The found bool is used to see if we actually found the author, or we just looped through the whole queue
@@ -464,12 +354,12 @@ class Music:
             if song.requester == author:
                 found = True
                 break
-            count += song.player.duration
+            count += song.duration
 
         # This is checking if nothing from the queue has been added to the total
         # If it has not, then we have not looped through the queue at all
         # Since the queue was already checked to have more than one song in it, this means the author is next
-        if count == state.current.player.duration:
+        if count == state.current.duration:
             await self.bot.say("You are next in the queue!")
             return
         if not found:
@@ -487,7 +377,7 @@ class Music:
             return
 
         # Asyncio provides no non-private way to access the queue, so we have to use _queue
-        queue = state.songs._queue
+        queue = state.songs.entries
         if len(queue) == 0:
             fmt = "Nothing currently in the queue"
         else:
@@ -499,7 +389,7 @@ class Music:
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
         await self.bot.say("There are a total of {} songs in the queue"
-                           .format(str(self.get_voice_state(ctx.message.server).songs.qsize())))
+                           .format(len(self.get_voice_state(ctx.message.server).songs.entries)))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
