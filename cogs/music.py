@@ -264,7 +264,7 @@ class Music:
             info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
 
             song = info.get('entries', [])[0]['webpage_url']
-            _entry = await state.songs.add_entry(song, ctx.message.author)
+            _entry, position = await state.songs.add_entry(song, ctx.message.author)
             if 'ytsearch' in info.get('url', ''):
                 print(info)
         await self.bot.say('Enqueued ' + str(_entry))
