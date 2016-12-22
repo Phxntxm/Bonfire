@@ -283,7 +283,7 @@ class Music:
         song = re.sub('[<>\[\]]', '', song)
 
         try:
-            _entry = await state.songs.add_entry(song, ctx.message.author)
+            _entry, position = await state.songs.add_entry(song, ctx.message.author)
         except WrongEntryTypeError:
             # This means that a song was attempted to be searched, instead of a link provided
             info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
@@ -297,6 +297,7 @@ class Music:
             # Obviously this doesn't work in Discord, so just remove this
             error = " ".join(error.split()[1:])
             await self.bot.send_message(ctx.message.channel, error)
+            return
         await self.bot.say('Enqueued ' + str(_entry))
 
     @commands.command(pass_context=True, no_pm=True)
