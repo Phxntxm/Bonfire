@@ -191,7 +191,7 @@ class Mod:
 
     @commands.command(pass_context=True)
     @checks.custom_perms(kick_members=True)
-    async def say(self, ctx, *, msg: str):
+    async def say(self, ctx: object, *, msg: object) -> object:
         """Tells the bot to repeat what you say
 
         EXAMPLE: !say I really like orange juice

@@ -4,10 +4,7 @@ from .voice_utilities import *
 import discord
 from discord.ext import commands
 
-import youtube_dl
 import math
-import functools
-import datetime
 import time
 import asyncio
 import re
@@ -15,8 +12,9 @@ import re
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
 
+
 class VoiceState:
-    def __init__(self, bot, downloader):
+    def __init__(self, bot, download):
         self.current = None
         self.voice = None
         self.bot = bot
@@ -33,7 +31,7 @@ class VoiceState:
             'quiet': True
         }
         self.volume = 50
-        self.downloader = downloader
+        self.downloader = download
 
     def is_playing(self):
         # If our VoiceClient or current VoiceEntry do not exist, then we are not playing a song
@@ -72,22 +70,22 @@ class VoiceState:
             self.current = await self.songs.get_next_entry()
 
             # Make sure we find a song
-            while (self.current is None):
+            while self.current is None:
                 await asyncio.sleep(1)
                 self.current = await self.songs.get_next_entry()
 
             # At this point we're sure we have a song, however it needs to be downloaded
-            while(not getattr(self.current, 'filename')):
+            while not getattr(self.current, 'filename'):
                 print("Downloading...")
                 await asyncio.sleep(1)
 
             # Create the player object
             self.current.player = self.voice.create_ffmpeg_player(
-                                                                        self.current.filename,
-                                                                        before_options="-nostdin",
-                                                                        options="-vn -b:a 128k",
-                                                                        after=self.toggle_next
-                                                                        )
+                self.current.filename,
+                before_options="-nostdin",
+                options="-vn -b:a 128k",
+                after=self.toggle_next
+            )
 
             # Now we can start actually playing the song
             self.current.player.start()
@@ -126,6 +124,7 @@ class Music:
         return state
 
     async def create_voice_client(self, channel):
+        """Creates a voice client and saves it"""
         # First join the channel and get the VoiceClient that we'll use to save per server
         server = channel.server
         state = self.get_voice_state(server)
@@ -142,6 +141,17 @@ class Music:
             state.voice = await self.bot.join_voice_channel(channel)
             return True
 
+    async def remove_voice_client(self, server):
+        """Removes any voice clients from a server
+        This is sometimes needed, due to the unreliability of Discord's voice connection
+        We do not want to end up with a voice client stuck somewhere, so this cancels any found for a server"""
+        state = self.get_voice_state(server)
+        voice = self.bot.voice_client_in(server)
+
+        if voice:
+            await voice.disconnect()
+        if state.voice:
+            await state.voice.disconnect()
 
     def __unload(self):
         # If this is unloaded, cancel all players and disconnect from all channels
@@ -189,13 +199,17 @@ class Music:
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
-    async def join(self, ctx, *, channel: discord.Channel):
+    async def join(self, *, channel: discord.Channel):
         """Joins a voice channel."""
         try:
             await self.create_voice_client(channel)
         # Check if the channel given was an actual voice channel
         except discord.InvalidArgument:
             await self.bot.say('This is not a voice channel...')
+        except (asyncio.TimeoutError, discord.ConnectionClosed):
+            await self.bot.say("I failed to connect! This can sometimes be caused by your server region being far away."
+                               " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
+            await self.remove_voice_client(channel.server)
         else:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
@@ -211,7 +225,13 @@ class Music:
             return False
 
         # Then simply create a voice client
-        success = await self.create_voice_client(summoned_channel)
+        try:
+            success = await self.create_voice_client(summoned_channel)
+        except (asyncio.TimeoutError, discord.ConnectionClosed):
+            await self.bot.say("I failed to connect! This can sometimes be caused by your server region being far away."
+                               " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
+            await self.remove_voice_client(summoned_channel.server)
+            return False
 
         if success:
             try:
@@ -230,6 +250,11 @@ class Music:
         The list of supported sites can be found here:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
+        # Fuck you soundcloud
+        if 'soundcloud.com' in song:
+            await self.bot.say("Soundcloud has changed the way that they allow downloads, and it now requires "
+                               "authorization. Unfortunately, I currently have no way to download from soundcloud")
+            return
 
         state = self.get_voice_state(ctx.message.server)
 
