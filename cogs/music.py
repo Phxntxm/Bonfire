@@ -290,8 +290,13 @@ class Music:
 
             song = info.get('entries', [])[0]['webpage_url']
             _entry, position = await state.songs.add_entry(song, ctx.message.author)
-            if 'ytsearch' in info.get('url', ''):
-                print(info)
+        except ExtractionError as e:
+            # This gets the youtube_dl error, instead of our error raised
+            error = str(e).split("\n\n")[1]
+            # Youtube has a "fancy" colour error message it prints to the console
+            # Obviously this doesn't work in Discord, so just remove this
+            error = " ".join(error.split()[1:])
+            await self.bot.send_message(ctx.message.channel, error)
         await self.bot.say('Enqueued ' + str(_entry))
 
     @commands.command(pass_context=True, no_pm=True)
