@@ -197,7 +197,7 @@ class Music:
             fmt = "Current song progress: {0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
             await self.bot.say(fmt)
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def join(self, *, channel: discord.Channel):
         """Joins a voice channel."""
