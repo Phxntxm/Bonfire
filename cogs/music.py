@@ -8,6 +8,7 @@ import math
 import time
 import asyncio
 import re
+import os
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -57,6 +58,8 @@ class VoiceState:
             self.player.stop()
 
     def toggle_next(self):
+        # Delete the old file (screw caching, when on 5000+ Guilds this takes up too much space)
+        os.remove(self.current.filename)
         # Set the Event so that the next song in the queue can be played
         self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
 
@@ -287,8 +290,19 @@ class Music:
         except WrongEntryTypeError:
             # This means that a song was attempted to be searched, instead of a link provided
             info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
-
-            song = info.get('entries', [])[0]['webpage_url']
+            try:
+                song = info.get('entries', [])[0]['webpage_url']
+            except IndexError:
+                await self.bot.send_message(ctx.message.channel, "No results found for {}!".format(song))
+                return
+            except ExtractionError as e:
+                # This gets the youtube_dl error, instead of our error raised
+                error = str(e).split("\n\n")[1]
+                # Youtube has a "fancy" colour error message it prints to the console
+                # Obviously this doesn't work in Discord, so just remove this
+                error = " ".join(error.split()[1:])
+                await self.bot.send_message(ctx.message.channel, error)
+                return
             _entry, position = await state.songs.add_entry(song, ctx.message.author)
         except ExtractionError as e:
             # This gets the youtube_dl error, instead of our error raised
