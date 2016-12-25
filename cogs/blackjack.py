@@ -1,7 +1,6 @@
 from . import utils
 
 from discord.ext import commands
-import discord
 
 import asyncio
 import math
@@ -20,6 +19,7 @@ card_map = {
     'J': 'Jack'
 }
 
+
 class Blackjack:
     def __init__(self, bot):
         self.bot = bot
@@ -31,11 +31,10 @@ class Blackjack:
             game.task.cancel()
 
     def create_game(self, message):
-        game = Game(self.bot, message)
-        self.games[message.server.id] = game
         # When we're done with the game, we need to delete the game itself and remove it's instance from games
         # To do this, it needs to be able to access this instance of Blackjack
-        game.bj = self
+        game = Game(self.bot, message, self)
+        self.games[message.server.id] = game
 
     @commands.group(pass_context=True, no_pm=True, aliases=['bj'], invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
@@ -63,7 +62,7 @@ class Blackjack:
                 else:
                     await self.bot.say("There are already a max number of players playing/waiting to play!")
 
-    @blackjack.command(pass_context=True, no_pm=True, name='leave', aliases=['quit', 'stop'])
+    @blackjack.command(pass_context=True, no_pm=True, name='leave', aliases=['quit'])
     @utils.custom_perms(send_messages=True)
     async def blackjack_leave(self, ctx):
         """Leaves the current game of blackjack
@@ -84,7 +83,7 @@ class Blackjack:
         else:
             await self.bot.say("Either you have already bet, or you are not even playing right now!")
 
-    @blackjack.command(pass_context=True, no_pm=True, name='forcestop')
+    @blackjack.command(pass_context=True, no_pm=True, name='forcestop', aliases=['stop'])
     @utils.custom_perms(manage_server=True)
     async def blackjack_stop(self, ctx):
         """Forces the game to stop, mostly for use if someone has gone afk 
@@ -100,7 +99,9 @@ class Blackjack:
             return
 
         game.task.cancel()
+        del self.games[ctx.message.server.id]
         await self.bot.say("The blackjack game running here has just ended")
+
 
 def FOIL(a, b):
     """Uses FOIL to calculate a new possible total (who knew math would come in handy?!)
@@ -121,6 +122,7 @@ def FOIL(a, b):
     # The list comprehension is to ensure we don't care about totals over 21
     new_totals = [x for x in new_totals if x < 22]
     return new_totals
+
 
 class Player:
     def __init__(self, member):
@@ -155,7 +157,8 @@ class Player:
                 for index, t in enumerate(total):
                     total[index] += int(face)
 
-        # If we have more than one possible total (there is at least one ace) then we do not care about one if it is over 21
+        # If we have more than one possible total (there is at least one ace) then we do not care about one if it is
+        # over 21
         if len(total) > 1:
             new_total = [x for x in total if x < 22]
             # However, if the ace is there and both possibilities cause a bust, we want the lowest one to be our count
@@ -176,16 +179,18 @@ class Player:
         fmt = "Hand:\n"
         fmt += "\n".join(
             "{} of {}".format(
-                              card_map.get(card[1], card[1]),
-                              face_map.get(card[0], card[0]))
+                card_map.get(card[1], card[1]),
+                face_map.get(card[0], card[0]))
             for card in self.hand
         )
         fmt += "\n(Total: {})".format(self.count)
         return fmt
 
+
 class Game:
-    def __init__(self, bot, message):
+    def __init__(self, bot, message, bj):
         player = Player(message.author)
+        self.bj = bj
         self.bot = bot
         self.players = [{'status': 'playing', 'player': player}]
         # Our buffer for players who want to join
@@ -214,7 +219,7 @@ class Game:
 
     async def game_task(self):
         """The task to handle the entire game"""
-        while(len(self.players) > 0):
+        while len(self.players) > 0:
             await self.bot.send_message(self.channel, "A new round has started!!")
 
             # First wait for bets
@@ -246,7 +251,6 @@ class Game:
 
     async def dealer_task(self):
         """The task handling the dealer's play after all players have stood"""
-        count = max(self.dealer.count)
         fmt = "It is the dealer's turn to play\n\n{}".format(self.dealer)
         msg = await self.bot.send_message(self.channel, fmt)
 
@@ -254,7 +258,7 @@ class Game:
             await asyncio.sleep(1)
             if self.dealer.bust:
                 fmt = msg.content + "\n\nDealer has busted!!"
-                msg = await self.bot.edit_message(msg, fmt)
+                await self.bot.edit_message(msg, fmt)
                 return
             for num in self.dealer.count:
                 if num > 16:
@@ -286,13 +290,15 @@ class Game:
             fmt = "It is your turn to play {0.member.mention}\n\n{0}".format(player)
             await self.bot.send_message(self.channel, fmt)
 
-            # If they're not playing anymore (i.e. they busted, are standing, etc.) then we don't want to keep asking them to hit or stand
+            # If they're not playing anymore (i.e. they busted, are standing, etc.) then we don't want to keep asking
+            #  them to hit or stand
             while entry['status'] not in ['stand', 'bust']:
 
                 # Ask if they want to hit or stand
                 fmt = "Hit, stand, or double?"
-                await self.bot.send_message(self.channel,fmt)
-                msg = await self.bot.wait_for_message(timeout=60, author=player.member, channel=self.channel, check=check)
+                await self.bot.send_message(self.channel, fmt)
+                msg = await self.bot.wait_for_message(timeout=60, author=player.member, channel=self.channel,
+                                                      check=check)
 
                 # If they took to long, make them stand so the next person can play
                 if msg is None:
@@ -308,22 +314,24 @@ class Game:
                 elif 'double' in msg.content.lower():
                     self.double(player)
                     await self.bot.send_message(self.channel, player)
-                # TODO: Handle double, split
+                    # TODO: Handle double, split
 
     async def bet_task(self):
         """Performs the task of betting"""
-        def check(msg):
+
+        def check(_msg):
             """Makes sure the  message provided is within the min and max bets"""
             try:
-                num = int(msg.content)
-                return self.min_bet <= num <= self.max_bet
+                msg_length = int(_msg.content)
+                return self.min_bet <= msg_length <= self.max_bet
             except ValueError:
-                return msg.content.lower() == 'skip'
+                return _msg.content.lower() == 'skip'
 
-        # There is one situation that we want to allow that means we cannot loop through players like normally would be the case:
-        # Betting has started; while one person is betting, another joins
-        # This means our list has changed, and neither based on the length or looping through the list itself will handle this
-        # To handle this, we'll loop 'infinitely', get a list of players who haven't bet yet, and then use the first person in that list
+        # There is one situation that we want to allow that means we cannot loop through players like normally would
+        # be the case: Betting has started; while one person is betting, another joins This means our list has
+        # changed, and neither based on the length or looping through the list itself will handle this To handle
+        # this, we'll loop 'infinitely', get a list of players who haven't bet yet, and then use the first person in
+        # that list
         while True:
             players = [p for p in self.players if p['status'] == 'playing']
 
@@ -335,8 +343,9 @@ class Game:
             player = entry['player']
 
             fmt = "Your turn to bet {0.member.mention}, your current chips are: {0.chips}\n" \
-                   "Current min bet is {1}, current max bet is {2}\n" \
-                   "Place your bet now (please provide only the number; 'skip' if you would like to leave this game)".format(player, self.min_bet, self.max_bet)
+                  "Current min bet is {1}, current max bet is {2}\n" \
+                  "Place your bet now (please provide only the number;" \
+                  "'skip' if you would like to leave this game)".format(player, self.min_bet, self.max_bet)
             await self.bot.send_message(self.channel, fmt)
             msg = await self.bot.wait_for_message(timeout=60, author=player.member, channel=self.channel, check=check)
 
@@ -382,9 +391,9 @@ class Game:
                     player.chips += math.floor(player.bet * 2.5)
                     blackjack.append(player)
                 else:
-                        # A push, the player gets their chips back
-                        player.chips += player.bet
-                        ties.append(player)
+                    # A push, the player gets their chips back
+                    player.chips += player.bet
+                    ties.append(player)
             elif not player.bust:
                 # If the dealer busts, we win
                 if dealer_count > 21:
@@ -521,9 +530,10 @@ class Game:
 
     def leave(self, member):
         player = self.get_player(member)
-        # If they are playing, then add them to the _removed_players list so that they can be removed at the end of the round
+        # If they are playing, then add them to the _removed_players list so that they can be removed at the end of
+        # the round
         if player:
-        # We need to make sure they haven't already bet
+            # We need to make sure they haven't already bet
             index = self._get_player_index(player)
             if self.players[index]['status'] == 'bet':
                 return False
@@ -533,6 +543,7 @@ class Game:
                 return True
         else:
             return False
+
     def double(self, player):
         """Doubles down on the current hand"""
         # First double the bet
@@ -567,6 +578,7 @@ class Game:
         elif 21 in player.count:
             index = self._get_player_index(player)
             self.players[index]['status'] = 'stand'
+
 
 def setup(bot):
     bot.add_cog(Blackjack(bot))
