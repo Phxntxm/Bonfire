@@ -303,13 +303,22 @@ class Music:
                 error = " ".join(error.split()[1:])
                 await self.bot.send_message(ctx.message.channel, error)
                 return
-            _entry, position = await state.songs.add_entry(song, ctx.message.author)
+            try:
+                _entry, position = await state.songs.add_entry(song, ctx.message.author)
+            except WrongEntryTypeError:
+                # This is either a playlist, or something not supported
+                fmt = "Sorry but I couldn't download that! Either you provided a playlist, a streamed link, or " \
+                      "a page that is not supported to download."
+                await self.bot.send_message(ctx.message.channel, fmt)
         except ExtractionError as e:
             # This gets the youtube_dl error, instead of our error raised
             error = str(e).split("\n\n")[1]
             # Youtube has a "fancy" colour error message it prints to the console
             # Obviously this doesn't work in Discord, so just remove this
             error = " ".join(error.split()[1:])
+            # Make sure we are not over our 2000 message limit length (there are some youtube errors that are)
+            if len(error) >= 2000:
+                error = "{}...".format(error[:1996])
             await self.bot.send_message(ctx.message.channel, error)
             return
         await self.bot.say('Enqueued ' + str(_entry))
