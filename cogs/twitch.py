@@ -1,6 +1,6 @@
 from discord.ext import commands
-from .utils import config
-from .utils import checks
+
+from . import utils
 
 import aiohttp
 import asyncio
@@ -21,26 +21,24 @@ class Twitch:
 
     def __init__(self, bot):
         self.bot = bot
-        self.key = config.twitch_key
+        self.key = utils.twitch_key
         self.params = {'client_id': self.key}
-        self.headers = {"User-Agent": config.user_agent,
+        self.headers = {"User-Agent": utils.user_agent,
                         "Client-ID": self.key}
 
     async def channel_online(self, channel: str):
         # Check a specific channel's data, and get the response in text format
         url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
-        with aiohttp.ClientSession() as s:
-            async with s.get(url, headers=self.headers, params=self.params) as response:
-                result = await response.text()
+
+        response = await utils.request(url, payload=self.params)
 
         # For some reason Twitch's API call is not reliable, sometimes it returns stream as None
         # That is what we're checking specifically, sometimes it doesn't exist in the returned JSON at all
-        # Sometimes it returns something that cannot be decoded with JSON
+        # Sometimes it returns something that cannot be decoded with JSON (which means we'll get None back)
         # In either error case, just assume they're offline, the next check will most likely work
         try:
-            data = json.loads(result)
-            return data['stream'] is not None
-        except (KeyError, json.JSONDecodeError):
+            return response['stream'] is not None
+        except (KeyError, TypeError):
             return False
 
     async def check_channels(self):
@@ -101,11 +99,11 @@ class Twitch:
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
-            fmt = "{}\n{0.__class__.__name__}: {0}".format(tb, e)
+            fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 
     @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def twitch(self, ctx, *, member: discord.Member = None):
         """Use this command to check the twitch info of a user
 
@@ -114,7 +112,7 @@ class Twitch:
         if member is None:
             member = ctx.message.author
 
-        result = await config.get_content('twitch', {'member_id': member.id})
+        result = await utils.get_content('twitch', {'member_id': member.id})
         if result is None:
             await self.bot.say("{} has not saved their twitch URL yet!".format(member.name))
             return
@@ -134,7 +132,7 @@ class Twitch:
         await self.bot.say("```\n{}```".format(fmt))
 
     @twitch.command(name='add', pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def add_twitch_url(self, ctx, url: str):
         """Saves your user's twitch URL
 
@@ -174,12 +172,12 @@ class Twitch:
         # Check to see if this user has already saved a twitch URL
         # If they have, update the URL, otherwise create a new entry
         # Assuming they're not live, and notifications should be on
-        if not await config.add_content('twitch', entry, r_filter):
-            await config.update_content('twitch', update, r_filter)
+        if not await utils.add_content('twitch', entry, r_filter):
+            await utils.update_content('twitch', update, r_filter)
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL
 
@@ -187,11 +185,11 @@ class Twitch:
         RESULT: I stop saving your twitch URL"""
         # Just try to remove it, if it doesn't exist, nothing is going to happen
         r_filter = {'member_id': ctx.message.author.id}
-        await config.remove_content('twitch', r_filter)
+        await utils.remove_content('twitch', r_filter)
         await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
     @twitch.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to modify notification settings for your twitch user
         Call this command by itself to add 'this' server as one that will be notified when you on/offline
@@ -199,7 +197,7 @@ class Twitch:
         EXAMPLE: !twitch notify
         RESULT: This server will now be notified when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
-        result = await config.get_content('twitch', r_filter)
+        result = await utils.get_content('twitch', r_filter)
         # Check if this user is saved at all
         if result is None:
             await self.bot.say(
@@ -209,31 +207,31 @@ class Twitch:
         elif ctx.message.server.id in result[0]['servers']:
             await self.bot.say("I am already set to notify in this server...")
         else:
-            await config.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.server.id)}, r_filter)
+            await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.server.id)}, r_filter)
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on
 
         EXAMPLE: !twitch notify on
         RESULT: Notifications will be sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
-        if await config.update_content('twitch', {"notifications_on": 1}, r_filter):
+        if await utils.update_content('twitch', {"notifications_on": 1}, r_filter):
             await self.bot.say("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
         else:
             await self.bot.say("I can't notify if you go live if I don't know your twitch URL yet!")
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
         """Turns twitch notifications off
 
         EXAMPLE: !twitch notify off
         RESULT: Notifications will not be sent when you go live"""
         r_filter = {'member_id': ctx.message.author.id}
-        if await config.update_content('twitch', {"notifications_on": 1}, r_filter):
+        if await utils.update_content('twitch', {"notifications_on": 1}, r_filter):
             await self.bot.say(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(
