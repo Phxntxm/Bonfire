@@ -1,5 +1,6 @@
 import aiohttp
 import io
+import inspect
 
 from . import config
 
@@ -60,6 +61,36 @@ async def download_image(url):
             # Then wrap it in a BytesIO object, to be used like an actual file
             image = io.BytesIO(await r.read())
     return image
+
+async def request(url, *, payload=None, method='GET', attr='json'):
+    """Handles requesting to a URL"""
+    headers = {'User-Agent': config.user_agent}
+
+    # Attempt to connect up to our max retries
+    for x in range(5):
+        try:
+            with aiohttp.ClientSession(headers=headers) as session:
+                async with session.request(method=method, url=url, params=payload) as r:
+                    # If we failed to connect, attempt again
+
+                    if r.status != 200:
+                        continue
+
+                    # Get the requested returned value
+                    obj = getattr(r, attr)
+                    # Try to call it (in case it's a method)
+                    try:
+                        obj = obj()
+                    # If it's not a method, we just want the object
+                    except TypeError:
+                        obj = obj
+                    # Now check if this is awaitable....if so, await it
+                    if inspect.isawaitable(obj):
+                        obj = await obj
+                    # Then just return the requested object
+                    return obj
+        except:
+            continue
 
 async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate
