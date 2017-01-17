@@ -125,7 +125,7 @@ class Overwatch:
         await self.bot.say("Looking up your profile information....")
         # All we're doing here is ensuring that the status is 200 when looking up someone's general information
         # If it's not, let them know exactly how to format their tag
-        endpoint = "{}/stats/general".format(bt)
+        endpoint = "{}/stats".format(bt)
         data = await self._request(None, endpoint)
         if data is None:
                 await self.bot.say("Profile does not exist! Battletags are picky, "
