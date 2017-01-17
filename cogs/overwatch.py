@@ -77,8 +77,10 @@ class Overwatch:
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
             data = await self._request(None, "{}/stats".format(bt))
+            region = [x for x in data.keys() if data[x] is not None][0]
+            stats = data[region]['stats']['quickplay']
 
-            output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if
+            output_data = [(k.title().replace("_", " "), r) for k, r in stats['game_stats'].items() if
                            k in check_g_stats]
         else:
             # If there was a hero provided, search for a user's data on that hero
