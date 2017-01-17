@@ -26,25 +26,26 @@ class Overwatch:
         self.headers = {"User-Agent": config.user_agent}
         self.session = aiohttp.ClientSession()
 
-    async def _request(self, payload, endpoint):
-        """Handles requesting to the API"""
+async def _request(self, payload, endpoint):
+    """Handles requesting to the API"""
 
-        # Format the URL we'll need based on the base_url, and the endpoint we want to hit
-        url = "{}{}".format(base_url, endpoint)
+    # Format the URL we'll need based on the base_url, and the endpoint we want to hit
+    url = "{}{}".format(base_url, endpoint)
 
-        # Attempt to connect up to our max retries
-        for x in range(MAX_RETRIES):
-            try:
-                async with aiohttp.ClientSession().get(url, headers=self.headers, params=payload) as r:
+    # Attempt to connect up to our max retries
+    for x in range(MAX_RETRIES):
+        try:
+            async with aiohttp.ClientSession(headers=self.headers) as session:
+                async with session.get(url, params=payload) as r:
                     # If we failed to connect, attempt again
                     if r.status != 200:
                         continue
 
                     data = await r.json()
                     return data
-            # If any error happened when making the request, attempt again
-            except:
-                continue
+        # If any error happened when making the request, attempt again
+        except:
+            continue
 
     @commands.group(no_pm=True)
     async def ow(self):
