@@ -7,7 +7,7 @@ import discord
 
 import aiohttp
 
-base_url = "https://api.owapi.net/api/v2/u/"
+base_url = "https://api.owapi.net/api/v3/u/"
 # This is a list of the possible things that we may want to retrieve from the stats
 # The API returns something if it exists, and leaves it out of the data returned entirely if it does not
 # For example if you have not won with a character, wins will not exist in the list
