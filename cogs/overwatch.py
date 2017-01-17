@@ -76,24 +76,29 @@ class Overwatch:
 
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
-            data = await self._request(None, "{}/stats/general".format(bt))
+            data = await self._request(None, "{}/stats".format(bt))
 
             output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if
                            k in check_g_stats]
         else:
             # If there was a hero provided, search for a user's data on that hero
-            endpoint = "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
+            hero = hero.lower().replace('-', '')
+            endpoint = "{}/heroes".format(bt)
             data = await self._request(None, endpoint)
-            if data is None:
+
+            region = [x for x in data.keys() if data[x] is not None][0]
+            stats = data[region]['heroes']['stats']['quickplay'].get(hero)
+
+            if stats is None:
                 fmt = "I couldn't find data with that hero, make sure that is a valid hero, " \
                       "otherwise {} has never used the hero {} before!".format(user.display_name, hero)
                 await self.bot.say(fmt)
                 return
 
             # Same list comprehension as before
-            output_data = [(k.title().replace("_", " "), r) for k, r in data['general_stats'].items() if
+            output_data = [(k.title().replace("_", " "), r) for k, r in stats['general_stats'].items() if
                            k in check_g_stats]
-            for k, r in data['hero_stats'].items():
+            for k, r in stats['hero_stats'].items():
                 output_data.append((k.title().replace("_", " "), r))
         try:
             banner = await images.create_banner(user, "Overwatch", output_data)
