@@ -1,6 +1,7 @@
 from discord.ext import commands
-from .utils import config
-from .utils import checks
+
+from . import utils
+
 from bs4 import BeautifulSoup as bs
 
 import discord
@@ -9,8 +10,6 @@ import random
 import re
 import math
 
-MAX_RETRIES = 5
-
 
 class Links:
     """This class contains all the commands that make HTTP requests
@@ -18,34 +17,9 @@ class Links:
 
     def __init__(self, bot):
         self.bot = bot
-        # Only default headers for all requests we should use sets the User-Agent
-        self.headers = {"User-Agent": config.user_agent}
-
-    async def _request(self, base_url, payload, endpoint='', convert_json=True):
-        """Handles requesting to the API"""
-
-        # Format the URL we'll need based on the base_url, and the endpoint we want to hit
-        url = "{}{}".format(base_url, endpoint)
-
-        # Attempt to connect up to our max retries
-        for x in range(MAX_RETRIES):
-            try:
-                async with aiohttp.get(url, headers=self.headers, params=payload) as r:
-                    # If we failed to connect, attempt again
-                    if r.status != 200:
-                        continue
-
-                    if convert_json:
-                        data = await r.json()
-                    else:
-                        data = await r.text()
-                    return data
-            # If any error happened when making the request, attempt again
-            except:
-                continue
 
     @commands.command(pass_context=True, aliases=['g'])
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def google(self, ctx, *, query: str):
         """Searches google for a provided query
 
@@ -55,7 +29,7 @@ class Links:
 
         # Turn safe filter on or off, based on whether or not this is a nsfw channel
         r_filter = {'channel_id': ctx.message.channel.id}
-        nsfw_channels = await config.get_content("nsfw_channels", r_filter)
+        nsfw_channels = await utils.get_content("nsfw_channels", r_filter)
         safe = 'off' if nsfw_channels else 'on'
 
         params = {'q': query,
@@ -67,7 +41,8 @@ class Links:
         fmt = ""
 
         # First make the request to google to get the results
-        data = await self._request(url, params, convert_json=False)
+        data = await utils.request(url, payload=params, attr='text')
+
         if data is None:
             await self.bot.send_message(ctx.message.channel, "I failed to connect to google! (That can happen??)")
             return
@@ -97,20 +72,21 @@ class Links:
         await self.bot.say(fmt)
 
     @commands.command(aliases=['yt'], pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def youtube(self, ctx, *, query: str):
         """Searches youtube for a provided query
 
         EXAMPLE: !youtube Cat videos!
         RESULT: Cat videos!"""
-        key = config.youtube_key
+        key = utils.youtube_key
         url = "https://www.googleapis.com/youtube/v3/search"
         params = {'key': key,
                   'part': 'snippet, id',
                   'type': 'video',
                   'q': query}
 
-        data = await self._request(url, params)
+        data = await utils.request(url, payload=params)
+
         if data is None:
             await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to youtube!")
             return
@@ -129,7 +105,7 @@ class Links:
         await self.bot.say(fmt)
 
     @commands.command(pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def wiki(self, ctx, *, query: str):
         """Pulls the top match for a specific term from wikipedia, and returns the result
 
@@ -142,7 +118,8 @@ class Links:
                   "format": "json",
                   "srsearch": query}
 
-        data = await self._request(base_url, params)
+        data = await utils.requet(base_url, payload=params)
+
         if data is None:
             await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to Wikipedia!")
             return
@@ -165,7 +142,7 @@ class Links:
                                                                                                            snippet))
 
     @commands.command(pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def urban(self, ctx, *, msg: str):
         """Pulls the top urbandictionary.com definition for a term
 
@@ -174,7 +151,7 @@ class Links:
         url = "http://api.urbandictionary.com/v0/define"
         params = {"term": msg}
         try:
-            data = await self._request(url, params)
+            data = await utils.request(url, payload=params)
             if data is None:
                 await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to urban dictionary!")
 
@@ -191,7 +168,7 @@ class Links:
             await self.bot.say("Sorry but I failed to connect to urban dictionary!")
 
     @commands.command(pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term
 
@@ -205,7 +182,7 @@ class Links:
             params = {'q': query}
 
             r_filter = {'channel_id': ctx.message.channel.id}
-            nsfw_channels = await config.get_content("nsfw_channels", r_filter)
+            nsfw_channels = await utils.get_content("nsfw_channels", r_filter)
             # If this is a nsfw channel, we just need to tack on 'explicit' to the terms
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
@@ -219,7 +196,8 @@ class Links:
 
             try:
                 # Get the response from derpibooru and parse the 'search' result from it
-                data = await self._request(url, params)
+                data = await utils.request(url, payload=params)
+
                 if data is None:
                     await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to Derpibooru!")
                     return
@@ -231,14 +209,18 @@ class Links:
             # The first request we've made ensures there are results
             # Now we can get the total count from that, and make another request based on the number of pages as well
             if len(results) > 0:
+                # Get the total number of pages
                 pages = math.ceil(data['total'] / len(results))
+                # Set a new paramater to set which page to use, randomly based on the number of pages
                 params['page'] = random.SystemRandom().randint(1, pages)
-                data = await self._request(url, params)
+                data =await utils.request(url, payload=params)
                 if data is None:
                     await self.bot.say("Sorry but I failed to connect to Derpibooru!")
                     return
+                # Now get the results again
                 results = data['search']
 
+                # Get the image link from the now random page'd and random result from that page
                 index = random.SystemRandom().randint(0, len(results) - 1)
                 image_link = 'https://derpibooru.org/{}'.format(results[index]['id'])
             else:
@@ -246,14 +228,13 @@ class Links:
                 return
         else:
             # If no search term was provided, search for a random image
-            async with aiohttp.ClientSession().get('https://derpibooru.org/images/random', headers=self.headers) as r:
-                # .url will be the URL we end up at, not the one requested.
-                # https://derpibooru.org/images/random redirects to a random image, so this is exactly what we want
-                image_link = r.url
+            # .url will be the URL we end up at, not the one requested.
+            # https://derpibooru.org/images/random redirects to a random image, so this is exactly what we want
+            image_link = await utils.request('https://derpibooru.org/images/random', attr='url')
         await self.bot.say(image_link)
 
     @commands.command(pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def e621(self, ctx, *, tags: str):
         """Searches for a random image from e621.net
         Format for the search terms need to be 'search term 1, search term 2, etc.'
@@ -276,13 +257,14 @@ class Links:
         await self.bot.say("Looking up an image with those tags....")
 
         r_filter = {'channel_id': ctx.message.channel.id}
-        nsfw_channels = await config.get_content("nsfw_channels", r_filter)
+        nsfw_channels = await utils.get_content("nsfw_channels", r_filter)
 
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
         params['tags'] += " rating:explicit" if nsfw_channels else " rating:safe"
 
-        data = await self._request(url, params)
+        data = await utils.request(url, payload=params)
+
         if data is None:
             await self.bot.send_message(ctx.message.channel,
                                         "Sorry, I had trouble connecting at the moment; please try again later")
