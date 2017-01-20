@@ -7,7 +7,7 @@ import discord
 
 import aiohttp
 
-base_url = "https://api.owapi.net/api/v2/u/"
+base_url = "https://api.owapi.net/api/v3/u/"
 # This is a list of the possible things that we may want to retrieve from the stats
 # The API returns something if it exists, and leaves it out of the data returned entirely if it does not
 # For example if you have not won with a character, wins will not exist in the list
@@ -35,13 +35,14 @@ class Overwatch:
         # Attempt to connect up to our max retries
         for x in range(MAX_RETRIES):
             try:
-                async with aiohttp.ClientSession().get(url, headers=self.headers, params=payload) as r:
-                    # If we failed to connect, attempt again
-                    if r.status != 200:
-                        continue
+                async with aiohttp.ClientSession(headers=self.headers) as session:
+                    async with session.get(url, params=payload) as r:
+                        # If we failed to connect, attempt again
+                        if r.status != 200:
+                            continue
 
-                    data = await r.json()
-                    return data
+                        data = await r.json()
+                        return data
             # If any error happened when making the request, attempt again
             except:
                 continue
@@ -76,24 +77,31 @@ class Overwatch:
 
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
-            data = await self._request(None, "{}/stats/general".format(bt))
+            data = await self._request(None, "{}/stats".format(bt))
+            region = [x for x in data.keys() if data[x] is not None][0]
+            stats = data[region]['stats']['quickplay']
 
-            output_data = [(k.title().replace("_", " "), r) for k, r in data['game_stats'].items() if
+            output_data = [(k.title().replace("_", " "), r) for k, r in stats['game_stats'].items() if
                            k in check_g_stats]
         else:
             # If there was a hero provided, search for a user's data on that hero
-            endpoint = "{}/heroes/{}".format(bt, hero.lower().replace('-', ''))
+            hero = hero.lower().replace('-', '')
+            endpoint = "{}/heroes".format(bt)
             data = await self._request(None, endpoint)
-            if data is None:
+
+            region = [x for x in data.keys() if data[x] is not None][0]
+            stats = data[region]['heroes']['stats']['quickplay'].get(hero)
+
+            if stats is None:
                 fmt = "I couldn't find data with that hero, make sure that is a valid hero, " \
                       "otherwise {} has never used the hero {} before!".format(user.display_name, hero)
                 await self.bot.say(fmt)
                 return
 
             # Same list comprehension as before
-            output_data = [(k.title().replace("_", " "), r) for k, r in data['general_stats'].items() if
+            output_data = [(k.title().replace("_", " "), r) for k, r in stats['general_stats'].items() if
                            k in check_g_stats]
-            for k, r in data['hero_stats'].items():
+            for k, r in stats['hero_stats'].items():
                 output_data.append((k.title().replace("_", " "), r))
         try:
             banner = await images.create_banner(user, "Overwatch", output_data)
@@ -118,7 +126,7 @@ class Overwatch:
         await self.bot.say("Looking up your profile information....")
         # All we're doing here is ensuring that the status is 200 when looking up someone's general information
         # If it's not, let them know exactly how to format their tag
-        endpoint = "{}/stats/general".format(bt)
+        endpoint = "{}/stats".format(bt)
         data = await self._request(None, endpoint)
         if data is None:
                 await self.bot.say("Profile does not exist! Battletags are picky, "

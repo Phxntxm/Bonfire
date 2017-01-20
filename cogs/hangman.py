@@ -156,8 +156,7 @@ class Hangman:
     @checks.custom_perms(send_messages=True)
     async def create_hangman(self, ctx):
         """This is used to create a new hangman game
-        Due to the fact that I might not be able to delete a message, I will PM you and ask for the phrase you want.
-        The phrase needs to be under 30 characters
+        A predefined phrase will be randomly chosen as the phrase to use
 
         EXAMPLE: !hangman start
         RESULT: This is pretty obvious .-."""

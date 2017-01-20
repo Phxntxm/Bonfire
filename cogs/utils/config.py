@@ -73,7 +73,7 @@ shard_count = global_config.get('shard_count', 1)
 shard_id = global_config.get('shard_id', 0)
 
 # The default status the bot will use
-default_status = global_config.get("default_status", "")
+default_status = global_config.get("default_status", None)
 # The URL that will be used to link to for the help command
 help_url = global_config.get("help_url", "")
 # The rethinkdb hostname
