@@ -118,7 +118,7 @@ class Links:
                   "format": "json",
                   "srsearch": query}
 
-        data = await utils.requet(base_url, payload=params)
+        data = await utils.request(base_url, payload=params)
 
         if data is None:
             await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to Wikipedia!")
