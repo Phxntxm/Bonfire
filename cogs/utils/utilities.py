@@ -62,33 +62,39 @@ async def download_image(url):
             image = io.BytesIO(await r.read())
     return image
 
-async def request(url, *, payload=None, method='GET', attr='json'):
-    """Handles requesting to a URL"""
-    headers = {'User-Agent': config.user_agent}
+async def request(url, *, headers=None, payload=None, method='GET', attr='json'):
+    # Make sure our User Agent is what's set, and ensure it's sent even if no headers are passed
+    if headers == None:
+        headers = {}
+    headers['User-Agent'] = config.user_agent
 
-    # Attempt to connect up to our max retries
-    for x in range(5):
+    # Try 5 times
+    for i in range(5):
         try:
+            # Create the session with our headeres
             with aiohttp.ClientSession(headers=headers) as session:
-                async with session.request(method=method, url=url, params=payload) as r:
-                    # If we failed to connect, attempt again
-
-                    if r.status != 200:
+                # Make the request, based on the method, url, and paramaters given
+                async with session.request(method, url, params=payload) as response:
+                    # If the request wasn't successful, re-attempt
+                    if response.status != 200:
                         continue
 
-                    # Get the requested returned value
-                    obj = getattr(r, attr)
-                    # Try to call it (in case it's a method)
                     try:
-                        obj = obj()
-                    # If it's not a method, we just want the object
-                    except TypeError:
-                        obj = obj
-                    # Now check if this is awaitable....if so, await it
-                    if inspect.isawaitable(obj):
-                        obj = await obj
-                    # Then just return the requested object
-                    return obj
+                        # Get the attribute requested
+                        return_value = getattr(response, attr)
+                        # Next check if this can be called
+                        if callable(return_value):
+                            return_value = return_value()
+                        # If this is awaitable, await it
+                        if inspect.isawaitable(return_value):
+                            return_value = await return_value
+
+                        # Then return it
+                        return return_value
+                    except AttributeError:
+                        # If an invalid attribute was requested, return None
+                        return None
+        # If an error was hit other than the one we want to catch, try again
         except:
             continue
 
