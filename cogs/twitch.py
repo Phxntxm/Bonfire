@@ -70,6 +70,8 @@ class Twitch:
                             channel = self.bot.get_channel(channel_id)
                             # Get the member that has just gone live
                             member = discord.utils.get(server.members, id=m_id)
+                            if member is None:
+                                continue
 
                             fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
                             await self.bot.send_message(channel, fmt)
