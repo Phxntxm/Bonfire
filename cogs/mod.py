@@ -381,7 +381,11 @@ class Mod:
         if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
             await self.bot.say("I do not have permission to delete messages...")
             return
-        await self.bot.purge_from(ctx.message.channel, limit=limit)
+        try:
+            await self.bot.purge_from(ctx.message.channel, limit=limit)
+        except discord.HTTPException:
+            await self.bot.send_message(ctx.message.channel, "Detected messages that are too far back for me to delete;" \
+                                        " I can only bulk delete messages that are under 14 days old.")
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(manage_messages=True)
