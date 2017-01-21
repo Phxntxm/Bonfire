@@ -5,8 +5,8 @@ import traceback
 import logging
 
 from discord.ext import commands
-from .utils import config
-from .utils import checks
+
+from . import utils
 
 log = logging.getLogger()
 
@@ -15,7 +15,7 @@ class Deviantart:
     def __init__(self, bot):
         self.base_url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
         self.bot = bot
-        self.headers = {"User-Agent": config.user_agent}
+        self.headers = {"User-Agent": utils.user_agent}
         self.session = aiohttp.ClientSession()
         self.token = None
         self.params = None
@@ -38,21 +38,21 @@ class Deviantart:
         # We need a token to create requests, it doesn't seem this token goes away
         # To get this token, we need to make a request and retrieve that
         url = 'https://www.deviantart.com/oauth2/token'
-        params = {'client_id': config.da_id,
-                  'client_secret': config.da_secret,
+        params = {'client_id': utils.da_id,
+                  'client_secret': utils.da_secret,
                   'grant_type': 'client_credentials'}
 
-        async with self.session.get(url, headers=self.headers, params=params) as response:
-            data = await response.json()
-            self.token = data.get('access_token', None)
-            self.params = {'access_token': self.token}
-            # Make sure we refresh our token, based on when they tell us it expires
-            # Ensure we call it a few seconds earlier, to give us enough time to set the new token
-            # If there was an issue, lets call this in a minute again
-            return data.get('expires_in', 65) - 5
+        data = await utils.request(url, payload=params)
+
+        self.token = data.get('access_token', None)
+        self.params = {'access_token': self.token}
+        # Make sure we refresh our token, based on when they tell us it expires
+        # Ensure we call it a few seconds earlier, to give us enough time to set the new token
+        # If there was an issue, lets call this in a minute again
+        return data.get('expires_in', 65) - 5
 
     async def check_posts(self):
-        content = await config.get_content('deviantart')
+        content = await utils.get_content('deviantart')
         # People might sub to the same person, so lets cache every person and their last update
         cache = {}
 
@@ -76,11 +76,11 @@ class Deviantart:
                     result = cache.get(da_name, None)
                     if result is None:
                         params['username'] = da_name
-                        async with self.session.get(self.base_url, headers=self.headers, params=params) as response:
-                            data = await response.json()
-                            log.warning("DA responded with {}".format(data))
-                            result = data['results'][0]
-                            cache[da_name] = result
+                        data = await utils.request(base_url, payload=params)
+
+                        log.warning("DA responded with {}".format(data))
+                        result = data['results'][0]
+                        cache[da_name] = result
 
                     # This means that our last update to this user, for this author, is not the same
                     if last_updated_id != result['deviationid']:
@@ -99,21 +99,21 @@ class Deviantart:
                         # We want to do this whether or not our last if statement was met
                         r_filter = {'member_id': user.id}
                         update = {'last_updated': {da_name: result['deviationid']}}
-                        await config.update_content('deviantart', update, r_filter)
+                        await utils.update_content('deviantart', update, r_filter)
         except Exception as e:
             tb = traceback.format_exc()
-            fmt = "{}\n{0.__class__.__name__}: {0}".format(tb, e)
+            fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 
     @commands.group()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def da(self):
         """This provides a sort of 'RSS' feed for subscribed to artists.
         Subscribe to artists, and I will PM you when new posts come out from these artists"""
         pass
 
     @da.command(pass_context=True, name='sub', aliases=['add', 'subscribe'])
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def da_sub(self, ctx, *, username):
         """This can be used to add a feed to your notifications.
         Provide a username, and when posts are made from this user, you will be notified
@@ -121,12 +121,12 @@ class Deviantart:
         EXAMPLE: !da sub MyFavoriteArtistEva<3
         RESULT: Notifications of amazing pics c:"""
         r_filter = {'member_id': ctx.message.author.id}
-        content = await config.get_content('deviantart', r_filter)
+        content = await utils.get_content('deviantart', r_filter)
         # TODO: Ensure the user provided is a real user
 
         if content is None:
             entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_updated': {}}
-            await config.add_content('deviantart', entry, r_filter)
+            await utils.add_content('deviantart', entry, r_filter)
             await self.bot.say("You have just subscribed to {}!".format(username))
         elif content[0]['subbed'] is None or username not in content[0]['subbed']:
             if content[0]['subbed'] is None:
@@ -134,26 +134,26 @@ class Deviantart:
             else:
                 content[0]['subbed'].append(username)
                 sub_list = content[0]['subbed']
-            await config.update_content('deviantart', {'subbed': sub_list}, r_filter)
+            await utils.update_content('deviantart', {'subbed': sub_list}, r_filter)
             await self.bot.say("You have just subscribed to {}!".format(username))
         else:
             await self.bot.say("You are already subscribed to that user!")
 
     @da.command(pass_context=True, name='unsub', aliases=['delete', 'remove', 'unsubscribe'])
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def da_unsub(self, ctx, *, username):
         """This command can be used to unsub from the specified user
 
         EXAMPLE: !da unsub TheArtistWhoBetrayedMe
         RESULT: No more pics from that terrible person!"""
         r_filter = {'member_id': ctx.message.author.id}
-        content = await config.get_content('deviantart', r_filter)
+        content = await utils.get_content('deviantart', r_filter)
 
         if content is None or content[0]['subbed'] is None:
             await self.bot.say("You are not subscribed to anyone at the moment!")
         elif username in content[0]['subbed']:
             content[0]['subbed'].remove(username)
-            await config.update_content('deviantart', {'subbed': content[0]['subbed']}, r_filter)
+            await utils.update_content('deviantart', {'subbed': content[0]['subbed']}, r_filter)
             await self.bot.say("You have just unsubscribed from {}!".format(username))
         else:
             await self.bot.say("You are not subscribed to that user!")
