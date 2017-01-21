@@ -126,6 +126,8 @@ def command_prefix(bot, message):
             prefix = [data['prefix'] for data in values if message.server.id == data['server_id']][0]
         except IndexError:
             prefix = None
+        except AttributeError:
+            prefix = None
         return prefix or default_prefix
     except KeyError:
         return default_prefix
