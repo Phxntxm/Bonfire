@@ -176,7 +176,7 @@ class Core:
 
             # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
             embed = discord.Embed(title=cmd.qualified_name)
-            embed.set_thumbnail(url=ctx.message.server.me.avatar_url)
+            embed.set_thumbnail(url=self.bot.user.avatar_url)
             embed.add_field(name="Description", value="\n".join(description), inline=False)
             if example:
                 embed.add_field(name="Example", value="\n".join(example), inline=False)
