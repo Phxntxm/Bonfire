@@ -15,3 +15,7 @@ bonfire.log
 cert.pem
 .bash*
 .cache
+.python_history
+.config/
+audio_tmp/*
+.viminfo
