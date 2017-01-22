@@ -19,3 +19,4 @@ cert.pem
 .config/
 audio_tmp/*
 .viminfo
+docs/_build
