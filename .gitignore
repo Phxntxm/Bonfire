@@ -20,3 +20,5 @@ cert.pem
 audio_tmp/*
 .viminfo
 docs/_build
+.ssh/*
+.gitconfig
