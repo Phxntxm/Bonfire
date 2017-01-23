@@ -40,7 +40,34 @@ class Core:
             return
 
         await self.bot.edit_message(reaction.message, embed=embed)
-        await self.bot.remove_reaction(reaction.message, reaction.emoji, user)
+        try:
+            await self.bot.remove_reaction(reaction.message, reaction.emoji, user)
+        except discord.Forbidden:
+            pass
+
+    async def on_reaction_remove(self, reaction, user):
+        # Make sure that this is a normal user who pressed the button
+        # Also make sure that this is even a message we should be paying attention to
+        # We need reaction_add and reaction_move for cases like PM's, where the bot cannot remove a reaction
+        # This causes an error when the bot tries to remove the reaction, leaving it in place
+        # So the next click from a user will remove it, not add it.
+        if user.bot or reaction.message.id not in self.help_embeds:
+            return
+
+        # If right is clicked
+        if '\u27A1' in reaction.emoji:
+            embed = self.next_page(reaction.message.id)
+        # If left is clicked
+        elif '\u2B05' in reaction.emoji:
+            embed = self.prev_page(reaction.message.id)
+        else:
+            return
+
+        await self.bot.edit_message(reaction.message, embed=embed)
+        try:
+            await self.bot.remove_reaction(reaction.message, reaction.emoji, user)
+        except discord.Forbidden:
+            pass
 
     def determine_commands(self, page):
         """Returns the list of commands to use per page"""
