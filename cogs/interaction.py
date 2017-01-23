@@ -135,7 +135,10 @@ class Interaction:
         url = member.avatar_url
         if ctx.message.server.me.permissions_in(ctx.message.channel).attach_files:
             file = await utilities.download_image(url)
-            await self.bot.upload(file, filename='avatar.jpg')
+            if file is None:
+                await self.bot.say(url)
+            else:
+                await self.bot.upload(file, filename='avatar.jpg')
         else:
             await self.bot.say(url)
 
