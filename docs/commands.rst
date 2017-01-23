@@ -10,6 +10,11 @@ This provides information on each command available to Bonfire.
    and the command is `example` then it will be labeled as `example` in the documentation,
    however you would call the command using `>example`.
 
+.. note::
+   Command usability is based on permissions, to run a command you need to have a certain permission.
+   Each command will label what permission is required, by default, to run the command. You can manage
+   custom permissions for a server with the command `perms`.
+
 Core
 ----
 
@@ -137,3 +142,129 @@ Links
    - If this is used in a nsfw channel this will query for suggestive/explicit pics. Otherwise
      It will pull a safe picture
 
+Interaction
+-----------
+
+.. data:: hug
+
+   Causes Bonfire to hug a person
+
+   - Default permissions required: send_message
+
+.. data:: avatar
+
+   Posts the full image of a provided person's avatar
+
+   - Default permissions required: send_message
+
+.. data:: battle
+
+   Challenges the provided player to a battle
+
+   - Default permissions required: send_message
+   - Cooldown, per member, for 3 minutes
+
+.. data:: accept
+
+   Accepts the challenger's battle
+
+   - Default permissions required: send_message
+
+.. data:: decline
+
+   Declines the challenger's battle
+
+   - Default permissions required: send_message
+
+.. data:: boop
+
+   Boops the provided person
+
+   - Default permissions required: send_message
+
+Music
+-----
+
+.. data:: progress
+
+   Prints the progress of the curent song
+
+   - Default permissions required: send_message
+
+.. data:: join
+
+   Causes Bonfire to join the provided channel
+
+   - Default permissions required: send_message
+
+.. data:: summon
+
+   Causes Bonfire to join the channel you are in
+
+
+   - Default permissions required: send_message
+
+.. data:: play
+
+   Plays a song; you can provide a link to a song or search terms, and youtube will be searched.
+   
+   - Default permissions required: send_message
+   - Playlists, live streams, and soundcloud cannot be used
+   - 10 songs can be queued at a time
+
+.. data:: volume
+
+   Sets the volume of the bot to a provided number
+
+   - Default permissions required: kick_members
+   - The number needs to be between 0 and 200
+
+.. data:: pause
+
+   Pauses the current song
+
+   - Default permissions required: kick_members
+
+.. data:: resume
+
+   Resumes the current song
+
+   - Default permissions required: kick_members
+
+.. data:: stop
+
+   Stops playing songs, and causes Bonfire to leave her voice channel
+
+   - Default permissions required: kick_members
+
+.. data:: eta
+
+   Provides an ETA on when your next song will play
+
+   - Default permissions required: send_message
+
+.. data:: queue
+
+   Prints out the songs currently in the queue
+
+   - Default permissions required: send_message
+
+.. data:: skip
+
+   Vote to skip a song. The song requester can automatically skip.
+   approximately 1/3 of the members in the voice channel
+   are required to vote to skip for the song to be skipped.
+
+   - Default permissions required: send_message
+
+.. data:: modskip
+
+   Force skips a song
+
+   - Default permissions required: kick_members
+
+.. data:: playing
+
+   Displays some information about the current song playing
+
+   - Default permissions required: send_message
