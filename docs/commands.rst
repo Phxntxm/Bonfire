@@ -268,3 +268,269 @@ Music
    Displays some information about the current song playing
 
    - Default permissions required: send_message
+
+Moderator Utilities
+-------------------
+
+.. data:: nickname
+
+   Changes Bonfire's nickname on the server
+
+   - Default permissions required: kick_members
+   - Aliases `nick`
+
+.. data:: kick
+
+   Kicks a member from the server
+
+   - Default permissions required: kick_members
+
+.. data:: ban
+
+   Bans a member from the server. For this you can provide a member, or their ID.
+   This is useful in cases where you want to ban someone preemptively from the server
+
+   - Default permissions required: ban_members
+
+.. data:: unban
+
+   Unbans a member from the server; the ID must be provided to unban a member.
+
+   - Default permissions required: ban_members
+
+.. data:: alerts
+
+   This is used to set a certain channel as the server's notifications channel.
+   Notifications such as someone going live on twitch or picarto go to this channel.
+
+   - Default permissions required: kick_members
+
+.. data:: usernotify
+   
+   Turns user notification on or off for the server; provide either on or off to change this.
+   This will set the channel that the command is ran in as the channel for these notifications
+
+   - Default permissions required: kick_members
+
+.. data:: nsfw add
+
+   Adds the current channel as a nsfw channel
+
+   - Default permissions required: kick_members
+
+.. data:: nsfw remove
+
+   Removes the current channel as a nsfw channel
+
+   - Default permissions required: kick_members
+   - Aliases `delete`
+
+.. data:: say
+
+   Causes the bot to say whatever you provide
+
+   - Default permissions required: kick_members
+
+.. data:: perms
+
+   Prints a message providing all possible permissions. This can be used to help with custom
+   permission settings.
+
+   - Default permissions required: send_messages
+
+.. data:: perms add
+
+   Sets custom permissions for a provided command. Format must be 'perms add <command> <permission>'
+   If you want to open the command to everyone, provide 'none' as the permission
+
+   - Default permissions required: manage_server
+   - Aliases `setup, create`
+
+.. data:: perms remove
+   
+   Removes the custom permissions setup on a command
+
+   - Default permissions required: manage_server
+   - Aliases `delete`
+
+.. data:: prefix
+
+   Used to setup a custom prefix for this server
+
+   - Default permissions required: manage_server
+
+.. data:: purge
+
+   Purges the channel of a specified number of messages. By default this is 100
+
+   - Default permissions required: manage_messages
+
+.. data:: prune
+
+   Prunes the channel from specified members, based on the number provided. The number 
+   must be provided by the members. If no members are provided, Bonfire's messages are assumed
+
+   - Default permissions required: manage_messages
+
+.. data:: rules
+
+   Prints out the rules setup on the server. By default will print out all rules; if you provide
+   a number it will print that rule
+
+   - Default permissions required: send_messages
+   - Aliases `rule`
+
+.. data:: rules add
+
+   Adds the specified rule to the list of server's rules.
+
+   - Default permissions required: manage_server
+   - Aliases `rules create, rule create, rule add`
+
+.. data:: rules remove
+   
+   Deletes a specified rule from the server; the rule deleted needs to be specified by the number.
+
+   - Default permissions required: manage_server
+   - Aliases `rules delete, rule delete, rules remove`
+
+Stats
+-----
+
+.. data:: serverinfo
+
+   Provide 'me' to print a leaderboard for your own usageProvides some information about the server
+
+   - Default permissions required: send_messages
+
+.. data:: command stats
+
+   This command can be used to view some usage stats about a specific command
+
+   - Default permissions required: send_messages
+
+.. data:: command leaderboard
+
+   This command can be used to print a leaderboard of commands. 
+   Provide 'server' to print a leaderboard for this server. 
+   Provide 'me' to print a leaderboard for your own usage
+
+   - Default permissions required: send_messages
+
+.. data:: mostboops
+
+   Shows you the person you have booped the most, as well as how many times
+
+   - Default permissions required: send_messages
+
+.. data:: listboops
+
+   Provides a list of all the users you have booped and the amount of times
+
+   - Default permissions required: send_messages
+
+.. data:: leaderboard
+
+   Provides a leaderboard of this server's battle records
+
+   - Default permissions required: send_messages
+
+.. data:: stats
+   
+   Provides battle stats about the person provided, defaulting to you
+
+   - Default permissions required: send_messages
+
+Blackjack
+---------
+
+.. data:: blackjack
+
+   Starts a game of blackjack; if a game is already running joins the current game of blackjack.
+   This is to be played like normal blackjack, and the rest of the usage for this is prompt based.
+   Bonfire will prompt at different stages of the game (i.e. hit or stand, what do you want to bet, etc.)
+
+   - Default permissions required: send_messages
+
+.. data:: blackjack leave
+
+   Leaves the current game of blackjack
+
+   - Default permissions required: send_messages
+
+.. data:: blackjack stop
+
+   Stops the current game of blackjack.
+
+   .. note::
+      Think of this as a completely normal table of blackjack, the person
+      who started the game cannot end it, it will continue even if they leave, as long as their are players.
+      That is why this is restricted to someone who can manage the server, as it should only be used in case
+      people have gone afk and the game is still running, which can get annoying.
+
+   - Default permissions required: manage_server
+
+DeviantArt
+----------
+
+.. data:: da sub
+
+   This can be used to add a feed to your notifications. Provide a username, and when posts are made
+   from this user, you will be notified.
+
+   - Default permissions required: send_messages
+   - Aliases `add, subscribe`
+
+.. data:: da unsub
+
+   This command can be used to unsubscribe from the specified user
+
+   - Default permissions required: send_messages
+   - Aliases `delete, remove, unsubscribe`
+
+Hangman
+-------
+
+.. data:: hangman
+
+   Makes a guess towards the server's currently running hangman game. A letter or the phrase can be guessed
+ 
+   - Default permissions required: send_messages
+   - Aliases `hm`
+
+.. data:: hangman start
+
+   Starts a new game of hangman. A predefined phrase will be randomly chosen as the phrase to use
+
+   - Default permissions required: send_messages
+   - Aliases `hangman create, hm start, hm create`
+
+.. data:: hangman stop
+
+   Force stops a game of hangman.
+
+   - Default permissions required: kick_members
+   - Aliases `hangman delete, hangman end, hangman remove, hm stop, hm delete, hm remove, hm end`
+
+Overwatch
+---------
+
+.. data:: ow stats
+
+   Provides a basic overview of a member's stats. By default the member used is the author; to lookup hero
+   specific stats, provide the hero after the  member to look up.
+
+   - Default permissions required: send_messages
+
+.. data:: ow add
+
+   Saves your provided battletag to your user, for lookup later. Format for a battletag is Username#1234
+
+   - Default permissions required: send_messages
+
+.. data:: ow delete
+
+   Unlinks your saved battletag from your user
+
+   - Default permissions required: send_messages
+   - Aliases `ow remove`
