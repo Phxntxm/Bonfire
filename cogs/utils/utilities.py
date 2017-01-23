@@ -55,11 +55,13 @@ def find_command(bot, command):
 async def download_image(url):
     """Returns a file-like object based on the URL provided"""
     headers = {'User-Agent': config.user_agent}
-    # Simply download the image
-    with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(url) as r:
-            # Then wrap it in a BytesIO object, to be used like an actual file
-            image = io.BytesIO(await r.read())
+    # Simply read the image, to get the bytes
+    bts = await request(url, attr='read')
+    if bts is None:
+        return None
+
+    # Then wrap it in a BytesIO object, to be used like an actual file
+    image = io.BytesIO(await r.read())
     return image
 
 async def request(url, *, headers=None, payload=None, method='GET', attr='json'):
