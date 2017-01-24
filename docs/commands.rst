@@ -534,3 +534,233 @@ Overwatch
 
    - Default permissions required: send_messages
    - Aliases `ow remove`
+
+Roles
+---------
+
+.. data:: role
+
+   This command can be used to print the current roles available on the server.
+
+   - Default permissions required: send_messages
+   - Aliases `roles`
+
+.. data:: role remove
+
+   This command is used to remove a role, or multiple roles from one or more users.
+   Run the command and Bonfire will prompt you to provide what's needed to remove the roles
+
+   - Default permissions required: manage_roles
+   - Aliases `roles remove`
+
+.. data:: role add
+
+   This command can be used to add a role or more to one or more users. Run the command and
+   Bonfire will prompt you to provide what's needed to add the roles.
+
+   - Default permissions required: manage_roles
+   - Aliases `roles add`
+
+.. data:: role delete
+
+   This command can be used to delete one of the roles from the server. Provide the role name
+   that you would like to remove from the server.
+
+   - Default permissions required: manage_roles
+   - Aliases `roles delete`
+
+.. data:: role create
+
+   This command can be used to create a role. There will be prompts as Bonfire asks how you would
+   like this role to be setup.
+
+   - Default permissions required: manage_roles
+   - Aliases `roles create`
+
+Raffles
+-------
+
+.. data:: raffles
+   
+   Prints out a list of the current running raffles.
+
+   - Default permissions required: send_messages
+
+.. data:: raffle
+
+   Enters a raffle setup on the server. Provide the number assigned to a raffle.
+
+   - Default permissions required: send_messages
+
+.. data:: raffle create
+
+   Sets up a new raffle, this will prompt the user for everything Bonfire needs to setup a raffle.
+
+   - Default permissions required: kick_members
+   - Aliases `raffle start, raffle begin, raffle add`
+
+Tictactoe
+---------
+
+.. data:: tictactoe
+
+   Plays on the current running tictactoe board. Obviously it needs to be your turn, a play is contrived
+   of one or more of the options `right, left, top, bottom, middle`.
+
+   - Default permissions required: send_messages
+   - Aliases `tic, tac, toe`
+
+.. data:: tictactoe start
+
+   Starts a game of tictactoe with the provided player.
+
+   - Default permissions required: send_messages
+   - Aliases `tictactoe create, tictactoe challenge, tic start, tic create, tic challenge, tac start, tac
+     create, tac challenge, toe start, toe create, toe challenge
+
+.. data:: tictactoe stop
+
+   Force stops a game of tictactoe
+
+   - Default permissions required: kick_members
+   - Aliases `tictactoe delete, tictactoe remove, tictactoe end, tic delete, tic stop, tic end, tic remove,
+     tac delete, tac stop, tac end, tac remove, toe delete, toe stop, toe end, toe remove
+
+Tags
+----
+
+.. data:: tags
+   
+   Prints out the tags setup on the server
+
+   - Default permissions required: send_messages
+
+.. data:: tag
+
+   Calls a tag setup for this server, whatever is provided after the command is the tag that is called.
+
+   - Default permissions required: send_messages
+
+.. data:: tag add
+
+   Adds a tag to the server
+
+   - Default permissions required: kick_members
+   - Aliases `tag create, tag start`
+
+.. data:: tag remove
+
+   Removes a tag from the server
+
+   - Default permissions required: kick_members
+   - Aliases `tag remove, tag stop`
+
+Strawpoll
+---------
+
+.. data:: strawpolls
+
+   This command can be used to show a strawpoll setup on this server. Provide the poll ID to get 
+   information on a single poll, by default this will show all polls setup on the server.
+
+   - Default permissions required: send_messages
+   - Aliases `strawpoll, poll, polls`
+
+.. data:: strawpoll create
+
+   Creates a strawpoll assigned to this server.
+
+   - Default permissions required: kick_members
+   - Aliases `strawpoll setup, strawpoll add, strawpolls create, strawpolls add, strawpolls setup,
+     poll create, poll setup, poll add, polls create, poll setup, poll add`
+
+.. data:: strawpoll remove
+
+   Removes a strawpoll from the server, based on the ID provided
+
+   - Default permissions required: kick_members
+   - Aliases `strawpoll delete, strawpoll stop, strawpolls delete, strawpolls stop, strawpolls remove,
+     poll delete, poll remove, poll stop, polls delete, polls remove, polls stop`
+
+Picarto
+-------
+
+.. data:: picarto
+   
+   This command can be used to view Picarto stats about a member that has their Picarto stream linked to their account
+
+   - Default permissions required: send_messages
+
+.. data:: picarto add
+
+   This command links a picarto user to your discord user.
+
+   - Default permissions required: send_messages
+
+.. data:: picarto remove
+
+   This command unlinks the picarto user currently linked to your acount
+
+   - Default permissions required: send_messages
+   - Aliases `picarto delete`
+
+.. data:: picarto notify
+
+   Adds the current server as one set to be notified if you go live on Picarto
+
+   - Default permissions required: send_messages
+
+.. data:: picarto notify on
+
+   Turns on picarto notifications, if you go live there will be notifications sent to the servers you've set
+
+   - Default permissions required: send_messages
+   - Aliases `picarto notify start, picarto notify yes`
+
+.. data:: picarto notify off
+
+   Turns off picarto notifications for your user
+
+   - Default permissions required: send_messages
+   - Aliases `picarto notify stop, picarto notify no`
+
+Owner
+-----
+
+.. note::
+   All commands in this module can only be ran by the owner
+
+.. data:: motd_push
+
+   Pushes a new message to the motd, which can be called with `motd`
+
+.. data:: debug
+
+   Used to evaluate code live. Code in between single \` will be executed in an eval statement, so setting a variable
+   for use will not work. Code in a code block (three \` symbols around newline separated commands) will be executed using
+   an exec statement, useful for more complicated evaluation of code. When using exec, there is an internal static method called `r`
+   which is used to send a message to the channel the command is ran in.
+
+.. data:: shutdown
+
+   Shuts the bot down
+
+.. data:: name
+
+   Changes the name assigned to the bot
+
+.. data:: status
+
+   Changes the bot's playing status
+
+.. data:: load
+
+   Loads a cog/module (these are found in the cogs folder)
+
+.. data:: unload
+
+   Unloads a cog/module
+
+.. data:: reload
+
+   Unloads then loads a cog/module   
