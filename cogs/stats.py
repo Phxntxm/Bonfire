@@ -79,6 +79,7 @@ class Stats:
         cmd = self.find_command(command)
         if cmd is None:
             await self.bot.say("`{}` is not a valid command".format(command))
+            return
 
         r_filter = {'command': cmd.qualified_name}
         command_stats = await config.get_content('command_usage', r_filter)
