@@ -5,7 +5,6 @@ from . import utils
 from bs4 import BeautifulSoup as bs
 
 import discord
-import aiohttp
 import random
 import re
 import math
@@ -154,6 +153,7 @@ class Links:
             data = await utils.request(url, payload=params)
             if data is None:
                 await self.bot.send_message(ctx.message.channel, "Sorry but I failed to connect to urban dictionary!")
+                return
 
             # List is the list of definitions found, if it's empty then nothing was found
             if len(data['list']) == 0:
@@ -213,7 +213,7 @@ class Links:
                 pages = math.ceil(data['total'] / len(results))
                 # Set a new paramater to set which page to use, randomly based on the number of pages
                 params['page'] = random.SystemRandom().randint(1, pages)
-                data =await utils.request(url, payload=params)
+                data = await utils.request(url, payload=params)
                 if data is None:
                     await self.bot.say("Sorry but I failed to connect to Derpibooru!")
                     return
