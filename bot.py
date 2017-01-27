@@ -66,7 +66,7 @@ async def process_command(ctx):
     command_usage['member_usage'] = total_member_usage
 
     # Add one to the server's usage for this command
-    if message.server is not None:
+    if ctx.message.server is not None:
         total_server_usage = command_usage.get('server_usage', {})
         server_usage = total_server_usage.get(server.id, 0) + 1
         total_server_usage[server.id] = server_usage
