@@ -61,7 +61,7 @@ async def download_image(url):
         return None
 
     # Then wrap it in a BytesIO object, to be used like an actual file
-    image = io.BytesIO(await r.read())
+    image = io.BytesIO(bts)
     return image
 
 async def request(url, *, headers=None, payload=None, method='GET', attr='json'):
