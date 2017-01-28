@@ -173,7 +173,7 @@ class Core:
         cmd = None
         page = 1
 
-        perms = self.bot.permissions_in(ctx.message.channel)
+        perms = ctx.message.server.me.permissions_in(ctx.message.channel)
         if not (perms.embed_links and perms.add_reactions):
             fmt = "I need the permissions `embed_links` and `add_reactions` to send my help message! " \
                   " Otherwise you can use this link to view available commands {}".format(

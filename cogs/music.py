@@ -9,6 +9,7 @@ import time
 import asyncio
 import re
 import os
+import socket
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -132,17 +133,22 @@ class Music:
         server = channel.server
         state = self.get_voice_state(server)
         voice = self.bot.voice_client_in(server)
+        # Attempt 3 times
+        for i in range(3):
+            try:
+                if voice is None:
+                    state.voice = await self.bot.join_voice_channel(channel)
+                    return True
+                elif voice.channel == channel:
+                    state.voice = voice
+                    return True
+                else:
+                    await voice.disconnect()
+                    state.voice = await self.bot.join_voice_channel(channel)
+                    return True
+            except (discord.ClientException, socket.gaierror):
+                continue
 
-        if voice is None:
-            state.voice = await self.bot.join_voice_channel(channel)
-            return True
-        elif voice.channel == channel:
-            state.voice = voice
-            return True
-        else:
-            await voice.disconnect()
-            state.voice = await self.bot.join_voice_channel(channel)
-            return True
 
     async def remove_voice_client(self, server):
         """Removes any voice clients from a server
@@ -289,8 +295,8 @@ class Music:
             _entry, position = await state.songs.add_entry(song, ctx.message.author)
         except WrongEntryTypeError:
             # This means that a song was attempted to be searched, instead of a link provided
-            info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
             try:
+                info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
                 song = info.get('entries', [])[0]['webpage_url']
             except IndexError:
                 await self.bot.send_message(ctx.message.channel, "No results found for {}!".format(song))
@@ -310,6 +316,7 @@ class Music:
                 fmt = "Sorry but I couldn't download that! Either you provided a playlist, a streamed link, or " \
                       "a page that is not supported to download."
                 await self.bot.send_message(ctx.message.channel, fmt)
+                return
         except ExtractionError as e:
             # This gets the youtube_dl error, instead of our error raised
             error = str(e).split("\n\n")[1]
