@@ -172,13 +172,13 @@ class Core:
 
         cmd = None
         page = 1
-
-        perms = ctx.message.server.me.permissions_in(ctx.message.channel)
-        if not (perms.embed_links and perms.add_reactions):
-            fmt = "I need the permissions `embed_links` and `add_reactions` to send my help message! " \
-                  " Otherwise you can use this link to view available commands {}".format(
-                  "http://bonfirebot.readthedocs.io/en/latest/")
-            await self.bot.say(fmt)
+        if ctx.message.server:
+            perms = ctx.message.server.me.permissions_in(ctx.message.channel)
+            if not (perms.embed_links and perms.add_reactions):
+                fmt = "I need the permissions `embed_links` and `add_reactions` to send my help message! " \
+                      " Otherwise you can use this link to view available commands {}".format(
+                      "http://bonfirebot.readthedocs.io/en/latest/")
+                await self.bot.say(fmt)
 
         if message is not None:
             # If something is provided, it can either be the page number or a command
