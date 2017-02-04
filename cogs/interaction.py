@@ -141,7 +141,7 @@ class Interaction:
                 if '.gif' in url:
                     filename = 'avatar.gif'
                 else:
-                    filename = 'avatar.jpg'
+                    filename = 'avatar.webp'
                 await self.bot.upload(file, filename=filename)
         else:
             await self.bot.say(url)
