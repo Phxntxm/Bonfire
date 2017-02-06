@@ -34,6 +34,7 @@ class VoiceState:
         }
         self.volume = 50
         self.downloader = download
+        self.file_names = []
 
     def is_playing(self):
         # If our VoiceClient or current VoiceEntry do not exist, then we are not playing a song
@@ -59,8 +60,6 @@ class VoiceState:
             self.player.stop()
 
     def toggle_next(self):
-        # Delete the old file (screw caching, when on 5000+ Guilds this takes up too much space)
-        os.remove(self.current.filename)
         # Set the Event so that the next song in the queue can be played
         self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
 
@@ -75,6 +74,7 @@ class VoiceState:
 
             # Make sure we find a song
             while self.current is None:
+                self.clear_audio_files()
                 await asyncio.sleep(1)
                 self.current = await self.songs.get_next_entry()
 
@@ -82,6 +82,10 @@ class VoiceState:
             while not getattr(self.current, 'filename'):
                 print("Downloading...")
                 await asyncio.sleep(1)
+
+            # Now add this file to our list of filenames, so that it can be deleted later
+            if self.current.filename not in self.file_names:
+                self.file_names.append(self.current.filename)
 
             # Create the player object
             self.current.player = self.voice.create_ffmpeg_player(
@@ -101,6 +105,11 @@ class VoiceState:
             # Wait till the Event has been set, before doing our task again
             await self.play_next_song.wait()
 
+    def clear_audio_files(self):
+        """Deletes all the audio files this guild has created"""
+        for f in self.file_names:
+            os.remove(f)
+        self.file_names = []
 
 class Music:
     """Voice related commands.
