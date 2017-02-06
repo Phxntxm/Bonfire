@@ -186,8 +186,6 @@ class Music:
         if state.voice is None:
             return
         voice_channel = state.voice.channel
-        if voice_channel != before.voice.voice_channel and voice_channel != after.voice.voice_channel:
-            return
         num_members = len(voice_channel.voice_members)
         state.required_skips = math.ceil((num_members + 1) / 3)
 
@@ -295,6 +293,10 @@ class Music:
         if my_channel != author_channel:
             await self.bot.say("You are not currently in the channel; please join before trying to request a song.")
             return
+
+        # Set the number of required skips to start
+        num_members = len(my_channel.voice_members)
+        state.required_skips = math.ceil((num_members + 1) / 3)
 
         # Create the player, and check if this was successful
         # Here all we want is to get the information of the player

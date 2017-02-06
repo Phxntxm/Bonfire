@@ -46,8 +46,8 @@ class Twitch:
         # Loop through as long as the bot is connected
         try:
             while not self.bot.is_closed:
-                twitch = await config.get_content('twitch', {'notifications_on': 1})
-                # Online/offline is based on whether they are set to such, in the config file
+                twitch = await utils.get_content('twitch', {'notifications_on': 1})
+                # Online/offline is based on whether they are set to such, in the utils file
                 # This means they were detected as online/offline before and we check for a change
                 online_users = {data['member_id']: data for data in twitch if data['live']}
                 offline_users = {data['member_id']: data for data in twitch if not data['live']}
@@ -62,7 +62,7 @@ class Twitch:
                             server = self.bot.get_server(server_id)
                             if server is None:
                                 continue
-                            server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
+                            server_alerts = await utils.get_content('server_alerts', {'server_id': server_id})
                             try:
                                 channel_id = server_alerts[0]['channel_id']
                             except (IndexError, TypeError):
@@ -75,7 +75,7 @@ class Twitch:
 
                             fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
                             await self.bot.send_message(channel, fmt)
-                        await config.update_content('twitch', {'live': 1}, {'member_id': m_id})
+                        await utils.update_content('twitch', {'live': 1}, {'member_id': m_id})
                 for m_id, result in online_users.items():
                     # Get their url and their user based on that url
                     url = result['twitch_url']
@@ -87,7 +87,7 @@ class Twitch:
                             server = self.bot.get_server(server_id)
                             if server is None:
                                 continue
-                            server_alerts = await config.get_content('server_alerts', {'server_id': server_id})
+                            server_alerts = await utils.get_content('server_alerts', {'server_id': server_id})
                             channel_id = server_id
                             if len(server_alerts) > 0:
                                 channel_id = server_alerts[0].get('channel_id')
@@ -97,7 +97,7 @@ class Twitch:
                             fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
                                 member.display_name, url)
                             await self.bot.send_message(channel, fmt)
-                        await config.update_content('twitch', {'live': 0}, {'member_id': m_id})
+                        await utils.update_content('twitch', {'live': 0}, {'member_id': m_id})
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
