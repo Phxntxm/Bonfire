@@ -189,6 +189,123 @@ class Music:
         num_members = len(voice_channel.voice_members)
         state.required_skips = math.ceil((num_members + 1) / 3)
 
+    async def queue_embed_task(self, state, channel, author):
+        index = 0
+        message = None
+        fmt = None
+        # Our check to ensure the only one who reacts is the bot
+        def check(reaction, user):
+            return user == author
+        possible_reactions = ['\u27A1', '\u2B05', '\u2b06', '\u2b07', '\u274c']
+        while True:
+            # Get the current queue (It might change while we're doing this)
+            # So do this in the while loop
+            queue = state.songs.entries
+            count = len(queue)
+            # This means the last song was removed
+            if count == 0:
+                await self.bot.send_message(channel, "Nothing currently in the queue")
+                break
+            # Get the current entry
+            entry = queue[index]
+            # Get the entry's embed
+            embed = entry.to_embed()
+            # Set the embed's title to indicate the amount of things in the queue
+            count = len(queue)
+            embed.title = "Current Queue [{}/{}]".format(index+1, count)
+            # Now we need to send the embed, so check if the message is already set
+            # If not, then we need to send a new one (i.e. this is the first time called)
+            if message:
+                message = await self.bot.edit_message(message, fmt, embed=embed)
+                # There's only one reaction we want to make sure we remove in the circumstances
+                # If the member doesn't have kick_members permissions, and isn't the requester
+                # Then they can't remove the song, otherwise they can
+                if not author.server_permissions.kick_members and author != entry.requester:
+                    try:
+                        await self.bot.remove_reaction(message, '\u274c', channel.server.me)
+                    except:
+                        pass
+                elif not author.server_permissions.kick_members and author == entry.requester:
+                    try:
+                        await self.bot.add_reaction(message, '\u274c')
+                    except:
+                        pass
+            else:
+                message = await self.bot.send_message(channel, embed=embed)
+                await self.bot.add_reaction(message, '\N{LEFTWARDS BLACK ARROW}')
+                await self.bot.add_reaction(message, '\N{BLACK RIGHTWARDS ARROW}')
+                # The moderation tools that can be used
+                if author.server_permissions.kick_members:
+                    await self.bot.add_reaction(message, '\N{DOWNWARDS BLACK ARROW}')
+                    await self.bot.add_reaction(message, '\N{UPWARDS BLACK ARROW}')
+                    await self.bot.add_reaction(message, '\N{CROSS MARK}')
+                elif author == entry.requester:
+                    await self.bot.add_reaction(message, '\N{CROSS MARK}')
+            # Reset the fmt message
+            fmt = None
+            # Now we wait for the next reaction
+            res = await self.bot.wait_for_reaction(possible_reactions, message=message, check=check, timeout=180)
+            if res is None:
+                break
+            else:
+                reaction, user = res
+            # Now we can prepare for the next embed to be sent
+            # If right is clicked
+            if '\u27A1' in reaction.emoji:
+                index += 1
+                if index >= count:
+                    index = 0
+            # If left is clicked
+            elif '\u2B05' in reaction.emoji:
+                index -= 1
+                if index < 0:
+                    index = count - 1
+            # If up is clicked
+            elif '\u2b06' in reaction.emoji:
+                # A second check just to make sure, as well as ensuring index is higher than 0
+                if author.server_permissions.kick_members and index > 0:
+                    if entry != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    else:
+                        # Remove the current entry
+                        del queue[index]
+                        # Add it one position higher
+                        queue.insert(index - 1, entry)
+                        # Lets move the index to look at the new place of the entry
+                        index -= 1
+            # If down is clicked
+            elif '\u2b07' in reaction.emoji:
+                # A second check just to make sure, as well as ensuring index is lower than last
+                if author.server_permissions.kick_members and index < (count - 1):
+                    if entry != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    else:
+                        # Remove the current entry
+                        del queue[index]
+                        # Add it one position lower
+                        queue.insert(index + 1, entry)
+                        # Lets move the index to look at the new place of the entry
+                        index += 1
+            # If x is clicked
+            elif '\u274c' in reaction.emoji:
+                # A second check just to make sure
+                if author.server_permissions.kick_members or author == entry.requester:
+                    if entry != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    else:
+                        # Simply remove the entry in place
+                        del queue[index]
+                        # This is the only check we need to make, to ensure index is now not more than last
+                        new_count = count - 1
+                        if index >= new_count:
+                            index = new_count - 1
+            try:
+                await self.bot.remove_reaction(message, reaction.emoji, user)
+            except discord.Forbidden:
+                pass
+        await self.bot.delete_message(message)
+
+
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def progress(self, ctx):
@@ -394,8 +511,9 @@ class Music:
         # Then erase the voice_state entirely, and disconnect from the channel
         try:
             state.audio_player.cancel()
+            state.clear_audio_files()
+            await self.remove_voice_client(ctx.message.server)
             del self.voice_states[server.id]
-            await state.voice.disconnect()
         except:
             pass
 
@@ -451,10 +569,9 @@ class Music:
         # Asyncio provides no non-private way to access the queue, so we have to use _queue
         queue = state.songs.entries
         if len(queue) == 0:
-            fmt = "Nothing currently in the queue"
+            await self.bot.say("Nothing currently in the queue")
         else:
-            fmt = "\n\n".join(str(x) for x in queue)
-        await self.bot.say("Current songs in the queue:```\n{}```".format(fmt))
+            self.bot.loop.create_task(self.queue_embed_task(state, ctx.message.channel, ctx.message.author))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -516,8 +633,23 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing anything.')
         else:
+            # Create the embed object we'll use
+            embed = discord.Embed()
+            # Fill in the simple things
+            embed.add_field(name='Title', value=state.current.title, inline=False)
+            embed.add_field(name='Requester', value=state.current.requester.display_name, inline=False)
+            # Get the amount of current skips, and display how many have been skipped/how many required
             skip_count = len(state.skip_votes)
-            await self.bot.say('Now playing {} [skips: {}/{}]'.format(state.current, skip_count, state.required_skips))
+            embed.add_field(name='Skip Count', value='{}/{}'.format(skip_count, state.required_skips), inline=False)
+            # Get the current progress and display this
+            progress = state.current.progress
+            length = state.current.length
+            progress = divmod(round(progress, 0), 60)
+            length = divmod(round(length, 0), 60)
+            fmt = "{0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
+            embed.add_field(name='Progress', value=fmt,inline=False)
+            # And send the embed
+            await self.bot.say(embed=embed)
 
 
 def setup(bot):
