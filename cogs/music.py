@@ -9,6 +9,7 @@ import time
 import asyncio
 import re
 import os
+import glob
 import socket
 
 if not discord.opus.is_loaded():
@@ -122,6 +123,12 @@ class Music:
         down = Downloader(download_folder='audio_tmp')
         self.downloader = down
         self.bot.downloader = down
+        self.clear_audio_tmp()
+
+    def clear_audio_tmp(self):
+        files = glob.glob('audio_tmp/*')
+        for f in files:
+            os.remove(f)
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
