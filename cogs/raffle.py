@@ -75,7 +75,10 @@ class Raffle:
             # We don't have to wait for it however, so create a task for it
             r_filter = {'id': raffle_id}
             self.bot.loop.create_task(config.remove_content('raffles', r_filter))
-            await self.bot.send_message(server, fmt)
+            try:
+                await self.bot.send_message(server, fmt)
+            except discord.Forbidden:
+                pass
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
