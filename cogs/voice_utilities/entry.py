@@ -3,6 +3,7 @@ import json
 import os
 import traceback
 import time
+import discord
 
 from hashlib import md5
 from .exceptions import ExtractionError
@@ -270,5 +271,16 @@ class URLPlaylistEntry(BasePlaylistEntry):
             else:
                 # Move the temporary file to it's final location.
                 os.rename(unhashed_fname, self.filename)
-
-
+    def to_embed(self):
+        """Returns an embed that can be used to display information about this particular song"""
+        # Create the embed object we'll use
+        embed = discord.Embed()
+        # Fill in the simple things
+        embed.add_field(name='Title', value=self.title, inline=False)
+        embed.add_field(name='Requester', value=self.requester.display_name, inline=False)
+        # Get the current length of the song and display this
+        length = divmod(round(self.length, 0), 60)
+        fmt = "{0[0]}m {0[1]}s".format(length)
+        embed.add_field(name='Duration', value=fmt,inline=False)
+        # And return the embed we created
+        return embed

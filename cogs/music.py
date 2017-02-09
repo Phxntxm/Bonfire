@@ -9,6 +9,8 @@ import time
 import asyncio
 import re
 import os
+import glob
+import socket
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -33,6 +35,7 @@ class VoiceState:
         }
         self.volume = 50
         self.downloader = download
+        self.file_names = []
 
     def is_playing(self):
         # If our VoiceClient or current VoiceEntry do not exist, then we are not playing a song
@@ -58,8 +61,6 @@ class VoiceState:
             self.player.stop()
 
     def toggle_next(self):
-        # Delete the old file (screw caching, when on 5000+ Guilds this takes up too much space)
-        os.remove(self.current.filename)
         # Set the Event so that the next song in the queue can be played
         self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
 
@@ -74,6 +75,7 @@ class VoiceState:
 
             # Make sure we find a song
             while self.current is None:
+                self.clear_audio_files()
                 await asyncio.sleep(1)
                 self.current = await self.songs.get_next_entry()
 
@@ -81,6 +83,10 @@ class VoiceState:
             while not getattr(self.current, 'filename'):
                 print("Downloading...")
                 await asyncio.sleep(1)
+
+            # Now add this file to our list of filenames, so that it can be deleted later
+            if self.current.filename not in self.file_names:
+                self.file_names.append(self.current.filename)
 
             # Create the player object
             self.current.player = self.voice.create_ffmpeg_player(
@@ -100,6 +106,11 @@ class VoiceState:
             # Wait till the Event has been set, before doing our task again
             await self.play_next_song.wait()
 
+    def clear_audio_files(self):
+        """Deletes all the audio files this guild has created"""
+        for f in self.file_names:
+            os.remove(f)
+        self.file_names = []
 
 class Music:
     """Voice related commands.
@@ -112,6 +123,12 @@ class Music:
         down = Downloader(download_folder='audio_tmp')
         self.downloader = down
         self.bot.downloader = down
+        self.clear_audio_tmp()
+
+    def clear_audio_tmp(self):
+        files = glob.glob('audio_tmp/*')
+        for f in files:
+            os.remove(f)
 
     def get_voice_state(self, server):
         state = self.voice_states.get(server.id)
@@ -132,17 +149,22 @@ class Music:
         server = channel.server
         state = self.get_voice_state(server)
         voice = self.bot.voice_client_in(server)
+        # Attempt 3 times
+        for i in range(3):
+            try:
+                if voice is None:
+                    state.voice = await self.bot.join_voice_channel(channel)
+                    return True
+                elif voice.channel == channel:
+                    state.voice = voice
+                    return True
+                else:
+                    await voice.disconnect()
+                    state.voice = await self.bot.join_voice_channel(channel)
+                    return True
+            except (discord.ClientException, socket.gaierror):
+                continue
 
-        if voice is None:
-            state.voice = await self.bot.join_voice_channel(channel)
-            return True
-        elif voice.channel == channel:
-            state.voice = voice
-            return True
-        else:
-            await voice.disconnect()
-            state.voice = await self.bot.join_voice_channel(channel)
-            return True
 
     async def remove_voice_client(self, server):
         """Removes any voice clients from a server
@@ -171,10 +193,125 @@ class Music:
         if state.voice is None:
             return
         voice_channel = state.voice.channel
-        if voice_channel != before.voice.voice_channel and voice_channel != after.voice.voice_channel:
-            return
         num_members = len(voice_channel.voice_members)
         state.required_skips = math.ceil((num_members + 1) / 3)
+
+    async def queue_embed_task(self, state, channel, author):
+        index = 0
+        message = None
+        fmt = None
+        # Our check to ensure the only one who reacts is the bot
+        def check(reaction, user):
+            return user == author
+        possible_reactions = ['\u27A1', '\u2B05', '\u2b06', '\u2b07', '\u274c']
+        while True:
+            # Get the current queue (It might change while we're doing this)
+            # So do this in the while loop
+            queue = state.songs.entries
+            count = len(queue)
+            # This means the last song was removed
+            if count == 0:
+                await self.bot.send_message(channel, "Nothing currently in the queue")
+                break
+            # Get the current entry
+            entry = queue[index]
+            # Get the entry's embed
+            embed = entry.to_embed()
+            # Set the embed's title to indicate the amount of things in the queue
+            count = len(queue)
+            embed.title = "Current Queue [{}/{}]".format(index+1, count)
+            # Now we need to send the embed, so check if the message is already set
+            # If not, then we need to send a new one (i.e. this is the first time called)
+            if message:
+                message = await self.bot.edit_message(message, fmt, embed=embed)
+                # There's only one reaction we want to make sure we remove in the circumstances
+                # If the member doesn't have kick_members permissions, and isn't the requester
+                # Then they can't remove the song, otherwise they can
+                if not author.server_permissions.kick_members and author != entry.requester:
+                    try:
+                        await self.bot.remove_reaction(message, '\u274c', channel.server.me)
+                    except:
+                        pass
+                elif not author.server_permissions.kick_members and author == entry.requester:
+                    try:
+                        await self.bot.add_reaction(message, '\u274c')
+                    except:
+                        pass
+            else:
+                message = await self.bot.send_message(channel, embed=embed)
+                await self.bot.add_reaction(message, '\N{LEFTWARDS BLACK ARROW}')
+                await self.bot.add_reaction(message, '\N{BLACK RIGHTWARDS ARROW}')
+                # The moderation tools that can be used
+                if author.server_permissions.kick_members:
+                    await self.bot.add_reaction(message, '\N{DOWNWARDS BLACK ARROW}')
+                    await self.bot.add_reaction(message, '\N{UPWARDS BLACK ARROW}')
+                    await self.bot.add_reaction(message, '\N{CROSS MARK}')
+                elif author == entry.requester:
+                    await self.bot.add_reaction(message, '\N{CROSS MARK}')
+            # Reset the fmt message
+            fmt = None
+            # Now we wait for the next reaction
+            res = await self.bot.wait_for_reaction(possible_reactions, message=message, check=check, timeout=180)
+            if res is None:
+                break
+            else:
+                reaction, user = res
+            # Now we can prepare for the next embed to be sent
+            # If right is clicked
+            if '\u27A1' in reaction.emoji:
+                index += 1
+                if index >= count:
+                    index = 0
+            # If left is clicked
+            elif '\u2B05' in reaction.emoji:
+                index -= 1
+                if index < 0:
+                    index = count - 1
+            # If up is clicked
+            elif '\u2b06' in reaction.emoji:
+                # A second check just to make sure, as well as ensuring index is higher than 0
+                if author.server_permissions.kick_members and index > 0:
+                    if entry != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    else:
+                        # Remove the current entry
+                        del queue[index]
+                        # Add it one position higher
+                        queue.insert(index - 1, entry)
+                        # Lets move the index to look at the new place of the entry
+                        index -= 1
+            # If down is clicked
+            elif '\u2b07' in reaction.emoji:
+                # A second check just to make sure, as well as ensuring index is lower than last
+                if author.server_permissions.kick_members and index < (count - 1):
+                    if entry != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    else:
+                        # Remove the current entry
+                        del queue[index]
+                        # Add it one position lower
+                        queue.insert(index + 1, entry)
+                        # Lets move the index to look at the new place of the entry
+                        index += 1
+            # If x is clicked
+            elif '\u274c' in reaction.emoji:
+                # A second check just to make sure
+                if author.server_permissions.kick_members or author == entry.requester:
+                    if entry != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    else:
+                        # Simply remove the entry in place
+                        del queue[index]
+                        # This is the only check we need to make, to ensure index is now not more than last
+                        new_count = count - 1
+                        if index >= new_count:
+                            index = new_count - 1
+            try:
+                await self.bot.remove_reaction(message, reaction.emoji, user)
+            except discord.Forbidden:
+                pass
+        await self.bot.delete_message(message)
+
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -281,6 +418,10 @@ class Music:
             await self.bot.say("You are not currently in the channel; please join before trying to request a song.")
             return
 
+        # Set the number of required skips to start
+        num_members = len(my_channel.voice_members)
+        state.required_skips = math.ceil((num_members + 1) / 3)
+
         # Create the player, and check if this was successful
         # Here all we want is to get the information of the player
         song = re.sub('[<>\[\]]', '', song)
@@ -289,8 +430,8 @@ class Music:
             _entry, position = await state.songs.add_entry(song, ctx.message.author)
         except WrongEntryTypeError:
             # This means that a song was attempted to be searched, instead of a link provided
-            info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
             try:
+                info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
                 song = info.get('entries', [])[0]['webpage_url']
             except IndexError:
                 await self.bot.send_message(ctx.message.channel, "No results found for {}!".format(song))
@@ -310,6 +451,7 @@ class Music:
                 fmt = "Sorry but I couldn't download that! Either you provided a playlist, a streamed link, or " \
                       "a page that is not supported to download."
                 await self.bot.send_message(ctx.message.channel, fmt)
+                return
         except ExtractionError as e:
             # This gets the youtube_dl error, instead of our error raised
             error = str(e).split("\n\n")[1]
@@ -376,8 +518,9 @@ class Music:
         # Then erase the voice_state entirely, and disconnect from the channel
         try:
             state.audio_player.cancel()
+            state.clear_audio_files()
+            await self.remove_voice_client(ctx.message.server)
             del self.voice_states[server.id]
-            await state.voice.disconnect()
         except:
             pass
 
@@ -433,10 +576,9 @@ class Music:
         # Asyncio provides no non-private way to access the queue, so we have to use _queue
         queue = state.songs.entries
         if len(queue) == 0:
-            fmt = "Nothing currently in the queue"
+            await self.bot.say("Nothing currently in the queue")
         else:
-            fmt = "\n\n".join(str(x) for x in queue)
-        await self.bot.say("Current songs in the queue:```\n{}```".format(fmt))
+            self.bot.loop.create_task(self.queue_embed_task(state, ctx.message.channel, ctx.message.author))
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.custom_perms(send_messages=True)
@@ -498,8 +640,23 @@ class Music:
         if not state.is_playing():
             await self.bot.say('Not playing anything.')
         else:
+            # Create the embed object we'll use
+            embed = discord.Embed()
+            # Fill in the simple things
+            embed.add_field(name='Title', value=state.current.title, inline=False)
+            embed.add_field(name='Requester', value=state.current.requester.display_name, inline=False)
+            # Get the amount of current skips, and display how many have been skipped/how many required
             skip_count = len(state.skip_votes)
-            await self.bot.say('Now playing {} [skips: {}/{}]'.format(state.current, skip_count, state.required_skips))
+            embed.add_field(name='Skip Count', value='{}/{}'.format(skip_count, state.required_skips), inline=False)
+            # Get the current progress and display this
+            progress = state.current.progress
+            length = state.current.length
+            progress = divmod(round(progress, 0), 60)
+            length = divmod(round(length, 0), 60)
+            fmt = "{0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
+            embed.add_field(name='Progress', value=fmt,inline=False)
+            # And send the embed
+            await self.bot.say(embed=embed)
 
 
 def setup(bot):

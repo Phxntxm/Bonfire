@@ -55,7 +55,7 @@ class Music:
         This command automatically searches as well from YouTube.
         The list of supported sites can be found here:
         https://rg3.github.io/youtube-dl/supportedsites.html
-        
+
         EXAMPLE: !play Song by Band
         RESULT: Song by Band will be queued to play!
         """
@@ -110,7 +110,12 @@ class Music:
     @commands.command(pass_context=True, no_pm=True, enabled=False)
     @checks.custom_perms(send_messages=True)
     async def queue(self, ctx):
-        """Provides a printout of the songs that are in the queue
+        """Provides a printout of the songs that are in the queue.
+        \N{LEFTWARDS BLACK ARROW}: Goes to the previous page
+        \N{BLACK RIGHTWARDS ARROW}: Goes to the next page
+        \N{DOWNWARDS BLACK ARROW}: Moves the current song showing back in the queue
+        \N{UPWARDS BLACK ARROW}: Moves the current song showing up in the queue
+        \N{CROSS MARK}: Removes the current song showing from the queue
 
         EXAMPLE: !queue
         RESULT: A list of shitty songs you probably don't wanna listen to"""
