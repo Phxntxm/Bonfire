@@ -76,7 +76,7 @@ class Core:
 
         if cmd is None:
             entries = sorted(utils.get_all_commands(self.bot))
-            pages = utils.Pages(self.bot, message=ctx.message, entires=entries)
+            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
             await pages.paginate()
         else:
             # Get the description for a command
