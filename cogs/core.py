@@ -1,8 +1,7 @@
 import discord
 from discord.ext import commands
-from .utils import checks
-from .utils import config
-from .utils import utilities
+
+from . import utils
 
 import subprocess
 import glob
@@ -23,119 +22,6 @@ class Core:
         self.help_embeds = {}
         self.results_per_page = 10
         self.commands = None
-
-    async def on_reaction_add(self, reaction, user):
-        # Make sure that this is a normal user who pressed the button
-        # Also make sure that this is even a message we should be paying attention to
-        if user.bot or reaction.message.id not in self.help_embeds:
-            return
-
-        # If right is clicked
-        if '\u27A1' in reaction.emoji:
-            embed = self.next_page(reaction.message.id)
-        # If left is clicked
-        elif '\u2B05' in reaction.emoji:
-            embed = self.prev_page(reaction.message.id)
-        else:
-            return
-
-        await self.bot.edit_message(reaction.message, embed=embed)
-        try:
-            await self.bot.remove_reaction(reaction.message, reaction.emoji, user)
-        except discord.Forbidden:
-            pass
-
-    async def on_reaction_remove(self, reaction, user):
-        # Make sure that this is a normal user who pressed the button
-        # Also make sure that this is even a message we should be paying attention to
-        # We need reaction_add and reaction_move for cases like PM's, where the bot cannot remove a reaction
-        # This causes an error when the bot tries to remove the reaction, leaving it in place
-        # So the next click from a user will remove it, not add it.
-        if user.bot or reaction.message.id not in self.help_embeds:
-            return
-
-        # If right is clicked
-        if '\u27A1' in reaction.emoji:
-            embed = self.next_page(reaction.message.id)
-        # If left is clicked
-        elif '\u2B05' in reaction.emoji:
-            embed = self.prev_page(reaction.message.id)
-        else:
-            return
-
-        await self.bot.edit_message(reaction.message, embed=embed)
-        try:
-            await self.bot.remove_reaction(reaction.message, reaction.emoji, user)
-        except discord.Forbidden:
-            pass
-
-    def determine_commands(self, page):
-        """Returns the list of commands to use per page"""
-
-        end_index = self.results_per_page * page
-        start_index = end_index - self.results_per_page
-
-        return self.commands[start_index:end_index]
-
-    def prev_page(self, message_id):
-        """Goes to the previus page"""
-        total_commands = len(self.commands)
-        # Increase the page count by one
-        page = self.help_embeds.get(message_id) - 1
-
-        total_pages = math.ceil(total_commands / self.results_per_page)
-
-        # If we hit the zeroith page, set to the very last page
-        if page <= 0:
-            page = total_pages
-        # Set the new page
-        self.help_embeds[message_id] = page
-        # Now create our new embed
-        return self.create_help_embed(message_id=message_id)
-
-    def next_page(self, message_id):
-        """Goes to the next page for this message"""
-        total_commands = len(self.commands)
-        # Increase the page count by one
-        page = self.help_embeds.get(message_id) + 1
-
-        total_pages = math.ceil(total_commands / self.results_per_page)
-
-        # Make sure we don't reach past what we should; if we do, reset to page 1
-        if page > total_pages:
-            page = 1
-
-        # Set the new page
-        self.help_embeds[message_id] = page
-        # Now create our new embed
-        return self.create_help_embed(message_id=message_id)
-
-    def create_help_embed(self, message_id=None, page=1):
-        # If a message_id is provided, we need to get the new page (this is being sent by next/prev page buttons)
-        if message_id is not None:
-            page = self.help_embeds.get(message_id)
-
-        # Refresh our command list
-        self.commands = sorted(utilities.get_all_commands(self.bot))
-
-        # Calculate the total amount of pages needed
-        total_commands = len(self.commands)
-        total_pages = math.ceil(total_commands / self.results_per_page)
-
-        # Lets make sure that if a page was provided, it is within our range of pages available
-        if page < 1 or page > total_pages:
-            page = 1
-
-        # First create the embed object
-        opts = {"title": "Command List [{}/{}]".format(page, total_pages),
-                "description": "Run help on a specific command for more information on it!"}
-        embed = discord.Embed(**opts)
-
-        # Add each field for the commands for this page
-        fmt = "\n".join(self.determine_commands(page))
-        embed.add_field(name="Commands", value=fmt, inline=False)
-
-        return embed
 
     def find_command(self, command):
         # This method ensures the command given is valid. We need to loop through commands
@@ -161,7 +47,7 @@ class Core:
         return cmd
 
     @commands.command(pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def help(self, ctx, *, message=None):
         """This command is used to provide a link to the help URL.
         This can be called on a command to provide more information about that command
@@ -189,14 +75,9 @@ class Core:
                 cmd = self.find_command(message)
 
         if cmd is None:
-            embed = self.create_help_embed(page=page)
-            msg = await self.bot.say(embed=embed)
-
-            # Add the arrows for previous and next page
-            await self.bot.add_reaction(msg, '\N{LEFTWARDS BLACK ARROW}')
-            await self.bot.add_reaction(msg, '\N{BLACK RIGHTWARDS ARROW}')
-            # The only thing we need to record about this message, is the page number, starting at 1
-            self.help_embeds[msg.id] = page
+            entries = sorted(utils.get_all_commands(self.bot))
+            pages = utils.Pages(self.bot, message=ctx.message, entires=entries)
+            await pages.paginate()
         else:
             # Get the description for a command
             description = cmd.help
@@ -209,7 +90,7 @@ class Core:
                 example = None
                 result = None
             # Also get the subcommands for this command, if they exist
-            subcommands = [x for x in utilities._get_all_commands(cmd) if x != cmd.qualified_name]
+            subcommands = [x for x in utils._get_all_commands(cmd) if x != cmd.qualified_name]
 
             # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
             embed = discord.Embed(title=cmd.qualified_name)
@@ -226,7 +107,7 @@ class Core:
             await self.bot.say(embed=embed)
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def motd(self, *, date=None):
         """This command can be used to print the current MOTD (Message of the day)
         This will most likely not be updated every day, however messages will still be pushed to this every now and then
@@ -234,7 +115,7 @@ class Core:
         EXAMPLE: !motd
         RESULT: 'This is an example message of the day!'"""
         if date is None:
-            motd = await config.get_content('motd')
+            motd = await utils.get_content('motd')
             try:
                 # Lets set this to the first one in the list first
                 latest_motd = motd[0]
@@ -256,7 +137,7 @@ class Core:
         else:
             try:
                 r_filter = pendulum.parse(date)
-                motd = await config.get_content('motd', r_filter)
+                motd = await utils.get_content('motd', r_filter)
                 date = motd[0]['date']
                 motd = motd[0]['motd']
                 fmt = "Message of the day for {}:\n\n{}".format(date, motd)
@@ -270,7 +151,7 @@ class Core:
                 await self.bot.say("Invalid date format! Try like {}".format(now))
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def calendar(self, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month
@@ -309,14 +190,14 @@ class Core:
         await self.bot.say("```\n{}```".format(cal))
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def info(self):
         """This command can be used to print out some of my information"""
         # fmt is a dictionary so we can set the key to it's output, then print both
         # The only real use of doing it this way is easier editing if the info
         # in this command is changed
 
-        bot_data = await config.get_content('bot_data')
+        bot_data = await utils.get_content('bot_data')
         total_data = {'member_count': 0,
                       'server_count': 0}
         for entry in bot_data:
@@ -326,7 +207,7 @@ class Core:
         # Create the original embed object
         opts = {'title': 'Dev Server',
                 'description': 'Join the server above for any questions/suggestions about me.',
-                'url': config.dev_server}
+                'url': utils.dev_server}
         embed = discord.Embed(**opts)
 
         # Add the normal values
@@ -359,7 +240,7 @@ class Core:
         await self.bot.say(embed=embed)
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def uptime(self):
         """Provides a printout of the current bot's uptime
 
@@ -368,7 +249,7 @@ class Core:
         await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
 
     @commands.command(aliases=['invite'])
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def addbot(self):
         """Provides a link that you can use to add me to a server
 
@@ -389,7 +270,7 @@ class Core:
                            .format(discord.utils.oauth_url(app_info.id, perms)))
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def doggo(self):
         """Use this to print a random doggo image.
 
@@ -401,7 +282,7 @@ class Core:
             await self.bot.upload(f)
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def snek(self):
         """Use this to print a random snek image.
 
@@ -413,7 +294,7 @@ class Core:
             await self.bot.upload(f)
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def joke(self):
         """Prints a random riddle
 
@@ -432,7 +313,7 @@ class Core:
                 break
 
     @commands.command(pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
         Format should be #d#
