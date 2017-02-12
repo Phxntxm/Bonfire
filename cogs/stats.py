@@ -1,9 +1,8 @@
 import discord
 from discord.ext import commands
 
-from .utils import config
-from .utils import checks
-from .utils import images
+
+from . import utils
 
 import re
 
@@ -30,7 +29,7 @@ class Stats:
         return cmd
 
     @commands.command(no_pm=True, pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def serverinfo(self, ctx):
         """Provides information about the server
 
@@ -65,12 +64,12 @@ class Stats:
         await self.bot.say(embed=embed)
 
     @commands.group(no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def command(self):
         pass
 
     @command.command(no_pm=True, pass_context=True, name="stats")
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def command_stats(self, ctx, *, command):
         """This command can be used to view some usage stats about a specific command
 
@@ -82,7 +81,7 @@ class Stats:
             return
 
         r_filter = {'command': cmd.qualified_name}
-        command_stats = await config.get_content('command_usage', r_filter)
+        command_stats = await utils.get_content('command_usage', r_filter)
         try:
             command_stats = command_stats[0]
         except TypeError:
@@ -109,7 +108,7 @@ class Stats:
             await self.bot.say(fmt)
 
     @command.command(no_pm=True, pass_context=True, name="leaderboard")
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def command_leaderboard(self, ctx, option="server"):
         """This command can be used to print a leaderboard of commands
         Provide 'server' to print a leaderboard for this server
@@ -120,7 +119,7 @@ class Stats:
         if re.search('(author|me)', option):
             author = ctx.message.author
             # First lets get all the command usage
-            command_stats = await config.get_content('command_usage')
+            command_stats = await utils.get_content('command_usage')
             # Now use a dictionary comprehension to get just the command name, and usage
             # Based on the author's usage of the command
             stats = {data['command']: data['member_usage'].get(author.id) for data in command_stats
@@ -142,7 +141,7 @@ class Stats:
         elif re.search('server', option):
             # This is exactly the same as above, except server usage instead of member usage
             server = ctx.message.server
-            command_stats = await config.get_content('command_usage')
+            command_stats = await utils.get_content('command_usage')
             stats = {data['command']: data['server_usage'].get(server.id) for data in command_stats
                      if data['server_usage'].get(server.id, 0) > 0}
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
@@ -154,14 +153,14 @@ class Stats:
             await self.bot.say("That is not a valid option, valid options are: `server` or `me`")
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times
 
         EXAMPLE: !mostboops
         RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
         r_filter = {'member_id': ctx.message.author.id}
-        boops = await config.get_content('boops', r_filter)
+        boops = await utils.get_content('boops', r_filter)
         if boops is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -182,17 +181,17 @@ class Stats:
 
         member = discord.utils.find(lambda m: m.id == most_id, self.bot.get_all_members())
         await self.bot.say("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
-            ctx.message.author.mention, member.mention, most_boops))
+            ctx.message.author.mention, member.display_name, most_boops))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times
 
         EXAMPLE: !listboops
         RESULT: The list of your booped members!"""
         r_filter = {'member_id': ctx.message.author.id}
-        boops = await config.get_content('boops', r_filter)
+        boops = await utils.get_content('boops', r_filter)
         if boops is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -219,7 +218,7 @@ class Stats:
             await self.bot.say("You have booped:```\n{}```".format(output))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record
 
@@ -227,32 +226,24 @@ class Stats:
         RESULT: A leaderboard of this server's battle records"""
         # Create a list of the ID's of all members in this server, for comparison to the records saved
         server_member_ids = [member.id for member in ctx.message.server.members]
-        battles = await config.get_content('battle_records')
+        battles = await utils.get_content('battle_records')
         battles = [battle for battle in battles if battle['member_id'] in server_member_ids]
 
         # Sort the members based on their rating
         sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)
 
         output = []
-        count = 1
         for x in sorted_members:
             member_id = x['member_id']
             rating = x['rating']
             member = ctx.message.server.get_member(member_id)
-            output.append((count, "{} (Rating: {})".format(member.display_name, rating)))
-            count += 1
-            if count >= 11:
-                break
+            output.append("{} (Rating: {})".format(member.display_name, rating))
 
-        try:
-            banner = await images.create_banner(ctx.message.author, "Battling Leaderboard", output)
-            await self.bot.upload(banner)
-        except (FileNotFoundError, discord.Forbidden):
-            fmt = "\n".join("#{}) {}".format(key, value) for key, value in output)
-            await self.bot.say("Battling leaderboard for this server:```\n{}```".format(fmt))
+        pages = utils.Pages(self.bot, message=ctx.message, entries=output, per_page=10)
+        await pages.paginate()
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def stats(self, ctx, member: discord.Member = None):
         """Prints the battling stats for you, or the user provided
 
@@ -262,7 +253,7 @@ class Stats:
 
         # For this one, we don't want to pass a filter, as we do need all battle records
         # We need this because we want to make a comparison for overall rank
-        all_members = await config.get_content('battle_records')
+        all_members = await utils.get_content('battle_records')
 
         # Make a list comprehension to just check if the user has battled
         if len([entry for entry in all_members if entry['member_id'] == member.id]) == 0:
