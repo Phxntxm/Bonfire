@@ -58,13 +58,6 @@ class Core:
 
         cmd = None
         page = 1
-        if ctx.message.server:
-            perms = ctx.message.server.me.permissions_in(ctx.message.channel)
-            if not (perms.embed_links and perms.add_reactions):
-                fmt = "I need the permissions `embed_links` and `add_reactions` to send my help message! " \
-                      " Otherwise you can use this link to view available commands {}".format(
-                      "http://bonfirebot.readthedocs.io/en/latest/")
-                await self.bot.say(fmt)
 
         if message is not None:
             # If something is provided, it can either be the page number or a command
@@ -76,8 +69,8 @@ class Core:
 
         if cmd is None:
             entries = sorted(utils.get_all_commands(self.bot))
-            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
             try:
+                pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await self.bot.say(str(e))

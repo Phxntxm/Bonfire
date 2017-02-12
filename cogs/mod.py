@@ -448,9 +448,9 @@ class Mod:
             return
 
         if rule is None:
-            pages = utils.Pages(self.bot, message=ctx.message, entries=rules, per_page=5)
-            pages.title = "Rules for {}".format(ctx.message.server.name)
             try:
+                pages = utils.Pages(self.bot, message=ctx.message, entries=rules, per_page=5)
+                pages.title = "Rules for {}".format(ctx.message.server.name)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await self.bot.say(str(e))

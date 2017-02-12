@@ -238,8 +238,8 @@ class Stats:
             member = ctx.message.server.get_member(member_id)
             output.append("{} (Rating: {})".format(member.display_name, rating))
 
-        pages = utils.Pages(self.bot, message=ctx.message, entries=output, per_page=10)
         try:
+            pages = utils.Pages(self.bot, message=ctx.message, entries=output)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await self.bot.say(str(e))
