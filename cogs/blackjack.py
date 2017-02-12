@@ -86,7 +86,7 @@ class Blackjack:
     @blackjack.command(pass_context=True, no_pm=True, name='forcestop', aliases=['stop'])
     @utils.custom_perms(manage_server=True)
     async def blackjack_stop(self, ctx):
-        """Forces the game to stop, mostly for use if someone has gone afk 
+        """Forces the game to stop, mostly for use if someone has gone afk
 
         EXAMPLE: !blackjack forcestop
         RESULT: No more blackjack spam"""
@@ -202,7 +202,7 @@ class Game:
         # The channel we'll send messages to
         self.channel = message.channel
 
-        # People can join in on this game, but lets make sure we don't go over the limit however 
+        # People can join in on this game, but lets make sure we don't go over the limit however
         self._max_players = 10
 
         # Lets create our main deck, and shuffle it
@@ -379,6 +379,11 @@ class Game:
 
         for entry in self.players:
             player = entry['player']
+            # Quick check here to ensure the player isn't someone who got added
+            # Specifically right after the betting phase
+            if not hasattr(player, 'bet'):
+                continue
+
             hand = player.hand
             count = max(player.count)
 
