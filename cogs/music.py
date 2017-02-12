@@ -165,7 +165,8 @@ class Music:
                     # This shouldn't theoretically ever happen yet it does. Thanks Discord
                     await voice.disconnect()
                     state.voice = await self.bot.join_voice_channel(channel)
-                    return True
+                    if state.voice:
+                        return True
             except (discord.ClientException, socket.gaierror):
                 continue
 
