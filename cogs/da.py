@@ -77,6 +77,8 @@ class Deviantart:
                     if result is None:
                         params['username'] = da_name
                         data = await utils.request(self.base_url, payload=params)
+                        if data is None:
+                            continue
 
                         result = data['results'][0]
                         cache[da_name] = result
