@@ -19,7 +19,7 @@ def get_all_commands(bot):
 
     return all_commands
 
-def _get_all_commands(command):
+def get_all_commands(command):
     yield command.qualified_name
     try:
         non_aliases = set(cmd.name for cmd in command.commands.values())
