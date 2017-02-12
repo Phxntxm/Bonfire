@@ -239,7 +239,10 @@ class Stats:
             output.append("{} (Rating: {})".format(member.display_name, rating))
 
         pages = utils.Pages(self.bot, message=ctx.message, entries=output, per_page=10)
-        await pages.paginate()
+        try:
+            await pages.paginate()
+        except utils.CannotPaginate as e:
+            await self.bot.say(str(e))
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)

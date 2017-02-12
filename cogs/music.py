@@ -167,13 +167,13 @@ class Music:
                     state.voice = await self.bot.join_voice_channel(channel)
                     if state.voice:
                         return True
-            except (discord.ClientException, socket.gaierror):
+            except (discord.ClientException, socket.gaierror, ConnectionResetError):
                 continue
 
         return False
 
 
-    async def remove_voice_client(self, server):
+    async def remove_voice_client(self, server):greendsi_webimsuan
         """Removes any voice clients from a server
         This is sometimes needed, due to the unreliability of Discord's voice connection
         We do not want to end up with a voice client stuck somewhere, so this cancels any found for a server"""
