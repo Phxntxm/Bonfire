@@ -146,6 +146,8 @@ class Music:
     async def create_voice_client(self, channel):
         """Creates a voice client and saves it"""
         # First join the channel and get the VoiceClient that we'll use to save per server
+        await self.remove_voice_client(channel.server)
+
         server = channel.server
         state = self.get_voice_state(server)
         voice = self.bot.voice_client_in(server)
@@ -154,16 +156,20 @@ class Music:
             try:
                 if voice is None:
                     state.voice = await self.bot.join_voice_channel(channel)
-                    return True
+                    if state.voice:
+                        return True
                 elif voice.channel == channel:
                     state.voice = voice
                     return True
                 else:
+                    # This shouldn't theoretically ever happen yet it does. Thanks Discord
                     await voice.disconnect()
                     state.voice = await self.bot.join_voice_channel(channel)
                     return True
             except (discord.ClientException, socket.gaierror):
                 continue
+
+        return False
 
 
     async def remove_voice_client(self, server):
@@ -412,6 +418,12 @@ class Music:
 
         author_channel = ctx.message.author.voice.voice_channel
         my_channel = ctx.message.server.me.voice.voice_channel
+
+        if my_channel is None:
+            # If we're here this means that after 3 attempts...4 different "failsafes"...
+            # Discord has returned saying the connection was successful, and returned a None connection
+            await self.bot.say("I failed to connect to the channel! Please try again soon")
+            return
 
         # To try to avoid some abuse, ensure the requester is actually in our channel
         if my_channel != author_channel:
