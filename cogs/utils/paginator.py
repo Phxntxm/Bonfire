@@ -13,7 +13,7 @@ class Pages:
     If the user does not reply within 2 minutes, the pagination
     interface exits automatically.
     """
-    def __init__(self, bot, *, message, entries, per_page=12):
+    def __init__(self, bot, *, message, entries, per_page=10):
         self.bot = bot
         self.entries = entries
         self.message = message
