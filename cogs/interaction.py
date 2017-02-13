@@ -142,6 +142,7 @@ class Interaction:
                     filename = 'avatar.gif'
                 else:
                     filename = 'avatar.webp'
+                    file = utils.convert_to_jpeg(file)
                 await self.bot.upload(file, filename=filename)
         else:
             await self.bot.say(url)
