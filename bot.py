@@ -5,6 +5,7 @@ import logging
 import datetime
 import pendulum
 import os
+import aiohttp
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -87,6 +88,8 @@ async def on_command_error(error, ctx):
         if isinstance(error.original, discord.Forbidden):
             return
         elif isinstance(error.original, discord.HTTPException) and 'empty message' in str(error.original):
+            return
+        elif isinstance(error.original, aiohttp.ClientOSError):
             return
     except AttributeError:
         pass

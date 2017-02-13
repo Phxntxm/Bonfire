@@ -1,8 +1,6 @@
 from discord.ext import commands
 
-from .utils import config
-from .utils import checks
-from .utils import utilities
+from . import utils
 
 import re
 import glob
@@ -23,7 +21,7 @@ class Owner:
         self.bot = bot
 
     @commands.command()
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def motd_push(self, *, message):
         """Used to push a new message to the message of the day"""
         date = pendulum.utcnow().to_date_string()
@@ -31,12 +29,12 @@ class Owner:
         entry = {'motd': message, 'date': date}
         # Try to add this, if there's an entry for that date, lets update it to make sure only one motd is sent a day
         # I should be managing this myself, more than one should not be sent in a day
-        if await config.add_content('motd', entry, r_filter):
-            await config.update_content('motd', entry, r_filter)
+        if await utils.add_content('motd', entry, r_filter):
+            await utils.update_content('motd', entry, r_filter)
         await self.bot.say("New motd update for {}!".format(date))
 
     @commands.command(pass_context=True)
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def debug(self, ctx):
         """Executes code"""
         # Eval and exec have different useful purposes, so use both
@@ -65,7 +63,7 @@ class Owner:
             await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command(pass_context=True)
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def shutdown(self, ctx):
         """Shuts the bot down"""
         fmt = 'Shutting down, I will miss you {0.author.name}'
@@ -74,21 +72,21 @@ class Owner:
         await self.bot.close()
 
     @commands.command()
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def name(self, newNick: str):
         """Changes the bot's name"""
         await self.bot.edit_profile(username=newNick)
         await self.bot.say('Changed username to ' + newNick)
 
     @commands.command()
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def status(self, *, status: str):
         """Changes the bot's 'playing' status"""
         await self.bot.change_status(discord.Game(name=status, type=0))
         await self.bot.say("Just changed my status to '{0}'!".format(status))
 
     @commands.command()
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def load(self, *, module: str):
         """Loads a module"""
 
@@ -106,7 +104,7 @@ class Owner:
             await self.bot.say(fmt.format(type(error).__name__, error))
 
     @commands.command()
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def unload(self, *, module: str):
         """Unloads a module"""
 
@@ -119,7 +117,7 @@ class Owner:
         await self.bot.say("I have just unloaded the {} module".format(module))
 
     @commands.command()
-    @commands.check(checks.is_owner)
+    @commands.check(utils.is_owner)
     async def reload(self, *, module: str):
         """Reloads a module"""
 

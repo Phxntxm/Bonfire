@@ -1,8 +1,9 @@
-from .utils import *
 from .voice_utilities import *
 
 import discord
 from discord.ext import commands
+
+from . import utils
 
 import math
 import time
@@ -146,6 +147,8 @@ class Music:
     async def create_voice_client(self, channel):
         """Creates a voice client and saves it"""
         # First join the channel and get the VoiceClient that we'll use to save per server
+        await self.remove_voice_client(channel.server)
+
         server = channel.server
         state = self.get_voice_state(server)
         voice = self.bot.voice_client_in(server)
@@ -154,16 +157,21 @@ class Music:
             try:
                 if voice is None:
                     state.voice = await self.bot.join_voice_channel(channel)
-                    return True
+                    if state.voice:
+                        return True
                 elif voice.channel == channel:
                     state.voice = voice
                     return True
                 else:
+                    # This shouldn't theoretically ever happen yet it does. Thanks Discord
                     await voice.disconnect()
                     state.voice = await self.bot.join_voice_channel(channel)
-                    return True
-            except (discord.ClientException, socket.gaierror):
+                    if state.voice:
+                        return True
+            except (discord.ClientException, socket.gaierror, ConnectionResetError):
                 continue
+
+        return False
 
 
     async def remove_voice_client(self, server):
@@ -314,7 +322,7 @@ class Music:
 
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def progress(self, ctx):
         """Provides the progress of the current song"""
 
@@ -338,7 +346,7 @@ class Music:
             await self.bot.say(fmt)
 
     @commands.command(no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def join(self, *, channel: discord.Channel):
         """Joins a voice channel."""
         try:
@@ -354,7 +362,7 @@ class Music:
             await self.bot.say('Ready to play audio in ' + channel.name)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def summon(self, ctx):
         """Summons the bot to join your voice channel."""
         # This method will be invoked by other commands, so we should return True or False instead of just returning
@@ -381,7 +389,7 @@ class Music:
         return success
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def play(self, ctx, *, song: str):
         """Plays a song.
         If there is a song currently in the queue, then it is
@@ -399,7 +407,7 @@ class Music:
         state = self.get_voice_state(ctx.message.server)
 
         # First check if we are connected to a voice channel at all, if not summon to the channel the author is in
-        # Since summon checks if the author is in a channel, we don't need to handle that here, just return if it failed
+        # Since summon utils if the author is in a channel, we don't need to handle that here, just return if it failed
         if state.voice is None:
             success = await ctx.invoke(self.summon)
             if not success:
@@ -412,6 +420,12 @@ class Music:
 
         author_channel = ctx.message.author.voice.voice_channel
         my_channel = ctx.message.server.me.voice.voice_channel
+
+        if my_channel is None:
+            # If we're here this means that after 3 attempts...4 different "failsafes"...
+            # Discord has returned saying the connection was successful, and returned a None connection
+            await self.bot.say("I failed to connect to the channel! Please try again soon")
+            return
 
         # To try to avoid some abuse, ensure the requester is actually in our channel
         if my_channel != author_channel:
@@ -466,7 +480,7 @@ class Music:
         await self.bot.say('Enqueued ' + str(_entry))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(kick_members=True)
+    @utils.custom_perms(kick_members=True)
     async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song."""
 
@@ -485,7 +499,7 @@ class Music:
             await self.bot.say('Set the volume to {:.0%}'.format(player.volume))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(kick_members=True)
+    @utils.custom_perms(kick_members=True)
     async def pause(self, ctx):
         """Pauses the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -493,7 +507,7 @@ class Music:
             state.player.pause()
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(kick_members=True)
+    @utils.custom_perms(kick_members=True)
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.get_voice_state(ctx.message.server)
@@ -501,7 +515,7 @@ class Music:
             state.player.resume()
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(kick_members=True)
+    @utils.custom_perms(kick_members=True)
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
         This also clears the queue.
@@ -525,7 +539,7 @@ class Music:
             pass
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def eta(self, ctx):
         """Provides an ETA on when your next song will play"""
         # Note: There is no way to tell how long a song has been playing, or how long there is left on a song
@@ -565,7 +579,7 @@ class Music:
         await self.bot.say("ETA till your next play is: {0[0]}m {0[1]}s".format(divmod(round(count, 0), 60)))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def queue(self, ctx):
         """Provides a printout of the songs that are in the queue"""
         state = self.get_voice_state(ctx.message.server)
@@ -581,14 +595,14 @@ class Music:
             self.bot.loop.create_task(self.queue_embed_task(state, ctx.message.channel, ctx.message.author))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
         await self.bot.say("There are a total of {} songs in the queue"
                            .format(len(self.get_voice_state(ctx.message.server).songs.entries)))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
         approximately 1/3 of the members in the voice channel
@@ -620,7 +634,7 @@ class Music:
             await self.bot.say('You have already voted to skip this song.')
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(kick_members=True)
+    @utils.custom_perms(kick_members=True)
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
         state = self.get_voice_state(ctx.message.server)
@@ -632,7 +646,7 @@ class Music:
         await self.bot.say('Song has just been skipped.')
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def playing(self, ctx):
         """Shows info about the currently played song."""
 

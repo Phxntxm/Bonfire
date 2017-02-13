@@ -1,8 +1,20 @@
 import aiohttp
-import io
+from io import BytesIO
 import inspect
 
 from . import config
+from PIL import Image
+
+def convert_to_jpeg(pfile):
+    # Open the file given
+    img = Image.open(pfile)
+    # Create the BytesIO object we'll use as our new "file"
+    new_file = BytesIO()
+    # Save to this file as jpeg
+    img.save(new_file, format='JPEG')
+    # In order to use the file, we need to seek back to the 0th position
+    new_file.seek(0)
+    return new_file
 
 def get_all_commands(bot):
     """Returns a list of all command names for the bot"""
@@ -14,17 +26,17 @@ def get_all_commands(bot):
     # Only the command itself will be yielded if there are no children
     for cmd_name in parent_command_names:
         cmd = bot.commands.get(cmd_name)
-        for child_cmd in _get_all_commands(cmd):
+        for child_cmd in get_subcommands(cmd):
             all_commands.append(child_cmd)
 
     return all_commands
 
-def _get_all_commands(command):
+def get_subcommands(command):
     yield command.qualified_name
     try:
         non_aliases = set(cmd.name for cmd in command.commands.values())
         for cmd_name in non_aliases:
-            yield from _get_all_commands(command.commands[cmd_name])
+            yield from get_subcommands(command.commands[cmd_name])
     except AttributeError:
         pass
 
@@ -61,7 +73,7 @@ async def download_image(url):
         return None
 
     # Then wrap it in a BytesIO object, to be used like an actual file
-    image = io.BytesIO(bts)
+    image = BytesIO(bts)
     return image
 
 async def request(url, *, headers=None, payload=None, method='GET', attr='json'):
