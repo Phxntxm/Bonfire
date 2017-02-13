@@ -174,7 +174,7 @@ class Music:
         return False
 
 
-    async def remove_voice_client(self, server):greendsi_webimsuan
+    async def remove_voice_client(self, server):
         """Removes any voice clients from a server
         This is sometimes needed, due to the unreliability of Discord's voice connection
         We do not want to end up with a voice client stuck somewhere, so this cancels any found for a server"""
