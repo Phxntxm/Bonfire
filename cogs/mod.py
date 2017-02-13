@@ -304,7 +304,7 @@ class Mod:
         # The other case is if I'm using the default has_permissions case
         # Which means I do not want to check custom permissions at all
         # Currently the second case is only on adding and removing permissions, to avoid abuse on these
-        for check in cmd.utils:
+        for check in cmd.checks:
             if "is_owner" == check.__name__ or re.search("has_permissions", str(check)) is not None:
                 await self.bot.say("This command cannot have custom permissions setup!")
                 return
