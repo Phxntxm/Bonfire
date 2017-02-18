@@ -71,7 +71,7 @@ class Core:
             entries = sorted(utils.get_all_commands(self.bot))
             try:
                 pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
-                await pages.paginate()
+                await pages.paginate(start_page=page)
             except utils.CannotPaginate as e:
                 await self.bot.say(str(e))
         else:
