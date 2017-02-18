@@ -525,8 +525,9 @@ class Music:
 
         # Stop playing whatever song is playing.
         if state.is_playing():
-            player = state.player
-            player.stop()
+            state.player.stop()
+
+        state.songs.clear()
 
         # This will stop cancel the audio event we're using to loop through the queue
         # Then erase the voice_state entirely, and disconnect from the channel
