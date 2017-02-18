@@ -89,7 +89,7 @@ class Twitch:
                                 continue
                             server_alerts = await utils.get_content('server_alerts', {'server_id': server_id})
                             channel_id = server_id
-                            if len(server_alerts) > 0:
+                            if server_alerts is not None and len(server_alerts) > 0:
                                 channel_id = server_alerts[0].get('channel_id')
                             channel = self.bot.get_channel(channel_id)
                             # Get the member that has just gone live

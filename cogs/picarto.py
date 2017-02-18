@@ -97,7 +97,7 @@ class Picarto:
                             server_alerts = await utils.get_content('server_alerts', {'server_id': server_id})
                             try:
                                 channel_id = server_alerts[0]['channel_id']
-                            except IndexError:
+                            except (IndexError, TypeError):
                                 channel_id = server_id
                             channel = self.bot.get_channel(channel_id)
                             # Get the member that has just gone live
