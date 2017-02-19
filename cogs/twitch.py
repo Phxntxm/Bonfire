@@ -210,6 +210,7 @@ class Twitch:
             await self.bot.say("I am already set to notify in this server...")
         else:
             await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.server.id)}, r_filter)
+            await self.bot.say("This server will now be notified if you go live")
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
