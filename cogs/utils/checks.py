@@ -1,4 +1,5 @@
 import asyncio
+import rethinkdb as r
 
 from discord.ext import commands
 import discord
@@ -6,6 +7,46 @@ from . import config
 
 loop = asyncio.get_event_loop()
 
+# The list of tables needed for the database
+table_list = ['battle_records', 'battling', 'boops', 'bot_data', 'command_usage', 'custom_permissions',
+              'deviantart', 'motd', 'nsfw_channels', 'overwatch', 'picarto', 'prefixes', 'raffles',
+              'rules', 'server_alerts', 'strawpolls', 'tags', 'tictactoe', 'twitch', 'user_notifications']
+
+
+async def db_check():
+    """Used to check if the required database/tables are setup"""
+    db_opts = config.db_opts
+
+    r.set_loop_type('asyncio')
+    # First try to connect, and see if the correct information was provided
+    try:
+        conn = await r.connect(**db_opts)
+    except r.errors.ReqlDriverError:
+        print("Cannot connect to the RethinkDB instance with the following information: {}".format(db_opts))
+
+        print("The RethinkDB instance you have setup may be down, otherwise please ensure you setup a"\
+        " RethinkDB instance, and you have provided the correct database information in config.yml")
+        quit()
+
+    # Get the current databases and check if the one we need is there
+    dbs = await r.db_list().run(conn)
+    if db_opts['db'] not in dbs:
+        # If not, we want to create it
+        print('Couldn\'t find database {}...creating now'.format(db_opts['db']))
+        await r.db_create(db_opts['db']).run(conn)
+        # Then add all the tables
+        for table in table_list:
+            print("Creating table {}...".format(table))
+            await r.table_create(table).run(conn)
+        print("Done!")
+    else:
+        # Otherwise, if the database is setup, make sure all the required tables are there
+        tables = await r.table_list().run(conn)
+        for table in table_list:
+            if table not in tables:
+                print("Creating table {}...".format(table))
+                await r.table_create(table).run(conn)
+        print("Done checking tables!")
 
 def is_owner(ctx):
     return ctx.message.author.id in config.owner_ids
