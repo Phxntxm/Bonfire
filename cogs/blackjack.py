@@ -207,6 +207,12 @@ class Game:
 
         # Lets create our main deck, and shuffle it
         self.deck = utils.Deck()
+        # So apparently, it is possible, with 10 players and nearly everyone/everyone busting
+        # To actually deplete the deck, and cause it to return None, and mess up later
+        # Due to this, lets make put 2 decks in here
+        _deck2 = utils.Deck()
+        self.deck.insert(list(_deck2.draw(52)))
+        del _deck2
         self.deck.shuffle()
         # The dealer
         self.dealer = Player('Dealer')
