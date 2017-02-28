@@ -288,8 +288,8 @@ class Game:
             fmt = "You got a blackjack {0.member.mention}!\n\n{0}".format(player)
 
             await self.bot.send_message(self.channel, fmt)
-        # Loop through each player (as long as their status is playing)
-        for entry in [p for p in self.players if p['status'] == 'playing']:
+        # Loop through each player (as long as their status is playing) and they have bet chips
+        for entry in [p for p in self.players if p['status'] == 'playing' and hasattr(p['player'], 'bet')]:
             player = entry['player']
 
             # Let them know it's their turn to play
