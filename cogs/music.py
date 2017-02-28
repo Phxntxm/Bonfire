@@ -12,6 +12,7 @@ import re
 import os
 import glob
 import socket
+import inspect
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
