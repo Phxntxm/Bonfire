@@ -384,7 +384,8 @@ class Music:
         except discord.InvalidArgument:
             await self.bot.say('This is not a voice channel...')
         except (asyncio.TimeoutError, discord.ConnectionClosed):
-            await self.bot.say("I failed to connect! This can sometimes be caused by your server region being far away."
+            await self.bot.say("I failed to connect! This usually happens if I don't have permission to join the"
+                               " channel, but can sometimes be caused by your server region being far away."
                                " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
             await self.remove_voice_client(channel.server)
         else:
@@ -405,7 +406,8 @@ class Music:
         try:
             success = await self.create_voice_client(summoned_channel)
         except (asyncio.TimeoutError, discord.ConnectionClosed):
-            await self.bot.say("I failed to connect! This can sometimes be caused by your server region being far away."
+            await self.bot.say("I failed to connect! This usually happens if I don't have permission to join the"
+                               " channel, but can sometimes be caused by your server region being far away."
                                " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
             await self.remove_voice_client(summoned_channel.server)
             return False
