@@ -24,9 +24,7 @@ Debian, Ubuntu, etc.:
 ```
 sudo apt install fortune-mod
 ```
-If you're on Red Hat, Fedora, etc., replace ``apt`` with ``yum``. If you're on another Linux distro, I trust you know what package manager to use.
-
-If you're on Windows, you might want to check out [this guide](http://superuser.com/questions/683162/bsd-fortune-for-windows-command-prompt-or-dos), but you're on your own.
+If you're on Red Hat, Fedora, etc., replace ``apt`` with ``yum``. If you're on another Linux distro, I trust you know what package manager to use. If you're on Windows, you might want to check out [this guide](http://superuser.com/questions/683162/bsd-fortune-for-windows-command-prompt-or-dos), but you're on your own.
 
 Note: ATM of writing this, Pillow 3.4.2 (the stable version...good job Pillow?) is broken, do not use pip's default to install this. This is why we're using Pillow==3.4.1 above, and not just Pillow
 
