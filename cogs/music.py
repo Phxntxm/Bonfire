@@ -427,12 +427,6 @@ class Music:
         The list of supported sites can be found here:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
-        # Fuck you soundcloud
-        if 'soundcloud.com' in song:
-            await self.bot.say("Soundcloud has changed the way that they allow downloads, and it now requires "
-                               "authorization. Unfortunately, I currently have no way to download from soundcloud")
-            return
-
         state = self.get_voice_state(ctx.message.server)
 
         # First check if we are connected to a voice channel at all, if not summon to the channel the author is in
