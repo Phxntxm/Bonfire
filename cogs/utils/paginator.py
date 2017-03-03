@@ -83,8 +83,11 @@ class Pages:
                 # we can't forbid it if someone ends up using it but remove
                 # it from the default set
                 continue
-
-            await self.bot.add_reaction(self.message, reaction)
+            try:
+                await self.bot.add_reaction(self.message, reaction)
+            except discord.NotFound:
+                # If the message isn't found, we don't care about clearing anything
+                return
 
     async def checked_show_page(self, page):
         if page != 0 and page <= self.maximum_pages:
