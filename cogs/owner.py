@@ -10,9 +10,6 @@ import aiohttp
 import pendulum
 import asyncio
 
-getter = re.compile(r'`(?!`)(.*?)`')
-multi = re.compile(r'```(.*?)```', re.DOTALL)
-
 
 class Owner:
     """Commands that can only be used by Phantom, bot management commands"""
@@ -35,32 +32,32 @@ class Owner:
 
     @commands.command(pass_context=True)
     @commands.check(utils.is_owner)
-    async def debug(self, ctx):
-        """Executes code"""
-        # Eval and exec have different useful purposes, so use both
+    async def debug(self, ctx, *, code : str):
+        """Evaluates code."""
+        code = code.strip('` ')
+        python = '```py\n{}\n```'
+        result = None
+
+        env = {
+            'bot': self.bot,
+            'ctx': ctx,
+            'message': ctx.message,
+            'server': ctx.message.server,
+            'channel': ctx.message.channel,
+            'author': ctx.message.author
+        }
+
+        env.update(globals())
+
         try:
+            result = eval(code, env)
+            if inspect.isawaitable(result):
+                result = await result
+        except Exception as e:
+            await self.bot.say(python.format(type(e).__name__ + ': ' + str(e)))
+            return
 
-            # `Get all content in this format`
-            match_single = getter.findall(ctx.message.content)
-            # ```\nGet all content in this format```
-            match_multi = multi.findall(ctx.message.content)
-
-            if match_single:
-                result = eval(match_single[0])
-
-                # In case the result needs to be awaited, handle that
-                if inspect.isawaitable(result):
-                    result = await result
-                await self.bot.say("```\n{0}```".format(result))
-            elif match_multi:
-                # Internal method to send the message to the channel, of whatever is passed
-                def r(v):
-                    self.bot.loop.create_task(self.bot.say("```\n{}```".format(v)))
-
-                exec(match_multi[0])
-        except Exception as error:
-            fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(error).__name__, error))
+        await self.bot.say(python.format(result))
 
     @commands.command(pass_context=True)
     @commands.check(utils.is_owner)

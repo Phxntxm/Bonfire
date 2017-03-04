@@ -207,6 +207,12 @@ class Game:
 
         # Lets create our main deck, and shuffle it
         self.deck = utils.Deck()
+        # So apparently, it is possible, with 10 players and nearly everyone/everyone busting
+        # To actually deplete the deck, and cause it to return None, and mess up later
+        # Due to this, lets make put 2 decks in here
+        _deck2 = utils.Deck()
+        self.deck.insert(list(_deck2.draw(52)))
+        del _deck2
         self.deck.shuffle()
         # The dealer
         self.dealer = Player('Dealer')
@@ -282,8 +288,8 @@ class Game:
             fmt = "You got a blackjack {0.member.mention}!\n\n{0}".format(player)
 
             await self.bot.send_message(self.channel, fmt)
-        # Loop through each player (as long as their status is playing)
-        for entry in [p for p in self.players if p['status'] == 'playing']:
+        # Loop through each player (as long as their status is playing) and they have bet chips
+        for entry in [p for p in self.players if p['status'] == 'playing' and hasattr(p['player'], 'bet')]:
             player = entry['player']
 
             # Let them know it's their turn to play

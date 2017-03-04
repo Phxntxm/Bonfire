@@ -233,7 +233,7 @@ class Mod:
             # If we don't find custom permissions, get the required permission for a command
             # based on what we set in utils.custom_perms, if custom_perms isn't found, we'll get an IndexError
             try:
-                custom_perms = [func for func in cmd.utils if "custom_perms" in func.__qualname__][0]
+                custom_perms = [func for func in cmd.checks if "custom_perms" in func.__qualname__][0]
             except IndexError:
                 # Loop through and check if there is a check called is_owner
                 # If we loop through and don't find one, this means that the only other choice is to be

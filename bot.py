@@ -10,13 +10,13 @@ import aiohttp
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 from discord.ext import commands
-from cogs.utils import config
+from cogs import utils
 
-opts = {'command_prefix': config.command_prefix,
-        'description': config.bot_description,
+opts = {'command_prefix': utils.command_prefix,
+        'description': utils.bot_description,
         'pm_help': None,
-        'shard_count': config.shard_count,
-        'shard_id': config.shard_id,
+        'shard_count': utils.shard_count,
+        'shard_id': utils.shard_id,
         'command_not_found': ''}
 
 bot = commands.Bot(**opts)
@@ -26,11 +26,11 @@ logging.basicConfig(level=logging.WARNING, filename='bonfire.log')
 @bot.event
 async def on_ready():
     # Change the status upon connection to the default status
-    await bot.change_presence(game=discord.Game(name=config.default_status, type=0))
+    await bot.change_presence(game=discord.Game(name=utils.default_status, type=0))
 
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
-
+    await utils.db_check()
 
 @bot.event
 async def on_message(message):
@@ -51,7 +51,7 @@ async def process_command(ctx):
     command = ctx.command
 
     r_filter = {'command': command.qualified_name}
-    command_usage = await config.get_content('command_usage', r_filter)
+    command_usage = await utils.get_content('command_usage', r_filter)
     if command_usage is None:
         command_usage = {'command': command.qualified_name}
     else:
@@ -74,8 +74,8 @@ async def process_command(ctx):
         command_usage['server_usage'] = total_server_usage
 
     # Save all the changes
-    if not await config.update_content('command_usage', command_usage, r_filter):
-        await config.add_content('command_usage', command_usage, r_filter)
+    if not await utils.update_content('command_usage', command_usage, r_filter):
+        await utils.add_content('command_usage', command_usage, r_filter)
 
 
 @bot.event
@@ -126,6 +126,6 @@ async def on_command_error(error, ctx):
 if __name__ == '__main__':
     bot.remove_command('help')
 
-    for e in config.extensions:
+    for e in utils.extensions:
         bot.load_extension(e)
-    bot.run(config.bot_token)
+    bot.run(utils.bot_token)

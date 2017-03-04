@@ -1,8 +1,8 @@
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
-from .utils import config
-from .utils import checks
-from .utils import utilities
+
+from . import utils
+
 import discord
 import random
 
@@ -109,7 +109,7 @@ class Interaction:
                                                not p2 == player_id and not p1 == player_id}
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def hug(self, ctx, user: discord.Member = None):
         """Makes me hug a person!
 
@@ -122,7 +122,7 @@ class Interaction:
         await self.bot.say(fmt.format(user.display_name))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def avatar(self, ctx, member: discord.Member = None):
         """Provides an image for the provided person's avatar (yours if no other member is provided)
 
@@ -134,7 +134,7 @@ class Interaction:
 
         url = member.avatar_url
         if ctx.message.server.me.permissions_in(ctx.message.channel).attach_files:
-            file = await utilities.download_image(url)
+            file = await utils.download_image(url)
             if file is None:
                 await self.bot.say(url)
             else:
@@ -149,7 +149,7 @@ class Interaction:
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 180, BucketType.user)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle
 
@@ -180,7 +180,7 @@ class Interaction:
         await self.bot.say(fmt.format(ctx, player2))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def accept(self, ctx):
         """Accepts the battle challenge
 
@@ -206,13 +206,13 @@ class Interaction:
         # All we need to do is change what order the challengers are printed/added as a paramater
         if random.SystemRandom().randint(0, 1):
             await self.bot.say(fmt.format(battleP1.mention, battleP2.mention))
-            await utilities.update_records('battle_records', battleP1, battleP2)
+            await utils.update_records('battle_records', battleP1, battleP2)
         else:
             await self.bot.say(fmt.format(battleP2.mention, battleP1.mention))
-            await utilities.update_records('battle_records', battleP2, battleP1)
+            await utils.update_records('battle_records', battleP2, battleP1)
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def decline(self, ctx):
         """Declines the battle challenge
 
@@ -235,7 +235,7 @@ class Interaction:
 
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 180, BucketType.user)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member = None, *, message = ""):
         """Boops the mentioned person
 
@@ -259,19 +259,19 @@ class Interaction:
             return
 
         r_filter = {'member_id': booper.id}
-        boops = await config.get_content('boops', r_filter)
+        boops = await utils.get_content('boops', r_filter)
         if boops is not None:
             boops = boops[0]['boops']
             # If the booper has never booped the member provided, assure it's 0
             amount = boops.get(boopee.id, 0) + 1
             boops[boopee.id] = amount
 
-            await config.update_content('boops', {'boops': boops}, r_filter)
+            await utils.update_content('boops', {'boops': boops}, r_filter)
         else:
             entry = {'member_id': booper.id,
                      'boops': {boopee.id: 1}}
 
-            await config.add_content('boops', entry, r_filter)
+            await utils.add_content('boops', entry, r_filter)
             amount = 1
 
         fmt = "{0.mention} has just booped {1.mention}{3}! That's {2} times now!"

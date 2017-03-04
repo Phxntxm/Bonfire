@@ -12,6 +12,7 @@ import re
 import os
 import glob
 import socket
+import inspect
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -320,6 +321,34 @@ class Music:
                 pass
         await self.bot.delete_message(message)
 
+    @commands.command(pass_context=True)
+    @commands.check(utils.is_owner)
+    async def vdebug(self, ctx, *, code : str):
+        """Evaluates code."""
+        code = code.strip('` ')
+        python = '```py\n{}\n```'
+        result = None
+
+        env = {
+            'bot': self.bot,
+            'ctx': ctx,
+            'message': ctx.message,
+            'server': ctx.message.server,
+            'channel': ctx.message.channel,
+            'author': ctx.message.author
+        }
+
+        env.update(globals())
+
+        try:
+            result = eval(code, env)
+            if inspect.isawaitable(result):
+                result = await result
+        except Exception as e:
+            await self.bot.say(python.format(type(e).__name__ + ': ' + str(e)))
+            return
+
+        await self.bot.say(python.format(result))
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -355,7 +384,8 @@ class Music:
         except discord.InvalidArgument:
             await self.bot.say('This is not a voice channel...')
         except (asyncio.TimeoutError, discord.ConnectionClosed):
-            await self.bot.say("I failed to connect! This can sometimes be caused by your server region being far away."
+            await self.bot.say("I failed to connect! This usually happens if I don't have permission to join the"
+                               " channel, but can sometimes be caused by your server region being far away."
                                " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
             await self.remove_voice_client(channel.server)
         else:
@@ -376,7 +406,8 @@ class Music:
         try:
             success = await self.create_voice_client(summoned_channel)
         except (asyncio.TimeoutError, discord.ConnectionClosed):
-            await self.bot.say("I failed to connect! This can sometimes be caused by your server region being far away."
+            await self.bot.say("I failed to connect! This usually happens if I don't have permission to join the"
+                               " channel, but can sometimes be caused by your server region being far away."
                                " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
             await self.remove_voice_client(summoned_channel.server)
             return False
@@ -525,8 +556,9 @@ class Music:
 
         # Stop playing whatever song is playing.
         if state.is_playing():
-            player = state.player
-            player.stop()
+            state.player.stop()
+
+        state.songs.clear()
 
         # This will stop cancel the audio event we're using to loop through the queue
         # Then erase the voice_state entirely, and disconnect from the channel

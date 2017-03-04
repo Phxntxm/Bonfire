@@ -89,7 +89,7 @@ class Twitch:
                                 continue
                             server_alerts = await utils.get_content('server_alerts', {'server_id': server_id})
                             channel_id = server_id
-                            if len(server_alerts) > 0:
+                            if server_alerts is not None and len(server_alerts) > 0:
                                 channel_id = server_alerts[0].get('channel_id')
                             channel = self.bot.get_channel(channel_id)
                             # Get the member that has just gone live
@@ -210,6 +210,7 @@ class Twitch:
             await self.bot.say("I am already set to notify in this server...")
         else:
             await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.server.id)}, r_filter)
+            await self.bot.say("This server will now be notified if you go live")
 
     @notify.command(name='on', aliases=['start,yes'], pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)

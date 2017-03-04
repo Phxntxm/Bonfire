@@ -169,9 +169,9 @@ class Pages:
                 return True
         return False
 
-    async def paginate(self):
+    async def paginate(self, start_page=1):
         """Actually paginate the entries and run the interactive loop if necessary."""
-        await self.show_page(1, first=True)
+        await self.show_page(start_page, first=True)
 
         while self.paginating:
             react = await self.bot.wait_for_reaction(message=self.message, check=self.react_check, timeout=120.0)
