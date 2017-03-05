@@ -56,8 +56,12 @@ class Owner:
         except Exception as e:
             await self.bot.say(python.format(type(e).__name__ + ': ' + str(e)))
             return
-
-        await self.bot.say(python.format(result))
+        try:
+            await self.bot.say(python.format(result))
+        except discord.HTTPException:
+            await self.bot.say("Result is too long for me to send")
+        except:
+            pass
 
     @commands.command(pass_context=True)
     @commands.check(utils.is_owner)
