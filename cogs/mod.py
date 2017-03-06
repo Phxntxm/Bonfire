@@ -390,7 +390,7 @@ class Mod:
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(manage_messages=True)
-    async def prune(self, ctx, limit = 100):
+    async def prune(self, ctx, limit = None):
         """This command can be used to prune messages from certain members
         Mention any user you want to prune messages from; if no members are mentioned, the messages removed will be mine
         If no limit is provided, then 100 will be used. This is also the max limit we can use
@@ -402,7 +402,7 @@ class Mod:
             # We may not have been passed a limit, and only mentions
             # If this happens, the limit will be set to that first mention
             limit = int(limit)
-        except:
+        except (TypeError, ValueError):
             limit = 100
 
         if limit > 100:
