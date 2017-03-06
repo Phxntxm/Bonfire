@@ -343,14 +343,15 @@ class Core:
             await self.bot.say("A {} sided die? You know that's impossible right?".format(num))
             return
 
-        value_str = ", ".join(str(random.SystemRandom().randint(1, num))
-                              for i in range(0, int(dice)))
+        nums = [random.SystemRandom().randint(1, num)) for i in range(0, int(dice)]
+        total = sum(nums)
+        value_str = ", ".join("{}".format(x) for x in nums)
 
         if dice == 1:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
         else:
-            fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'
-        await self.bot.say(fmt.format(ctx, dice, num, value_str))
+            fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}, for a total of {4}!'
+        await self.bot.say(fmt.format(ctx, dice, num, value_str, total))
 
 
 def setup(bot):
