@@ -427,7 +427,7 @@ class Mod:
 
         # If we're not setting the user to the bot, then we're deleting someone elses messages
         # To do so, we need manage_messages permission, so check if we have that
-        elif not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
+        if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
             await self.bot.say("I do not have permission to delete messages...")
             return
 
