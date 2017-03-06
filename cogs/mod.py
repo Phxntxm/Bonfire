@@ -403,8 +403,18 @@ class Mod:
 
         # If no members are provided, assume we're trying to prune our own messages
         members = ctx.message.mentions
+        roles = ctx.message.role_mentions
         if len(members) == 0:
             members = [ctx.message.server.me]
+
+        # Our check for if a message should be deleted
+        def check(m):
+            if m.author in members:
+                return True
+            if any(x in m.author.roles for x in roles):
+                return True
+            return False
+
         # If we're not setting the user to the bot, then we're deleting someone elses messages
         # To do so, we need manage_messages permission, so check if we have that
         elif not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
@@ -415,11 +425,11 @@ class Mod:
         # We'll increment count, and stop deleting messages if we hit the limit.
         count = 0
         async for msg in self.bot.logs_from(ctx.message.channel, before=ctx.message):
-            if msg.author in members:
+            if check(msg):
                 try:
                     await self.bot.delete_message(msg)
                     count += 1
-                except discord.NotFound:
+                except:
                     pass
                 if count >= limit:
                     break
