@@ -59,9 +59,7 @@ class Deviantart:
         try:
             for entry in content:
                 user = discord.utils.get(self.bot.get_all_members(), id=entry['member_id'])
-
-                # If we're sharded, we might not be able to find this user.
-                # If the bot is not in the server with the member either
+                # If the bot is not in the server with the member, we might not be able to find this user.
                 if user is None:
                     continue
 
@@ -97,7 +95,7 @@ class Deviantart:
                                   result['title'],
                                   result['author']['username'],
                                   result['url'])
-                            await self.bot.send_message(user, fmt)
+                            await user.sendfmt)
                         # Now we can update the user's last updated for this DA
                         # We want to do this whether or not our last if statement was met
                         r_filter = {'member_id': user.id}
@@ -110,12 +108,12 @@ class Deviantart:
 
     @commands.group()
     @utils.custom_perms(send_messages=True)
-    async def da(self):
+    async def da(self, ctx):
         """This provides a sort of 'RSS' feed for subscribed to artists.
         Subscribe to artists, and I will PM you when new posts come out from these artists"""
         pass
 
-    @da.command(pass_context=True, name='sub', aliases=['add', 'subscribe'])
+    @da.command(name='sub', aliases=['add', 'subscribe'])
     @utils.custom_perms(send_messages=True)
     async def da_sub(self, ctx, *, username):
         """This can be used to add a feed to your notifications.
@@ -130,7 +128,7 @@ class Deviantart:
         if content is None:
             entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_updated': {}}
             await utils.add_content('deviantart', entry, r_filter)
-            await self.bot.say("You have just subscribed to {}!".format(username))
+            await ctx.send("You have just subscribed to {}!".format(username))
         elif content[0]['subbed'] is None or username not in content[0]['subbed']:
             if content[0]['subbed'] is None:
                 sub_list = [username]
@@ -138,9 +136,9 @@ class Deviantart:
                 content[0]['subbed'].append(username)
                 sub_list = content[0]['subbed']
             await utils.update_content('deviantart', {'subbed': sub_list}, r_filter)
-            await self.bot.say("You have just subscribed to {}!".format(username))
+            await ctx.send("You have just subscribed to {}!".format(username))
         else:
-            await self.bot.say("You are already subscribed to that user!")
+            await ctx.send("You are already subscribed to that user!")
 
     @da.command(pass_context=True, name='unsub', aliases=['delete', 'remove', 'unsubscribe'])
     @utils.custom_perms(send_messages=True)
@@ -153,13 +151,13 @@ class Deviantart:
         content = await utils.get_content('deviantart', r_filter)
 
         if content is None or content[0]['subbed'] is None:
-            await self.bot.say("You are not subscribed to anyone at the moment!")
+            await ctx.send("You are not subscribed to anyone at the moment!")
         elif username in content[0]['subbed']:
             content[0]['subbed'].remove(username)
             await utils.update_content('deviantart', {'subbed': content[0]['subbed']}, r_filter)
-            await self.bot.say("You have just unsubscribed from {}!".format(username))
+            await ctx.send("You have just unsubscribed from {}!".format(username))
         else:
-            await self.bot.say("You are not subscribed to that user!")
+            await ctx.send("You are not subscribed to that user!")
 
 
 def setup(bot):

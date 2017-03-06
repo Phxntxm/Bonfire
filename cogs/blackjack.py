@@ -34,17 +34,17 @@ class Blackjack:
         # When we're done with the game, we need to delete the game itself and remove it's instance from games
         # To do this, it needs to be able to access this instance of Blackjack
         game = Game(self.bot, message, self)
-        self.games[message.server.id] = game
+        self.games[message.guild.id] = game
 
-    @commands.group(pass_context=True, no_pm=True, aliases=['bj'], invoke_without_command=True)
+    @commands.group(no_pm=True, aliases=['bj'], invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
     async def blackjack(self, ctx):
         """Creates a game/joins the current running game of blackjack
 
         EXAMPLE: !blackjack
         RESULT: A new game of blackjack!"""
-        # Get this server's game if it exists
-        game = self.games.get(ctx.message.server.id)
+        # Get this guild's game if it exists
+        game = self.games.get(ctx.message.guild.id)
         # If it doesn't, start one
         if game is None:
             self.create_game(ctx.message)
@@ -54,15 +54,15 @@ class Blackjack:
             # If it worked, they're ready to play
             if status:
                 fmt = "{} has joined the game of blackjack, and will be able to play next round!"
-                await self.bot.say(fmt.format(ctx.message.author.display_name))
+                await ctx.send(fmt.format(ctx.message.author.display_name))
             else:
                 # Otherwise, lets check *why* they couldn't join
                 if game.playing(ctx.message.author):
-                    await self.bot.say("You are already playing! Wait for your turn!")
+                    await ctx.send("You are already playing! Wait for your turn!")
                 else:
-                    await self.bot.say("There are already a max number of players playing/waiting to play!")
+                    await ctx.send("There are already a max number of players playing/waiting to play!")
 
-    @blackjack.command(pass_context=True, no_pm=True, name='leave', aliases=['quit'])
+    @blackjack.command(no_pm=True, name='leave', aliases=['quit'])
     @utils.custom_perms(send_messages=True)
     async def blackjack_leave(self, ctx):
         """Leaves the current game of blackjack
@@ -70,37 +70,37 @@ class Blackjack:
         EXAMPLE: !blackjack leave
         RESULT: You stop losing money in blackjack"""
 
-        # Get this server's game if it exists
-        game = self.games.get(ctx.message.server.id)
+        # Get this guild's game if it exists
+        game = self.games.get(ctx.message.guild.id)
 
         if game is None:
-            await self.bot.say("There are currently no games of Blackjack running!")
+            await ctx.send("There are currently no games of Blackjack running!")
             return
 
         status = game.leave(ctx.message.author)
         if status:
-            await self.bot.say("You have left the game, and will be removed at the end of this round")
+            await ctx.send("You have left the game, and will be removed at the end of this round")
         else:
-            await self.bot.say("Either you have already bet, or you are not even playing right now!")
+            await ctx.send("Either you have already bet, or you are not even playing right now!")
 
-    @blackjack.command(pass_context=True, no_pm=True, name='forcestop', aliases=['stop'])
-    @utils.custom_perms(manage_server=True)
+    @blackjack.command(no_pm=True, name='forcestop', aliases=['stop'])
+    @utils.custom_perms(manage_guild=True)
     async def blackjack_stop(self, ctx):
         """Forces the game to stop, mostly for use if someone has gone afk
 
         EXAMPLE: !blackjack forcestop
         RESULT: No more blackjack spam"""
 
-        # Get this server's game if it exists
-        game = self.games.get(ctx.message.server.id)
+        # Get this guild's game if it exists
+        game = self.games.get(ctx.message.guild.id)
 
         if game is None:
-            await self.bot.say("There are currently no games of Blackjack running!")
+            await ctx.send("There are currently no games of Blackjack running!")
             return
 
         game.task.cancel()
-        del self.games[ctx.message.server.id]
-        await self.bot.say("The blackjack game running here has just ended")
+        del self.games[ctx.message.guild.id]
+        await ctx.send("The blackjack game running here has just ended")
 
 
 def FOIL(a, b):
@@ -226,7 +226,7 @@ class Game:
     async def game_task(self):
         """The task to handle the entire game"""
         while len(self.players) > 0:
-            await self.bot.send_message(self.channel, "A new round has started!!")
+            await self.channel.send("A new round has started!!")
 
             # First wait for bets
             await self.bet_task()
@@ -253,25 +253,25 @@ class Game:
             await self.cleanup()
 
         # If we reach the end of this loop, that means there are no more players
-        del self.bj.games[self.channel.server.id]
+        del self.bj.games[self.channel.guild.id]
 
     async def dealer_task(self):
         """The task handling the dealer's play after all players have stood"""
         fmt = "It is the dealer's turn to play\n\n{}".format(self.dealer)
-        msg = await self.bot.send_message(self.channel, fmt)
+        msg = await self.channel.send(fmt)
 
         while True:
             await asyncio.sleep(1)
             if self.dealer.bust:
                 fmt = msg.content + "\n\nDealer has busted!!"
-                await self.bot.edit_message(msg, fmt)
+                await msg.edit(content=fmt)
                 return
             for num in self.dealer.count:
                 if num > 16:
                     return
             self.hit(self.dealer)
             fmt = "It is the dealer's turn to play\n\n{}".format(self.dealer)
-            msg = await self.bot.edit_message(msg, fmt)
+            msg = await msg.edit(content=fmt)
 
     async def round_task(self):
         """The task handling the round itself, asking each person to hit or stand"""
@@ -280,21 +280,25 @@ class Game:
         # A differen task will handle if a player hit blackjack to start (so they would not be 'playing')
 
         # Our check to make sure a valid 'command' was provided
-        check = lambda m: m.content.lower() in ['hit', 'stand', 'double']
+        def check(m):
+            if m.channel == self.channel && m.author = player.member:
+                return m.content.lower() in ['hit', 'stand', 'double']
+            else:
+                return False
 
         # First lets handle the blackjacks
         for entry in [p for p in self.players if p['status'] == 'blackjack']:
             player = entry['player']
             fmt = "You got a blackjack {0.member.mention}!\n\n{0}".format(player)
 
-            await self.bot.send_message(self.channel, fmt)
+            await self.channel.send(fmt)
         # Loop through each player (as long as their status is playing) and they have bet chips
         for entry in [p for p in self.players if p['status'] == 'playing' and hasattr(p['player'], 'bet')]:
             player = entry['player']
 
             # Let them know it's their turn to play
             fmt = "It is your turn to play {0.member.mention}\n\n{0}".format(player)
-            await self.bot.send_message(self.channel, fmt)
+            await self.channel.send(fmt)
 
             # If they're not playing anymore (i.e. they busted, are standing, etc.) then we don't want to keep asking
             #  them to hit or stand
@@ -302,37 +306,28 @@ class Game:
 
                 # Ask if they want to hit or stand
                 fmt = "Hit, stand, or double?"
-                await self.bot.send_message(self.channel, fmt)
-                msg = await self.bot.wait_for_message(timeout=60, author=player.member, channel=self.channel,
-                                                      check=check)
+                await self.channel.send(fmt)
 
-                # If they took to long, make them stand so the next person can play
-                if msg is None:
-                    await self.bot.send_message(self.channel, "Took to long! You're standing!")
+                try:
+                    msg = await self.bot.wait_for('message', timeout=60, check=check)
+                except asyncio.TimeoutError:
+                    await self.channel.send("Took to long! You're standing!")
                     entry['status'] = 'stand'
-                # If they want to hit
-                elif 'hit' in msg.content.lower():
-                    self.hit(player)
-                    await self.bot.send_message(self.channel, player)
-                # If they want to stand
-                elif 'stand' in msg.content.lower():
-                    self.stand(player)
-                elif 'double' in msg.content.lower():
-                    self.double(player)
-                    await self.bot.send_message(self.channel, player)
-                    # TODO: Handle double, split
+                else:
+                    # If they want to hit
+                    if 'hit' in msg.content.lower():
+                        self.hit(player)
+                        await self.channel.send(player)
+                    # If they want to stand
+                    elif 'stand' in msg.content.lower():
+                        self.stand(player)
+                    elif 'double' in msg.content.lower():
+                        self.double(player)
+                        await self.channel.send(player)
+                        # TODO: Handle double, split
 
     async def bet_task(self):
         """Performs the task of betting"""
-
-        def check(_msg):
-            """Makes sure the  message provided is within the min and max bets"""
-            try:
-                msg_length = int(_msg.content)
-                return self.min_bet <= msg_length <= self.max_bet
-            except ValueError:
-                return _msg.content.lower() == 'skip'
-
         # There is one situation that we want to allow that means we cannot loop through players like normally would
         # be the case: Betting has started; while one person is betting, another joins This means our list has
         # changed, and neither based on the length or looping through the list itself will handle this To handle
@@ -348,28 +343,43 @@ class Game:
             entry = players[0]
             player = entry['player']
 
+            def check(_msg):
+                """Makes sure the  message provided is within the min and max bets"""
+                if _msg.channel == self.channel and _msg.author == player.member:
+                    try:
+                        msg_length = int(_msg.content)
+                        return self.min_bet <= msg_length <= self.max_bet
+                    except ValueError:
+                        return _msg.content.lower() == 'skip'
+                else:
+                    return false
+
             fmt = "Your turn to bet {0.member.mention}, your current chips are: {0.chips}\n" \
                   "Current min bet is {1}, current max bet is {2}\n" \
                   "Place your bet now (please provide only the number;" \
                   "'skip' if you would like to leave this game)".format(player, self.min_bet, self.max_bet)
-            await self.bot.send_message(self.channel, fmt)
-            msg = await self.bot.wait_for_message(timeout=60, author=player.member, channel=self.channel, check=check)
 
-            if msg is None:
-                await self.bot.send_message(self.channel, "You took too long! You're sitting this round out")
+            await self.channel.send(fmt)
+
+            try:
+                msg = await self.bot.wait_for("message", timeout=60, check=check)
+            except asyncio.TimeoutError:
+                await self.channel.send("You took too long! You're sitting this round out")
                 entry['status'] = 'stand'
-            elif msg.content.lower() == 'skip':
-                await self.bot.send_message(self.channel, "Alright, you've been removed from the game")
-                self.leave(player.member)
             else:
-                num = int(msg.content)
-                # Set the new bet, and remove it from this players chip total
-                if num <= player.chips:
-                    player.bet = num
-                    player.chips -= num
-                    entry['status'] = 'bet'
+                if msg.content.lower() == 'skip':
+                    await self.channel.send("Alright, you've been removed from the game")
+                    self.leave(player.member)
                 else:
-                    await self.bot.send_message(self.channel, "You can't bet more than you have!!")
+                    num = int(msg.content)
+                    # Set the new bet, and remove it from this players chip total
+                    if num <= player.chips:
+                        player.bet = num
+                        player.chips -= num
+                        entry['status'] = 'bet'
+                    else:
+                        await self.channel.send("You can't bet more than you have!!")
+
             # Call this so that we can correct the list, if someone has left or join
             self.player_cleanup()
 
@@ -464,7 +474,7 @@ class Game:
             # Add that to the main string
             fmt += "Blackjacks: {}\n".format(_fmt)
 
-        await self.bot.send_message(self.channel, fmt)
+        await self.channel.send(fmt)
 
         # Do the same for the dealers hand
         cards = list(self.dealer.hand.draw(self.dealer.hand.count))
@@ -481,10 +491,10 @@ class Game:
         self.players.extend(self._added_players)
         self._added_players.clear()
 
-        # What we want to do is remove any players that are in the game and have left the server
+        # What we want to do is remove any players that are in the game and have left the guild
         for entry in self.players:
             m = entry['player'].member
-            if m not in self.channel.server.members:
+            if m not in self.channel.guild.members:
                 self._removed_players.append(entry['player'])
 
         # Remove the players who left

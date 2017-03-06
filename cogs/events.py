@@ -48,38 +48,17 @@ class StatsUpdate:
             log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
 
     async def on_server_join(self, server):
-        r_filter = {'shard_id': config.shard_id}
-        server_count = len(self.bot.servers)
-        member_count = len(set(self.bot.get_all_members()))
-        entry = {'server_count': server_count, 'member_count': member_count, "shard_id": config.shard_id}
-        # Check if this was successful, if it wasn't, that means a new shard was added and we need to add that entry
-        if not await config.update_content('bot_data', entry, r_filter):
-            await config.add_content('bot_data', entry, r_filter)
         self.bot.loop.create_task(self.update())
 
     async def on_server_leave(self, server):
-        r_filter = {'shard_id': config.shard_id}
-        server_count = len(self.bot.servers)
-        member_count = len(set(self.bot.get_all_members()))
-        entry = {'server_count': server_count, 'member_count': member_count, "shard_id": config.shard_id}
-        # Check if this was successful, if it wasn't, that means a new shard was added and we need to add that entry
-        if not await config.update_content('bot_data', entry, r_filter):
-            await config.add_content('bot_data', entry, r_filter)
         self.bot.loop.create_task(self.update())
 
     async def on_ready(self):
-        r_filter = {'shard_id': config.shard_id}
-        server_count = len(self.bot.servers)
-        member_count = len(set(self.bot.get_all_members()))
-        entry = {'server_count': server_count, 'member_count': member_count, "shard_id": config.shard_id}
-        # Check if this was successful, if it wasn't, that means a new shard was added and we need to add that entry
-        if not await config.update_content('bot_data', entry, r_filter):
-            await config.add_content('bot_data', entry, r_filter)
         self.bot.loop.create_task(self.update())
 
     async def on_member_join(self, member):
-        server = member.server
-        r_filter = {'server_id': server.id}
+        guild = member.guild
+        r_filter = {'server_id': guild.id}
         notifications = await config.get_content('user_notifications', r_filter)
 
         try:
@@ -91,12 +70,12 @@ class StatsUpdate:
         if not channel_id:
             return
 
-        channel = server.get_channel(channel_id)
-        await self.bot.send_message(channel, "Welcome to the '{0.server.name}' server {0.mention}!".format(member))
+        channel = guild.get_channel(channel_id)
+        await channel.send("Welcome to the '{0.server.name}' server {0.mention}!".format(member))
 
     async def on_member_remove(self, member):
-        server = member.server
-        r_filter = {'server_id': server.id}
+        guild = member.guild
+        r_filter = {'server_id': guild.id}
         notifications = await config.get_content('user_notifications', r_filter)
 
         try:
@@ -109,9 +88,7 @@ class StatsUpdate:
             return
 
         channel = server.get_channel(channel_id)
-        await self.bot.send_message(channel,
-                                    "{0} has left the server, I hope it wasn't because of something I said :c".format(
-                                        member.display_name))
+        await channelsend("{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
 
 
 def setup(bot):
