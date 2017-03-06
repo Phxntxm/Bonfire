@@ -343,7 +343,7 @@ class Core:
             await self.bot.say("A {} sided die? You know that's impossible right?".format(num))
             return
 
-        nums = [random.SystemRandom().randint(1, num)) for i in range(0, int(dice)]
+        nums = [random.SystemRandom().randint(1, num)) for i in range(0, int(dice))]
         total = sum(nums)
         value_str = ", ".join("{}".format(x) for x in nums)
 
