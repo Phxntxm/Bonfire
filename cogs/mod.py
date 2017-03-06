@@ -414,7 +414,7 @@ class Mod:
         # Since logs_from will give us any message, not just the user's we need
         # We'll increment count, and stop deleting messages if we hit the limit.
         count = 0
-        async for msg in self.bot.logs_from(ctx.message.channel):
+        async for msg in self.bot.logs_from(ctx.message.channel, before=ctx.message):
             if msg.author in members:
                 try:
                     await self.bot.delete_message(msg)
@@ -424,9 +424,10 @@ class Mod:
                 if count >= limit:
                     break
         msg = await self.bot.say("{} messages succesfully deleted".format(count))
-        await asyncio.sleep(60)
+        await asyncio.sleep(5)
         try:
             await self.bot.delete_message(msg)
+            await self.bot.delete_message(ctx.message)
         except discord.NotFound:
             pass
 
