@@ -185,7 +185,7 @@ class Pages:
         await self.show_page(start_page, first=True)
 
         while self.paginating:
-            react = await self.bot.wait_for('reaction', check=self.react_check, timeout=120.0)
+            react = await self.bot.wait_for('reaction_add', check=self.react_check, timeout=120.0)
             if react is None:
                 self.paginating = False
                 try:
