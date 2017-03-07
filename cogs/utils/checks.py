@@ -73,9 +73,10 @@ def custom_perms(**perms):
         # Loop through and find this server's entry for custom permissions
         # Find the command we're using, if it exists, then overwrite
         # The required permissions, based on the value saved
-        for x in perm_values:
-            if x['server_id'] == ctx.message.server.id and x.get(ctx.command.qualified_name):
-                required_perm = discord.Permissions(x[ctx.command.qualified_name])
+        if perm_values:
+            for x in perm_values:
+                if x['server_id'] == ctx.message.server.id and x.get(ctx.command.qualified_name):
+                    required_perm = discord.Permissions(x[ctx.command.qualified_name])
 
         # Now just check if the person running the command has these permissions
         return member_perms >= required_perm
