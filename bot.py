@@ -38,7 +38,7 @@ async def on_message(message):
 
 
 @bot.event
-async def on_command_completion(command, ctx):
+async def on_command_completion(ctx):
     # There's no reason to continue waiting for this to complete, so lets immediately launch this in a new future
     bot.loop.create_task(process_command(ctx))
 
