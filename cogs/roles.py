@@ -22,7 +22,7 @@ class Roles:
         EXAMPLE: !role
         RESULT: A list of all your roles"""
         # Simply get a list of all roles in this server and send them
-        server_roles = [role.name for role in ctx.message.server.roles if not role.is_everyone]
+        server_roles = [role.name for role in ctx.message.guild.roles if not role.is_everyone]
         await ctx.send("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
 
     @role.command(name='remove', no_pm=True)
@@ -33,12 +33,12 @@ class Roles:
         EXAMPLE: !role remove @Jim @Bot @Joe
         RESULT: A follow-along to remove the role(s) you want to, from these 3 members"""
         # No use in running through everything if the bot cannot manage roles
-        if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
+        if not ctx.message.guild.me.permissions_in(ctx.message.channel).manage_roles:
             await ctx.send("I can't manage roles in this server, do you not trust  me? :c")
             return
         check = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel
 
-        server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
+        server_roles = [role for role in ctx.message.guild.roles if not role.is_everyone]
         # First get the list of all mentioned users
         members = ctx.message.mentions
         # If no users are mentioned, ask the author for a list of the members they want to remove the role from
@@ -96,13 +96,13 @@ class Roles:
         EXAMPLE: !role add @Bob @Joe @jim
         RESULT: A follow along to add the roles you want to these 3"""
         # No use in running through everything if the bot cannot manage roles
-        if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
+        if not ctx.message.guild.me.permissions_in(ctx.message.channel).manage_roles:
             await ctx.send("I can't manage roles in this server, do you not trust  me? :c")
             return
         check = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel
 
         # This is exactly the same as removing roles, except we call add_roles instead.
-        server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
+        server_roles = [role for role in ctx.message.guild.roles if not role.is_everyone]
         members = ctx.message.mentions
         if len(members) == 0:
             await ctx.send("Please provide the list of members you want to add a role to")
@@ -149,13 +149,13 @@ class Roles:
         EXAMPLE: !role delete StupidRole
         RESULT: No more role called StupidRole"""
         # No use in running through everything if the bot cannot manage roles
-        if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
+        if not ctx.message.guild.me.permissions_in(ctx.message.channel).manage_roles:
             await ctx.send("I can't delete roles in this server, do you not trust  me? :c")
             return
 
         # If no role was given, get the current roles on the server and ask which ones they'd like to remove
         if role is None:
-            server_roles = [role for role in ctx.message.server.roles if not role.is_everyone]
+            server_roles = [role for role in ctx.message.guild.roles if not role.is_everyone]
 
             await ctx.send(
                 "Which role would you like to remove from the server? Here is a list of this server's roles:"
@@ -192,13 +192,13 @@ class Roles:
         EXAMPLE: !role create
         RESULT: A follow along in order to create a new role"""
         # No use in running through everything if the bot cannot create the role
-        if not ctx.message.server.me.permissions_in(ctx.message.channel).manage_roles:
+        if not ctx.message.guild.me.permissions_in(ctx.message.channel).manage_roles:
             await ctx.send("I can't create roles in this server, do you not trust  me? :c")
             return
 
         # Save a couple variables that will be used repeatedly
         author = ctx.message.author
-        server = ctx.message.server
+        server = ctx.message.guild
         channel = ctx.message.channel
 
         # A couple checks that will be used in the wait_for_message's

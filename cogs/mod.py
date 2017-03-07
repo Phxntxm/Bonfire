@@ -23,7 +23,7 @@ class Mod:
 
         EXAMPLE: !nick Music Bot
         RESULT: My nickname is now Music Bot"""
-        await ctx.message.server.me.edit(nick=name)
+        await ctx.message.guild.me.edit(nick=name)
         await ctx.send("\N{OK HAND SIGN}")
 
     @commands.command(no_pm=True)
@@ -107,8 +107,8 @@ class Mod:
 
         EXAMPLE: !alerts #alerts
         RESULT: No more alerts spammed in #general!"""
-        r_filter = {'server_id': ctx.message.server.id}
-        entry = {'server_id': ctx.message.server.id,
+        r_filter = {'server_id': ctx.message.guild.id}
+        entry = {'server_id': ctx.message.guild.id,
                  'channel_id': channel.id}
         if not await utils.add_content('server_alerts', entry, r_filter):
             await utils.update_content('server_alerts', entry, r_filter)
@@ -319,7 +319,7 @@ class Mod:
                 "That command does not exist! You can't have custom permissions on a non-existant command....")
             return
 
-        r_filter = {'server_id': ctx.message.server.id}
+        r_filter = {'server_id': ctx.message.guild.id}
         await utils.replace_content('custom_permissions', r.row.without(cmd.qualified_name), r_filter)
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
@@ -357,15 +357,15 @@ class Mod:
 
         EXAMPLE: !purge 50
         RESULT: -50 messages in this channel"""
-        if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
+        if not ctx.message.channel.permissions_for(ctx.message.guild.me).manage_messages:
             await ctx.send("I do not have permission to delete messages...")
             return
         try:
             await ctx.message.channel.purge(limit=limit)
         except discord.HTTPException:
-            await self.bot.send_message(ctx.message.channel, "Detected messages that are too far "
-                                                             "back for me to delete; I can only bulk delete messages"
-                                                             " that are under 14 days old.")
+            await ctx.message.channel.send("Detected messages that are too far "
+                                           "back for me to delete; I can only bulk delete messages"
+                                           " that are under 14 days old.")
 
     @commands.command(no_pm=True)
     @utils.custom_perms(manage_messages=True)
@@ -387,7 +387,7 @@ class Mod:
         if limit > 100:
             limit = 100
         if limit < 0:
-            await self.bot.say("Limit cannot be less than 0!")
+            await ctx.send("Limit cannot be less than 0!")
             return
 
         # If no members are provided, assume we're trying to prune our own messages
@@ -407,8 +407,8 @@ class Mod:
 
         # If we're not setting the user to the bot, then we're deleting someone elses messages
         # To do so, we need manage_messages permission, so check if we have that
-        if not ctx.message.channel.permissions_for(ctx.message.server.me).manage_messages:
-            await self.bot.say("I do not have permission to delete messages...")
+        if not ctx.message.channel.permissions_for(ctx.message.guild.me).manage_messages:
+            await ctx.send("I do not have permission to delete messages...")
             return
 
         # Since logs_from will give us any message, not just the user's we need
@@ -453,7 +453,7 @@ class Mod:
         if rule is None:
             try:
                 pages = utils.Pages(self.bot, message=ctx.message, entries=rules, per_page=5)
-                pages.title = "Rules for {}".format(ctx.message.server.name)
+                pages.title = "Rules for {}".format(ctx.message.guild.name)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
@@ -472,8 +472,8 @@ class Mod:
 
         EXAMPLE: !rules add No fun allowed in this server >:c
         RESULT: No more fun...unless they break the rules!"""
-        r_filter = {'server_id': ctx.message.server.id}
-        entry = {'server_id': ctx.message.server.id,
+        r_filter = {'server_id': ctx.message.guild.id}
+        entry = {'server_id': ctx.message.guild.id,
                  'rules': [rule]}
         update = {'rules': r.row['rules'].append(rule)}
         if not await utils.update_content('rules', update, r_filter):
@@ -489,7 +489,7 @@ class Mod:
 
         EXAMPLE: !rules delete 5
         RESULT: Freedom from opression!"""
-        r_filter = {'server_id': ctx.message.server.id}
+        r_filter = {'server_id': ctx.message.guild.id}
         update = {'rules': r.row['rules'].delete_at(rule - 1)}
         if not await utils.update_content('rules', update, r_filter):
             await ctx.send("That is not a valid rule number, try running the command again.")

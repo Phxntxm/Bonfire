@@ -40,26 +40,26 @@ class Strawpoll:
         RESULT: A list of all polls setup on this server"""
         # Strawpolls cannot be 'deleted' so to handle whether a poll is running or not on a server
         # Just save the poll, which can then be removed when it should not be "running" anymore
-        r_filter = {'server_id': ctx.message.server.id}
+        r_filter = {'server_id': ctx.message.guild.id}
         polls = await config.get_content('strawpolls', r_filter)
         # Check if there are any polls setup on this server
         try:
             polls = polls[0]['polls']
         except TypeError:
-            await self.bot.say("There are currently no strawpolls running on this server!")
+            await ctx.send("There are currently no strawpolls running on this server!")
             return
         # Print all polls on this server if poll_id was not provided
         if poll_id is None:
             fmt = "\n".join(
                 "{}: https://strawpoll.me/{}".format(data['title'], data['poll_id']) for data in polls)
-            await self.bot.say("```\n{}```".format(fmt))
+            await ctx.send("```\n{}```".format(fmt))
         else:
             # Since strawpoll should never allow us to have more than one poll with the same ID
             # It's safe to assume there's only one result
             try:
                 poll = [p for p in polls if p['poll_id'] == poll_id][0]
             except IndexError:
-                await self.bot.say("That poll does not exist on this server!")
+                await ctx.send("That poll does not exist on this server!")
                 return
 
             async with self.session.get("{}/{}".format(self.url, poll_id),
@@ -72,13 +72,13 @@ class Strawpoll:
             # The rest is simple formatting
             fmt_options = "\n\t".join(
                 "{}: {}".format(result, data['votes'][i]) for i, result in enumerate(data['options']))
-            author = discord.utils.get(ctx.message.server.members, id=poll['author'])
+            author = discord.utils.get(ctx.message.guild.members, id=poll['author'])
             created_ago = (pendulum.utcnow() - pendulum.parse(poll['date'])).in_words()
             link = "https://strawpoll.me/{}".format(poll_id)
             fmt = "Link: {}\nTitle: {}\nAuthor: {}\nCreated: {} ago\nOptions:\n\t{}".format(link, data['title'],
                                                                                             author.display_name,
                                                                                             created_ago, fmt_options)
-            await self.bot.say("```\n{}```".format(fmt))
+            await ctx.send("```\n{}```".format(fmt))
 
     @strawpolls.command(name='create', aliases=['setup', 'add'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -103,7 +103,7 @@ class Strawpoll:
             options = [option for option in options if option]
         # If neither is found, then error out and let them know to use the help command, since this one is a bit finicky
         else:
-            await self.bot.say(
+            await ctx.send(
                 "Please provide options for a new strawpoll! Use {}help {} if you do not know the format".format(
                     ctx.prefix, ctx.command.qualified_name))
             return
@@ -115,24 +115,24 @@ class Strawpoll:
             async with self.session.post(self.url, data=json.dumps(payload), headers=self.headers) as response:
                 data = await response.json()
         except json.JSONDecodeError:
-            await self.bot.say("Sorry, I couldn't connect to strawpoll at the moment. Please try again later")
+            await ctx.send("Sorry, I couldn't connect to strawpoll at the moment. Please try again later")
             return
 
         # Save this strawpoll in the list of running strawpolls for a server
         poll_id = str(data['id'])
 
-        r_filter = {'server_id': ctx.message.server.id}
+        r_filter = {'server_id': ctx.message.guild.id}
         sub_entry = {'poll_id': poll_id,
                      'author': ctx.message.author.id,
                      'date': str(pendulum.utcnow()),
                      'title': title}
 
-        entry = {'server_id': ctx.message.server.id,
+        entry = {'server_id': ctx.message.guild.id,
                  'polls': [sub_entry]}
         update = {'polls': r.row['polls'].append(sub_entry)}
         if not await config.update_content('strawpolls', update, r_filter):
             await config.add_content('strawpolls', entry, {'poll_id': poll_id})
-        await self.bot.say("Link for your new strawpoll: https://strawpoll.me/{}".format(poll_id))
+        await ctx.send("Link for your new strawpoll: https://strawpoll.me/{}".format(poll_id))
 
     @strawpolls.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -141,12 +141,12 @@ class Strawpoll:
 
         EXAMPLE: !strawpoll remove 5
         RESULT: No more strawpoll 5~"""
-        r_filter = {'server_id': ctx.message.server.id}
+        r_filter = {'server_id': ctx.message.guild.id}
         content = await config.get_content('strawpolls', r_filter)
         try:
             content = content[0]['polls']
         except TypeError:
-            await self.bot.say("There are no strawpolls setup on this server!")
+            await ctx.send("There are no strawpolls setup on this server!")
             return
 
         polls = [poll for poll in content if poll['poll_id'] != poll_id]
@@ -154,6 +154,6 @@ class Strawpoll:
         update = {'polls': polls}
         # Try to remove the poll based on the ID, if it doesn't exist, this will return false
         if await config.update_content('strawpolls', update, r_filter):
-            await self.bot.say("I have just removed the poll with the ID {}".format(poll_id))
+            await ctx.send("I have just removed the poll with the ID {}".format(poll_id))
         else:
-            await self.bot.say("There is no poll setup with that ID!")
+            await ctx.send("There is no poll setup with that ID!")

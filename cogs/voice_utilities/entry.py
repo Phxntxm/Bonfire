@@ -145,7 +145,7 @@ class URLPlaylistEntry(BasePlaylistEntry):
             meta['channel'] = ch or data['meta']['channel']['name']
 
         if 'author' in data['meta']:
-            meta['author'] = meta['channel'].server.get_member(data['meta']['author']['id'])
+            meta['author'] = meta['channel'].guild.get_member(data['meta']['author']['id'])
 
         return cls(playlist, url, title, duration, filename, **meta)
 

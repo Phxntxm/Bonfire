@@ -75,7 +75,7 @@ def custom_perms(**perms):
         # The required permissions, based on the value saved
         if perm_values:
             for x in perm_values:
-                if x['server_id'] == ctx.message.server.id and x.get(ctx.command.qualified_name):
+                if x['server_id'] == ctx.message.guild.id and x.get(ctx.command.qualified_name):
                     required_perm = discord.Permissions(x[ctx.command.qualified_name])
 
         # Now just check if the person running the command has these permissions

@@ -148,9 +148,9 @@ class Music:
     async def create_voice_client(self, channel):
         """Creates a voice client and saves it"""
         # First join the channel and get the VoiceClient that we'll use to save per server
-        await self.remove_voice_client(channel.server)
+        await self.remove_voice_client(channel.guild)
 
-        server = channel.server
+        server = channel.guild
         state = self.get_voice_state(server)
         voice = self.bot.voice_client_in(server)
         # Attempt 3 times
@@ -198,7 +198,7 @@ class Music:
                 pass
 
     async def on_voice_state_update(self, before, after):
-        state = self.get_voice_state(after.server)
+        state = self.get_voice_state(after.guild)
         if state.voice is None:
             return
         voice_channel = state.voice.channel
@@ -236,12 +236,12 @@ class Music:
                 # There's only one reaction we want to make sure we remove in the circumstances
                 # If the member doesn't have kick_members permissions, and isn't the requester
                 # Then they can't remove the song, otherwise they can
-                if not author.server_permissions.kick_members and author != entry.requester:
+                if not author.guild_permissions.kick_members and author != entry.requester:
                     try:
-                        await self.bot.remove_reaction(message, '\u274c', channel.server.me)
+                        await self.bot.remove_reaction(message, '\u274c', channel.guild.me)
                     except:
                         pass
-                elif not author.server_permissions.kick_members and author == entry.requester:
+                elif not author.guild_permissions.kick_members and author == entry.requester:
                     try:
                         await self.bot.add_reaction(message, '\u274c')
                     except:
@@ -251,7 +251,7 @@ class Music:
                 await self.bot.add_reaction(message, '\N{LEFTWARDS BLACK ARROW}')
                 await self.bot.add_reaction(message, '\N{BLACK RIGHTWARDS ARROW}')
                 # The moderation tools that can be used
-                if author.server_permissions.kick_members:
+                if author.guild_permissions.kick_members:
                     await self.bot.add_reaction(message, '\N{DOWNWARDS BLACK ARROW}')
                     await self.bot.add_reaction(message, '\N{UPWARDS BLACK ARROW}')
                     await self.bot.add_reaction(message, '\N{CROSS MARK}')
@@ -279,7 +279,7 @@ class Music:
             # If up is clicked
             elif '\u2b06' in reaction.emoji:
                 # A second check just to make sure, as well as ensuring index is higher than 0
-                if author.server_permissions.kick_members and index > 0:
+                if author.guild_permissions.kick_members and index > 0:
                     if entry != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     else:
@@ -292,7 +292,7 @@ class Music:
             # If down is clicked
             elif '\u2b07' in reaction.emoji:
                 # A second check just to make sure, as well as ensuring index is lower than last
-                if author.server_permissions.kick_members and index < (count - 1):
+                if author.guild_permissions.kick_members and index < (count - 1):
                     if entry != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     else:
@@ -305,7 +305,7 @@ class Music:
             # If x is clicked
             elif '\u274c' in reaction.emoji:
                 # A second check just to make sure
-                if author.server_permissions.kick_members or author == entry.requester:
+                if author.guild_permissions.kick_members or author == entry.requester:
                     if entry != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     else:
@@ -333,7 +333,7 @@ class Music:
             'bot': self.bot,
             'ctx': ctx,
             'message': ctx.message,
-            'server': ctx.message.server,
+            'server': ctx.message.guild,
             'channel': ctx.message.channel,
             'author': ctx.message.author
         }
@@ -345,10 +345,10 @@ class Music:
             if inspect.isawaitable(result):
                 result = await result
         except Exception as e:
-            await self.bot.say(python.format(type(e).__name__ + ': ' + str(e)))
+            await ctx.send(python.format(type(e).__name__ + ': ' + str(e)))
             return
 
-        await self.bot.say(python.format(result))
+        await ctx.send(python.format(result))
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -356,23 +356,23 @@ class Music:
         """Provides the progress of the current song"""
 
         # Make sure we're playing first
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if not state.is_playing():
-            await self.bot.say('Not playing anything.')
+            await ctx.send('Not playing anything.')
         else:
             progress = state.current.progress
             length = state.current.length
             # Another check, just to make sure; this may happen for a very brief amount of time
             # Between when the song was requested, and still downloading to play
             if not progress or not length:
-                await self.bot.say('Not playing anything.')
+                await ctx.send('Not playing anything.')
                 return
 
             # Otherwise just format this nicely
             progress = divmod(round(progress, 0), 60)
             length = divmod(round(length, 0), 60)
             fmt = "Current song progress: {0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
-            await self.bot.say(fmt)
+            await ctx.send(fmt)
 
     @commands.command(no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -382,14 +382,14 @@ class Music:
             await self.create_voice_client(channel)
         # Check if the channel given was an actual voice channel
         except discord.InvalidArgument:
-            await self.bot.say('This is not a voice channel...')
+            await ctx.send('This is not a voice channel...')
         except (asyncio.TimeoutError, discord.ConnectionClosed):
-            await self.bot.say("I failed to connect! This usually happens if I don't have permission to join the"
+            await ctx.send("I failed to connect! This usually happens if I don't have permission to join the"
                                " channel, but can sometimes be caused by your server region being far away."
                                " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
-            await self.remove_voice_client(channel.server)
+            await self.remove_voice_client(channel.guild)
         else:
-            await self.bot.say('Ready to play audio in ' + channel.name)
+            await ctx.send('Ready to play audio in ' + channel.name)
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -399,22 +399,22 @@ class Music:
         # First check if the author is even in a voice_channel
         summoned_channel = ctx.message.author.voice_channel
         if summoned_channel is None:
-            await self.bot.say('You are not in a voice channel.')
+            await ctx.send('You are not in a voice channel.')
             return False
 
         # Then simply create a voice client
         try:
             success = await self.create_voice_client(summoned_channel)
         except (asyncio.TimeoutError, discord.ConnectionClosed):
-            await self.bot.say("I failed to connect! This usually happens if I don't have permission to join the"
+            await ctx.send("I failed to connect! This usually happens if I don't have permission to join the"
                                " channel, but can sometimes be caused by your server region being far away."
                                " Otherwise this is an issue on Discord's end, causing the connect to timeout!")
-            await self.remove_voice_client(summoned_channel.server)
+            await self.remove_voice_client(summoned_channel.guild)
             return False
 
         if success:
             try:
-                await self.bot.say('Ready to play audio in ' + summoned_channel.name)
+                await ctx.send('Ready to play audio in ' + summoned_channel.name)
             except discord.Forbidden:
                 pass
         return success
@@ -429,7 +429,7 @@ class Music:
         The list of supported sites can be found here:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
 
         # First check if we are connected to a voice channel at all, if not summon to the channel the author is in
         # Since summon utils if the author is in a channel, we don't need to handle that here, just return if it failed
@@ -440,21 +440,21 @@ class Music:
 
         # If the queue is full, we ain't adding anything to it
         if state.songs.full:
-            await self.bot.say("The queue is currently full! You'll need to wait to add a new song")
+            await ctx.send("The queue is currently full! You'll need to wait to add a new song")
             return
 
         author_channel = ctx.message.author.voice.voice_channel
-        my_channel = ctx.message.server.me.voice.voice_channel
+        my_channel = ctx.message.guild.me.voice.voice_channel
 
         if my_channel is None:
             # If we're here this means that after 3 attempts...4 different "failsafes"...
             # Discord has returned saying the connection was successful, and returned a None connection
-            await self.bot.say("I failed to connect to the channel! Please try again soon")
+            await ctx.send("I failed to connect to the channel! Please try again soon")
             return
 
         # To try to avoid some abuse, ensure the requester is actually in our channel
         if my_channel != author_channel:
-            await self.bot.say("You are not currently in the channel; please join before trying to request a song.")
+            await ctx.send("You are not currently in the channel; please join before trying to request a song.")
             return
 
         # Set the number of required skips to start
@@ -502,32 +502,32 @@ class Music:
                 error = "{}...".format(error[:1996])
             await self.bot.send_message(ctx.message.channel, error)
             return
-        await self.bot.say('Enqueued ' + str(_entry))
+        await ctx.send('Enqueued ' + str(_entry))
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(kick_members=True)
     async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song."""
 
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if value is None:
             volume = state.volume
-            await self.bot.say("Current volume is {}".format(volume))
+            await ctx.send("Current volume is {}".format(volume))
             return
         if value > 200:
-            await self.bot.say("Sorry but the max volume is 200")
+            await ctx.send("Sorry but the max volume is 200")
             return
         state.volume = value
         if state.is_playing():
             player = state.player
             player.volume = value / 100
-            await self.bot.say('Set the volume to {:.0%}'.format(player.volume))
+            await ctx.send('Set the volume to {:.0%}'.format(player.volume))
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(kick_members=True)
     async def pause(self, ctx):
         """Pauses the currently played song."""
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if state.is_playing():
             state.player.pause()
 
@@ -535,7 +535,7 @@ class Music:
     @utils.custom_perms(kick_members=True)
     async def resume(self, ctx):
         """Resumes the currently played song."""
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if state.is_playing():
             state.player.resume()
 
@@ -545,7 +545,7 @@ class Music:
         """Stops playing audio and leaves the voice channel.
         This also clears the queue.
         """
-        server = ctx.message.server
+        server = ctx.message.guild
         state = self.get_voice_state(server)
 
         # Stop playing whatever song is playing.
@@ -559,7 +559,7 @@ class Music:
         try:
             state.audio_player.cancel()
             state.clear_audio_files()
-            await self.remove_voice_client(ctx.message.server)
+            await self.remove_voice_client(ctx.message.guild)
             del self.voice_states[server.id]
         except:
             pass
@@ -570,16 +570,16 @@ class Music:
         """Provides an ETA on when your next song will play"""
         # Note: There is no way to tell how long a song has been playing, or how long there is left on a song
         # That is why this is called an "ETA"
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         author = ctx.message.author
 
         if not state.is_playing():
-            await self.bot.say('Not playing any music right now...')
+            await ctx.send('Not playing any music right now...')
             return
 
         queue = state.songs.entries
         if len(queue) == 0:
-            await self.bot.say("Nothing currently in the queue")
+            await ctx.send("Nothing currently in the queue")
             return
 
         # Start off by adding the remaining length of the current song
@@ -597,26 +597,26 @@ class Music:
         # If it has not, then we have not looped through the queue at all
         # Since the queue was already checked to have more than one song in it, this means the author is next
         if count == state.current.duration:
-            await self.bot.say("You are next in the queue!")
+            await ctx.send("You are next in the queue!")
             return
         if not found:
-            await self.bot.say("You are not in the queue!")
+            await ctx.send("You are not in the queue!")
             return
-        await self.bot.say("ETA till your next play is: {0[0]}m {0[1]}s".format(divmod(round(count, 0), 60)))
+        await ctx.send("ETA till your next play is: {0[0]}m {0[1]}s".format(divmod(round(count, 0), 60)))
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
     async def queue(self, ctx):
         """Provides a printout of the songs that are in the queue"""
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if not state.is_playing():
-            await self.bot.say('Not playing any music right now...')
+            await ctx.send('Not playing any music right now...')
             return
 
         # Asyncio provides no non-private way to access the queue, so we have to use _queue
         queue = state.songs.entries
         if len(queue) == 0:
-            await self.bot.say("Nothing currently in the queue")
+            await ctx.send("Nothing currently in the queue")
         else:
             self.bot.loop.create_task(self.queue_embed_task(state, ctx.message.channel, ctx.message.author))
 
@@ -624,8 +624,8 @@ class Music:
     @utils.custom_perms(send_messages=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
-        await self.bot.say("There are a total of {} songs in the queue"
-                           .format(len(self.get_voice_state(ctx.message.server).songs.entries)))
+        await ctx.send("There are a total of {} songs in the queue"
+                           .format(len(self.get_voice_state(ctx.message.guild).songs.entries)))
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -635,15 +635,15 @@ class Music:
         are required to vote to skip for the song to be skipped.
         """
 
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if not state.is_playing():
-            await self.bot.say('Not playing any music right now...')
+            await ctx.send('Not playing any music right now...')
             return
 
         # Check if the person requesting a skip is the requester of the song, if so automatically skip
         voter = ctx.message.author
         if voter == state.current.requester:
-            await self.bot.say('Requester requested skipping song...')
+            await ctx.send('Requester requested skipping song...')
             state.skip()
         # Otherwise check if the voter has already voted
         elif voter.id not in state.skip_votes:
@@ -652,33 +652,33 @@ class Music:
 
             # Now check how many votes have been made, if 3 then go ahead and skip, otherwise add to the list of votes
             if total_votes >= state.required_skips:
-                await self.bot.say('Skip vote passed, skipping song...')
+                await ctx.send('Skip vote passed, skipping song...')
                 state.skip()
             else:
-                await self.bot.say('Skip vote added, currently at [{}/{}]'.format(total_votes, state.required_skips))
+                await ctx.send('Skip vote added, currently at [{}/{}]'.format(total_votes, state.required_skips))
         else:
-            await self.bot.say('You have already voted to skip this song.')
+            await ctx.send('You have already voted to skip this song.')
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(kick_members=True)
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if not state.is_playing():
-            await self.bot.say('Not playing any music right now...')
+            await ctx.send('Not playing any music right now...')
             return
 
         state.skip()
-        await self.bot.say('Song has just been skipped.')
+        await ctx.send('Song has just been skipped.')
 
     @commands.command(pass_context=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
     async def playing(self, ctx):
         """Shows info about the currently played song."""
 
-        state = self.get_voice_state(ctx.message.server)
+        state = self.get_voice_state(ctx.message.guild)
         if not state.is_playing():
-            await self.bot.say('Not playing anything.')
+            await ctx.send('Not playing anything.')
         else:
             # Create the embed object we'll use
             embed = discord.Embed()
@@ -696,7 +696,7 @@ class Music:
             fmt = "{0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
             embed.add_field(name='Progress', value=fmt,inline=False)
             # And send the embed
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
 
 
 def setup(bot):

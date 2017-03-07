@@ -20,7 +20,7 @@ class StatsUpdate:
         self.bot.loop.create_task(self.session.close())
 
     async def update(self):
-        server_count = len(self.bot.servers)
+        server_count = len(self.bot.guilds)
 
         carbon_payload = {
             'key': config.carbon_key,
@@ -67,7 +67,7 @@ class StatsUpdate:
             return
 
         channel = guild.get_channel(channel_id)
-        await channel.send("Welcome to the '{0.server.name}' server {0.mention}!".format(member))
+        await channel.send("Welcome to the '{0.guild.name}' server {0.mention}!".format(member))
 
     async def on_member_remove(self, member):
         guild = member.guild

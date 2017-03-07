@@ -176,7 +176,7 @@ class Core:
         embed = discord.Embed(**opts)
 
         # Add the normal values
-        embed.add_field(name='Total Servers', value=len(self.bot.servers))
+        embed.add_field(name='Total Servers', value=len(self.bot.guilds))
         embed.add_field(name='Total Members', value=len(set(self.bot.get_all_members())))
 
         # Count the variable values; hangman, tictactoe, etc.
