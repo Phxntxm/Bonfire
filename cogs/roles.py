@@ -44,9 +44,9 @@ class Roles:
         # If no users are mentioned, ask the author for a list of the members they want to remove the role from
         if len(members) == 0:
             await ctx.send("Please provide the list of members you want to remove a role from")
-            msg = await self.bot.wait_for('message', check=check, timeout=60)
-
-            if msg is None:
+            try:
+                msg = await self.bot.wait_for('message', check=check, timeout=60)
+            except asyncio.TimeoutError:
                 await ctx.send("You took too long. I'm impatient, don't make me wait")
                 return
             if len(msg.mentions) == 0:
@@ -60,8 +60,9 @@ class Roles:
                        "Make sure the roles, if more than one is provided, are separate by commas. "
                        "Here is a list of this server's roles:"
                        "```\n{}```".format("\n".join([r.name for r in server_roles])))
-        msg = await self.bot.wait_for('message', check=check, timeout=60)
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=60)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long. I'm impatient, don't make me wait")
             return
 
@@ -105,8 +106,9 @@ class Roles:
         members = ctx.message.mentions
         if len(members) == 0:
             await ctx.send("Please provide the list of members you want to add a role to")
-            msg = await self.bot.wait_for('message', check=check, timeout=60)
-            if msg is None:
+            try:
+                msg = await self.bot.wait_for('message', check=check, timeout=60)
+            except asyncio.TimeoutError:
                 await ctx.send("You took too long. I'm impatient, don't make me wait")
                 return
             if len(msg.mentions) == 0:
@@ -118,9 +120,9 @@ class Roles:
                        "Make sure the roles, if more than one is provided, are separate by commas. "
                        "Here is a list of this server's roles:"
                        "```\n{}```".format("\n".join([r.name for r in server_roles])))
-
-        msg = await self.bot.wait_for('message', check=check, timeout=60)
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=60)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long. I'm impatient, don't make me wait")
             return
         role_names = re.split(', ?', msg.content)
@@ -168,8 +170,9 @@ class Roles:
                 else:
                     return False
 
-            msg = await self.bot.wait_for('message', timeout=60, check=check)
-            if msg is None:
+            try:
+                msg = await self.bot.wait_for('message', timeout=60, check=check)
+            except asyncio.TimeoutError:
                 await ctx.send("You took too long. I'm impatient, don't make me wait")
                 return
             # If we have gotten here, based on our previous check, we know that the content provided is a valid role.
@@ -222,8 +225,9 @@ class Roles:
         # Start the checks for the role, get the name of the role first
         await ctx.send(
             "Alright! I'm ready to create a new role, please respond with the name of the role you want to create")
-        msg = await self.bot.wait_for('message', timeout=60.0, check=author_check)
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', timeout=60.0, check=author_check)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long. I'm impatient, don't make me wait")
             return
         name = msg.content
@@ -236,8 +240,9 @@ class Roles:
                        "```\n{}```".format(fmt))
         # For this we're going to give a couple extra minutes before we timeout
         # as it might take a bit to figure out which permissions they want
-        msg = await self.bot.wait_for('message', timeout=180.0, check=num_seperated_check)
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', timeout=180.0, check=num_seperated_check)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long. I'm impatient, don't make me wait")
             return
 
@@ -246,16 +251,18 @@ class Roles:
 
         # Check if this role should be in a separate section on the sidebard, i.e. hoisted
         await ctx.send("Do you want this role to be in a separate section on the sidebar? (yes or no)")
-        msg = await self.bot.wait_for('message', timeout=60.0, check=yes_no_check)
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', timeout=60.0, check=yes_no_check)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long. I'm impatient, don't make me wait")
             return
         hoist = True if msg.content.lower() == "yes" else False
 
         # Check if this role should be able to be mentioned
         await ctx.send("Do you want this role to be mentionable? (yes or no)")
-        msg = await self.bot.wait_for('message', timeout=60.0, check=yes_no_check)
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', timeout=60.0, check=yes_no_check)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long. I'm impatient, don't make me wait")
             return
         mentionable = True if msg.content.lower() == "yes" else False
@@ -277,9 +284,10 @@ class Roles:
         await asyncio.sleep(1)
         await ctx.send("We did it! You just created the new role {}\nIf you want to add this role"
                        " to some people, mention them now".format(role.name))
-        msg = await self.bot.wait_for('message', timeout=60.0, check=members_check)
-        # There's no need to mention the users, so don't send a failure message if they didn't, just return
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', timeout=60.0, check=members_check)
+        except asyncio.TimeoutError:
+            # There's no need to mention the users, so don't send a failure message if they didn't, just return
             return
 
         # Otherwise members were mentioned, add the new role to them now

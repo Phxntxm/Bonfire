@@ -173,9 +173,9 @@ class Raffle:
             "Ready to start a new raffle! Please respond with the title you would like to use for this raffle!")
 
         check = lambda m: m.author == author and m.channel == channel
-        msg = await self.bot.wait_for('message', check=check, timeout=120)
-
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=120)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long! >:c")
             return
 
@@ -192,9 +192,9 @@ class Raffle:
                 return re.search("\d+ (minutes?|hours?|days?|weeks?|months?)", m.content.lower()) is not None
             else:
                 return False
-        msg = await self.bot.wait_for('message', timeout=120, check=check)
-
-        if msg is None:
+        try:
+            msg = await self.bot.wait_for('message', timeout=120, check=check)
+        except asyncio.TimeoutError:
             await ctx.send("You took too long! >:c")
             return
 

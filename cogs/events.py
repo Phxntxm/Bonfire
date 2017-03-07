@@ -20,11 +20,7 @@ class StatsUpdate:
         self.bot.loop.create_task(self.session.close())
 
     async def update(self):
-        server_count = 0
-        data = await config.get_content('bot_data')
-
-        for entry in data:
-            server_count += entry.get('server_count')
+        server_count = len(self.bot.servers)
 
         carbon_payload = {
             'key': config.carbon_key,

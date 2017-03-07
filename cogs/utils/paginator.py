@@ -120,12 +120,17 @@ class Pages:
         """lets you type a page number to go to"""
         to_delete = []
         to_delete.append(await self.message.channel.send('What page do you want to go to?'))
+
         def check(m):
             if m.author == self.author and m.channel == self.message.channel:
                 return m.content.isdigit()
             else:
                 return False
-        msg = await self.bot.wait_for('message', check=check, timeout=30.0)
+
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=30.0)
+        except asyncio.TimeoutError:
+            msg = None
         if msg is not None:
             page = int(msg.content)
             to_delete.append(msg)
@@ -185,7 +190,10 @@ class Pages:
         await self.show_page(start_page, first=True)
 
         while self.paginating:
-            react = await self.bot.wait_for('reaction_add', check=self.react_check, timeout=120.0)
+            try:
+                react = await self.bot.wait_for('reaction_add', check=self.react_check, timeout=120.0)
+            except asyncio.TimeoutError:
+                react = None
             if react is None:
                 self.paginating = False
                 try:
