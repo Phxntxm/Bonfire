@@ -9,7 +9,7 @@ global_config = {}
 # Ensure that the required config.yml file actually exists
 try:
     with open("config.yml", "r") as f:
-        global_config = yaml.load(f)
+        global_config = yaml.safe_load(f)
 except FileNotFoundError:
     print("You have no config file setup! Please use config.yml.sample to setup a valid config file")
     quit()
@@ -70,10 +70,6 @@ user_agent = global_config.get('user_agent', "")
 # The extensions to load
 extensions = global_config.get('extensions', [])
 
-# The variables needed for sharding
-shard_count = global_config.get('shard_count', 1)
-shard_id = global_config.get('shard_id', 0)
-
 # The default status the bot will use
 default_status = global_config.get("default_status", None)
 # The URL that will be used to link to for the help command
@@ -124,14 +120,9 @@ def command_prefix(bot, message):
     # But it is not worth a query for every single message the bot detects, to fix
     try:
         values = cache['prefixes'].values
-        try:
-            prefix = [data['prefix'] for data in values if message.server.id == data['server_id']][0]
-        except IndexError:
-            prefix = None
-        except AttributeError:
-            prefix = None
+        prefix = [data['prefix'] for data in values if message.server.id == data['server_id']][0]
         return prefix or default_prefix
-    except KeyError:
+    except (KeyError, TypeError, IndexError, AttributeError):
         return default_prefix
 
 

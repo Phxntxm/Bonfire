@@ -94,10 +94,10 @@ async def on_command_error(error, ctx):
 
     if isinstance(error, commands.BadArgument):
         fmt = "Please provide a valid argument to pass to the command: {}".format(error)
-        await bot.send_message(ctx.message.channel, fmt)
+        await ctx.message.channel.send(fmt)
     elif isinstance(error, commands.CheckFailure):
         fmt = "You can't tell me what to do!"
-        await bot.send_message(ctx.message.channel, fmt)
+        await ctx.message.channel.send(fmt)
     elif isinstance(error, commands.CommandOnCooldown):
         m, s = divmod(error.retry_after, 60)
         fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \

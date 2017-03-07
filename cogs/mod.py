@@ -101,7 +101,7 @@ class Mod:
 
     @commands.command(no_pm=True)
     @utils.custom_perms(kick_members=True)
-    async def alerts(self, ctx, channel: discord.Channel):
+    async def alerts(self, ctx, channel: discord.TextChannel):
         """This command is used to set a channel as the server's 'notifications' channel
         Any notifications (like someone going live on Twitch, or Picarto) will go to that channel
 

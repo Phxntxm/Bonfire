@@ -376,7 +376,7 @@ class Music:
 
     @commands.command(no_pm=True)
     @utils.custom_perms(send_messages=True)
-    async def join(self, *, channel: discord.Channel):
+    async def join(self, *, channel: discord.TextChannel):
         """Joins a voice channel."""
         try:
             await self.create_voice_client(channel)

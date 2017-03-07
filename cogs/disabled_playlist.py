@@ -30,7 +30,7 @@ class Music:
 
     @commands.command(no_pm=True, enabled=False)
     @checks.custom_perms(send_messages=True)
-    async def join(self, ctx, *, channel: discord.Channel):
+    async def join(self, ctx, *, channel: discord.TextChannel):
         """Joins a voice channel.
 
         EXAMPLE: !join Music
