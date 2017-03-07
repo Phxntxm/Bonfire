@@ -1,7 +1,8 @@
-from discord.ext import commands
-from .utils import config
-from .utils import checks
 import re
+
+from discord.ext import commands
+
+from . import utils
 
 
 class Tags:
@@ -10,39 +11,39 @@ class Tags:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @commands.command(no_pm=True)
+    @utils.custom_perms(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has
 
         EXAMPLE: !tags
         RESULT: All tags setup on this server"""
-        tags = await config.get_content('tags', {'server_id': ctx.message.server.id})
+        tags = await utils.get_content('tags', {'server_id': ctx.message.guild.id})
         # Simple generator that adds a tag to the list to print, if the tag is for this server
         try:
             fmt = "\n".join("{}".format(tag['tag']) for tag in tags)
-            await self.bot.say('```\n{}```'.format(fmt))
+            await ctx.send('```\n{}```'.format(fmt))
         except TypeError:
-            await self.bot.say("There are not tags setup on this server!")
+            await ctx.send("There are not tags setup on this server!")
 
-    @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @commands.group(invoke_without_command=True, no_pm=True)
+    @utils.custom_perms(send_messages=True)
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
          The format to call a custom tag is !tag <tag>
 
          EXAMPLE: !tag butts
          RESULT: Whatever you setup for the butts tag!!"""
-        r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
-        tags = await config.get_content('tags', r_filter)
+        r_filter = lambda row: (row['server_id'] == ctx.message.guild.id) & (row['tag'] == tag)
+        tags = await utils.get_content('tags', r_filter)
         if tags is None:
-            await self.bot.say('That tag does not exist!')
+            await ctx.send('That tag does not exist!')
             return
         # We shouldn't ever have two tags of the same name, so just get the first result
-        await self.bot.say("\u200B{}".format(tags[0]['result']))
+        await ctx.send("\u200B{}".format(tags[0]['result']))
 
-    @tag.command(name='add', aliases=['create', 'start'], pass_context=True, no_pm=True)
-    @checks.custom_perms(kick_members=True)
+    @tag.command(name='add', aliases=['create', 'start'], no_pm=True)
+    @utils.custom_perms(kick_members=True)
     async def add_tag(self, ctx, *, result: str):
         """Use this to add a new tag that can be used in this server
         Format to add a tag is !tag add <tag> - <result>
@@ -56,43 +57,43 @@ class Tags:
             tag_result = match.group(2).strip()
         # Next two checks are just to ensure there was a valid match found
         except AttributeError:
-            await self.bot.say(
+            await ctx.send(
                 "Please provide the format for the tag in: {}tag add <tag> - <result>".format(ctx.prefix))
             return
         # If our regex failed to find the content (aka they provided the wrong format)
         if len(tag) == 0 or len(tag_result) == 0:
-            await self.bot.say(
+            await ctx.send(
                 "Please provide the format for the tag in: {}tag add <tag> - <result>".format(ctx.prefix))
             return
 
         # Make sure the tag created does not mention everyone/here
         if '@everyone' in tag_result or '@here' in tag_result:
-            await self.bot.say("You cannot create a tag that mentions everyone!")
+            await ctx.send("You cannot create a tag that mentions everyone!")
             return
-        entry = {'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result}
-        r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
+        entry = {'server_id': ctx.message.guild.id, 'tag': tag, 'result': tag_result}
+        r_filter = lambda row: (row['server_id'] == ctx.message.guild.id) & (row['tag'] == tag)
         # Try to create new entry first, if that fails (it already exists) then we update it
-        if await config.add_content('tags', entry, r_filter):
-            await self.bot.say(
+        if await utils.add_content('tags', entry, r_filter):
+            await ctx.send(
                 "I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
         else:
-            await config.update_content('tags', entry, r_filter)
-            await self.bot.say(
+            await utils.update_content('tags', entry, r_filter)
+            await ctx.send(
                 "I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
 
-    @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
-    @checks.custom_perms(kick_members=True)
+    @tag.command(name='delete', aliases=['remove', 'stop'], no_pm=True)
+    @utils.custom_perms(kick_members=True)
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag from use for this server
         Format to delete a tag is !tag delete <tag>
 
         EXAMPLE: !tag delete stupid_tag
         RESULT: Deletes that stupid tag"""
-        r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
-        if await config.remove_content('tags', r_filter):
-            await self.bot.say('I have just removed the tag `{}`'.format(tag))
+        r_filter = lambda row: (row['server_id'] == ctx.message.guild.id) & (row['tag'] == tag)
+        if await utils.remove_content('tags', r_filter):
+            await ctx.send('I have just removed the tag `{}`'.format(tag))
         else:
-            await self.bot.say(
+            await ctx.send(
                 "The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
 
 

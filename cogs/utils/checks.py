@@ -24,9 +24,10 @@ async def db_check():
     except r.errors.ReqlDriverError:
         print("Cannot connect to the RethinkDB instance with the following information: {}".format(db_opts))
 
-        print("The RethinkDB instance you have setup may be down, otherwise please ensure you setup a"\
-        " RethinkDB instance, and you have provided the correct database information in config.yml")
+        print("The RethinkDB instance you have setup may be down, otherwise please ensure you setup a"
+              " RethinkDB instance, and you have provided the correct database information in config.yml")
         quit()
+        return
 
     # Get the current databases and check if the one we need is there
     dbs = await r.db_list().run(conn)
@@ -47,6 +48,7 @@ async def db_check():
                 print("Creating table {}...".format(table))
                 await r.table_create(table).run(conn)
         print("Done checking tables!")
+
 
 def is_owner(ctx):
     return ctx.message.author.id in config.owner_ids
@@ -79,11 +81,4 @@ def custom_perms(**perms):
         return member_perms >= required_perm
 
     predicate.perms = perms
-    return commands.check(predicate)
-
-
-def is_pm():
-    def predicate(ctx):
-        return ctx.message.channel.is_private
-
     return commands.check(predicate)

@@ -3,10 +3,12 @@ import json
 import os
 import traceback
 import time
-import discord
+import aiohttp
 
+from discord import Embed
 from hashlib import md5
 from .exceptions import ExtractionError
+
 
 async def get_header(session, url, headerfield=None, *, timeout=5):
     with aiohttp.Timeout(timeout):
@@ -16,12 +18,14 @@ async def get_header(session, url, headerfield=None, *, timeout=5):
             else:
                 return response.headers
 
+
 def md5sum(filename, limit=0):
     fhash = md5()
     with open(filename, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
             fhash.update(chunk)
     return fhash.hexdigest()[-limit:]
+
 
 class BasePlaylistEntry:
     def __init__(self):
@@ -48,8 +52,8 @@ class BasePlaylistEntry:
 
     def get_ready_future(self):
         """
-        Returns a future that will fire when the song is ready to be played. The future will either fire with the result (being the entry) or an exception
-        as to why the song download failed.
+        Returns a future that will fire when the song is ready to be played. The future will either fire with the
+        result (being the entry) or an exception as to why the song download failed.
         """
         future = asyncio.Future()
         if self.is_downloaded:
@@ -159,7 +163,7 @@ class URLPlaylistEntry(BasePlaylistEntry):
                     'type': self.meta[i].__class__.__name__,
                     'id': self.meta[i].id,
                     'name': self.meta[i].name
-                    } for i in self.meta
+                } for i in self.meta
                 }
             # Actually I think I can just getattr instead, getattr(discord, type)
         }
@@ -271,16 +275,17 @@ class URLPlaylistEntry(BasePlaylistEntry):
             else:
                 # Move the temporary file to it's final location.
                 os.rename(unhashed_fname, self.filename)
+
     def to_embed(self):
         """Returns an embed that can be used to display information about this particular song"""
         # Create the embed object we'll use
-        embed = discord.Embed()
+        embed = Embed()
         # Fill in the simple things
         embed.add_field(name='Title', value=self.title, inline=False)
         embed.add_field(name='Requester', value=self.requester.display_name, inline=False)
         # Get the current length of the song and display this
         length = divmod(round(self.length, 0), 60)
         fmt = "{0[0]}m {0[1]}s".format(length)
-        embed.add_field(name='Duration', value=fmt,inline=False)
+        embed.add_field(name='Duration', value=fmt, inline=False)
         # And return the embed we created
         return embed

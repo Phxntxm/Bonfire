@@ -10,7 +10,7 @@ from enum import Enum
 class Chess:
     def __init__(self, bot):
         self.bot = bot
-        # Our format for games is going to be a little different, because we do want to allow multiple games per server
+        # Our format for games is going to be a little different, because we do want to allow multiple games per guild
         # Format should be {'server_id': [Game, Game, Game]}
         self.games = {}
 
@@ -91,18 +91,18 @@ class Chess:
                     return MoveStatus.invalid
 
     def get_game(self, player):
-        """Provides the game this player is playing, in this server"""
-        server_games = self.games.get(player.server.id, [])
-        for game in server_games:
+        """Provides the game this player is playing, in this guild"""
+        guild_games = self.games.get(player.guild.id, [])
+        for game in guild_games:
             if player in game.challengers.values():
                 return game
 
         return None
 
     def in_game(self, player):
-        """Checks to see if a player is playing in a game right now, in this server"""
-        server_games = self.games.get(player.server.id, [])
-        for game in server_games:
+        """Checks to see if a player is playing in a game right now, in this guild"""
+        guild_games = self.games.get(player.guild.id, [])
+        for game in guild_games:
             if player in game.challengers.values():
                 return True
 
@@ -111,13 +111,13 @@ class Chess:
     def start_game(self, player1, player2):
         game = Game(player1, player2)
         try:
-            self.games[player1.server.id].append(game)
+            self.games[player1.guild.id].append(game)
         except KeyError:
-            self.games[player1.server.id] = [game]
+            self.games[player1.guild.id] = [game]
 
         return game
 
-    @commands.group(pass_contxt=True, invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
     @checks.custom_perms(send_messages=True)
     async def chess(self, ctx, *, move):
         """Moves a piece based on the notation provided
@@ -142,47 +142,48 @@ class Chess:
             EXAMPLE: !rook to d4"""
         result = self.play(ctx.message.author, move)
         if result is MoveStatus.invalid:
-            await self.bot.say("That was an invalid move!")
+            await ctx.send("That was an invalid move!")
         elif result is MoveStatus.wrong_turn:
-            await self.bot.say("It is not your turn to play on your game in this server!")
+            await ctx.send("It is not your turn to play on your game in this guild!")
         elif result is MoveStatus.no_game:
-            await self.bot.say("You are not currently playing a game on this server!")
+            await ctx.send("You are not currently playing a game on this guild!")
         elif result is MoveStatus.valid:
             game = self.get_game(ctx.message.author)
             link = game.draw_board()
             await self.bot.upload(link)
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @checks.custom_perms(send_messages=True)
     async def chess_start(self, ctx, player2: discord.Member):
         """Starts a chess game with another player
-        You can play one game on a single server at a time
+        You can play one game on a single guild at a time
 
         EXAMPLE: !chess start @Victim
         RESULT: A new chess game! Good luck~"""
 
         # Lets first check our permissions; we're not going to create a text based board
         # So we need to be able to attach files in order to send the board
-        if not ctx.message.channel.permissions_for(ctx.message.server.me).attach_files:
-            await self.bot.say(
+        if not ctx.message.channel.permissions_for(ctx.message.guild.me).attach_files:
+            await ctx.send(
                 "I need to be able to send pictures to provide the board! Please ask someone with mange roles permission, to grant me attach files permission if you want to play this")
             return
 
         # Make sure the author and player 2 are not in a game already
         if self.in_game(ctx.message.author):
-            await self.bot.say("Sorry, but you can only be in one game per server at a time")
+            await ctx.send("Sorry, but you can only be in one game per guild at a time")
             return
 
         if self.in_game(player2):
-            await self.bot.say("Sorry, but {} is already in a game on this server!".format(player2.display_name))
+            await ctx.send("Sorry, but {} is already in a game on this guild!".format(player2.display_name))
             return
 
         # Start the game
         game = self.start_game(ctx.message.author, player2)
         player1 = game.challengers.get('white')
-        await self.bot.say(
-            "{} you have started a chess game with {}\n\n{} will be white this game, and is going first.\nIf you need information about the notation used to play, run {}help chess".format(
-                ctx.message.author.display_name, player2.display_name, ctx.prefix))
+        await ctx.send(
+            "{} you have started a chess game with {}\n\n{} will be white this game, and is going first.\nIf you need "
+            "information about the notation used to play, run {}help chess".format(
+                ctx.message.author.display_name, player2.display_name, player1, ctx.prefix))
 
 
 class MoveStatus(Enum):
@@ -209,7 +210,7 @@ class Game:
         self.reset_board()
 
         # The point of chess revolves around the king's position
-        # Due to this, we're going to use the king's position a lot, so lets save this variable 
+        # Due to this, we're going to use the king's position a lot, so lets save this variable
         self.w_king_pos = (0, 4)
         self.b_king_pos = (7, 4)
 
@@ -262,7 +263,7 @@ class Game:
             colour = 'black'
             king_pos = self.b_king_pos
 
-        if not can_castle[colour][pos]:
+        if not self.can_castle[colour][pos]:
             return False
 
         # During castling, the row should never change
@@ -388,7 +389,7 @@ class Game:
     def check(self):
         """Checks our current board, and checks (based on whose turn it is) if we're in a 'check' state"""
         # To check for a check, what we should do is loop through the board
-        # Then check if it's the the current players turn's piece, and compare to moving to the king's position 
+        # Then check if it's the the current players turn's piece, and compare to moving to the king's position
         for x, row in enumerate(self.board):
             for y, piece in enumerate(row):
                 if self.white_turn and re.search('B.', piece) and self.valid_move((x, y), self.b_king_pos):

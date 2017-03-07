@@ -10,7 +10,6 @@ import re
 import calendar
 import pendulum
 import datetime
-import math
 
 
 class Core:
@@ -23,30 +22,7 @@ class Core:
         self.results_per_page = 10
         self.commands = None
 
-    def find_command(self, command):
-        # This method ensures the command given is valid. We need to loop through commands
-        # As self.bot.commands only includes parent commands
-        # So we are splitting the command in parts, looping through the commands
-        # And getting the subcommand based on the next part
-        # If we try to access commands of a command that isn't a group
-        # We'll hit an AttributeError, meaning an invalid command was given
-        # If we loop through and don't find anything, cmd will still be None
-        # And we'll report an invalid was given as well
-        cmd = None
-
-        for part in command.split():
-            try:
-                if cmd is None:
-                    cmd = self.bot.commands.get(part)
-                else:
-                    cmd = cmd.commands.get(part)
-            except AttributeError:
-                cmd = None
-                break
-
-        return cmd
-
-    @commands.command(pass_context=True)
+    @commands.command()
     @utils.custom_perms(send_messages=True)
     async def help(self, ctx, *, message=None):
         """This command is used to provide a link to the help URL.
@@ -65,7 +41,7 @@ class Core:
             try:
                 page = int(message)
             except:
-                cmd = self.find_command(message)
+                cmd = self.bot.get_command(message)
 
         if cmd is None:
             entries = sorted(utils.get_all_commands(self.bot))
@@ -73,7 +49,7 @@ class Core:
                 pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
                 await pages.paginate(start_page=page)
             except utils.CannotPaginate as e:
-                await self.bot.say(str(e))
+                await ctx.send(str(e))
         else:
             # Get the description for a command
             description = cmd.help
@@ -100,11 +76,11 @@ class Core:
             if subcommands:
                 embed.add_field(name='Subcommands', value="\n".join(subcommands), inline=False)
 
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def motd(self, *, date=None):
+    async def motd(self, ctx, *, date=None):
         """This command can be used to print the current MOTD (Message of the day)
         This will most likely not be updated every day, however messages will still be pushed to this every now and then
 
@@ -126,10 +102,10 @@ class Core:
                 motd = latest_motd['motd']
             # This will be hit if we do not have any entries for motd
             except TypeError:
-                await self.bot.say("No message of the day!")
+                await ctx.send("No message of the day!")
             else:
                 fmt = "Last updated: {}\n\n{}".format(date, motd)
-                await self.bot.say(fmt)
+                await ctx.send(fmt)
         else:
             try:
                 r_filter = pendulum.parse(date)
@@ -137,18 +113,18 @@ class Core:
                 date = motd[0]['date']
                 motd = motd[0]['motd']
                 fmt = "Message of the day for {}:\n\n{}".format(date, motd)
-                await self.bot.say(fmt)
+                await ctx.send(fmt)
             # This one will be hit if we return None for that day
             except TypeError:
-                await self.bot.say("No message of the day for {}!".format(date))
+                await ctx.send("No message of the day for {}!".format(date))
             # This will be hit if pendulum fails to parse the date passed
             except ValueError:
                 now = pendulum.utcnow().to_date_string()
-                await self.bot.say("Invalid date format! Try like {}".format(now))
+                await ctx.send("Invalid date format! Try like {}".format(now))
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def calendar(self, month: str = None, year: int = None):
+    async def calendar(self, ctx, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month
 
@@ -176,29 +152,22 @@ class Core:
         else:
             month = months.get(month.lower())
             if month is None:
-                await self.bot.say("Please provide a valid Month!")
+                await ctx.send("Please provide a valid Month!")
                 return
         # If year was not passed, use the current year
         if year is None:
             year = datetime.datetime.today().year
         # Here we create the actual "text" calendar that we are printing
         cal = calendar.TextCalendar().formatmonth(year, month)
-        await self.bot.say("```\n{}```".format(cal))
+        await ctx.send("```\n{}```".format(cal))
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def info(self):
+    async def info(self, ctx):
         """This command can be used to print out some of my information"""
         # fmt is a dictionary so we can set the key to it's output, then print both
         # The only real use of doing it this way is easier editing if the info
         # in this command is changed
-
-        bot_data = await utils.get_content('bot_data')
-        total_data = {'member_count': 0,
-                      'server_count': 0}
-        for entry in bot_data:
-            total_data['member_count'] += entry['member_count']
-            total_data['server_count'] += entry['server_count']
 
         # Create the original embed object
         opts = {'title': 'Dev Server',
@@ -207,8 +176,8 @@ class Core:
         embed = discord.Embed(**opts)
 
         # Add the normal values
-        embed.add_field(name='Total Servers', value=total_data['server_count'])
-        embed.add_field(name='Total Members', value=total_data['member_count'])
+        embed.add_field(name='Total Servers', value=len(self.bot.servers))
+        embed.add_field(name='Total Members', value=len(set(self.bot.get_all_members())))
 
         # Count the variable values; hangman, tictactoe, etc.
         hm_games = len(self.bot.get_cog('Hangman').games)
@@ -233,20 +202,20 @@ class Core:
         embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
         embed.set_footer(text=self.bot.description)
 
-        await self.bot.say(embed=embed)
+        await ctx.send(embed=embed)
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def uptime(self):
+    async def uptime(self, ctx):
         """Provides a printout of the current bot's uptime
 
         EXAMPLE: !uptime
         RESULT: A BAJILLION DAYS"""
-        await self.bot.say("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
+        await ctx.send("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
 
     @commands.command(aliases=['invite'])
     @utils.custom_perms(send_messages=True)
-    async def addbot(self):
+    async def addbot(self, ctx):
         """Provides a link that you can use to add me to a server
 
         EXAMPLE: !addbot
@@ -261,13 +230,17 @@ class Core:
         perms.embed_links = True
         perms.read_message_history = True
         perms.attach_files = True
+        perms.speak = True
+        perms.connect = True
+        perms.attach_files = True
+        perms.add_reactions = True
         app_info = await self.bot.application_info()
-        await self.bot.say("Use this URL to add me to a server that you'd like!\n{}"
-                           .format(discord.utils.oauth_url(app_info.id, perms)))
+        await ctx.send("Use this URL to add me to a server that you'd like!\n{}"
+                       .format(discord.utils.oauth_url(app_info.id, perms)))
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def doggo(self):
+    async def doggo(self, ctx):
         """Use this to print a random doggo image.
 
         EXAMPLE: !doggo
@@ -275,11 +248,11 @@ class Core:
         # Find a random image based on how many we currently have
         f = random.SystemRandom().choice(glob.glob('images/doggo*'))
         with open(f, 'rb') as f:
-            await self.bot.upload(f)
+            await ctx.send(file=f)
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def snek(self):
+    async def snek(self, ctx):
         """Use this to print a random snek image.
 
         EXAMPLE: !snek
@@ -287,11 +260,11 @@ class Core:
         # Find a random image based on how many we currently have
         f = random.SystemRandom().choice(glob.glob('images/snek*'))
         with open(f, 'rb') as f:
-            await self.bot.upload(f)
+            await ctx.send(file=f)
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def joke(self):
+    async def joke(self, ctx):
         """Prints a random riddle
 
         EXAMPLE: !joke
@@ -302,13 +275,13 @@ class Core:
             try:
                 fortune = subprocess.check_output(
                     fortune_command.split()).decode("utf-8")
-                await self.bot.say(fortune)
+                await ctx.send(fortune)
             except discord.HTTPException:
                 pass
             else:
                 break
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @utils.custom_perms(send_messages=True)
     async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
@@ -325,7 +298,7 @@ class Core:
         # Check if something like ed3 was provided, or something else entirely
         # was provided
         except (AttributeError, ValueError):
-            await self.bot.say("Please provide the die notation in #d#!")
+            await ctx.send("Please provide the die notation in #d#!")
             return
 
         # Dice will be None if d# was provided, assume this means 1d#
@@ -334,16 +307,16 @@ class Core:
         # have it set
         dice = int(dice)
         if dice > 10:
-            await self.bot.say("I'm not rolling more than 10 dice, I have tiny hands")
+            await ctx.send("I'm not rolling more than 10 dice, I have tiny hands")
             return
         if num > 100:
-            await self.bot.say("What die has more than 100 sides? Please, calm down")
+            await ctx.send("What die has more than 100 sides? Please, calm down")
             return
         if num <= 1:
-            await self.bot.say("A {} sided die? You know that's impossible right?".format(num))
+            await ctx.send("A {} sided die? You know that's impossible right?".format(num))
             return
 
-        nums = [random.SystemRandom().randint(1, num) for i in range(0, int(dice))]
+        nums = [random.SystemRandom().randint(1, num) for _ in range(0, int(dice))]
         total = sum(nums)
         value_str = ", ".join("{}".format(x) for x in nums)
 
@@ -351,7 +324,7 @@ class Core:
             fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
         else:
             fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}, for a total of {4}!'
-        await self.bot.say(fmt.format(ctx, dice, num, value_str, total))
+        await ctx.send(fmt.format(ctx, dice, num, value_str, total))
 
 
 def setup(bot):

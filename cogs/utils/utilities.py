@@ -5,6 +5,7 @@ import inspect
 from . import config
 from PIL import Image
 
+
 def convert_to_jpeg(pfile):
     # Open the file given
     img = Image.open(pfile)
@@ -15,6 +16,7 @@ def convert_to_jpeg(pfile):
     # In order to use the file, we need to seek back to the 0th position
     new_file.seek(0)
     return new_file
+
 
 def get_all_commands(bot):
     """Returns a list of all command names for the bot"""
@@ -31,6 +33,7 @@ def get_all_commands(bot):
 
     return all_commands
 
+
 def get_subcommands(command):
     yield command.qualified_name
     try:
@@ -40,33 +43,9 @@ def get_subcommands(command):
     except AttributeError:
         pass
 
-def find_command(bot, command):
-    """Finds a command (be it parent or sub command) based on string given"""
-    # This method ensures the command given is valid. We need to loop through commands
-    # As bot.commands only includes parent commands
-    # So we are splitting the command in parts, looping through the commands
-    # And getting the subcommand based on the next part
-    # If we try to access commands of a command that isn't a group
-    # We'll hit an AttributeError, meaning an invalid command was given
-    # If we loop through and don't find anything, cmd will still be None
-    # And we'll report an invalid was given as well
-    cmd = None
-
-    for part in command.split():
-        try:
-            if cmd is None:
-                cmd = bot.commands.get(part)
-            else:
-                cmd = cmd.commands.get(part)
-        except AttributeError:
-            cmd = None
-            break
-
-    return cmd
 
 async def download_image(url):
     """Returns a file-like object based on the URL provided"""
-    headers = {'User-Agent': config.user_agent}
     # Simply read the image, to get the bytes
     bts = await request(url, attr='read')
     if bts is None:
@@ -76,10 +55,12 @@ async def download_image(url):
     image = BytesIO(bts)
     return image
 
+
 async def request(url, *, headers=None, payload=None, method='GET', attr='json'):
     # Make sure our User Agent is what's set, and ensure it's sent even if no headers are passed
-    if headers == None:
+    if headers is None:
         headers = {}
+
     headers['User-Agent'] = config.user_agent
 
     # Try 5 times
@@ -111,6 +92,7 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json')
         # If an error was hit other than the one we want to catch, try again
         except:
             continue
+
 
 async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate

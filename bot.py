@@ -15,11 +15,9 @@ from cogs import utils
 opts = {'command_prefix': utils.command_prefix,
         'description': utils.bot_description,
         'pm_help': None,
-        'shard_count': utils.shard_count,
-        'shard_id': utils.shard_id,
         'command_not_found': ''}
 
-bot = commands.Bot(**opts)
+bot = commands.AutoShardedBot(**opts)
 logging.basicConfig(level=logging.WARNING, filename='bonfire.log')
 
 
@@ -104,12 +102,12 @@ async def on_command_error(error, ctx):
         m, s = divmod(error.retry_after, 60)
         fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
             .format(round(m), round(s))
-        await bot.send_message(ctx.message.channel, fmt)
+        await ctx.message.channel.send(fmt)
     elif isinstance(error, commands.NoPrivateMessage):
         fmt = "This command cannot be used in a private message"
-        await bot.send_message(ctx.message.channel, fmt)
+        await ctx.message.channel.send(fmt)
     elif isinstance(error, commands.MissingRequiredArgument):
-        await bot.send_message(ctx.message.channel, error)
+        await ctx.message.channel.send(error)
     else:
         now = datetime.datetime.now()
         with open("error_log", 'a') as f:

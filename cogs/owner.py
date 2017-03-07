@@ -4,11 +4,11 @@ from . import utils
 
 import re
 import glob
+import asyncio
+import aiohttp
 import discord
 import inspect
-import aiohttp
 import pendulum
-import asyncio
 
 
 class Owner:
@@ -19,7 +19,7 @@ class Owner:
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def motd_push(self, *, message):
+    async def motd_push(self, ctx, *, message):
         """Used to push a new message to the message of the day"""
         date = pendulum.utcnow().to_date_string()
         r_filter = {'date': date}
@@ -28,15 +28,14 @@ class Owner:
         # I should be managing this myself, more than one should not be sent in a day
         if await utils.add_content('motd', entry, r_filter):
             await utils.update_content('motd', entry, r_filter)
-        await self.bot.say("New motd update for {}!".format(date))
+        await ctx.send("New motd update for {}!".format(date))
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.check(utils.is_owner)
-    async def debug(self, ctx, *, code : str):
+    async def debug(self, ctx, *, code: str):
         """Evaluates code."""
         code = code.strip('` ')
         python = '```py\n{}\n```'
-        result = None
 
         env = {
             'bot': self.bot,
@@ -54,41 +53,41 @@ class Owner:
             if inspect.isawaitable(result):
                 result = await result
         except Exception as e:
-            await self.bot.say(python.format(type(e).__name__ + ': ' + str(e)))
+            await ctx.send(python.format(type(e).__name__ + ': ' + str(e)))
             return
         try:
-            await self.bot.say(python.format(result))
+            await ctx.send(python.format(result))
         except discord.HTTPException:
-            await self.bot.say("Result is too long for me to send")
+            await ctx.send("Result is too long for me to send")
         except:
             pass
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.check(utils.is_owner)
     async def shutdown(self, ctx):
         """Shuts the bot down"""
         fmt = 'Shutting down, I will miss you {0.author.name}'
-        await self.bot.say(fmt.format(ctx.message))
+        await ctx.send(fmt.format(ctx.message))
         await self.bot.logout()
         await self.bot.close()
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def name(self, newNick: str):
+    async def name(self, ctx, newNick: str):
         """Changes the bot's name"""
         await self.bot.edit_profile(username=newNick)
-        await self.bot.say('Changed username to ' + newNick)
+        await ctx.send('Changed username to ' + newNick)
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def status(self, *, status: str):
+    async def status(self, ctx, *, status: str):
         """Changes the bot's 'playing' status"""
         await self.bot.change_status(discord.Game(name=status, type=0))
-        await self.bot.say("Just changed my status to '{0}'!".format(status))
+        await ctx.send("Just changed my status to '{0}'!".format(status))
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def load(self, *, module: str):
+    async def load(self, ctx, *, module: str):
         """Loads a module"""
 
         # Do this because I'm too lazy to type cogs.module
@@ -99,14 +98,14 @@ class Owner:
         # This try catch will catch errors such as syntax errors in the module we are loading
         try:
             self.bot.load_extension(module)
-            await self.bot.say("I have just loaded the {} module".format(module))
+            await ctx.send("I have just loaded the {} module".format(module))
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(error).__name__, error))
+            await ctx.send(fmt.format(type(error).__name__, error))
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def unload(self, *, module: str):
+    async def unload(self, ctx, *, module: str):
         """Unloads a module"""
 
         # Do this because I'm too lazy to type cogs.module
@@ -115,11 +114,11 @@ class Owner:
             module = "cogs.{}".format(module)
 
         self.bot.unload_extension(module)
-        await self.bot.say("I have just unloaded the {} module".format(module))
+        await ctx.send("I have just unloaded the {} module".format(module))
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def reload(self, *, module: str):
+    async def reload(self, ctx, *, module: str):
         """Reloads a module"""
 
         # Do this because I'm too lazy to type cogs.module
@@ -131,10 +130,10 @@ class Owner:
         # This try block will catch errors such as syntax errors in the module we are loading
         try:
             self.bot.load_extension(module)
-            await self.bot.say("I have just reloaded the {} module".format(module))
+            await ctx.send("I have just reloaded the {} module".format(module))
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
-            await self.bot.say(fmt.format(type(error).__name__, error))
+            await ctx.send(fmt.format(type(error).__name__, error))
 
 
 def setup(bot):

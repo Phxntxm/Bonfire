@@ -104,10 +104,10 @@ class Hangman:
     def create(self, word, ctx):
         # Create a new game, then save it as the server's game
         game = Game(word)
-        self.games[ctx.message.server.id] = game
+        self.games[ctx.message.guild.id] = game
         return game
 
-    @commands.group(aliases=['hm'], pass_context=True, no_pm=True, invoke_without_command=True)
+    @commands.group(aliases=['hm'], no_pm=True, invoke_without_command=True)
     @commands.cooldown(1, 7, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def hangman(self, ctx, *, guess):
@@ -115,10 +115,10 @@ class Hangman:
 
         EXAMPLE: !hangman e (or) !hangman The Phrase!
         RESULT: Hopefully a win!"""
-        game = self.games.get(ctx.message.server.id)
+        game = self.games.get(ctx.message.guild.id)
         if not game:
             ctx.command.reset_cooldown(ctx)
-            await self.bot.say("There are currently no hangman games running!")
+            await ctx.send("There are currently no hangman games running!")
             return
 
         # Check if we are guessing a letter or a phrase. Only one letter can be guessed at a time
@@ -128,7 +128,7 @@ class Hangman:
         if len(guess) == 1:
             if guess in game.guessed_letters:
                 ctx.command.reset_cooldown(ctx)
-                await self.bot.say("That letter has already been guessed!")
+                await ctx.send("That letter has already been guessed!")
                 # Return here as we don't want to count this as a failure
                 return
             if game.guess_letter(guess):
@@ -143,16 +143,16 @@ class Hangman:
 
         if game.win():
             fmt += " You guys got it! The word was `{}`".format(game.word)
-            del self.games[ctx.message.server.id]
+            del self.games[ctx.message.guild.id]
         elif game.failed():
             fmt += " Sorry, you guys failed...the word was `{}`".format(game.word)
-            del self.games[ctx.message.server.id]
+            del self.games[ctx.message.guild.id]
         else:
             fmt += str(game)
 
-        await self.bot.say(fmt)
+        await ctx.send(fmt)
 
-    @hangman.command(name='create', aliases=['start'], no_pm=True, pass_context=True)
+    @hangman.command(name='create', aliases=['start'], no_pm=True)
     @checks.custom_perms(send_messages=True)
     async def create_hangman(self, ctx):
         """This is used to create a new hangman game
@@ -163,16 +163,16 @@ class Hangman:
 
         # Only have one hangman game per server, since anyone
         # In a server (except the creator) can guess towards the current game
-        if self.games.get(ctx.message.server.id) is not None:
-            await self.bot.say("Sorry but only one Hangman game can be running per server!")
+        if self.games.get(ctx.message.guild.id) is not None:
+            await ctx.send("Sorry but only one Hangman game can be running per server!")
             return
 
         game = self.create(random.SystemRandom().choice(phrases), ctx)
         # Let them know the game has started, then print the current game so that the blanks are shown
-        await self.bot.say(
+        await ctx.send(
             "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
 
-    @hangman.command(name='delete', aliases=['stop', 'remove', 'end'], pass_context=True, no_pm=True)
+    @hangman.command(name='delete', aliases=['stop', 'remove', 'end'], no_pm=True)
     @checks.custom_perms(kick_members=True)
     async def stop_game(self, ctx):
         """Force stops a game of hangman
@@ -181,12 +181,12 @@ class Hangman:
 
         EXAMPLE: !hangman stop
         RESULT: No more men being hung"""
-        if self.games.get(ctx.message.server.id) is None:
-            await self.bot.say("There are no Hangman games running on this server!")
+        if self.games.get(ctx.message.guild.id) is None:
+            await ctx.send("There are no Hangman games running on this server!")
             return
 
-        del self.games[ctx.message.server.id]
-        await self.bot.say("I have just stopped the game of Hangman, a new should be able to be started now!")
+        del self.games[ctx.message.guild.id]
+        await ctx.send("I have just stopped the game of Hangman, a new should be able to be started now!")
 
 
 def setup(bot):

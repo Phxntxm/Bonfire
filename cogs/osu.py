@@ -1,46 +1,18 @@
-from .utils import config
-from .utils import checks
-from .utils import images
+from . import utils
 
 from discord.ext import commands
 import discord
 
-import aiohttp
-
 # https://github.com/ppy/osu-api/wiki
-base_url = 'https://osu.ppy.sh/api/'
+BASE_URL = 'https://osu.ppy.sh/api/'
 MAX_RETRIES = 5
 
 
 class Osu:
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {'User-Agent': config.user_agent}
-        self.key = config.osu_key
-
-    async def _request(self, payload, endpoint):
-        """Handles requesting to the API"""
-
-        # Format the URL we'll need based on the base_url, and the endpoint we want to hit
-        url = "{}{}".format(base_url, endpoint)
-
-        # Check if our key was added, if it wasn't, add it
-        key = payload.get('k', self.key)
-        payload['k'] = key
-
-        # Attempt to connect up to our max retries
-        for x in range(MAX_RETRIES):
-            try:
-                async with aiohttp.get(url, headers=self.headers, params=payload) as r:
-                    # If we failed to connect, attempt again
-                    if r.status != 200:
-                        continue
-
-                    data = await r.json()
-                    return data
-            # If any error happened when making the request, attempt again
-            except:
-                continue
+        self.key = utils.osu_key
+        self.payload = {'k': self.key}
 
     async def find_beatmap(self, query):
         """Finds a beatmap ID based on the first match of searching a beatmap"""
@@ -48,21 +20,22 @@ class Osu:
 
     async def get_beatmap(self, b_id):
         """Gets beatmap info based on the ID provided"""
-        params = {'b': b_id}
-        endpoint = 'get_beatmaps'
-        data = await self._request(params, endpoint)
+        payload = self.payload.copy()
+        payload['b'] = b_id
+        url = BASE_URL + 'get_beatmaps'
+        data = await utils.request(url, payload=payload)
         try:
             return data[0]
-        except IndexError:
+        except (IndexError, TypeError):
             return None
 
-    @commands.group(pass_context=True, invoke_without_command=True)
-    @checks.custom_perms(send_messages=True)
+    @commands.group(invoke_without_command=True)
+    @utils.custom_perms(send_messages=True)
     async def osu(self, ctx):
         pass
 
-    @osu.command(name='scores', aliases=['score'], pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @osu.command(name='scores', aliases=['score'])
+    @utils.custom_perms(send_messages=True)
     async def osu_user_scores(self, ctx, user, song=1):
         """Used to get the top scores for a user
         You can provide either your Osu ID or your username
@@ -73,7 +46,7 @@ class Osu:
         EXAMPLE: !osu MyUsername 5
         RESULT: Info about your 5th best song"""
 
-        await self.bot.say("Looking up your Osu information...")
+        await ctx.send("Looking up your Osu information...")
         # To make this easy for the user, it's indexed starting at 1, so lets subtract by 1
         song -= 1
         # Make sure the song is not negative however, if so set to 0
@@ -93,17 +66,18 @@ class Osu:
                    'countmiss': 'misses',
                    'perfect': 'got_max_combo'}
 
-        params = {'u': user,
-                  'limit': 100}
-        # The endpoint that we're accessing to get this informatin
-        endpoint = 'get_user_best'
-        data = await self._request(params, endpoint)
+        payload = self.payload.copy()
+        payload['u'] = user
+        payload['limit'] = 100
+        # The endpoint that we're accessing to get this information
+        url = BASE_URL + 'get_user_beat'
+        data = await utils.request(url, payload=payload)
 
         try:
             data = data[song]
-        except IndexError:
-            if len(data) == 0:
-                await self.bot.say("I could not find any top songs for the user {}".format(user))
+        except (IndexError, TypeError):
+            if data is not None and len(data) == 0:
+                await ctx.send("I could not find any top songs for the user {}".format(user))
                 return
             else:
                 data = data[len(data) - 1]
@@ -130,14 +104,14 @@ class Osu:
         # Attempt to create our banner and upload that
         # If we can't find the images needed, or don't have permissions, just send a message instead
         try:
-            banner = await images.create_banner(ctx.message.author, "Osu User Stats", fmt)
+            banner = await utils.create_banner(ctx.message.author, "Osu User Stats", fmt)
             await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
             _fmt = "\n".join("{}: {}".format(k, r) for k, r in fmt)
-            await self.bot.say("```\n{}```".format(_fmt))
+            await ctx.send("```\n{}```".format(_fmt))
 
     @osu.command(name='user', pass_context=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def osu_user_info(self, ctx, *, user):
         """Used to get information about a specific user
         You can provide either your Osu ID or your username
@@ -147,7 +121,7 @@ class Osu:
         EXAMPLE: !osu user MyUserName
         RESULT: Info about your user"""
 
-        await self.bot.say("Looking up your Osu information...")
+        await ctx.send("Looking up your Osu information...")
         # A list of the possible values we'll receive, that we want to display
         wanted_info = ['username', 'playcount', 'ranked_score', 'pp_rank', 'level', 'pp_country_rank',
                        'accuracy', 'country', 'pp_country_rank', 'count_rank_s', 'count_rank_a']
@@ -159,16 +133,17 @@ class Osu:
                    'count_rank_a': 'total_a_ranks'}
 
         # The paramaters that we'll send to osu to get the information needed
-        params = {'u': user}
-        # The endpoint that we're accessing to get this informatin
-        endpoint = 'get_user'
-        data = await self._request(params, endpoint)
+        payload = self.payload.copy()
+        payload['u'] = user
+        # The endpoint that we're accessing to get this information
+        url = BASE_URL + 'get_user'
+        data = await utils.request(url, payload=payload)
 
         # Make sure we found a result, we should only find one with the way we're searching
         try:
             data = data[0]
-        except IndexError:
-            await self.bot.say("I could not find anyone with the user name/id of {}".format(user))
+        except (IndexError, TypeError):
+            await ctx.send("I could not find anyone with the user name/id of {}".format(user))
             return
 
         # Now lets create our dictionary needed to create the image 
@@ -181,11 +156,11 @@ class Osu:
         # Attempt to create our banner and upload that
         # If we can't find the images needed, or don't have permissions, just send a message instead
         try:
-            banner = await images.create_banner(ctx.message.author, "Osu User Stats", fmt)
-            await self.bot.upload(banner)
+            banner = await utils.create_banner(ctx.message.author, "Osu User Stats", fmt)
+            await ctx.send(file=banner)
         except (FileNotFoundError, discord.Forbidden):
             _fmt = "\n".join("{}: {}".format(k, r) for k, r in fmt.items())
-            await self.bot.say("```\n{}```".format(_fmt))
+            await ctx.send("```\n{}```".format(_fmt))
 
 
 def setup(bot):

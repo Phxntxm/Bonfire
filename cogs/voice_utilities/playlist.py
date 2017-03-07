@@ -4,7 +4,7 @@ from collections import deque
 from itertools import islice
 from random import shuffle
 
-from .entry import URLPlaylistEntry
+from .entry import URLPlaylistEntry, get_header
 from .exceptions import ExtractionError, WrongEntryTypeError
 from .event_emitter import EventEmitter
 
