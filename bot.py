@@ -45,7 +45,7 @@ async def on_command_completion(ctx):
 
 async def process_command(ctx):
     author = ctx.message.author
-    server = ctx.message.server
+    server = ctx.message.guild
     command = ctx.command
 
     r_filter = {'command': command.qualified_name}
@@ -65,7 +65,7 @@ async def process_command(ctx):
     command_usage['member_usage'] = total_member_usage
 
     # Add one to the server's usage for this command
-    if ctx.message.server is not None:
+    if ctx.message.guild is not None:
         total_server_usage = command_usage.get('server_usage', {})
         server_usage = total_server_usage.get(server.id, 0) + 1
         total_server_usage[server.id] = server_usage
@@ -111,7 +111,7 @@ async def on_command_error(error, ctx):
     else:
         now = datetime.datetime.now()
         with open("error_log", 'a') as f:
-            print("In server '{0.message.server}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
+            print("In server '{0.message.guild}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
                   file=f)
             try:
                 traceback.print_tb(error.original.__traceback__, file=f)
