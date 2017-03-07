@@ -56,6 +56,9 @@ class Deviantart:
         # People might sub to the same person, so lets cache every person and their last update
         cache = {}
 
+        if not content:
+            return
+
         try:
             for entry in content:
                 user = discord.utils.get(self.bot.get_all_members(), id=entry['member_id'])
