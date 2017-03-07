@@ -57,7 +57,7 @@ def is_owner(ctx):
 def custom_perms(**perms):
     def predicate(ctx):
         # Return true if this is a private channel, we'll handle that in the registering of the command
-        if ctx.message.channel.is_private:
+        if ctx.message.channel is discord.DMChannel:
             return True
 
         # Get the member permissions so that we can compare
