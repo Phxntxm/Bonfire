@@ -238,7 +238,7 @@ class Mod:
                 # Loop through and check if there is a check called is_owner
                 # If we loop through and don't find one, this means that the only other choice is to be
                 # Able to manage the server (for the utils on perm commands)
-                for func in cmd.utils:
+                for func in cmd.checks:
                     if "is_owner" in func.__qualname__:
                         await ctx.send("You need to own the bot to run this command")
                         return
