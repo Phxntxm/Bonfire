@@ -244,7 +244,7 @@ class Mod:
                         await ctx.send("You need to own the bot to run this command")
                         return
                 await ctx.send(
-                    "You are required to have `manage_server` permissions to run `{}`".format(cmd.qualified_name))
+                    "You are required to have `manage_guild` permissions to run `{}`".format(cmd.qualified_name))
                 return
 
             # Perms will be an attribute if custom_perms is found no matter what, so no need to check this
@@ -261,7 +261,7 @@ class Mod:
                            "to use the command `{}` in this server".format(needed_perm, command))
 
     @perms.command(name="add", aliases=["setup,create"], no_pm=True)
-    @commands.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_guild=True)
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'
@@ -321,7 +321,7 @@ class Mod:
                        "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
 
     @perms.command(name="remove", aliases=["delete"], no_pm=True)
-    @commands.has_permissions(manage_server=True)
+    @commands.has_permissions(manage_guild=True)
     async def remove_perms(self, ctx, *, command: str):
         """Removes the custom permissions setup on the command specified
 
@@ -475,7 +475,7 @@ class Mod:
             await ctx.send("Rule {}: \"{}\"".format(rule, fmt))
 
     @rules.command(name='add', aliases=['create'], no_pm=True)
-    @utils.custom_perms(manage_server=True)
+    @utils.custom_perms(manage_guild=True)
     async def rules_add(self, ctx, *, rule: str):
         """Adds a rule to this server's rules
 
@@ -497,7 +497,7 @@ class Mod:
         await ctx.send("I have just saved your new rule, use the rules command to view this server's current rules")
 
     @rules.command(name='remove', aliases=['delete'], no_pm=True)
-    @utils.custom_perms(manage_server=True)
+    @utils.custom_perms(manage_guild=True)
     async def rules_delete(self, ctx, rule: int):
         """Removes one of the rules from the list of this server's rules
         Provide a number to delete that rule

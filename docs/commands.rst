@@ -343,21 +343,21 @@ Moderator Utilities
    Sets custom permissions for a provided command. Format must be 'perms add <command> <permission>'
    If you want to open the command to everyone, provide 'none' as the permission
 
-   - Default permissions required: manage_server
+   - Default permissions required: manage_guild
    - Aliases `setup, create`
 
 .. data:: perms remove
    
    Removes the custom permissions setup on a command
 
-   - Default permissions required: manage_server
+   - Default permissions required: manage_guild
    - Aliases `delete`
 
 .. data:: prefix
 
    Used to setup a custom prefix for this server
 
-   - Default permissions required: manage_server
+   - Default permissions required: manage_guild
 
 .. data:: purge
 
@@ -384,14 +384,14 @@ Moderator Utilities
 
    Adds the specified rule to the list of server's rules.
 
-   - Default permissions required: manage_server
+   - Default permissions required: manage_guild
    - Aliases `rules create, rule create, rule add`
 
 .. data:: rules remove
    
    Deletes a specified rule from the server; the rule deleted needs to be specified by the number.
 
-   - Default permissions required: manage_server
+   - Default permissions required: manage_guild
    - Aliases `rules delete, rule delete, rules remove`
 
 Stats
@@ -468,7 +468,7 @@ Blackjack
       That is why this is restricted to someone who can manage the server, as it should only be used in case
       people have gone afk and the game is still running, which can get annoying.
 
-   - Default permissions required: manage_server
+   - Default permissions required: manage_guild
 
 DeviantArt
 ----------
