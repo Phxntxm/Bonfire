@@ -233,7 +233,7 @@ class Twitch:
 
         EXAMPLE: !twitch notify off
         RESULT: Notifications will not be sent when you go live"""
-        if await utils.update_content('twitch', {"notifications_on": 1}, str(ctx.message.author.id)):
+        if await utils.update_content('twitch', {"notifications_on": 0}, str(ctx.message.author.id)):
             await ctx.send(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(
