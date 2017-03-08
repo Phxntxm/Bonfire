@@ -88,7 +88,7 @@ class Tags:
         EXAMPLE: !tag delete stupid_tag
         RESULT: Deletes that stupid tag"""
         await ctx.send("Temporarily disabled")
-        // TODO: Fix tags, this will inherently fix this method
+        # TODO: Fix tags, this will inherently fix this method
         """r_filter = lambda row: (row['server_id'] == ctx.message.guild.id) & (row['tag'] == tag)
         if await utils.remove_content('tags', r_filter):
             await ctx.send('I have just removed the tag `{}`'.format(tag))
