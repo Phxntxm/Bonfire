@@ -59,15 +59,15 @@ async def process_command(ctx):
 
     # Add one to the author's usage for this command
     total_member_usage = command_usage.get('member_usage', {})
-    member_usage = total_member_usage.get(author.id, 0) + 1
+    member_usage = total_member_usage.get(str(author.id), 0) + 1
     total_member_usage[str(author.id)] = member_usage
     command_usage['member_usage'] = total_member_usage
 
     # Add one to the server's usage for this command
     if ctx.message.guild is not None:
         total_server_usage = command_usage.get('server_usage', {})
-        server_usage = total_server_usage.get(server.id, 0) + 1
-        total_server_usage[server.id] = server_usage
+        server_usage = total_server_usage.get(str(server.id), 0) + 1
+        total_server_usage[str(server.id)] = server_usage
         command_usage['server_usage'] = total_server_usage
 
     # Save all the changes
