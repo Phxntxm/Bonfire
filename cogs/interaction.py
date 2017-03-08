@@ -259,7 +259,7 @@ class Interaction:
             await ctx.send("Why the heck are you booping me? Get away from me >:c")
             return
 
-        key = str(booper.id)
+        key = booper.id
         boops = await utils.get_content('boops', key)
         if boops is not None:
             boops = boops[0]['boops']
