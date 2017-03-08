@@ -106,7 +106,7 @@ cache = {}
 
 # We still need 'cache' for prefixes and custom permissions however, so for now, just include that
 cache['prefixes'] = Cache('prefixes')
-cache['custom_permissions'] = Cache('custom_permissions')
+cache['server_settings'] = Cache('server_settings')
 
 async def update_cache():
     for value in cache.values():
@@ -119,56 +119,45 @@ def command_prefix(bot, message):
     # If the prefix does exist in the database and isn't in our cache; too bad, something has messed up
     # But it is not worth a query for every single message the bot detects, to fix
     try:
-        values = cache['prefixes'].values
-        prefix = [data['prefix'] for data in values if message.guild.id == data['server_id']][0]
+        prefix = cache['server_settings'].values[message.guild.id]['prefix']
         return prefix or default_prefix
     except (KeyError, TypeError, IndexError, AttributeError):
         return default_prefix
 
 
-async def add_content(table, content, r_filter=None):
+async def add_content(table, content):
     r.set_loop_type("asyncio")
     conn = await r.connect(**db_opts)
     # First we need to make sure that this entry doesn't exist
     # For all rethinkDB cares, multiple entries can exist with the same content
     # For our purposes however, we do not want this
     try:
-        if r_filter is not None:
-            cursor = await r.table(table).filter(r_filter).run(conn)
-            cur_content = await _convert_to_list(cursor)
-            if len(cur_content) > 0:
-                await conn.close()
-                return False
-        await r.table(table).insert(content).run(conn)
+        result = await r.table(table).insert(content).run(conn)
         await conn.close()
-        return True
     except r.ReqlOpFailedError:
         # This means the table does not exist
         await r.table_create(table).run(conn)
         await r.table(table).insert(content).run(conn)
         await conn.close()
-        return True
+        result = {}
+    return result.get('inserted', 0) > 0
 
 
-async def remove_content(table, r_filter=None):
-    if r_filter is None:
-        r_filter = {}
+async def remove_content(table, key):
     r.set_loop_type("asyncio")
     conn = await r.connect(**db_opts)
     try:
-        result = await r.table(table).filter(r_filter).delete().run(conn)
+        result = await r.table(table).get(key).delete().run(conn)
     except r.ReqlOpFailedError:
         result = {}
         pass
     await conn.close()
-    if table == 'prefixes' or table == 'custom_permissions':
+    if table == 'prefixes' or table == 'server_settings':
         loop.create_task(cache[table].update())
     return result.get('deleted', 0) > 0
 
 
-async def update_content(table, content, r_filter=None):
-    if r_filter is None:
-        r_filter = {}
+async def update_content(table, content, key):
     r.set_loop_type("asyncio")
     conn = await r.connect(**db_opts)
     # This method is only for updating content, so if we find that it doesn't exist, just return false
@@ -176,36 +165,54 @@ async def update_content(table, content, r_filter=None):
         # Update based on the content and filter passed to us
         # rethinkdb allows you to do many many things inside of update
         # This is why we're accepting a variable and using it, whatever it may be, as the query
-        result = await r.table(table).filter(r_filter).update(content).run(conn)
+        result = await r.table(table).get(key).update(content).run(conn)
     except r.ReqlOpFailedError:
         await conn.close()
         result = {}
     await conn.close()
-    if table == 'prefixes' or table == 'custom_permissions':
+    if table == 'prefixes' or table == 'server_settings':
         loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
-async def replace_content(table, content, r_filter=None):
+async def replace_content(table, content, key):
     # This method is here because .replace and .update can have some different functionalities
-    if r_filter is None:
-        r_filter = {}
     r.set_loop_type("asyncio")
     conn = await r.connect(**db_opts)
     try:
-        result = await r.table(table).filter(r_filter).replace(content).run(conn)
+        result = await r.table(table).get(key).replace(content).run(conn)
     except r.ReqlOpFailedError:
         await conn.close()
         result = {}
     await conn.close()
-    if table == 'prefixes' or table == 'custom_permissions':
+    if table == 'prefixes' or table == 'server_settings':
         loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
 
-async def get_content(table: str, r_filter=None):
-    if r_filter is None:
-        r_filter = {}
+async def get_content(table, key=None):
+    r.set_loop_type("asyncio")
+    conn = await r.connect(**db_opts)
+
+    try:
+        if key:
+            cursor = await r.table(table).get(key).run(conn)
+        else:
+            cursor = await r.table(table).run()
+        if cursor is None:
+            content = None
+        else:
+            content = await _convert_to_list(cursor)
+            if len(content) == 0:
+                content = None
+    except (IndexError, r.ReqlOpFailedError):
+        content = None
+    await conn.close()
+    if table == 'prefixes' or table == 'server_settings':
+        loop.create_task(cache[table].update())
+    return content
+
+async def filter_content(table: str, r_filter):
     r.set_loop_type("asyncio")
     conn = await r.connect(**db_opts)
     try:
@@ -216,7 +223,7 @@ async def get_content(table: str, r_filter=None):
     except (IndexError, r.ReqlOpFailedError):
         content = None
     await conn.close()
-    if table == 'prefixes' or table == 'custom_permissions':
+    if table == 'prefixes' or table == 'server_settings':
         loop.create_task(cache[table].update())
     return content
 

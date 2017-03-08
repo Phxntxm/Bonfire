@@ -51,7 +51,7 @@ class Picarto:
         try:
             while not self.bot.is_closed:
                 r_filter = {'notifications_on': 1}
-                picarto = await utils.get_content('picarto', r_filter)
+                picarto = await utils.filter_content('picarto', r_filter)
                 # Get all online users before looping, so that only one request is needed
                 online_users_list = await online_users()
                 old_online_users = {data['member_id']: data for data in picarto if data['live']}
@@ -123,8 +123,7 @@ class Picarto:
         RESULT: Info about their picarto stream"""
         # If member is not given, base information on the author
         member = member or ctx.message.author
-        r_filter = {'member_id': member.id}
-        picarto_entry = await utils.get_content('picarto', r_filter)
+        picarto_entry = await utils.get_content('picarto', member.id)
         if picarto_entry is None:
             await ctx.send("That user does not have a picarto url setup!")
             return
@@ -184,26 +183,25 @@ class Picarto:
                            "user? Silly")
             return
 
-        r_filter = {'member_id': ctx.message.author.id}
+        key = ctx.message.author.id
         entry = {'picarto_url': url,
                  'servers': [ctx.message.guild.id],
                  'notifications_on': 1,
                  'live': 0,
                  'member_id': ctx.message.author.id}
-        if await utils.add_content('picarto', entry, r_filter):
+        if await utils.add_content('picarto', entry):
             await ctx.send(
                 "I have just saved your Picarto URL {}, this guild will now be notified when you go live".format(
                     ctx.message.author.mention))
         else:
-            await utils.update_content('picarto', {'picarto_url': url}, r_filter)
+            await utils.update_content('picarto', {'picarto_url': url}, key)
             await ctx.send("I have just updated your Picarto URL")
 
     @picarto.command(name='remove', aliases=['delete'], no_pm=True)
     @utils.custom_perms(send_messages=True)
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
-        r_filter = {'member_id': ctx.message.author.id}
-        if await utils.remove_content('picarto', r_filter):
+        if await utils.remove_content('picarto', ctx.message.author.id):
             await ctx.send("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
         else:
             await ctx.send(
@@ -218,8 +216,7 @@ class Picarto:
 
         EXAMPLE: !picarto notify
         RESULT: This guild will now be notified of you going live"""
-        r_filter = {'member_id': ctx.message.author.id}
-        result = await utils.get_content('picarto', r_filter)
+        result = await utils.get_content('picarto', ctx.message.author.id)
         # Check if this user is saved at all
         if result is None:
             await ctx.send(
@@ -230,7 +227,7 @@ class Picarto:
             await ctx.send("I am already set to notify in this guild...")
         else:
             await utils.update_content('picarto', {'servers': r.row['servers'].append(ctx.message.guild.id)},
-                                       r_filter)
+                                       ctx.message.author.id)
 
     @notify.command(name='on', aliases=['start,yes'], no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -239,8 +236,7 @@ class Picarto:
 
         EXAMPLE: !picarto notify on
         RESULT: Notifications are sent when you go live"""
-        r_filter = {'member_id': ctx.message.author.id}
-        await utils.update_content('picarto', {'notifications_on': 1}, r_filter)
+        await utils.update_content('picarto', {'notifications_on': 1}, ctx.message.author.id)
         await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
             ctx.message.author.mention))
 
@@ -251,8 +247,7 @@ class Picarto:
 
         EXAMPLE: !picarto notify off
         RESULT: No more notifications sent when you go live"""
-        r_filter = {'member_id': ctx.message.author.id}
-        await utils.update_content('picarto', {'notifications_on': 0}, r_filter)
+        await utils.update_content('picarto', {'notifications_on': 0}, ctx.message.author.id)
         await ctx.send(
             "I will not notify if you go live anymore {}, "
             "are you going to stream some lewd stuff you don't want people to see?~".format(

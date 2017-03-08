@@ -101,9 +101,8 @@ class Deviantart:
                             await user.send(fmt)
                         # Now we can update the user's last updated for this DA
                         # We want to do this whether or not our last if statement was met
-                        r_filter = {'member_id': user.id}
                         update = {'last_updated': {da_name: result['deviationid']}}
-                        await utils.update_content('deviantart', update, r_filter)
+                        await utils.update_content('deviantart', update, str(user.id))
         except Exception as e:
             tb = traceback.format_exc()
             fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
@@ -124,13 +123,13 @@ class Deviantart:
 
         EXAMPLE: !da sub MyFavoriteArtistEva<3
         RESULT: Notifications of amazing pics c:"""
-        r_filter = {'member_id': ctx.message.author.id}
-        content = await utils.get_content('deviantart', r_filter)
+        key = str(ctx.message.author.id)
+        content = await utils.get_content('deviantart', key)
         # TODO: Ensure the user provided is a real user
 
         if content is None:
             entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_updated': {}}
-            await utils.add_content('deviantart', entry, r_filter)
+            await utils.add_content('deviantart', entry)
             await ctx.send("You have just subscribed to {}!".format(username))
         elif content[0]['subbed'] is None or username not in content[0]['subbed']:
             if content[0]['subbed'] is None:
@@ -138,7 +137,7 @@ class Deviantart:
             else:
                 content[0]['subbed'].append(username)
                 sub_list = content[0]['subbed']
-            await utils.update_content('deviantart', {'subbed': sub_list}, r_filter)
+            await utils.update_content('deviantart', {'subbed': sub_list}, key)
             await ctx.send("You have just subscribed to {}!".format(username))
         else:
             await ctx.send("You are already subscribed to that user!")
@@ -150,14 +149,14 @@ class Deviantart:
 
         EXAMPLE: !da unsub TheArtistWhoBetrayedMe
         RESULT: No more pics from that terrible person!"""
-        r_filter = {'member_id': ctx.message.author.id}
-        content = await utils.get_content('deviantart', r_filter)
+        key = str(ctx.message.author.id)
+        content = await utils.get_content('deviantart', key)
 
         if content is None or content[0]['subbed'] is None:
             await ctx.send("You are not subscribed to anyone at the moment!")
         elif username in content[0]['subbed']:
             content[0]['subbed'].remove(username)
-            await utils.update_content('deviantart', {'subbed': content[0]['subbed']}, r_filter)
+            await utils.update_content('deviantart', {'subbed': content[0]['subbed']}, key)
             await ctx.send("You have just unsubscribed from {}!".format(username))
         else:
             await ctx.send("You are not subscribed to that user!")

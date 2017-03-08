@@ -45,7 +45,7 @@ class Twitch:
         # Loop through as long as the bot is connected
         try:
             while not self.bot.is_closed:
-                twitch = await utils.get_content('twitch', {'notifications_on': 1})
+                twitch = await utils.filter_content('twitch', {'notifications_on': 1})
                 # Online/offline is based on whether they are set to such, in the utils file
                 # This means they were detected as online/offline before and we check for a change
                 online_users = {data['member_id']: data for data in twitch if data['live']}
@@ -61,7 +61,7 @@ class Twitch:
                             server = self.bot.get_server(server_id)
                             if server is None:
                                 continue
-                            server_alerts = await utils.get_content('server_alerts', {'server_id': server_id})
+                            server_alerts = await utils.get_content('server_alerts', server_id)
                             try:
                                 channel_id = server_alerts[0]['channel_id']
                             except (IndexError, TypeError):
@@ -161,7 +161,7 @@ class Twitch:
                            "What would be the point of adding a nonexistant twitch user? Silly")
             return
 
-        r_filter = {'member_id': ctx.message.author.id}
+        key = ctx.message.author.id
         entry = {'twitch_url': url,
                  'servers': [ctx.message.guild.id],
                  'notifications_on': 1,
@@ -172,8 +172,8 @@ class Twitch:
         # Check to see if this user has already saved a twitch URL
         # If they have, update the URL, otherwise create a new entry
         # Assuming they're not live, and notifications should be on
-        if not await utils.add_content('twitch', entry, r_filter):
-            await utils.update_content('twitch', update, r_filter)
+        if not await utils.add_content('twitch', entry):
+            await utils.update_content('twitch', update, key)
         await ctx.send("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'], no_pm=True)
@@ -184,8 +184,7 @@ class Twitch:
         EXAMPLE: !twitch remove
         RESULT: I stop saving your twitch URL"""
         # Just try to remove it, if it doesn't exist, nothing is going to happen
-        r_filter = {'member_id': ctx.message.author.id}
-        await utils.remove_content('twitch', r_filter)
+        await utils.remove_content('twitch', ctx.message.author.id)
         await ctx.send("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
     @twitch.group(no_pm=True, invoke_without_command=True)
@@ -196,8 +195,8 @@ class Twitch:
 
         EXAMPLE: !twitch notify
         RESULT: This server will now be notified when you go live"""
-        r_filter = {'member_id': ctx.message.author.id}
-        result = await utils.get_content('twitch', r_filter)
+        key = ctx.message.author.id
+        result = await utils.get_content('twitch', key)
         # Check if this user is saved at all
         if result is None:
             await ctx.send(
@@ -207,7 +206,7 @@ class Twitch:
         elif ctx.message.guild.id in result[0]['servers']:
             await ctx.send("I am already set to notify in this server...")
         else:
-            await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.guild.id)}, r_filter)
+            await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.guild.id)}, key)
             await ctx.send("This server will now be notified if you go live")
 
     @notify.command(name='on', aliases=['start,yes'], no_pm=True)
@@ -217,8 +216,7 @@ class Twitch:
 
         EXAMPLE: !twitch notify on
         RESULT: Notifications will be sent when you go live"""
-        r_filter = {'member_id': ctx.message.author.id}
-        if await utils.update_content('twitch', {"notifications_on": 1}, r_filter):
+        if await utils.update_content('twitch', {"notifications_on": 1}, ctx.message.author.id):
             await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
         else:
@@ -231,8 +229,7 @@ class Twitch:
 
         EXAMPLE: !twitch notify off
         RESULT: Notifications will not be sent when you go live"""
-        r_filter = {'member_id': ctx.message.author.id}
-        if await utils.update_content('twitch', {"notifications_on": 1}, r_filter):
+        if await utils.update_content('twitch', {"notifications_on": 1}, ctx.message.author.id):
             await ctx.send(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(

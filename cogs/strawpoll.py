@@ -131,7 +131,7 @@ class Strawpoll:
                  'polls': [sub_entry]}
         update = {'polls': r.row['polls'].append(sub_entry)}
         if not await config.update_content('strawpolls', update, r_filter):
-            await config.add_content('strawpolls', entry, {'poll_id': poll_id})
+            await config.add_content('strawpolls', entry)
         await ctx.send("Link for your new strawpoll: https://strawpoll.me/{}".format(poll_id))
 
     @strawpolls.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)

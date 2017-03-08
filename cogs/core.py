@@ -108,8 +108,7 @@ class Core:
                 await ctx.send(fmt)
         else:
             try:
-                r_filter = pendulum.parse(date)
-                motd = await utils.get_content('motd', r_filter)
+                motd = await utils.get_content('motd', str(pendulum.parse(date).date()))
                 date = motd[0]['date']
                 motd = motd[0]['motd']
                 fmt = "Message of the day for {}:\n\n{}".format(date, motd)

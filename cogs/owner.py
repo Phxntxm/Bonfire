@@ -22,12 +22,12 @@ class Owner:
     async def motd_push(self, ctx, *, message):
         """Used to push a new message to the message of the day"""
         date = pendulum.utcnow().to_date_string()
-        r_filter = {'date': date}
+        key = date
         entry = {'motd': message, 'date': date}
         # Try to add this, if there's an entry for that date, lets update it to make sure only one motd is sent a day
         # I should be managing this myself, more than one should not be sent in a day
-        if await utils.add_content('motd', entry, r_filter):
-            await utils.update_content('motd', entry, r_filter)
+        if await utils.add_content('motd', entry):
+            await utils.update_content('motd', entry, key)
         await ctx.send("New motd update for {}!".format(date))
 
     @commands.command()

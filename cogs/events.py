@@ -54,16 +54,15 @@ class StatsUpdate:
 
     async def on_member_join(self, member):
         guild = member.guild
-        r_filter = {'server_id': guild.id}
-        notifications = await config.get_content('user_notifications', r_filter)
+        server_settings = await config.get_content('server_settings', guild.id)
 
         try:
-            channel_id = notifications[0]['channel_id']
-        except TypeError:
-            return
-
-        # By default, notifications should be off unless explicitly turned on
-        if not channel_id:
+            join_leave_on = server_settings[0]['join_leave']
+            if join_leave_on:
+                channel_id = server_settings[0]['notification_channel'] or member.guild.id
+            else:
+                return
+        except (IndexError, TypeError):
             return
 
         channel = guild.get_channel(channel_id)
@@ -71,20 +70,19 @@ class StatsUpdate:
 
     async def on_member_remove(self, member):
         guild = member.guild
-        r_filter = {'server_id': guild.id}
-        notifications = await config.get_content('user_notifications', r_filter)
+        server_settings = await config.get_content('server_settings', guild.id)
 
         try:
-            channel_id = notifications[0]['channel_id']
-        except TypeError:
+            join_leave_on = server_settings[0]['join_leave']
+            if join_leave_on:
+                channel_id = server_settings[0]['notification_channel'] or member.guild.id
+            else:
+                return
+        except (IndexError, TypeError):
             return
 
-        # By default, notifications should be off unless explicitly turned on
-        if not channel_id:
-            return
-
-        channel = server.get_channel(channel_id)
-        await channelsend("{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
+        channel = guild.get_channel(channel_id)
+        await channel.send("{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
 
 
 def setup(bot):

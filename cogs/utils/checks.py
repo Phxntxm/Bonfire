@@ -7,10 +7,22 @@ from . import config
 
 loop = asyncio.get_event_loop()
 
-# The list of tables needed for the database
-table_list = ['battle_records', 'battling', 'boops', 'bot_data', 'command_usage', 'custom_permissions',
-              'deviantart', 'motd', 'nsfw_channels', 'overwatch', 'picarto', 'prefixes', 'raffles',
-              'rules', 'server_alerts', 'strawpolls', 'tags', 'tictactoe', 'twitch', 'user_notifications']
+# The tables needed for the database, as well as their primary keys
+required_tables = {
+    'battle_records': 'member_id',
+    'boops': 'member_id',
+    'command_usage': 'command',
+    'deviantart': 'member_id',
+    'motd': 'date',
+    'overwatch': 'member_id',
+    'picarto': 'member_id',
+    'server_settings': 'guild_id',
+    'raffles': 'id',
+    'strawpolls': 'guild_id',
+    'tags': 'guild_id',
+    'tictactoe': 'member_id',
+    'twitch': 'member_id'
+}
 
 
 async def db_check():
@@ -36,17 +48,17 @@ async def db_check():
         print('Couldn\'t find database {}...creating now'.format(db_opts['db']))
         await r.db_create(db_opts['db']).run(conn)
         # Then add all the tables
-        for table in table_list:
+        for table, key in required_tables.items():
             print("Creating table {}...".format(table))
-            await r.table_create(table).run(conn)
+            await r.table_create(table, primary_key=key).run(conn)
         print("Done!")
     else:
         # Otherwise, if the database is setup, make sure all the required tables are there
         tables = await r.table_list().run(conn)
-        for table in table_list:
+        for table, key in required_tables.items():
             if table not in tables:
                 print("Creating table {}...".format(table))
-                await r.table_create(table).run(conn)
+                await r.table_create(table, primary_key=key).run(conn)
         print("Done checking tables!")
 
 
@@ -68,15 +80,12 @@ def custom_perms(**perms):
         for perm, setting in perms.items():
             setattr(required_perm, perm, setting)
 
-        perm_values = config.cache.get('custom_permissions').values
-
-        # Loop through and find this server's entry for custom permissions
-        # Find the command we're using, if it exists, then overwrite
-        # The required permissions, based on the value saved
-        if perm_values:
-            for x in perm_values:
-                if x['server_id'] == ctx.message.guild.id and x.get(ctx.command.qualified_name):
-                    required_perm = discord.Permissions(x[ctx.command.qualified_name])
+        server_settings = config.cache.get('server_settings').values[ctx.message.guild.id]
+        try:
+            required_perm_value = server_settings['permissions'][ctx.command.qualified_name]
+            required_perm = discord.Permissions(required_perm_value)
+        except (TypeError, IndexError):
+            pass
 
         # Now just check if the person running the command has these permissions
         return member_perms >= required_perm

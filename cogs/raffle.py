@@ -74,8 +74,7 @@ class Raffle:
 
             # No matter which one of these matches were met, the raffle has ended and we want to remove it
             # We don't have to wait for it however, so create a task for it
-            r_filter = {'id': raffle_id}
-            self.bot.loop.create_task(utils.remove_content('raffles', r_filter))
+            self.bot.loop.create_task(utils.remove_content('raffles', raffle_id))
             try:
                 await server.send(fmt)
             except discord.Forbidden:
@@ -89,7 +88,7 @@ class Raffle:
         EXAMPLE: !raffles
         RESULT: A list of the raffles setup on this server"""
         r_filter = {'server_id': ctx.message.guild.id}
-        raffles = await utils.get_content('raffles', r_filter)
+        raffles = await utils.filter_content('raffles', r_filter)
         if raffles is None:
             await ctx.send("There are currently no raffles setup on this server!")
             return
@@ -114,7 +113,7 @@ class Raffle:
         r_filter = {'server_id': ctx.message.guild.id}
         author = ctx.message.author
 
-        raffles = await utils.get_content('raffles', r_filter)
+        raffles = await utils.filter_content('raffles', r_filter)
         if raffles is None:
             await ctx.send("There are currently no raffles setup on this server!")
             return
@@ -130,10 +129,8 @@ class Raffle:
                 return
             entrants.append(author.id)
 
-            # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
-            r_filter = {'id': raffles[0]['id']}
             update = {'entrants': entrants}
-            await utils.update_content('raffles', update, r_filter)
+            await utils.update_content('raffles', update, raffles[0]['id'])
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         # Otherwise, make sure the author gave a valid raffle_id
         elif raffle_id in range(raffle_count - 1):
@@ -146,9 +143,8 @@ class Raffle:
             entrants.append(author.id)
 
             # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
-            r_filter = {'id': raffles[raffle_id]['id']}
             update = {'entrants': entrants}
-            await utils.update_content('raffles', update, r_filter)
+            await utils.update_content('raffles', update, raffles[raffle_id]['id'])
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         else:
             fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! " \

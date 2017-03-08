@@ -43,6 +43,17 @@ def get_subcommands(command):
     except AttributeError:
         pass
 
+async def channel_is_nsfw(channel):
+    server = channel.guild.id
+    channel = channel.id
+
+    server_settings = await config.get_content('server_settings', server)
+
+    try:
+        return channel in server_settings[0]['nsfw_channels']
+    except (TypeError, IndexError):
+        return False
+
 
 async def download_image(url):
     """Returns a file-like object based on the URL provided"""
@@ -98,7 +109,7 @@ async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
     r_filter = lambda row: (row['member_id'] == winner.id) | (row['member_id'] == loser.id)
-    matches = await config.get_content(key, r_filter)
+    matches = await config.filter_content(key, r_filter)
 
     winner_stats = {}
     loser_stats = {}
@@ -148,7 +159,7 @@ async def update_records(key, winner, loser):
 
     if not await config.update_content(key, winner_stats, {'member_id': winner.id}):
         winner_stats['member_id'] = winner.id
-        await config.add_content(key, winner_stats, {'member_id': winner.id})
+        await config.add_content(key, winner_stats)
     if not await config.update_content(key, loser_stats, {'member_id': loser.id}):
         loser_stats['member_id'] = loser.id
-        await config.add_content(key, loser_stats, {'member_id': loser.id})
+        await config.add_content(key, loser_stats)

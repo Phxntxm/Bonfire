@@ -99,19 +99,19 @@ class Mod:
         except discord.HTTPException:
             await ctx.send("Sorry, I failed to ban that user!")
 
-    @commands.command(no_pm=True)
+    @commands.command(no_pm=True, aliases=['alerts'])
     @utils.custom_perms(kick_members=True)
-    async def alerts(self, ctx, channel: discord.TextChannel):
+    async def notifications(self, ctx, channel: discord.TextChannel):
         """This command is used to set a channel as the server's 'notifications' channel
         Any notifications (like someone going live on Twitch, or Picarto) will go to that channel
 
         EXAMPLE: !alerts #alerts
         RESULT: No more alerts spammed in #general!"""
-        r_filter = {'server_id': ctx.message.guild.id}
+        key = ctx.message.guild.id
         entry = {'server_id': ctx.message.guild.id,
-                 'channel_id': channel.id}
-        if not await utils.add_content('server_alerts', entry, r_filter):
-            await utils.update_content('server_alerts', entry, r_filter)
+                 'notification_channel': channel.id}
+        if not await utils.update_content('server_alerts', entry, key):
+            await utils.add_content('server_alerts', entry)
         await ctx.send("I have just changed this server's 'notifications' channel"
                        "\nAll notifications will now go to `{}`".format(channel))
 
@@ -119,7 +119,6 @@ class Mod:
     @utils.custom_perms(kick_members=True)
     async def usernotify(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
-        This will save what channel you run this command in, that will be the channel used to send the notification to
         Provide on, yes, or true to set it on; otherwise it will be turned off
 
         EXAMPLE: !usernotify on
@@ -127,12 +126,13 @@ class Mod:
         # Join/Leave notifications can be kept separate from normal alerts
         # So we base this channel on it's own and not from alerts
         # When mod logging becomes available, that will be kept to it's own channel if wanted as well
-        on_off = ctx.message.channel.id if re.search("(on|yes|true)", on_off.lower()) else None
-        r_filter = {'server_id': ctx.message.guild.id}
+        on_off = True if re.search("(on|yes|true)", on_off.lower()) else False
+        key = ctx.message.guild.id
         entry = {'server_id': ctx.message.guild.id,
-                 'channel_id': on_off}
-        if not await utils.add_content('user_notifications', entry, r_filter):
-            await utils.update_content('user_notifications', entry, r_filter)
+                 'join_leave': on_off}
+        if not await utils.update_content('user_notifications', entry, key):
+            await utils.add_content('user_notifications', entry)
+
         fmt = "notify" if on_off else "not notify"
         await ctx.send("This server will now {} if someone has joined or left".format(fmt))
 
@@ -149,11 +149,20 @@ class Mod:
 
         EXAMPLE: !nsfw add
         RESULT: ;)"""
-        r_filter = {'channel_id': ctx.message.channel.id}
-        if await utils.add_content('nsfw_channels', r_filter, r_filter):
-            await ctx.send("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
+        key = ctx.message.guild.id
+        entry = {'server_id': key,
+                 'nsfw_channels': [ctx.message.channel.id]}
+        update = {'nsfw_channels': r.row['nsfw_channels'].append(ctx.message.channel.id)}
+
+        server_settings = await utils.get_content('server_settings', key)
+        if server_settings and 'nsfw_channels' in server_settings[0].keys():
+            await utils.update_content('server_settings', update, key)
+        elif server_settings:
+            await utils.update_content('server_settings', entry, key)
         else:
-            await ctx.send("This channel is already registered as 'nsfw'!")
+            await utils.add_content('server_settings', entry, key)
+
+        await ctx.send("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @nsfw.command(name="remove", aliases=["delete"])
     @utils.custom_perms(kick_members=True)
@@ -162,11 +171,23 @@ class Mod:
 
         EXAMPLE: !nsfw remove
         RESULT: ;("""
-        r_filter = {'channel_id': ctx.message.channel.id}
-        if await utils.remove_content('nsfw_channels', r_filter):
-            await ctx.send("This channel has just been unregistered as a nsfw channel")
-        else:
-            await ctx.send("This channel is not registered as a ''nsfw' channel!")
+
+        key = ctx.message.guild.id
+        server_settings = await utils.get_content('server_settings', key)
+        channel = ctx.message.channel.id
+        try:
+            channels = server_settings[0]['nsfw_channels']
+            if channel in channels:
+                channels.remove(channel)
+
+                entry = {'nsfw_channels': channels}
+                await utils.update_content('server_settings', entry, key)
+                await ctx.send("This channel has just been unregistered as a nsfw channel")
+                return
+        except (TypeError, IndexError):
+            pass
+
+        await ctx.send("This channel is not registered as a 'nsfw' channel!")
 
     @commands.command()
     @utils.custom_perms(kick_members=True)
@@ -195,17 +216,17 @@ class Mod:
                 "Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
             return
 
-        r_filter = {'server_id': ctx.message.guild.id}
-        server_perms = await utils.get_content('custom_permissions', r_filter)
-        try:
-            server_perms = server_perms[0]
-        except TypeError:
-            server_perms = {}
         cmd = self.bot.get_command(command)
 
         if cmd is None:
             await ctx.send("That is not a valid command!")
             return
+
+        server_settings = await utils.get_content('server_settings', ctx.message.guild.id)
+        try:
+            server_perms = server_settings[0]['permissions']
+        except (TypeError, IndexError):
+            server_perms = {}
 
         perms_value = server_perms.get(cmd.qualified_name)
         if perms_value is None:
@@ -257,6 +278,13 @@ class Mod:
                            "`perms add <command> <permission>`")
             return
 
+        cmd = self.bot.get_command(command)
+
+        if cmd is None:
+            await ctx.send(
+                "That command does not exist! You can't have custom permissions on a non-existant command....")
+            return
+
         # If a user can run a command, they have to have send_messages permissions; so use this as the base
         if permissions.lower() == "none":
             permissions = "send_messages"
@@ -272,13 +300,6 @@ class Mod:
             return
         perm_value = perm_obj.value
 
-        cmd = self.bot.get_command(command)
-
-        if cmd is None:
-            await ctx.send(
-                "That command does not exist! You can't have custom permissions on a non-existant command....")
-            return
-
         # Two cases I use should never have custom permissions setup on them, is_owner for obvious reasons
         # The other case is if I'm using the default has_permissions case
         # Which means I do not want to check custom permissions at all
@@ -288,19 +309,13 @@ class Mod:
                 await ctx.send("This command cannot have custom permissions setup!")
                 return
 
-        r_filter = {'server_id': ctx.message.guild.id}
+        key = ctx.message.guild.id
         entry = {'server_id': ctx.message.guild.id,
-                 cmd.qualified_name: perm_value}
+                 'permissions': {cmd.qualified_name: perm_value}}
 
-        # In all other cases, I've used add_content before update_content
-        # In this case, I'm going the other way around, to make the least queries
-        # As custom permissions are probably going to be ran multiple times per server
-        # Whereas in most other cases, the command is probably going to be ran once/few times per server
-        if not await utils.update_content('custom_permissions', entry, r_filter):
-            await utils.add_content('custom_permissions', entry, r_filter)
+        if not await utils.update_content('server_settings', entry, key):
+            await utils.add_content('server_settings', entry)
 
-        # Same case as prefixes, for now, trigger a manual update
-        self.bot.loop.create_task(utils.cache['custom_permissions'].update())
         await ctx.send("I have just added your custom permissions; "
                        "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
 
@@ -319,12 +334,9 @@ class Mod:
                 "That command does not exist! You can't have custom permissions on a non-existant command....")
             return
 
-        r_filter = {'server_id': ctx.message.guild.id}
-        await utils.replace_content('custom_permissions', r.row.without(cmd.qualified_name), r_filter)
+        update = {'permissions': {cmd.qualified_name: None}}
+        await utils.update_content('custom_permissions', update, ctx.message.guild.id)
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
-
-        # Same case as prefixes, for now, trigger a manual update
-        self.bot.loop.create_task(utils.cache['custom_permissions'].update())
 
     @commands.command(no_pm=True)
     @utils.custom_perms(manage_guild=True)
@@ -333,15 +345,15 @@ class Mod:
 
         EXAMPLE: !prefix new_prefix
         RESULT: You probably screwing it up and not realizing you now need to do new_prefixprefix"""
-        r_filter = {'server_id': ctx.message.guild.id}
+        key = ctx.message.guild.id
         if prefix.lower().strip() == "none":
             prefix = None
 
         entry = {'server_id': ctx.message.guild.id,
                  'prefix': prefix}
 
-        if not await utils.add_content('prefixes', entry, r_filter):
-            await utils.update_content('prefixes', entry, r_filter)
+        if not await utils.update_content('server_settings', entry, key):
+            await utils.add_content('prefixes', entry)
 
         if prefix is None:
             fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
@@ -439,16 +451,14 @@ class Mod:
 
         EXAMPLE: !rules 5
         RESULT: Rule 5 is printed"""
-        r_filter = {'server_id': ctx.message.guild.id}
-        rules = await utils.get_content('rules', r_filter)
-        try:
-            rules = rules[0]['rules']
-        except TypeError:
+        server_settings = await utils.get_content('server_settings', ctx.message.guild.id)
+        rules = server_settings['rules']
+
+        if not rules or len(rules) == 0:
             await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
             return
-        if len(rules) == 0:
-            await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
-            return
+        else:
+            rules = rules[0]
 
         if rule is None:
             try:
@@ -472,12 +482,18 @@ class Mod:
 
         EXAMPLE: !rules add No fun allowed in this server >:c
         RESULT: No more fun...unless they break the rules!"""
-        r_filter = {'server_id': ctx.message.guild.id}
+        key = ctx.message.guild.id
         entry = {'server_id': ctx.message.guild.id,
                  'rules': [rule]}
         update = {'rules': r.row['rules'].append(rule)}
-        if not await utils.update_content('rules', update, r_filter):
-            await utils.add_content('rules', entry, r_filter)
+
+        server_settings = await utils.get_content('server_settings', key)
+        if server_settings and 'rules' in server_settings[0].keys():
+            await utils.update_content('server_settings', update, key)
+        elif server_settings:
+            await utils.update_content('server_settings', entry, key)
+        else:
+            await utils.add_content('server_settings', entry)
 
         await ctx.send("I have just saved your new rule, use the rules command to view this server's current rules")
 
@@ -489,9 +505,8 @@ class Mod:
 
         EXAMPLE: !rules delete 5
         RESULT: Freedom from opression!"""
-        r_filter = {'server_id': ctx.message.guild.id}
         update = {'rules': r.row['rules'].delete_at(rule - 1)}
-        if not await utils.update_content('rules', update, r_filter):
+        if not await utils.update_content('server_settings', update, ctx.message.guild.id):
             await ctx.send("That is not a valid rule number, try running the command again.")
         else:
             await ctx.send("I have just removed that rule from your list of rules!")

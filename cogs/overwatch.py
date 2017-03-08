@@ -38,8 +38,7 @@ class Overwatch:
         await ctx.message.channel.trigger_typing()
 
         user = user or ctx.message.author
-        r_filter = {'member_id': user.id}
-        ow_stats = await utils.get_content('overwatch', r_filter)
+        ow_stats = await utils.get_content('overwatch', user.id)
 
         if ow_stats is None:
             await ctx.send("I do not have this user's battletag saved!")
@@ -96,7 +95,7 @@ class Overwatch:
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists
         bt = bt.replace("#", "-")
-        r_filter = {'member_id': ctx.message.author.id}
+        key = ctx.message.author.id
 
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await ctx.send("Looking up your profile information....")
@@ -113,8 +112,8 @@ class Overwatch:
         entry = {'member_id': ctx.message.author.id, 'battletag': bt}
         update = {'battletag': bt}
         # Try adding this first, if that fails, update the saved entry
-        if not await utils.add_content('overwatch', entry, r_filter):
-            await utils.update_content('overwatch', update, r_filter)
+        if not await utils.add_content('overwatch', entry):
+            await utils.update_content('overwatch', update, key)
         await ctx.send("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'])
@@ -124,8 +123,7 @@ class Overwatch:
 
         EXAMPLE: !ow delete
         RESULT: Your battletag is no longer saved"""
-        r_filter = {'member_id': ctx.message.author.id}
-        if await utils.remove_content('overwatch', r_filter):
+        if await utils.remove_content('overwatch', ctx.message.author.id):
             await ctx.send("I no longer have your battletag saved {}".format(ctx.message.author.mention))
         else:
             await ctx.send("I don't even have your battletag saved {}".format(ctx.message.author.mention))

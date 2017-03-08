@@ -61,8 +61,7 @@ class Stats:
             await ctx.send("`{}` is not a valid command".format(command))
             return
 
-        r_filter = {'command': cmd.qualified_name}
-        command_stats = await utils.get_content('command_usage', r_filter)
+        command_stats = await utils.get_content('command_usage', cmd.qualified_name)
         try:
             command_stats = command_stats[0]
         except TypeError:
@@ -140,8 +139,7 @@ class Stats:
 
         EXAMPLE: !mostboops
         RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
-        r_filter = {'member_id': ctx.message.author.id}
-        boops = await utils.get_content('boops', r_filter)
+        boops = await utils.get_content('boops', ctx.message.author.id)
         if boops is None:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -171,8 +169,7 @@ class Stats:
 
         EXAMPLE: !listboops
         RESULT: The list of your booped members!"""
-        r_filter = {'member_id': ctx.message.author.id}
-        boops = await utils.get_content('boops', r_filter)
+        boops = await utils.get_content('boops', ctx.message.author.id)
         if boops is None:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
