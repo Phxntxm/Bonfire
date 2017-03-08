@@ -306,7 +306,7 @@ class Mod:
         # Which means I do not want to check custom permissions at all
         # Currently the second case is only on adding and removing permissions, to avoid abuse on these
         for check in cmd.checks:
-            if "is_owner" == check.__name__ or "has_permissions" not in str(check):
+            if "is_owner" == check.__name__ or "has_permissions" in str(check):
                 await ctx.send("This command cannot have custom permissions setup!")
                 return
 
