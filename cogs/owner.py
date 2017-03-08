@@ -73,17 +73,17 @@ class Owner:
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def name(self, ctx, newNick: str):
+    async def name(self, ctx, new_nick: str):
         """Changes the bot's name"""
-        await self.bot.edit_profile(username=newNick)
-        await ctx.send('Changed username to ' + newNick)
+        await self.bot.user.edit(username=new_nick)
+        await ctx.send('Changed username to ' + new_nick)
 
     @commands.command()
     @commands.check(utils.is_owner)
     async def status(self, ctx, *, status: str):
         """Changes the bot's 'playing' status"""
-        await self.bot.change_status(discord.Game(name=status, type=0))
-        await ctx.send("Just changed my status to '{0}'!".format(status))
+        await self.bot.change_presence(game=discord.Game(name=status, type=0))
+        await ctx.send("Just changed my status to '{}'!".format(status))
 
     @commands.command()
     @commands.check(utils.is_owner)
