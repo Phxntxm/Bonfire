@@ -8,6 +8,7 @@ import random
 
 battle_outcomes = \
     ["A meteor fell on {1}, {0} is left standing and has been declared the victor!",
+     "{1} was shot through the heart, and {0} is to blame",
      "{0} has bucked {1} into a tree, even Big Mac would be impressed at that kick!",
      "As they were battling, {1} was struck by lightning! {0} you lucked out this time!",
      "{1} tried to dive at {0} while fighting, somehow they missed and landed in quicksand."
