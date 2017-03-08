@@ -125,7 +125,7 @@ class Twitch:
 
         embed = discord.Embed(title=data['display_name'], url=url)
         if data['logo']:
-            embed.set_thumbnail(data['logo'])
+            embed.set_thumbnail(url=data['logo'])
 
         embed.add_field(name='Title', value=data['status'])
         embed.add_field(name='Followers', value=data['followers'])
