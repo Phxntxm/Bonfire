@@ -112,7 +112,7 @@ class Twitch:
         if member is None:
             member = ctx.message.author
 
-        result = await utils.get_content('twitch', {'member_id': str(member.id)})
+        result = await utils.get_content('twitch', str(member.id))
         if result is None:
             await ctx.send("{} has not saved their twitch URL yet!".format(member.name))
             return
