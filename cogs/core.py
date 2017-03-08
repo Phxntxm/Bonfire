@@ -109,8 +109,8 @@ class Core:
         else:
             try:
                 motd = await utils.get_content('motd', str(pendulum.parse(date).date()))
-                date = motd[0]['date']
-                motd = motd[0]['motd']
+                date = motd['date']
+                motd = motd['motd']
                 fmt = "Message of the day for {}:\n\n{}".format(date, motd)
                 await ctx.send(fmt)
             # This one will be hit if we return None for that day

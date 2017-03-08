@@ -131,12 +131,12 @@ class Deviantart:
             entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_updated': {}}
             await utils.add_content('deviantart', entry)
             await ctx.send("You have just subscribed to {}!".format(username))
-        elif content[0]['subbed'] is None or username not in content[0]['subbed']:
-            if content[0]['subbed'] is None:
+        elif content['subbed'] is None or username not in content['subbed']:
+            if content['subbed'] is None:
                 sub_list = [username]
             else:
-                content[0]['subbed'].append(username)
-                sub_list = content[0]['subbed']
+                content['subbed'].append(username)
+                sub_list = content['subbed']
             await utils.update_content('deviantart', {'subbed': sub_list}, key)
             await ctx.send("You have just subscribed to {}!".format(username))
         else:
@@ -152,9 +152,9 @@ class Deviantart:
         key = ctx.message.author.id
         content = await utils.get_content('deviantart', key)
 
-        if content is None or content[0]['subbed'] is None:
+        if content is None or content['subbed'] is None:
             await ctx.send("You are not subscribed to anyone at the moment!")
-        elif username in content[0]['subbed']:
+        elif username in content['subbed']:
             content[0]['subbed'].remove(username)
             await utils.update_content('deviantart', {'subbed': content[0]['subbed']}, key)
             await ctx.send("You have just unsubscribed from {}!".format(username))

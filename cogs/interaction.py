@@ -262,7 +262,7 @@ class Interaction:
         key = booper.id
         boops = await utils.get_content('boops', key)
         if boops is not None:
-            boops = boops[0]['boops']
+            boops = boops['boops']
             # If the booper has never booped the member provided, assure it's 0
             amount = boops.get(boopee.id, 0) + 1
             boops[boopee.id] = amount

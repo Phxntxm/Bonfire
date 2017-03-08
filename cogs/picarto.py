@@ -70,7 +70,7 @@ class Picarto:
                                 continue
                             guild_alerts = await utils.get_content('server_alerts', {'server_id': guild_id})
                             try:
-                                channel_id = guild_alerts[0]['channel_id']
+                                channel_id = guild_alerts['channel_id']
                             except (IndexError, TypeError):
                                 channel_id = guild_id
                             channel = self.bot.get_channel(channel_id)
@@ -95,7 +95,7 @@ class Picarto:
                                 continue
                             guild_alerts = await utils.get_content('server_alerts', {'server_id': guild_id})
                             try:
-                                channel_id = guild_alerts[0]['channel_id']
+                                channel_id = guild_alerts['channel_id']
                             except (IndexError, TypeError):
                                 channel_id = guild_id
                             channel = self.bot.get_channel(channel_id)
@@ -128,7 +128,7 @@ class Picarto:
             await ctx.send("That user does not have a picarto url setup!")
             return
 
-        member_url = picarto_entry[0]['picarto_url']
+        member_url = picarto_entry['picarto_url']
 
         # Use regex to get the actual username so that we can make a request to the API
         stream = re.search("(?<=picarto.tv/)(.*)", member_url).group(1)
@@ -223,7 +223,7 @@ class Picarto:
                 "I do not have your Picarto URL added {}. You can save your Picarto url with !picarto add".format(
                     ctx.message.author.mention))
         # Then check if this guild is already added as one to notify in
-        elif ctx.message.guild.id in result[0]['servers']:
+        elif ctx.message.guild.id in result['servers']:
             await ctx.send("I am already set to notify in this guild...")
         else:
             await utils.update_content('picarto', {'servers': r.row['servers'].append(ctx.message.guild.id)},

@@ -51,8 +51,7 @@ async def process_command(ctx):
     command_usage = await utils.get_content('command_usage', key=command.qualified_name)
     if command_usage is None:
         command_usage = {'command': command.qualified_name}
-    else:
-        command_usage = command_usage[0]
+
     # Add one to the total usage for this command, basing it off 0 to start with (obviously)
     total_usage = command_usage.get('total_usage', 0) + 1
     command_usage['total_usage'] = total_usage

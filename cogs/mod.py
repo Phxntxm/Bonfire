@@ -155,7 +155,7 @@ class Mod:
         update = {'nsfw_channels': r.row['nsfw_channels'].append(ctx.message.channel.id)}
 
         server_settings = await utils.get_content('server_settings', key)
-        if server_settings and 'nsfw_channels' in server_settings[0].keys():
+        if server_settings and 'nsfw_channels' in server_settings.keys():
             await utils.update_content('server_settings', update, key)
         elif server_settings:
             await utils.update_content('server_settings', entry, key)
@@ -176,7 +176,7 @@ class Mod:
         server_settings = await utils.get_content('server_settings', key)
         channel = ctx.message.channel.id
         try:
-            channels = server_settings[0]['nsfw_channels']
+            channels = server_settings['nsfw_channels']
             if channel in channels:
                 channels.remove(channel)
 
@@ -224,7 +224,7 @@ class Mod:
 
         server_settings = await utils.get_content('server_settings', ctx.message.guild.id)
         try:
-            server_perms = server_settings[0]['permissions']
+            server_perms = server_settings['permissions']
         except (TypeError, IndexError):
             server_perms = {}
 
@@ -457,8 +457,6 @@ class Mod:
         if not rules or len(rules) == 0:
             await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
             return
-        else:
-            rules = rules[0]
 
         if rule is None:
             try:

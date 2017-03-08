@@ -45,7 +45,7 @@ class Overwatch:
             return
         # This API sometimes takes a while to look up information, so send a message saying we're processing
 
-        bt = ow_stats[0]['battletag']
+        bt = ow_stats['battletag']
 
         if hero == "":
             # If no hero was provided, we just want the base stats for a player

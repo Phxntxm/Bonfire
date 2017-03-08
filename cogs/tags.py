@@ -18,7 +18,7 @@ class Tags:
 
         EXAMPLE: !tags
         RESULT: All tags setup on this server"""
-        tags = await utils.get_content('tags', {'server_id': ctx.message.guild.id})
+        tags = await utils.get_content('tags', ctx.message.guild.id)
         # Simple generator that adds a tag to the list to print, if the tag is for this server
         try:
             fmt = "\n".join("{}".format(tag['tag']) for tag in tags)

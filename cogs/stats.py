@@ -62,9 +62,7 @@ class Stats:
             return
 
         command_stats = await utils.get_content('command_usage', cmd.qualified_name)
-        try:
-            command_stats = command_stats[0]
-        except TypeError:
+        if command_stats is None:
             await ctx.send("That command has never been used! You know I worked hard on that! :c")
             return
 
@@ -145,7 +143,7 @@ class Stats:
             return
 
         # Just to make this easier, just pay attention to the boops data, now that we have the right entry
-        boops = boops[0]['boops']
+        boops = boops['boops']
 
         # First get a list of the ID's of all members in this server, for use in list comprehension
         server_member_ids = [member.id for member in ctx.message.guild.members]
@@ -175,7 +173,7 @@ class Stats:
             return
 
         # Just to make this easier, just pay attention to the boops data, now that we have the right entry
-        boops = boops[0]['boops']
+        boops = boops['boops']
 
         # Same concept as the mostboops method
         server_member_ids = [member.id for member in ctx.message.guild.members]

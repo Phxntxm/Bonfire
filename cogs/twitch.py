@@ -61,9 +61,9 @@ class Twitch:
                             server = self.bot.get_server(server_id)
                             if server is None:
                                 continue
-                            server_alerts = await utils.get_content('server_alerts', server_id)
+                            server_settings = await utils.get_content('server_settings', server_id)
                             try:
-                                channel_id = server_alerts[0]['channel_id']
+                                channel_id = server_settings['notification_channel']
                             except (IndexError, TypeError):
                                 channel_id = server_id
                             channel = self.bot.get_channel(channel_id)
@@ -86,10 +86,11 @@ class Twitch:
                             server = self.bot.get_server(server_id)
                             if server is None:
                                 continue
-                            server_alerts = await utils.get_content('server_alerts', {'server_id': server_id})
-                            channel_id = server_id
-                            if server_alerts is not None and len(server_alerts) > 0:
-                                channel_id = server_alerts[0].get('channel_id')
+                            server_settings = await utils.get_content('server_settings', server_id)
+                            try:
+                                channel_id = server_settings['notification_channel']
+                            except (IndexError, TypeError):
+                                channel_id = server_id
                             channel = self.bot.get_channel(channel_id)
                             # Get the member that has just gone live
                             member = server.get_member(m_id)
@@ -203,7 +204,7 @@ class Twitch:
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
                     ctx.message.author.mention))
         # Then check if this server is already added as one to notify in
-        elif ctx.message.guild.id in result[0]['servers']:
+        elif ctx.message.guild.id in result['servers']:
             await ctx.send("I am already set to notify in this server...")
         else:
             await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.guild.id)}, key)

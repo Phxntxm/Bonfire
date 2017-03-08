@@ -50,7 +50,7 @@ async def channel_is_nsfw(channel):
     server_settings = await config.get_content('server_settings', server)
 
     try:
-        return channel in server_settings[0]['nsfw_channels']
+        return channel in server_settings['nsfw_channels']
     except (TypeError, IndexError):
         return False
 
