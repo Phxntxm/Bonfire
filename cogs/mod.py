@@ -111,8 +111,8 @@ class Mod:
         key = str(ctx.message.guild.id)
         entry = {'server_id': key,
                  'notification_channel': str(channel.id)}
-        if not await utils.update_content('server_alerts', entry, key):
-            await utils.add_content('server_alerts', entry)
+        if not await utils.update_content('server_settings', entry, key):
+            await utils.add_content('server_settings', entry)
         await ctx.send("I have just changed this server's 'notifications' channel"
                        "\nAll notifications will now go to `{}`".format(channel))
 
@@ -131,8 +131,8 @@ class Mod:
         key = str(ctx.message.guild.id)
         entry = {'server_id': key,
                  'join_leave': on_off}
-        if not await utils.update_content('user_notifications', entry, key):
-            await utils.add_content('user_notifications', entry)
+        if not await utils.update_content('server_settings', entry, key):
+            await utils.add_content('server_settings', entry)
 
         fmt = "notify" if on_off else "not notify"
         await ctx.send("This server will now {} if someone has joined or left".format(fmt))
@@ -226,7 +226,7 @@ class Mod:
         server_settings = await utils.get_content('server_settings', str(ctx.message.guild.id))
         try:
             server_perms = server_settings['permissions']
-        except (TypeError, IndexError):
+        except (TypeError, IndexError, KeyError):
             server_perms = {}
 
         perms_value = server_perms.get(cmd.qualified_name)
