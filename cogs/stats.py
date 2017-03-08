@@ -181,7 +181,7 @@ class Stats:
 
         # Same concept as the mostboops method
         server_member_ids = [member.id for member in ctx.message.guild.members]
-        booped_members = {m_id: amt for m_id, amt in boops.items() if int(m_id) in server_member_ids}
+        booped_members = {int(m_id): amt for m_id, amt in boops.items() if int(m_id) in server_member_ids}
         sorted_booped_members = sorted(booped_members.items(), key=lambda k: k[1], reverse=True)
         # Now we only want the first 10 members, so splice this list
         sorted_booped_members = sorted_booped_members[:10]
@@ -217,7 +217,7 @@ class Stats:
 
         output = []
         for x in sorted_members:
-            member_id = x['member_id']
+            member_id = int(x['member_id'])
             rating = x['rating']
             member = ctx.message.guild.get_member(member_id)
             output.append("{} (Rating: {})".format(member.display_name, rating))
