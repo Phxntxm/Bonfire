@@ -121,7 +121,7 @@ def command_prefix(bot, message):
     try:
         prefix = cache['server_settings'].values[message.guild.id]['prefix']
         return prefix or default_prefix
-    except (KeyError, TypeError, IndexError, AttributeError):
+    except (KeyError, TypeError, IndexError, AttributeError, ValueError):
         return default_prefix
 
 

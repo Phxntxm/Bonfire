@@ -84,7 +84,7 @@ def custom_perms(**perms):
         try:
             required_perm_value = server_settings['permissions'][ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
-        except (TypeError, IndexError):
+        except (TypeError, IndexError, ValueError):
             pass
 
         # Now just check if the person running the command has these permissions
