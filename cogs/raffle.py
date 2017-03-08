@@ -34,7 +34,7 @@ class Raffle:
             return
 
         for raffle in raffles:
-            server = self.bot.get_guild(raffle['server_id'])
+            server = self.bot.get_guild(int(raffle['server_id']))
 
             # Check to see if this cog can find the server in question
             if server is None:
@@ -58,13 +58,13 @@ class Raffle:
                 winner = None
                 count = 0
                 while winner is None:
-                    winner = server.get_member(random.SystemRandom().choice(entrants))
+                    winner = server.get_member(int(random.SystemRandom().choice(entrants)))
 
                     # Lets make sure we don't get caught in an infinite loop
-                    # Realistically having more than 25 random entrants found that aren't in the server anymore
-                    # Isn't something that should be an issue
+                    # Realistically having more than 50 random entrants found that aren't in the server anymore
+                    # Isn't something that should be an issue, but better safe than sorry
                     count += 1
-                    if count >= 25:
+                    if count >= 50:
                         break
 
                 if winner is None:
@@ -75,8 +75,12 @@ class Raffle:
             # No matter which one of these matches were met, the raffle has ended and we want to remove it
             # We don't have to wait for it however, so create a task for it
             self.bot.loop.create_task(utils.remove_content('raffles', raffle_id))
+
+            server_settings = await utils.get_content('server_settings', str(server.id))
+            channel_id = server_settings.get('notification_channel', server.id)
+            channel = self.bot.get_channel(channel_id)
             try:
-                await server.send(fmt)
+                await channel.send(fmt)
             except discord.Forbidden:
                 pass
 
