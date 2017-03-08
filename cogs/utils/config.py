@@ -205,6 +205,8 @@ async def get_content(table, key=None):
             content = await _convert_to_list(cursor)
             if len(content) == 0:
                 content = None
+        else:
+            content = cursor
     except (IndexError, r.ReqlOpFailedError):
         content = None
     await conn.close()
