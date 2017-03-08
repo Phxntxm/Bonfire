@@ -336,7 +336,7 @@ class Mod:
             return
 
         update = {'permissions': {cmd.qualified_name: None}}
-        await utils.update_content('custom_permissions', update, str(ctx.message.guild.id))
+        await utils.update_content('server_settings', update, str(ctx.message.guild.id))
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
     @commands.command(no_pm=True)
@@ -374,7 +374,8 @@ class Mod:
             await ctx.send("I do not have permission to delete messages...")
             return
         try:
-            await ctx.message.channel.purge(limit=limit)
+            await ctx.message.channel.purge(limit=limit, before=ctx.message)
+            await ctx.message.delete()
         except discord.HTTPException:
             await ctx.message.channel.send("Detected messages that are too far "
                                            "back for me to delete; I can only bulk delete messages"
@@ -427,7 +428,7 @@ class Mod:
         # Since logs_from will give us any message, not just the user's we need
         # We'll increment count, and stop deleting messages if we hit the limit.
         count = 0
-        async for msg in self.bot.logs_from(ctx.message.channel, before=ctx.message):
+        async for msg in ctx.message.channel.history(before=ctx.message):
             if check(msg):
                 try:
                     await msg.delete()
@@ -487,7 +488,7 @@ class Mod:
         update = {'rules': r.row['rules'].append(rule)}
 
         server_settings = await utils.get_content('server_settings', key)
-        if server_settings and 'rules' in server_settings[0].keys():
+        if server_settings and 'rules' in server_settings.keys():
             await utils.update_content('server_settings', update, key)
         elif server_settings:
             await utils.update_content('server_settings', entry, key)
