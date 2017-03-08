@@ -123,11 +123,18 @@ class Twitch:
         payload = {'client_id': self.key}
         data = await utils.request(twitch_url, payload=payload)
 
-        fmt = "Username: {}".format(data['display_name'])
-        fmt += "\nStatus: {}".format(data['status'])
-        fmt += "\nFollowers: {}".format(data['followers'])
-        fmt += "\nURL: {}".format(url)
-        await ctx.send("```\n{}```".format(fmt))
+        embed = discord.Embed(title=data['display_name'], url=url)
+        if data['logo']:
+            embed.set_thumbnail(data['logo'])
+
+        embed.add_field(name='Title', value=data['status'])
+        embed.add_field(name='Followers', value=data['followers'])
+        embed.add_field(name='Views', value=data['views'])
+        if data['game']:
+            embed.add_field(name='Game', value=data['game'])
+        embed.add_field(name='Language', value=data['broadcaster_language'])
+
+        await ctx.send(embed=embed)
 
     @twitch.command(name='add', no_pm=True)
     @utils.custom_perms(send_messages=True)
