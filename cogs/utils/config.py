@@ -201,7 +201,7 @@ async def get_content(table, key=None):
             cursor = await r.table(table).run(conn)
         if cursor is None:
             content = None
-        else:
+        elif type(cursor) is not dict:
             content = await _convert_to_list(cursor)
             if len(content) == 0:
                 content = None
