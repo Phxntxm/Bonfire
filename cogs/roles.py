@@ -82,7 +82,7 @@ class Roles:
 
         # Otherwise, remove the roles from each member given
         for member in members:
-            await self.bot.remove_roles(member, *roles)
+            await member.remove_roles(*roles)
         await ctx.send("I have just removed the following roles:```\n{}``` from the following members:"
                        "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
