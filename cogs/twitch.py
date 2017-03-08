@@ -117,7 +117,6 @@ class Twitch:
             await ctx.send("{} has not saved their twitch URL yet!".format(member.name))
             return
 
-        result = result[0]
         url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
         twitch_url = "https://api.twitch.tv/kraken/channels/{}".format(user)
