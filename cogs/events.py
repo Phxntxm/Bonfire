@@ -62,7 +62,7 @@ class StatsUpdate:
                 channel_id = server_settings['notification_channel'] or member.guild.id
             else:
                 return
-        except (IndexError, TypeError):
+        except (IndexError, TypeError, KeyError):
             return
 
         channel = guild.get_channel(int(channel_id))
@@ -78,7 +78,7 @@ class StatsUpdate:
                 channel_id = server_settings['notification_channel'] or member.guild.id
             else:
                 return
-        except (IndexError, TypeError):
+        except (IndexError, TypeError, KeyError):
             return
 
         channel = guild.get_channel(int(channel_id))
