@@ -60,7 +60,7 @@ async def process_command(ctx):
     # Add one to the author's usage for this command
     total_member_usage = command_usage.get('member_usage', {})
     member_usage = total_member_usage.get(author.id, 0) + 1
-    total_member_usage[author.id] = member_usage
+    total_member_usage[str(author.id)] = member_usage
     command_usage['member_usage'] = total_member_usage
 
     # Add one to the server's usage for this command
