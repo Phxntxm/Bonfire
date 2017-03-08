@@ -264,13 +264,13 @@ class Interaction:
         if boops is not None:
             boops = boops['boops']
             # If the booper has never booped the member provided, assure it's 0
-            amount = boops.get(boopee.id, 0) + 1
-            boops[boopee.id] = amount
+            amount = boops.get(str(boopee.id), 0) + 1
+            boops[str(boopee.id)] = amount
 
             await utils.update_content('boops', {'boops': boops}, key)
         else:
             entry = {'member_id': booper.id,
-                     'boops': {boopee.id: 1}}
+                     'boops': {str(boopee.id): 1}}
 
             await utils.add_content('boops', entry)
             amount = 1
