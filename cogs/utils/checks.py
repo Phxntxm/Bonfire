@@ -80,8 +80,8 @@ def custom_perms(**perms):
         for perm, setting in perms.items():
             setattr(required_perm, perm, setting)
 
-        server_settings = config.cache.get('server_settings').values[ctx.message.guild.id]
         try:
+            server_settings = config.cache.get('server_settings').values[ctx.message.guild.id]
             required_perm_value = server_settings['permissions'][ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
         except (TypeError, IndexError, KeyError):
