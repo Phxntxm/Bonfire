@@ -97,8 +97,6 @@ class Overwatch:
         bt = bt.replace("#", "-")
         key = str(ctx.message.author.id)
 
-        # This API sometimes takes a while to look up information, so send a message saying we're processing
-        await ctx.send("Looking up your profile information....")
         # All we're doing here is ensuring that the status is 200 when looking up someone's general information
         # If it's not, let them know exactly how to format their tag
         url = BASE_URL + "{}/stats".format(bt)

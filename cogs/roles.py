@@ -22,7 +22,7 @@ class Roles:
         EXAMPLE: !role
         RESULT: A list of all your roles"""
         # Simply get a list of all roles in this server and send them
-        server_roles = [role.name for role in ctx.message.guild.roles if not role.is_everyone]
+        server_roles = [role.name for role in ctx.message.guild.roles if not role.is_default()]
         await ctx.send("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
 
     @role.command(name='remove', no_pm=True)
@@ -38,7 +38,7 @@ class Roles:
             return
         check = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel
 
-        server_roles = [role for role in ctx.message.guild.roles if not role.is_everyone]
+        server_roles = [role for role in ctx.message.guild.roles if not role.is_default()]
         # First get the list of all mentioned users
         members = ctx.message.mentions
         # If no users are mentioned, ask the author for a list of the members they want to remove the role from
@@ -102,7 +102,7 @@ class Roles:
         check = lambda m: m.author == ctx.message.author and m.channel == ctx.message.channel
 
         # This is exactly the same as removing roles, except we call add_roles instead.
-        server_roles = [role for role in ctx.message.guild.roles if not role.is_everyone]
+        server_roles = [role for role in ctx.message.guild.roles if not role.is_default()]
         members = ctx.message.mentions
         if len(members) == 0:
             await ctx.send("Please provide the list of members you want to add a role to")
@@ -155,7 +155,7 @@ class Roles:
 
         # If no role was given, get the current roles on the server and ask which ones they'd like to remove
         if role is None:
-            server_roles = [role for role in ctx.message.guild.roles if not role.is_everyone]
+            server_roles = [role for role in ctx.message.guild.roles if not role.is_default()]
 
             await ctx.send(
                 "Which role would you like to remove from the server? Here is a list of this server's roles:"
