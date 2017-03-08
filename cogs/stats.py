@@ -37,8 +37,8 @@ class Stats:
         embed.add_field(name='Roles', value=len(server.roles))
 
         # Split channels into voice and text channels
-        voice_channels = [c for c in server.channels if str(c.type) == 'voice']
-        text_channels = [c for c in server.channels if str(c.type) == 'text']
+        voice_channels = [c for c in server.channels if c is discord.VoiceChannel]
+        text_channels = [c for c in server.channels if is discord.TextChannel]
         embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
         embed.add_field(name='Owner', value=server.owner.display_name)
 
@@ -123,10 +123,14 @@ class Stats:
             stats = {data['command']: data['server_usage'].get(str(server.id)) for data in command_stats
                      if data['server_usage'].get(str(server.id), 0) > 0}
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
-
-            top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
-            await ctx.send(
-                "This server's top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
+            try:
+                top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
+                banner = await utils.create_banner(ctx.message.author, "Server command usage", top_5)
+                await ctx.send(file=banner)
+            except (FileNotFoundError, discord.Forbidden):
+                top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
+                await ctx.send(
+                    "This server's top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
         else:
             await ctx.send("That is not a valid option, valid options are: `server` or `me`")
 
@@ -176,8 +180,8 @@ class Stats:
         boops = boops['boops']
 
         # Same concept as the mostboops method
-        server_member_ids = [str(member.id )for member in ctx.message.guild.members]
-        booped_members = {m_id: amt for m_id, amt in boops.items() if m_id in server_member_ids}
+        server_member_ids = [member.id for member in ctx.message.guild.members]
+        booped_members = {m_id: amt for m_id, amt in boops.items() if int(m_id) in server_member_ids}
         sorted_booped_members = sorted(booped_members.items(), key=lambda k: k[1], reverse=True)
         # Now we only want the first 10 members, so splice this list
         sorted_booped_members = sorted_booped_members[:10]
@@ -201,9 +205,12 @@ class Stats:
         EXAMPLE: !leaderboard
         RESULT: A leaderboard of this server's battle records"""
         # Create a list of the ID's of all members in this server, for comparison to the records saved
-        server_member_ids = [str(member.id) for member in ctx.message.guild.members]
+        server_member_ids = [member.id for member in ctx.message.guild.members]
         battles = await utils.get_content('battle_records')
-        battles = [battle for battle in battles if battle['member_id'] in server_member_ids]
+        if battles is None or len(battles) == 0:
+            await ctx.send("No one has battled on this server!")
+
+        battles = [battle for battle in battles if int(battle['member_id']) in server_member_ids]
 
         # Sort the members based on their rating
         sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)
@@ -233,6 +240,8 @@ class Stats:
         # For this one, we don't want to pass a filter, as we do need all battle records
         # We need this because we want to make a comparison for overall rank
         all_members = await utils.get_content('battle_records')
+        if all_members is None or len(all_members) == 0:
+            await ctx.send("You have not battled anyone!")
 
         # Make a list comprehension to just check if the user has battled
         if len([entry for entry in all_members if entry['member_id'] == str(member.id)]) == 0:
@@ -240,8 +249,8 @@ class Stats:
             return
 
         # Same concept as the leaderboard
-        server_member_ids = [str(member.id) for member in ctx.message.guild.members]
-        server_members = [stats for stats in all_members if stats['member_id'] in server_member_ids]
+        server_member_ids = [member.id for member in ctx.message.guild.members]
+        server_members = [stats for stats in all_members if int(stats['member_id']) in server_member_ids]
         sorted_server_members = sorted(server_members, key=lambda x: x['rating'], reverse=True)
         sorted_all_members = sorted(all_members, key=lambda x: x['rating'], reverse=True)
 
