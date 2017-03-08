@@ -67,8 +67,8 @@ class Stats:
             return
 
         total_usage = command_stats['total_usage']
-        member_usage = command_stats['member_usage'].get(ctx.message.author.id, 0)
-        server_usage = command_stats['server_usage'].get(ctx.message.guild.id, 0)
+        member_usage = command_stats['member_usage'].get(str(ctx.message.author.id), 0)
+        server_usage = command_stats['server_usage'].get(str(ctx.message.guild.id), 0)
 
         try:
             data = [("Command Name", cmd.qualified_name),
@@ -100,8 +100,8 @@ class Stats:
             command_stats = await utils.get_content('command_usage')
             # Now use a dictionary comprehension to get just the command name, and usage
             # Based on the author's usage of the command
-            stats = {data['command']: data['member_usage'].get(author.id) for data in command_stats
-                     if data['member_usage'].get(author.id, 0) > 0}
+            stats = {data['command']: data['member_usage'].get(str(author.id)) for data in command_stats
+                     if data['member_usage'].get(str(author.id), 0) > 0}
             # Now sort it by the amount of times used
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
 
@@ -120,8 +120,8 @@ class Stats:
             # This is exactly the same as above, except server usage instead of member usage
             server = ctx.message.guild
             command_stats = await utils.get_content('command_usage')
-            stats = {data['command']: data['server_usage'].get(server.id) for data in command_stats
-                     if data['server_usage'].get(server.id, 0) > 0}
+            stats = {data['command']: data['server_usage'].get(str(server.id)) for data in command_stats
+                     if data['server_usage'].get(str(server.id), 0) > 0}
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
 
             top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
