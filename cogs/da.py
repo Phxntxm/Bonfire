@@ -102,7 +102,7 @@ class Deviantart:
                         # Now we can update the user's last updated for this DA
                         # We want to do this whether or not our last if statement was met
                         update = {'last_updated': {da_name: result['deviationid']}}
-                        await utils.update_content('deviantart', update, user.id)
+                        await utils.update_content('deviantart', update, str(user.id))
         except Exception as e:
             tb = traceback.format_exc()
             fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
@@ -123,12 +123,12 @@ class Deviantart:
 
         EXAMPLE: !da sub MyFavoriteArtistEva<3
         RESULT: Notifications of amazing pics c:"""
-        key = ctx.message.author.id
+        key = str(ctx.message.author.id)
         content = await utils.get_content('deviantart', key)
         # TODO: Ensure the user provided is a real user
 
         if content is None:
-            entry = {'member_id': ctx.message.author.id, 'subbed': [username], 'last_updated': {}}
+            entry = {'member_id': str(ctx.message.author.id), 'subbed': [username], 'last_updated': {}}
             await utils.add_content('deviantart', entry)
             await ctx.send("You have just subscribed to {}!".format(username))
         elif content['subbed'] is None or username not in content['subbed']:
@@ -149,7 +149,7 @@ class Deviantart:
 
         EXAMPLE: !da unsub TheArtistWhoBetrayedMe
         RESULT: No more pics from that terrible person!"""
-        key = ctx.message.author.id
+        key = (ctx.message.author.id)
         content = await utils.get_content('deviantart', key)
 
         if content is None or content['subbed'] is None:

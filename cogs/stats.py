@@ -137,7 +137,7 @@ class Stats:
 
         EXAMPLE: !mostboops
         RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
-        boops = await utils.get_content('boops', ctx.message.author.id)
+        boops = await utils.get_content('boops', str(ctx.message.author.id))
         if boops is None:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -146,7 +146,7 @@ class Stats:
         boops = boops['boops']
 
         # First get a list of the ID's of all members in this server, for use in list comprehension
-        server_member_ids = [member.id for member in ctx.message.guild.members]
+        server_member_ids = [str(member.id) for member in ctx.message.guild.members]
         # Then get a sorted list, based on the amount of times they've booped the member
         # Reverse needs to be true, as we want it to go from highest to lowest
         sorted_boops = sorted(boops.items(), key=lambda x: x[1], reverse=True)
@@ -156,7 +156,7 @@ class Stats:
         # Since this is sorted, we just need to get the following information on the first user in the list
         most_id, most_boops = sorted_boops[0]
 
-        member = discord.utils.find(lambda m: m.id == most_id, self.bot.get_all_members())
+        member = discord.utils.find(lambda m: str(m.id) == most_id, self.bot.get_all_members())
         await ctx.send("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
             ctx.message.author.mention, member.display_name, most_boops))
 
@@ -167,7 +167,7 @@ class Stats:
 
         EXAMPLE: !listboops
         RESULT: The list of your booped members!"""
-        boops = await utils.get_content('boops', ctx.message.author.id)
+        boops = await utils.get_content('boops', str(ctx.message.author.id))
         if boops is None:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -176,7 +176,7 @@ class Stats:
         boops = boops['boops']
 
         # Same concept as the mostboops method
-        server_member_ids = [member.id for member in ctx.message.guild.members]
+        server_member_ids = [str(member.id )for member in ctx.message.guild.members]
         booped_members = {m_id: amt for m_id, amt in boops.items() if m_id in server_member_ids}
         sorted_booped_members = sorted(booped_members.items(), key=lambda k: k[1], reverse=True)
         # Now we only want the first 10 members, so splice this list
@@ -201,7 +201,7 @@ class Stats:
         EXAMPLE: !leaderboard
         RESULT: A leaderboard of this server's battle records"""
         # Create a list of the ID's of all members in this server, for comparison to the records saved
-        server_member_ids = [member.id for member in ctx.message.guild.members]
+        server_member_ids = [str(member.id) for member in ctx.message.guild.members]
         battles = await utils.get_content('battle_records')
         battles = [battle for battle in battles if battle['member_id'] in server_member_ids]
 
@@ -235,23 +235,23 @@ class Stats:
         all_members = await utils.get_content('battle_records')
 
         # Make a list comprehension to just check if the user has battled
-        if len([entry for entry in all_members if entry['member_id'] == member.id]) == 0:
+        if len([entry for entry in all_members if entry['member_id'] == str(member.id)]) == 0:
             await ctx.send("That user has not battled yet!")
             return
 
         # Same concept as the leaderboard
-        server_member_ids = [member.id for member in ctx.message.guild.members]
+        server_member_ids = [str(member.id) for member in ctx.message.guild.members]
         server_members = [stats for stats in all_members if stats['member_id'] in server_member_ids]
         sorted_server_members = sorted(server_members, key=lambda x: x['rating'], reverse=True)
         sorted_all_members = sorted(all_members, key=lambda x: x['rating'], reverse=True)
 
         # Enumurate the list so that we can go through, find the user's place in the list
         # and get just that for the rank
-        server_rank = [i for i, x in enumerate(sorted_server_members) if x['member_id'] == member.id][0] + 1
-        total_rank = [i for i, x in enumerate(sorted_all_members) if x['member_id'] == member.id][0] + 1
+        server_rank = [i for i, x in enumerate(sorted_server_members) if x['member_id'] == str(member.id)][0] + 1
+        total_rank = [i for i, x in enumerate(sorted_all_members) if x['member_id'] == str(member.id)][0] + 1
         # The rest of this is straight forward, just formatting
 
-        entry = [m for m in server_members if m['member_id'] == member.id][0]
+        entry = [m for m in server_members if m['member_id'] == str(member.id)][0]
         rating = entry['rating']
         record = "{}-{}".format(entry['wins'], entry['losses'])
         try:

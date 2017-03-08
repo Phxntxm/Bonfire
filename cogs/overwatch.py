@@ -38,7 +38,7 @@ class Overwatch:
         await ctx.message.channel.trigger_typing()
 
         user = user or ctx.message.author
-        ow_stats = await utils.get_content('overwatch', user.id)
+        ow_stats = await utils.get_content('overwatch', str(user.id))
 
         if ow_stats is None:
             await ctx.send("I do not have this user's battletag saved!")
@@ -95,7 +95,7 @@ class Overwatch:
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists
         bt = bt.replace("#", "-")
-        key = ctx.message.author.id
+        key = str(ctx.message.author.id)
 
         # This API sometimes takes a while to look up information, so send a message saying we're processing
         await ctx.send("Looking up your profile information....")
@@ -109,7 +109,7 @@ class Overwatch:
             return
 
         # Now just save the battletag
-        entry = {'member_id': ctx.message.author.id, 'battletag': bt}
+        entry = {'member_id': key, 'battletag': bt}
         update = {'battletag': bt}
         # Try adding this first, if that fails, update the saved entry
         if not await utils.add_content('overwatch', entry):
@@ -123,7 +123,7 @@ class Overwatch:
 
         EXAMPLE: !ow delete
         RESULT: Your battletag is no longer saved"""
-        if await utils.remove_content('overwatch', ctx.message.author.id):
+        if await utils.remove_content('overwatch', str(ctx.message.author.id)):
             await ctx.send("I no longer have your battletag saved {}".format(ctx.message.author.mention))
         else:
             await ctx.send("I don't even have your battletag saved {}".format(ctx.message.author.mention))

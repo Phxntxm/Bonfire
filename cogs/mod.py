@@ -107,9 +107,9 @@ class Mod:
 
         EXAMPLE: !alerts #alerts
         RESULT: No more alerts spammed in #general!"""
-        key = ctx.message.guild.id
-        entry = {'server_id': ctx.message.guild.id,
-                 'notification_channel': channel.id}
+        key = str(ctx.message.guild.id)
+        entry = {'server_id': key,
+                 'notification_channel': str(channel.id)}
         if not await utils.update_content('server_alerts', entry, key):
             await utils.add_content('server_alerts', entry)
         await ctx.send("I have just changed this server's 'notifications' channel"
@@ -127,8 +127,8 @@ class Mod:
         # So we base this channel on it's own and not from alerts
         # When mod logging becomes available, that will be kept to it's own channel if wanted as well
         on_off = True if re.search("(on|yes|true)", on_off.lower()) else False
-        key = ctx.message.guild.id
-        entry = {'server_id': ctx.message.guild.id,
+        key = str(ctx.message.guild.id)
+        entry = {'server_id': key,
                  'join_leave': on_off}
         if not await utils.update_content('user_notifications', entry, key):
             await utils.add_content('user_notifications', entry)
@@ -149,10 +149,10 @@ class Mod:
 
         EXAMPLE: !nsfw add
         RESULT: ;)"""
-        key = ctx.message.guild.id
+        key = str(ctx.message.guild.id)
         entry = {'server_id': key,
-                 'nsfw_channels': [ctx.message.channel.id]}
-        update = {'nsfw_channels': r.row['nsfw_channels'].append(ctx.message.channel.id)}
+                 'nsfw_channels': [str(ctx.message.channel.id)]}
+        update = {'nsfw_channels': r.row['nsfw_channels'].append(str(ctx.message.channel.id))}
 
         server_settings = await utils.get_content('server_settings', key)
         if server_settings and 'nsfw_channels' in server_settings.keys():
@@ -172,9 +172,9 @@ class Mod:
         EXAMPLE: !nsfw remove
         RESULT: ;("""
 
-        key = ctx.message.guild.id
+        key = str(ctx.message.guild.id)
         server_settings = await utils.get_content('server_settings', key)
-        channel = ctx.message.channel.id
+        channel = str(ctx.message.channel.id)
         try:
             channels = server_settings['nsfw_channels']
             if channel in channels:
@@ -222,7 +222,7 @@ class Mod:
             await ctx.send("That is not a valid command!")
             return
 
-        server_settings = await utils.get_content('server_settings', ctx.message.guild.id)
+        server_settings = await utils.get_content('server_settings', str(ctx.message.guild.id))
         try:
             server_perms = server_settings['permissions']
         except (TypeError, IndexError):
@@ -309,8 +309,8 @@ class Mod:
                 await ctx.send("This command cannot have custom permissions setup!")
                 return
 
-        key = ctx.message.guild.id
-        entry = {'server_id': ctx.message.guild.id,
+        key = str(ctx.message.guild.id)
+        entry = {'server_id': key,
                  'permissions': {cmd.qualified_name: perm_value}}
 
         if not await utils.update_content('server_settings', entry, key):
@@ -335,7 +335,7 @@ class Mod:
             return
 
         update = {'permissions': {cmd.qualified_name: None}}
-        await utils.update_content('custom_permissions', update, ctx.message.guild.id)
+        await utils.update_content('custom_permissions', update, str(ctx.message.guild.id))
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
     @commands.command(no_pm=True)
@@ -345,11 +345,11 @@ class Mod:
 
         EXAMPLE: !prefix new_prefix
         RESULT: You probably screwing it up and not realizing you now need to do new_prefixprefix"""
-        key = ctx.message.guild.id
+        key = str(ctx.message.guild.id)
         if prefix.lower().strip() == "none":
             prefix = None
 
-        entry = {'server_id': ctx.message.guild.id,
+        entry = {'server_id': key,
                  'prefix': prefix}
 
         if not await utils.update_content('server_settings', entry, key):
@@ -451,8 +451,8 @@ class Mod:
 
         EXAMPLE: !rules 5
         RESULT: Rule 5 is printed"""
-        server_settings = await utils.get_content('server_settings', ctx.message.guild.id)
-        rules = server_settings['rules']
+        server_settings = await utils.get_content('server_settings', str(ctx.message.guild.id))
+        rules = server_settings.get('rules')
 
         if not rules or len(rules) == 0:
             await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
@@ -480,8 +480,8 @@ class Mod:
 
         EXAMPLE: !rules add No fun allowed in this server >:c
         RESULT: No more fun...unless they break the rules!"""
-        key = ctx.message.guild.id
-        entry = {'server_id': ctx.message.guild.id,
+        key = str(ctx.message.guild.id)
+        entry = {'server_id': key,
                  'rules': [rule]}
         update = {'rules': r.row['rules'].append(rule)}
 
@@ -504,7 +504,7 @@ class Mod:
         EXAMPLE: !rules delete 5
         RESULT: Freedom from opression!"""
         update = {'rules': r.row['rules'].delete_at(rule - 1)}
-        if not await utils.update_content('server_settings', update, ctx.message.guild.id):
+        if not await utils.update_content('server_settings', update, str(ctx.message.guild.id)):
             await ctx.send("That is not a valid rule number, try running the command again.")
         else:
             await ctx.send("I have just removed that rule from your list of rules!")

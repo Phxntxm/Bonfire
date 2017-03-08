@@ -54,7 +54,7 @@ class StatsUpdate:
 
     async def on_member_join(self, member):
         guild = member.guild
-        server_settings = await config.get_content('server_settings', guild.id)
+        server_settings = await config.get_content('server_settings', str(guild.id))
 
         try:
             join_leave_on = server_settings['join_leave']
@@ -65,12 +65,12 @@ class StatsUpdate:
         except (IndexError, TypeError):
             return
 
-        channel = guild.get_channel(channel_id)
+        channel = guild.get_channel(int(channel_id))
         await channel.send("Welcome to the '{0.guild.name}' server {0.mention}!".format(member))
 
     async def on_member_remove(self, member):
         guild = member.guild
-        server_settings = await config.get_content('server_settings', guild.id)
+        server_settings = await config.get_content('server_settings', str(guild.id))
 
         try:
             join_leave_on = server_settings['join_leave']
@@ -81,7 +81,7 @@ class StatsUpdate:
         except (IndexError, TypeError):
             return
 
-        channel = guild.get_channel(channel_id)
+        channel = guild.get_channel(int(channel_id))
         await channel.send("{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
 
 

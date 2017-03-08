@@ -14,7 +14,7 @@ log = logging.getLogger()
 BASE_URL = 'https://ptvappapi.picarto.tv'
 
 # This is a public key for use, I don't care if this is seen
-key = '03e26294-b793-11e5-9a41-005056984bd4'
+api_key = '03e26294-b793-11e5-9a41-005056984bd4'
 
 
 async def online_users():
@@ -24,7 +24,7 @@ async def online_users():
         # In place of requesting for /channel and checking if that is online currently, for each channel
         # This method is in place to just return all online_users
         url = BASE_URL + '/online/all'
-        payload = {'key': key}
+        payload = {'key': api_key}
         return await utils.request(url, payload=payload)
     except:
         return {}
@@ -123,7 +123,7 @@ class Picarto:
         RESULT: Info about their picarto stream"""
         # If member is not given, base information on the author
         member = member or ctx.message.author
-        picarto_entry = await utils.get_content('picarto', member.id)
+        picarto_entry = await utils.get_content('picarto', str(member.id))
         if picarto_entry is None:
             await ctx.send("That user does not have a picarto url setup!")
             return
@@ -133,7 +133,7 @@ class Picarto:
         # Use regex to get the actual username so that we can make a request to the API
         stream = re.search("(?<=picarto.tv/)(.*)", member_url).group(1)
         url = BASE_URL + '/channel/{}'.format(stream)
-        payload = {'key': key}
+        payload = {'key': api_key}
 
         data = await utils.request(url, payload=payload)
 
@@ -176,19 +176,19 @@ class Picarto:
             url = "https://www.{}".format(url)
         channel = re.search("https://www.picarto.tv/(.*)", url).group(1)
         url = BASE_URL + '/channel/{}'.format(channel)
-        payload = {'key': key}
+        payload = {'key': api_key}
         data = await utils.request(url, payload=payload)
         if not data:
             await ctx.send("That Picarto user does not exist! What would be the point of adding a nonexistant Picarto "
                            "user? Silly")
             return
 
-        key = ctx.message.author.id
+        key = str(ctx.message.author.id)
         entry = {'picarto_url': url,
-                 'servers': [ctx.message.guild.id],
+                 'servers': [str(ctx.message.guild.id)],
                  'notifications_on': 1,
                  'live': 0,
-                 'member_id': ctx.message.author.id}
+                 'member_id': key}
         if await utils.add_content('picarto', entry):
             await ctx.send(
                 "I have just saved your Picarto URL {}, this guild will now be notified when you go live".format(
@@ -201,7 +201,7 @@ class Picarto:
     @utils.custom_perms(send_messages=True)
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
-        if await utils.remove_content('picarto', ctx.message.author.id):
+        if await utils.remove_content('picarto', str(ctx.message.author.id)):
             await ctx.send("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
         else:
             await ctx.send(
@@ -216,7 +216,8 @@ class Picarto:
 
         EXAMPLE: !picarto notify
         RESULT: This guild will now be notified of you going live"""
-        result = await utils.get_content('picarto', ctx.message.author.id)
+        key = str(ctx.message.author.id)
+        result = await utils.get_content('picarto', key)
         # Check if this user is saved at all
         if result is None:
             await ctx.send(
@@ -226,8 +227,7 @@ class Picarto:
         elif ctx.message.guild.id in result['servers']:
             await ctx.send("I am already set to notify in this guild...")
         else:
-            await utils.update_content('picarto', {'servers': r.row['servers'].append(ctx.message.guild.id)},
-                                       ctx.message.author.id)
+            await utils.update_content('picarto', {'servers': r.row['servers'].append(str(ctx.message.guild.id))}, key)
 
     @notify.command(name='on', aliases=['start,yes'], no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -236,7 +236,7 @@ class Picarto:
 
         EXAMPLE: !picarto notify on
         RESULT: Notifications are sent when you go live"""
-        await utils.update_content('picarto', {'notifications_on': 1}, ctx.message.author.id)
+        await utils.update_content('picarto', {'notifications_on': 1}, str(ctx.message.author.id))
         await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
             ctx.message.author.mention))
 
@@ -247,7 +247,7 @@ class Picarto:
 
         EXAMPLE: !picarto notify off
         RESULT: No more notifications sent when you go live"""
-        await utils.update_content('picarto', {'notifications_on': 0}, ctx.message.author.id)
+        await utils.update_content('picarto', {'notifications_on': 0}, str(ctx.message.author.id))
         await ctx.send(
             "I will not notify if you go live anymore {}, "
             "are you going to stream some lewd stuff you don't want people to see?~".format(

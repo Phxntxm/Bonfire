@@ -87,7 +87,7 @@ class Raffle:
 
         EXAMPLE: !raffles
         RESULT: A list of the raffles setup on this server"""
-        r_filter = {'server_id': ctx.message.guild.id}
+        r_filter = {'server_id': str(ctx.message.guild.id)}
         raffles = await utils.filter_content('raffles', r_filter)
         if raffles is None:
             await ctx.send("There are currently no raffles setup on this server!")
@@ -110,7 +110,7 @@ class Raffle:
         RESULT: You've entered the first raffle!"""
         # Lets let people use 1 - (length of raffles) and handle 0 base ourselves
         raffle_id -= 1
-        r_filter = {'server_id': ctx.message.guild.id}
+        r_filter = {'server_id': str(ctx.message.guild.id)}
         author = ctx.message.author
 
         raffles = await utils.filter_content('raffles', r_filter)
@@ -124,10 +124,10 @@ class Raffle:
         if raffle_count == 1:
             entrants = raffles[0]['entrants']
             # Lets make sure that the user hasn't already entered the raffle
-            if author.id in entrants:
+            if str(author.id) in entrants:
                 await ctx.send("You have already entered this raffle!")
                 return
-            entrants.append(author.id)
+            entrants.append(str(author.id))
 
             update = {'entrants': entrants}
             await utils.update_content('raffles', update, raffles[0]['id'])
@@ -137,10 +137,10 @@ class Raffle:
             entrants = raffles[raffle_id]['entrants']
 
             # Lets make sure that the user hasn't already entered the raffle
-            if author.id in entrants:
+            if str(author.id) in entrants:
                 await ctx.send("You have already entered this raffle!")
                 return
-            entrants.append(author.id)
+            entrants.append(str(author.id))
 
             # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
             update = {'entrants': entrants}
@@ -231,8 +231,8 @@ class Raffle:
         entry = {'title': title,
                  'expires': expires.to_datetime_string(),
                  'entrants': [],
-                 'author': author.id,
-                 'server_id': server.id}
+                 'author': str(author.id),
+                 'server_id': str(server.id)}
 
         # We don't want to pass a filter to this, because we can have multiple raffles per server
         await utils.add_content('raffles', entry)

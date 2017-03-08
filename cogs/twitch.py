@@ -114,7 +114,7 @@ class Twitch:
         if member is None:
             member = ctx.message.author
 
-        result = await utils.get_content('twitch', {'member_id': member.id})
+        result = await utils.get_content('twitch', {'member_id': str(member.id)})
         if result is None:
             await ctx.send("{} has not saved their twitch URL yet!".format(member.name))
             return
@@ -162,12 +162,12 @@ class Twitch:
                            "What would be the point of adding a nonexistant twitch user? Silly")
             return
 
-        key = ctx.message.author.id
+        key = str(ctx.message.author.id)
         entry = {'twitch_url': url,
-                 'servers': [ctx.message.guild.id],
+                 'servers': [str(ctx.message.guild.id)],
                  'notifications_on': 1,
                  'live': 0,
-                 'member_id': ctx.message.author.id}
+                 'member_id': key}
         update = {'twitch_url': url}
 
         # Check to see if this user has already saved a twitch URL
@@ -185,7 +185,7 @@ class Twitch:
         EXAMPLE: !twitch remove
         RESULT: I stop saving your twitch URL"""
         # Just try to remove it, if it doesn't exist, nothing is going to happen
-        await utils.remove_content('twitch', ctx.message.author.id)
+        await utils.remove_content('twitch', str(ctx.message.author.id))
         await ctx.send("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
     @twitch.group(no_pm=True, invoke_without_command=True)
@@ -196,7 +196,7 @@ class Twitch:
 
         EXAMPLE: !twitch notify
         RESULT: This server will now be notified when you go live"""
-        key = ctx.message.author.id
+        key = str(ctx.message.author.id)
         result = await utils.get_content('twitch', key)
         # Check if this user is saved at all
         if result is None:
@@ -204,10 +204,10 @@ class Twitch:
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
                     ctx.message.author.mention))
         # Then check if this server is already added as one to notify in
-        elif ctx.message.guild.id in result['servers']:
+        elif str(ctx.message.guild.id) in result['servers']:
             await ctx.send("I am already set to notify in this server...")
         else:
-            await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.guild.id)}, key)
+            await utils.update_content('twitch', {'servers': r.row['servers'].append(str(ctx.message.guild.id))}, key)
             await ctx.send("This server will now be notified if you go live")
 
     @notify.command(name='on', aliases=['start,yes'], no_pm=True)
@@ -217,7 +217,7 @@ class Twitch:
 
         EXAMPLE: !twitch notify on
         RESULT: Notifications will be sent when you go live"""
-        if await utils.update_content('twitch', {"notifications_on": 1}, ctx.message.author.id):
+        if await utils.update_content('twitch', {"notifications_on": 1}, str(ctx.message.author.id)):
             await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
         else:
@@ -230,7 +230,7 @@ class Twitch:
 
         EXAMPLE: !twitch notify off
         RESULT: Notifications will not be sent when you go live"""
-        if await utils.update_content('twitch', {"notifications_on": 1}, ctx.message.author.id):
+        if await utils.update_content('twitch', {"notifications_on": 1}, str(ctx.message.author.id)):
             await ctx.send(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(

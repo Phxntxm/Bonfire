@@ -259,7 +259,7 @@ class Interaction:
             await ctx.send("Why the heck are you booping me? Get away from me >:c")
             return
 
-        key = booper.id
+        key = str(booper.id)
         boops = await utils.get_content('boops', key)
         if boops is not None:
             boops = boops['boops']
@@ -269,7 +269,7 @@ class Interaction:
 
             await utils.update_content('boops', {'boops': boops}, key)
         else:
-            entry = {'member_id': booper.id,
+            entry = {'member_id': str(booper.id),
                      'boops': {str(boopee.id): 1}}
 
             await utils.add_content('boops', entry)
