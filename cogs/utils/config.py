@@ -198,7 +198,7 @@ async def get_content(table, key=None):
         if key:
             cursor = await r.table(table).get(key).run(conn)
         else:
-            cursor = await r.table(table).run()
+            cursor = await r.table(table).run(conn)
         if cursor is None:
             content = None
         else:
