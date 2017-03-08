@@ -160,7 +160,7 @@ class Mod:
         elif server_settings:
             await utils.update_content('server_settings', entry, key)
         else:
-            await utils.add_content('server_settings', entry, key)
+            await utils.add_content('server_settings', entry)
 
         await ctx.send("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
