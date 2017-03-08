@@ -155,7 +155,7 @@ class Deviantart:
         if content is None or content['subbed'] is None:
             await ctx.send("You are not subscribed to anyone at the moment!")
         elif username in content['subbed']:
-            content[0]['subbed'].remove(username)
+            content['subbed'].remove(username)
             await utils.update_content('deviantart', {'subbed': content[0]['subbed']}, key)
             await ctx.send("You have just unsubscribed from {}!".format(username))
         else:
