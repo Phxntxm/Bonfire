@@ -52,7 +52,7 @@ class Mod:
         # Lets only accept an int for this method, in order to ensure only an ID is provided
         # Due to that though, we need to ensure a string is passed as the member's ID
         try:
-            await discord.http.unban(member_id, ctx.guild.id)
+            await self.bot.http.unban(member_id, ctx.guild.id)
             await ctx.send("\N{OK HAND SIGN}")
         except discord.Forbidden:
             await ctx.send("But I can't, muh permissions >:c")
@@ -72,7 +72,7 @@ class Mod:
         # Lets first check if a user ID was provided, as that will be the easiest case to ban
         if member.isdigit():
             try:
-                await discord.http.ban(member, ctx.guild.id)
+                await self.bot.http.ban(member, ctx.guild.id)
                 await ctx.send("\N{OK HAND SIGN}")
             except discord.Forbidden:
                 await ctx.send("But I can't, muh permissions >:c")
