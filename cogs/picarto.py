@@ -42,8 +42,6 @@ def check_online(online_channels, channel):
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
-        self.headers = {"User-Agent": utils.user_agent}
-        self.session = aiohttp.ClientSession()
 
     async def check_channels(self):
         await self.bot.wait_until_ready()

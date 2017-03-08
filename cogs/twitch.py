@@ -22,8 +22,6 @@ class Twitch:
         self.bot = bot
         self.key = utils.twitch_key
         self.params = {'client_id': self.key}
-        self.headers = {"User-Agent": utils.user_agent,
-                        "Client-ID": self.key}
 
     async def channel_online(self, channel: str):
         # Check a specific channel's data, and get the response in text format
@@ -122,10 +120,9 @@ class Twitch:
         result = result[0]
         url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-        twitch_url = "https://api.twitch.tv/kraken/channels/{}?client_id={}".format(user, self.key)
-        with aiohttp.ClientSession() as s:
-            async with s.get(twitch_url) as response:
-                data = await response.json()
+        twitch_url = "https://api.twitch.tv/kraken/channels/{}".format(user)
+        payload = {'client_id': self.key}
+        data = await utils.request(twitch_url, payload=payload)
 
         fmt = "Username: {}".format(data['display_name'])
         fmt += "\nStatus: {}".format(data['status'])

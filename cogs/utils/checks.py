@@ -16,10 +16,10 @@ required_tables = {
     'motd': 'date',
     'overwatch': 'member_id',
     'picarto': 'member_id',
-    'server_settings': 'guild_id',
+    'server_settings': 'server_id',
     'raffles': 'id',
-    'strawpolls': 'guild_id',
-    'tags': 'guild_id',
+    'strawpolls': 'server_id',
+    'tags': 'server_id',
     'tictactoe': 'member_id',
     'twitch': 'member_id'
 }

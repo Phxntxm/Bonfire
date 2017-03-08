@@ -15,8 +15,6 @@ class Deviantart:
     def __init__(self, bot):
         self.base_url = "https://www.deviantart.com/api/v1/oauth2/gallery/all"
         self.bot = bot
-        self.headers = {"User-Agent": utils.user_agent}
-        self.session = aiohttp.ClientSession()
         self.token = None
         self.params = None
         bot.loop.create_task(self.token_task())
