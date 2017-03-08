@@ -81,8 +81,9 @@ def custom_perms(**perms):
             setattr(required_perm, perm, setting)
 
         try:
-            server_settings = config.cache.get('server_settings').values[str(ctx.message.guild.id)]
-            required_perm_value = server_settings['permissions'][ctx.command.qualified_name]
+            server_settings = config.cache.get('server_settings').values
+            required_perm_value = [x for x in server_settings if x['server_id'] == str(
+                ctx.message.guild.id)][0]['permissions'][ctx.command.qualified_name]
             required_perm = discord.Permissions(required_perm_value)
         except (TypeError, IndexError, KeyError):
             pass

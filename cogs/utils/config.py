@@ -119,7 +119,8 @@ def command_prefix(bot, message):
     # If the prefix does exist in the database and isn't in our cache; too bad, something has messed up
     # But it is not worth a query for every single message the bot detects, to fix
     try:
-        prefix = cache['server_settings'].values[str(message.guild.id)]['prefix']
+        prefixes = cache['server_settings'].values
+        prefix = [x for x in prefixes if x['prefix'] == str(message.guild.id)][0]['prefix']
         return prefix or default_prefix
     except (KeyError, TypeError, IndexError, AttributeError, KeyError):
         return default_prefix
