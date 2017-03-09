@@ -176,7 +176,7 @@ class Pages:
         self.paginating = False
 
     def react_check(self, reaction, user):
-        if user is None or user.id != self.author.id or reaction.message != self.message:
+        if user is None or user.id != self.author.id:
             return False
 
         for (emoji, func) in self.reaction_emojis:
@@ -191,7 +191,7 @@ class Pages:
 
         while self.paginating:
             try:
-                react = await self.bot.wait_for('reaction_add', check=self.react_check, timeout=120.0)
+                react, user = await self.bot.wait_for('reaction_add', check=self.react_check, timeout=120.0)
             except asyncio.TimeoutError:
                 react = None
             if react is None:
@@ -204,7 +204,7 @@ class Pages:
                     break
 
             try:
-                await self.message.remove_reaction(react.reaction.emoji, react.user)
+                await self.message.remove_reaction(react.emoji, user)
             except:
                 pass  # can't remove it so don't bother doing so
 
