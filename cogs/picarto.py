@@ -154,7 +154,7 @@ class Picarto:
         # Print them if they exist, otherwise don't try to include them
         social_links = data.get('social_urls')
 
-        for i, result in data['social_links'].items():
+        for i, result in data['social_urls'].items():
             embed.add_field(name=i, value=result)
 
         await ctx.send(embed=embed)
