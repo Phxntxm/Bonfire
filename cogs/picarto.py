@@ -147,12 +147,8 @@ class Picarto:
             embed.set_thumbnail(url=data['avatar_url'])
 
         for i, result in data.items():
-            if i in things_to_print:
-                result = str(result)
-                if not result:
-                    result = '\u200B'
-
-                embed.add_field(name=i, value=result)
+            if i in things_to_print and str(result):
+                embed.add_field(name=i, value=str(result))
 
         # Social URL's can be given if a user wants them to show
         # Print them if they exist, otherwise don't try to include them
