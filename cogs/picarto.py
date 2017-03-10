@@ -134,6 +134,9 @@ class Picarto:
         payload = {'key': api_key}
 
         data = await utils.request(url, payload=payload)
+        if data is None:
+            await ctx.send("I couldn't connect to Picarto!")
+            return
 
         # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
         things_to_print = ['channel', 'commissions_enabled', 'is_nsfw', 'program', 'tablet', 'followers',
@@ -173,9 +176,10 @@ class Picarto:
         else:
             url = "https://www.{}".format(url)
         channel = re.search("https://www.picarto.tv/(.*)", url).group(1)
-        url = BASE_URL + '/channel/{}'.format(channel)
+        api_url = BASE_URL + '/channel/{}'.format(channel)
         payload = {'key': api_key}
-        data = await utils.request(url, payload=payload)
+        
+        data = await utils.request(api_url, payload=payload)
         if not data:
             await ctx.send("That Picarto user does not exist! What would be the point of adding a nonexistant Picarto "
                            "user? Silly")
