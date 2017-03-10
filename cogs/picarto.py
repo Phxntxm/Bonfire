@@ -148,6 +148,10 @@ class Picarto:
 
         for i, result in data.items():
             if i in things_to_print:
+                result = str(result)
+                if not result:
+                    result = '\u200B'
+
                 embed.add_field(name=i, value=result)
 
         # Social URL's can be given if a user wants them to show
