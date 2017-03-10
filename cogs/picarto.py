@@ -148,6 +148,7 @@ class Picarto:
 
         for i, result in data.items():
             if i in things_to_print and str(result):
+                i = i.title().replace('_', ' ')
                 embed.add_field(name=i, value=str(result))
 
         # Social URL's can be given if a user wants them to show
