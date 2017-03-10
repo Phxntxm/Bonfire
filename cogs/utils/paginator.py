@@ -66,7 +66,10 @@ class Pages:
 
         if not first:
             self.embed.description = '\n'.join(p)
-            await self.message.edit(embed=self.embed)
+            try:
+                await self.message.edit(embed=self.embed)
+            except discord.NotFound:
+                self.paginating = False
             return
 
         # verify we can actually use the pagination session
