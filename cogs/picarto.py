@@ -141,18 +141,23 @@ class Picarto:
         # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
         things_to_print = ['channel', 'commissions_enabled', 'is_nsfw', 'program', 'tablet', 'followers',
                            'content_type']
-        # Using title and replace to provide a nice way to print the data
-        fmt = "\n".join(
-            "{}: {}".format(i.title().replace("_", " "), result) for i, result in data.items() if i in things_to_print)
+
+        embed = discord.Embed(title='{}\'s Picarto'.format(data['channel']), url=url)
+        if data['avatar_url']:
+            embed.set_thumbnail(url=data['avatar_url'])
+
+        for i, result in data.items():
+            if i in things_to_print:
+                embed.add_field(name=i, value=result)
 
         # Social URL's can be given if a user wants them to show
         # Print them if they exist, otherwise don't try to include them
         social_links = data.get('social_urls')
-        if social_links:
-            fmt2 = "\n".join(
-                "\t{}: {}".format(i.title().replace("_", " "), result) for i, result in social_links.items())
-            fmt = "{}\nSocial Links:\n{}".format(fmt, fmt2)
-        await ctx.send("Picarto stats for {}: ```\n{}```".format(member.display_name, fmt))
+
+        for i, result in data['social_links'].items():
+            embed.add_field(name=i, value=result)
+
+        await ctx.send(embed=embed)
 
     @picarto.command(name='add', no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -178,7 +183,7 @@ class Picarto:
         channel = re.search("https://www.picarto.tv/(.*)", url).group(1)
         api_url = BASE_URL + '/channel/{}'.format(channel)
         payload = {'key': api_key}
-        
+
         data = await utils.request(api_url, payload=payload)
         if not data:
             await ctx.send("That Picarto user does not exist! What would be the point of adding a nonexistant Picarto "
