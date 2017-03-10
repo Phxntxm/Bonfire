@@ -198,7 +198,8 @@ class Core:
         if bj_games:
             embed.add_field(name='Total blackjack games running', value=bj_games)
 
-        embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
+        if hasattr(bot, 'uptime'):
+            embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
         embed.set_footer(text=self.bot.description)
 
         await ctx.send(embed=embed)
