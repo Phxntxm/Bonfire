@@ -119,6 +119,8 @@ class Picarto:
 
         EXAMPLE: !picarto @otherPerson
         RESULT: Info about their picarto stream"""
+        await ctx.message.channel.trigger_typing()
+
         # If member is not given, base information on the author
         member = member or ctx.message.author
         picarto_entry = await utils.get_content('picarto', str(member.id))
@@ -167,6 +169,8 @@ class Picarto:
 
         EXAMPLE: !picarto add MyUsername
         RESULT: Your picarto stream is saved, and notifications should go to this guild"""
+        await ctx.message.channel.trigger_typing()
+        
         # This uses a lookbehind to check if picarto.tv exists in the url given
         # If it does, it matches picarto.tv/user and sets the url as that
         # Then (in the else) add https://www. to that

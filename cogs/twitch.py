@@ -109,6 +109,8 @@ class Twitch:
 
         EXAMPLE: !twitch @OtherPerson
         RESULT: Information about their twitch URL"""
+        await ctx.message.channel.trigger_typing()
+        
         if member is None:
             member = ctx.message.author
 
@@ -143,6 +145,8 @@ class Twitch:
 
         EXAMPLE: !twitch add MyTwitchName
         RESULT: Saves your twitch URL; notifications will be sent to this server when you go live"""
+        await ctx.message.channel.trigger_typing()
+
         # This uses a lookbehind to check if twitch.tv exists in the url given
         # If it does, it matches twitch.tv/user and sets the url as that
         # Then (in the else) add https://www. to that
