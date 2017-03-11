@@ -49,8 +49,8 @@ class Osu:
             return
 
         for result in data:
-            member = int(data['member_id'])
-            user = await self.get_user_from_api(data['osu_username'])
+            member = int(result['member_id'])
+            user = await self.get_user_from_api(result['osu_username'])
             if user:
                 self.osu_users[member] = user
 
@@ -83,6 +83,8 @@ class Osu:
         e.add_field(name='Playcount', value=user.playcount, inline=False)
         e.add_field(name='Ranked Score', value=user.ranked_score, inline=False)
         e.add_field(name='Total Score', value=user.total_score, inline=False)
+
+        await ctx.send(embed=e)
 
     @osu.command(name='add', aliases=['create', 'connect'])
     @utils.custom_perms(send_messages=True)
