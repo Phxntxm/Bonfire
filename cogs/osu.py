@@ -108,6 +108,76 @@ class Osu:
 
         await ctx.send("I have just saved your Osu user {}".format(author.display_name))
 
+    @osu.command(name='score', aliases=['scores'])
+    @utils.custom_perms(send_messages=True)
+    async def osu_scores(self, ctx, *data):
+        """Find the top x osu scores for a provided member
+        Note: You can only get the top 50 songs for a user
+
+        EXAMPLE: !osu scores @Person 5
+        RESULT: The top 5 maps for the user @Person"""
+
+        # Set the defaults before we go through our passed data to figure out what we want
+        limit = 5
+        member = ctx.message.author
+        # Only loop through the first 2....we care about nothing after that
+        for piece in data[:2]:
+            # First lets try to convert to an int, for limit
+            try:
+                limit = int(piece)
+                # Since Osu's API returns no information about the beatmap on scores
+                # We also need to call it to get the beatmap...in order to not get rate limited
+                # Lets limit this to 50
+                if limit > 50:
+                    limit = 50
+                elif limit < 1:
+                    limit = 5
+            except:
+                converter = commands.converter.MemberConverter()
+                converter.prepare(ctx, piece)
+                try:
+                    member = converter.convert()
+                except commands.converter.BadArgument:
+                    pass
+
+        user = self.osu_users.get(member.id)
+        if user is None:
+            await ctx.send("I don't have that user's Osu account saved!")
+            return
+
+        scores = await self.api.get_user_best(user.username, limit=limit)
+        entries = []
+        for i in scores:
+            m = await self.api.get_beatmaps(beatmap_id=i.beatmap_id)
+            m = m[0]
+            entry = {
+                'title': 'Top {} Osu scores for {}'.format(limit, member.display_name),
+                'fields': [
+                    {'name': 'Artist', 'value': m.artist},
+                    {'name': 'Title', 'value': m.title},
+                    {'name': 'Creator', 'value': m.creator},
+                    {'name': 'CS (Circle Size)', 'value': m.diff_size},
+                    {'name': 'AR (Approach Rate)', 'value': m.diff_approach},
+                    {'name': 'HP (Health Drain)', 'value': m.diff_drain},
+                    {'name': 'OD (Overall Difficulty)', 'value': m.diff_overall},
+                    {'name': 'Length', 'value': m.total_length},
+                    {'name': 'Score', 'value': i.score},
+                    {'name': 'Max Combo', 'value': i.maxcombo},
+                    {'name': 'Hits', 'value': "{}/{}/{}/{} (300/100/50/misses)".format(i.count300, i.count100, i.count50, i.countmiss), "inline": False},
+                    {'name': 'Perfect', 'value': "Yes" if i.perfect else "No"},
+                    {'name': 'Rank', 'value': i.rank},
+                    {'name': 'PP', 'value': i.pp},
+                    {'name': 'Mods', 'value': str(i.enabled_mods)},
+                    {'name': 'Date', 'value': str(i.date)}
+                ]
+            }
+
+            entries.append(entry)
+        try:
+            pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
+            await pages.paginate()
+        except utils.CannotPaginate as e:
+            await ctx.send(str(e))
 
 def setup(bot):
     bot.add_cog(Osu(bot))
