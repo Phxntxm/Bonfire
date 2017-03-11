@@ -70,7 +70,7 @@ class Osu:
             return
 
         e = discord.Embed(title='Osu profile for {}'.format(user.username))
-        e.set_thumbnail(url='https://a.ppy.sh/{}'.format(user_id))
+        e.set_thumbnail(url='https://a.ppy.sh/{}'.format(user.user_id))
         e.add_field(name='Rank', value=user.pp_rank, inline=False)
         e.add_field(name='Level', value=user.level, inline=False)
         e.add_field(name='Performance Points', value=user.pp_raw, inline=False)
