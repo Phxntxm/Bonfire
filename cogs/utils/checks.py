@@ -19,7 +19,7 @@ required_tables = {
     'server_settings': 'server_id',
     'raffles': 'id',
     'strawpolls': 'server_id',
-    'osu', 'member_id',
+    'osu': 'member_id',
     'tags': 'server_id',
     'tictactoe': 'member_id',
     'twitch': 'member_id'

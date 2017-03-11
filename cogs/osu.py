@@ -14,7 +14,7 @@ class Osu:
     def __init__(self, bot):
         self.bot = bot
         self.api = OsuApi(utils.osu_key, connector=AHConnector())
-        self.bot.loop.create_task(get_users())
+        self.bot.loop.create_task(self.get_users())
         self.osu_users = {}
 
     async def get_user(self, member, username):
@@ -56,7 +56,7 @@ class Osu:
 
     @commands.group(invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
-    async def osu(self, ctx, member=None):
+    async def osu(self, ctx, member: discord.Member=None):
         """Provides basic information about a specific user
 
         EXAMPLE: !osu @Person
@@ -84,7 +84,7 @@ class Osu:
         e.add_field(name='Ranked Score', value=user.ranked_score, inline=False)
         e.add_field(name='Total Score', value=user.total_score, inline=False)
 
-    @osu.command(aliases=['create', 'connect'])
+    @osu.command(name='add', aliases=['create', 'connect'])
     @utils.custom_perms(send_messages=True)
     async def osu_add(self, ctx, *, username):
         """Links an osu account to your discord account
@@ -95,7 +95,7 @@ class Osu:
         user = await self.get_user(author, username)
         if user is None:
             await ctx.send("I couldn't find an osu user that matches {}".format(username))
-            else
+            return
 
         entry = {
             'member_id': str(author.id),
