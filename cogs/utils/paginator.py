@@ -212,3 +212,64 @@ class Pages:
                 pass  # can't remove it so don't bother doing so
 
             await self.match()
+
+class DetailedPages(Pages):
+    """A class built on the normal Paginator, except with the idea that you want one 'thing' per page
+    This allows the ability to have more data on a page, more fields, etc. and page through each 'thing'"""
+
+    def __init__(self, *args, **kwargs):
+        kwargs['per_page'] = 1
+        super().__init__(*args, **kwargs)
+
+    def get_page(self, page):
+        return self.entries[page - 1]
+
+    async def show_page(self, page, *, first=False):
+        self.current_page = page
+        entries = self.get_page(page)
+
+        self.embed.set_footer(text='Page %s/%s (%s entries)' % (page, self.maximum_pages, len(self.entries)))
+        self.embed.clear_fields()
+        self.embed.description = ""
+
+        for key, value in entries.items():
+            if key == 'fields':
+                for f in value:
+                    self.embed.add_field(name=f.get('name'), value=f.get('value'), inline=f.get('inline', True))
+            else:
+                setattr(self.embed, key, value)
+
+        if not self.paginating:
+            return await self.message.channel.send(embed=self.embed)
+
+        if not first:
+            try:
+                await self.message.edit(embed=self.embed)
+            except discord.NotFound:
+                self.paginating = False
+            return
+
+        # verify we can actually use the pagination session
+        if not self.permissions.add_reactions:
+            raise CannotPaginate('Bot does not have add reactions permission.')
+
+        if not self.permissions.read_message_history:
+            raise CannotPaginate('Bot does not have Read Message History permission.')
+
+        if self.embed.description:
+            self.embed.description += '\nConfused? React with \N{INFORMATION SOURCE} for more info.'
+        else:
+            self.embed.description = '\nConfused? React with \N{INFORMATION SOURCE} for more info.'
+
+        self.message = await self.message.channel.send(embed=self.embed)
+        for (reaction, _) in self.reaction_emojis:
+            if self.maximum_pages == 2 and reaction in ('\u23ed', '\u23ee'):
+                # no |<< or >>| buttons if we only have two pages
+                # we can't forbid it if someone ends up using it but remove
+                # it from the default set
+                continue
+            try:
+                await self.message.add_reaction(reaction)
+            except discord.NotFound:
+                # If the message isn't found, we don't care about clearing anything
+                return
