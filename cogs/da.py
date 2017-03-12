@@ -140,7 +140,7 @@ class Deviantart:
         else:
             await ctx.send("You are already subscribed to that user!")
 
-    @da.command(pass_context=True, name='unsub', aliases=['delete', 'remove', 'unsubscribe'])
+    @da.command(name='unsub', aliases=['delete', 'remove', 'unsubscribe'])
     @utils.custom_perms(send_messages=True)
     async def da_unsub(self, ctx, *, username):
         """This command can be used to unsub from the specified user
@@ -158,6 +158,23 @@ class Deviantart:
             await ctx.send("You have just unsubscribed from {}!".format(username))
         else:
             await ctx.send("You are not subscribed to that user!")
+
+    @da.command(name='list')
+    @utils.custom_perms(send_messages=True)
+    async def da_list(self, ctx):
+        """Lists the artists you are subscribed to on DA
+
+        EXAMPLE: !da list
+        RESULT: Artist 1, Artist2, Artist 3"""
+
+        key = str(ctx.message.author.id)
+        content = await utils.get_content('deviantart', key)
+
+        if content is None or content['subbed'] is None:
+            await ctx.send("You are not subscribed to anyone at the moment!")
+        else:
+            fmt = ", ".join(content['subbed'])
+            await ctx.send("You are subscribed to:\n\n{}".format(fmt))
 
 
 def setup(bot):
