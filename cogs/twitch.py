@@ -53,7 +53,7 @@ class Twitch:
                     # If they're currently online, but saved as not then we'll send our notification
                     if online and data['live'] == 0:
                         for s_id in data['servers']:
-                            server = self.bot.get_guild(s_id)
+                            server = self.bot.get_guild(int(s_id))
                             if server is None:
                                 continue
                             member = server.get_member(m_id)
@@ -69,7 +69,7 @@ class Twitch:
                             self.bot.loop.create_task(utils.update_content('twitch', {'live': 1}, str(m_id)))
                     elif not online and data['live'] == 1:
                         for s_id in data['servers']:
-                            server = self.bot.get_guild(s_id)
+                            server = self.bot.get_guild(int(s_id))
                             if server is None:
                                 continue
                             member = server.get_member(m_id)
