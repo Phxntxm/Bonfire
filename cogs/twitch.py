@@ -49,12 +49,14 @@ class Twitch:
                 online_users = {data['member_id']: data for data in twitch if data['live']}
                 offline_users = {data['member_id']: data for data in twitch if not data['live']}
                 for m_id, result in offline_users.items():
+                    m_id = int(m_id)
                     # Get their url and their user based on that url
                     url = result['twitch_url']
                     user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
                     # Check if they are online right now
                     if await self.channel_online(user):
                         for server_id in result['servers']:
+                            server_id = int(server_id)
                             # Get the channel to send the message to, based on the saved alert's channel
                             server = self.bot.get_server(server_id)
                             if server is None:
@@ -74,12 +76,14 @@ class Twitch:
                             await channel.send(fmt)
                         await utils.update_content('twitch', {'live': 1}, {'member_id': m_id})
                 for m_id, result in online_users.items():
+                    m_id = int(m_id)
                     # Get their url and their user based on that url
                     url = result['twitch_url']
                     user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
                     # Check if they are online right now
                     if not await self.channel_online(user):
                         for server_id in result['servers']:
+                            server_id = int(server_id)
                             # Get the channel to send the message to, based on the saved alert's channel
                             server = self.bot.get_server(server_id)
                             if server is None:
@@ -110,7 +114,7 @@ class Twitch:
         EXAMPLE: !twitch @OtherPerson
         RESULT: Information about their twitch URL"""
         await ctx.message.channel.trigger_typing()
-        
+
         if member is None:
             member = ctx.message.author
 

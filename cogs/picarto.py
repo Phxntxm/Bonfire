@@ -56,12 +56,14 @@ class Picarto:
                 old_offline_users = {data['member_id']: data for data in picarto if not data['live']}
 
                 for m_id, result in old_offline_users.items():
+                    m_id = int(m_id)
                     # Get their url and their user based on that url
                     url = result['picarto_url']
                     user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
                     # Check if they are online right now
                     if check_online(online_users_list, user):
                         for guild_id in result['servers']:
+                            guild_id = int(guild_id)
                             # Get the channel to send the message to, based on the saved alert's channel
                             guild = self.bot.get_guild(guild_id)
                             if guild is None:
@@ -81,12 +83,14 @@ class Picarto:
                             await channel.send(fmt)
                         await utils.update_content('picarto', {'live': 1}, {'member_id': m_id})
                 for m_id, result in old_online_users.items():
+                    m_id = int(m_id)
                     # Get their url and their user based on that url
                     url = result['picarto_url']
                     user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
                     # Check if they are online right now
                     if not check_online(online_users_list, user):
                         for guild_id in result['servers']:
+                            guild_id = int(guild_id)
                             # Get the channel to send the message to, based on the saved alert's channel
                             guild = self.bot.get_guild(guild_id)
                             if guild is None:
@@ -170,7 +174,7 @@ class Picarto:
         EXAMPLE: !picarto add MyUsername
         RESULT: Your picarto stream is saved, and notifications should go to this guild"""
         await ctx.message.channel.trigger_typing()
-        
+
         # This uses a lookbehind to check if picarto.tv exists in the url given
         # If it does, it matches picarto.tv/user and sets the url as that
         # Then (in the else) add https://www. to that
