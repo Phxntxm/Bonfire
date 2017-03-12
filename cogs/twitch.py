@@ -43,7 +43,7 @@ class Twitch:
         await self.bot.wait_until_ready()
         # Loop through as long as the bot is connected
         try:
-            while not self.bot.is_closed:
+            while not self.bot.is_closed():
                 twitch = await utils.filter_content('twitch', {'notifications_on': 1})
                 for data in twitch:
                     m_id = int(data['member_id'])
@@ -51,10 +51,10 @@ class Twitch:
                     # Check if they are online
                     online = await self.channel_online(url)
                     # If they're currently online, but saved as not then we'll send our notification
-                    if online and not data['live']:
+                    if online and data['live'] == 0:
                         for s_id in data['servers']:
                             s_id = int(s_id)
-                            server = self.bot.get_server(s_id)
+                            server = self.bot.get_guild(s_id)
                             if server is None:
                                 continue
                             member = server.get_member(m_id)
@@ -65,10 +65,10 @@ class Twitch:
                             channel = server.get_channel(channel_id)
                             await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['twitch_url']))
                             self.bot.loop.create_task(utils.update_content('twitch', {'live': 1}, str(m_id)))
-                    elif not online and data['live']:
+                    elif not online and data['live'] == 1:
                         for s_id in data['servers']:
                             s_id = int(s_id)
-                            server = self.bot.get_server(s_id)
+                            server = self.bot.get_guild(s_id)
                             if server is None:
                                 continue
                             member = server.get_member(m_id)
