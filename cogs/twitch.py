@@ -61,7 +61,10 @@ class Twitch:
                             if member is None:
                                 continue
                             server_settings = await utils.get_content('server_settings', s_id)
-                            channel_id = int(server_settings.get('notification_channel', s_id))
+                            if server_settings is not None:
+                                channel_id = int(server_settings.get('notification_channel', s_id))
+                            else:
+                                channel_id = s_id
                             channel = server.get_channel(channel_id)
                             await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['twitch_url']))
                             self.bot.loop.create_task(utils.update_content('twitch', {'live': 1}, str(m_id)))
@@ -75,7 +78,10 @@ class Twitch:
                             if member is None:
                                 continue
                             server_settings = await utils.get_content('server_settings', s_id)
-                            channel_id = int(server_settings.get('notification_channel', s_id))
+                            if server_settings is not None:
+                                channel_id = int(server_settings.get('notification_channel', s_id))
+                            else:
+                                channel_id = s_id
                             channel = server.get_channel(channel_id)
                             await channel.send("{} has just gone offline! View their stream next time at <{}>".format(member.display_name, data['twitch_url']))
                             self.bot.loop.create_task(utils.update_content('twitch', {'live': 0}, str(m_id)))
