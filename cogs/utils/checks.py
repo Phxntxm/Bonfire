@@ -12,7 +12,6 @@ required_tables = {
     'battle_records': 'member_id',
     'boops': 'member_id',
     'command_usage': 'command',
-    'deviantart': 'member_id',
     'motd': 'date',
     'overwatch': 'member_id',
     'picarto': 'member_id',
