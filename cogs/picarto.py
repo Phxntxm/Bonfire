@@ -44,6 +44,7 @@ class Picarto:
         # This is a loop that runs every 30 seconds, checking if anyone has gone online
         try:
             while not self.bot.is_closed():
+                await self.get_online_users()
                 picarto = await utils.filter_content('picarto', {'notifications_on': 1})
                 for data in picarto:
                     m_id = int(data['member_id'])
@@ -135,7 +136,7 @@ class Picarto:
         social_links = data.get('social_urls')
 
         for i, result in data['social_urls'].items():
-            embed.add_field(name=i, value=result)
+            embed.add_field(name=i.title(), value=result)
 
         await ctx.send(embed=embed)
 
