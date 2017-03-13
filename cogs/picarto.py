@@ -32,10 +32,10 @@ class Picarto:
         self.online_channels = await utils.request(url, payload=payload)
 
     def channel_online(self, channel):
-        # online_channels is the dictionary of all users online currently
-        # And channel is the name we are checking against that
+        # Channel is the name we are checking against that
         # This creates a list of all users that match this channel name (should only ever be 1)
         # And returns True as long as it is more than 0
+        channel = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
         matches = [stream for stream in self.online_channels if stream['channel_name'].lower() == channel.lower()]
         return len(matches) > 0
 
@@ -50,7 +50,7 @@ class Picarto:
                     m_id = int(data['member_id'])
                     url = data['picarto_url']
                     # Check if they are online
-                    online = await self.channel_online(url)
+                    online = self.channel_online(url)
                     # If they're currently online, but saved as not then we'll send our notification
                     if online and data['live'] == 0:
                         for s_id in data['servers']:
