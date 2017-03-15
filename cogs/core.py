@@ -198,7 +198,8 @@ class Core:
         if bj_games:
             embed.add_field(name='Total blackjack games running', value=bj_games)
 
-        embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
+        if hasattr(self.bot, 'uptime'):
+            embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
         embed.set_footer(text=self.bot.description)
 
         await ctx.send(embed=embed)
@@ -210,7 +211,10 @@ class Core:
 
         EXAMPLE: !uptime
         RESULT: A BAJILLION DAYS"""
-        await ctx.send("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
+        if hasattr(self.bot, 'uptime'):
+            await ctx.send("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
+        else:
+            await ctx.send("I've just restarted and not quite ready yet...gimme time I'm not a morning pony :c")
 
     @commands.command(aliases=['invite'])
     @utils.custom_perms(send_messages=True)

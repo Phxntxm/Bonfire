@@ -17,95 +17,73 @@ BASE_URL = 'https://ptvappapi.picarto.tv'
 api_key = '03e26294-b793-11e5-9a41-005056984bd4'
 
 
-async def online_users():
-    try:
-        # Someone from picarto contacted me and told me their database queries are odd
-        # It is more efficent on their end to make a query for all online users, and base checks off that
-        # In place of requesting for /channel and checking if that is online currently, for each channel
-        # This method is in place to just return all online_users
-        url = BASE_URL + '/online/all'
-        payload = {'key': api_key}
-        return await utils.request(url, payload=payload)
-    except:
-        return {}
 
 
-def check_online(online_channels, channel):
-    # online_channels is the dictionary of all users online currently
-    # And channel is the name we are checking against that
-    # This creates a list of all users that match this channel name (should only ever be 1)
-    # And returns True as long as it is more than 0
-    matches = [stream for stream in online_channels if stream['channel_name'].lower() == channel.lower()]
-    return len(matches) > 0
 
 
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
 
+    async def get_online_users(self):
+        # This method is in place to just return all online users so we can compare against it
+        url = BASE_URL + '/online/all'
+        payload = {'key': api_key}
+        self.online_channels = await utils.request(url, payload=payload)
+
+    def channel_online(self, channel):
+        # Channel is the name we are checking against that
+        # This creates a list of all users that match this channel name (should only ever be 1)
+        # And returns True as long as it is more than 0
+        channel = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
+        matches = [stream for stream in self.online_channels if stream['channel_name'].lower() == channel.lower()]
+        return len(matches) > 0
+
     async def check_channels(self):
         await self.bot.wait_until_ready()
         # This is a loop that runs every 30 seconds, checking if anyone has gone online
         try:
-            while not self.bot.is_closed:
-                r_filter = {'notifications_on': 1}
-                picarto = await utils.filter_content('picarto', r_filter)
-                # Get all online users before looping, so that only one request is needed
-                online_users_list = await online_users()
-                old_online_users = {data['member_id']: data for data in picarto if data['live']}
-                old_offline_users = {data['member_id']: data for data in picarto if not data['live']}
-
-                for m_id, result in old_offline_users.items():
-                    # Get their url and their user based on that url
-                    url = result['picarto_url']
-                    user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                    # Check if they are online right now
-                    if check_online(online_users_list, user):
-                        for guild_id in result['servers']:
-                            # Get the channel to send the message to, based on the saved alert's channel
-                            guild = self.bot.get_guild(guild_id)
-                            if guild is None:
+            while not self.bot.is_closed():
+                await self.get_online_users()
+                picarto = await utils.filter_content('picarto', {'notifications_on': 1})
+                for data in picarto:
+                    m_id = int(data['member_id'])
+                    url = data['picarto_url']
+                    # Check if they are online
+                    online = self.channel_online(url)
+                    # If they're currently online, but saved as not then we'll send our notification
+                    if online and data['live'] == 0:
+                        for s_id in data['servers']:
+                            server = self.bot.get_guild(int(s_id))
+                            if server is None:
                                 continue
-                            guild_alerts = await utils.get_content('server_alerts', {'server_id': guild_id})
-                            try:
-                                channel_id = guild_alerts['channel_id']
-                            except (IndexError, TypeError):
-                                channel_id = guild_id
-                            channel = self.bot.get_channel(channel_id)
-                            # Get the member that has just gone live
-                            member = guild.get_member(m_id)
+                            member = server.get_member(m_id)
                             if member is None:
                                 continue
-
-                            fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
-                            await channel.send(fmt)
-                        await utils.update_content('picarto', {'live': 1}, {'member_id': m_id})
-                for m_id, result in old_online_users.items():
-                    # Get their url and their user based on that url
-                    url = result['picarto_url']
-                    user = re.search("(?<=picarto.tv/)(.*)", url).group(1)
-                    # Check if they are online right now
-                    if not check_online(online_users_list, user):
-                        for guild_id in result['servers']:
-                            # Get the channel to send the message to, based on the saved alert's channel
-                            guild = self.bot.get_guild(guild_id)
-                            if guild is None:
+                            server_settings = await utils.get_content('server_settings', s_id)
+                            if server_settings is not None:
+                                channel_id = int(server_settings.get('notification_channel', s_id))
+                            else:
+                                channel_id = int(s_id)
+                            channel = server.get_channel(channel_id)
+                            await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['picarto_url']))
+                            self.bot.loop.create_task(utils.update_content('picarto', {'live': 1}, str(m_id)))
+                    elif not online and data['live'] == 1:
+                        for s_id in data['servers']:
+                            server = self.bot.get_guild(int(s_id))
+                            if server is None:
                                 continue
-                            guild_alerts = await utils.get_content('server_alerts', {'server_id': guild_id})
-                            try:
-                                channel_id = guild_alerts['channel_id']
-                            except (IndexError, TypeError):
-                                channel_id = guild_id
-                            channel = self.bot.get_channel(channel_id)
-                            # Get the member that has just gone live
-                            member = guild.get_member(m_id)
+                            member = server.get_member(m_id)
                             if member is None:
                                 continue
-
-                            fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
-                                member.display_name, url)
-                            await channel.send(fmt)
-                        await utils.update_content('picarto', {'live': 0}, {'member_id': m_id})
+                            server_settings = await utils.get_content('server_settings', s_id)
+                            if server_settings is not None:
+                                channel_id = int(server_settings.get('notification_channel', s_id))
+                            else:
+                                channel_id = int(s_id)
+                            channel = server.get_channel(channel_id)
+                            await channel.send("{} has just gone offline! View their stream next time at <{}>".format(member.display_name, data['picarto_url']))
+                            self.bot.loop.create_task(utils.update_content('picarto', {'live': 0}, str(m_id)))
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
@@ -119,6 +97,8 @@ class Picarto:
 
         EXAMPLE: !picarto @otherPerson
         RESULT: Info about their picarto stream"""
+        await ctx.message.channel.trigger_typing()
+
         # If member is not given, base information on the author
         member = member or ctx.message.author
         picarto_entry = await utils.get_content('picarto', str(member.id))
@@ -134,22 +114,31 @@ class Picarto:
         payload = {'key': api_key}
 
         data = await utils.request(url, payload=payload)
+        if data is None:
+            await ctx.send("I couldn't connect to Picarto!")
+            return
 
         # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
         things_to_print = ['channel', 'commissions_enabled', 'is_nsfw', 'program', 'tablet', 'followers',
                            'content_type']
-        # Using title and replace to provide a nice way to print the data
-        fmt = "\n".join(
-            "{}: {}".format(i.title().replace("_", " "), result) for i, result in data.items() if i in things_to_print)
+
+        embed = discord.Embed(title='{}\'s Picarto'.format(data['channel']), url=url)
+        if data['avatar_url']:
+            embed.set_thumbnail(url=data['avatar_url'])
+
+        for i, result in data.items():
+            if i in things_to_print and str(result):
+                i = i.title().replace('_', ' ')
+                embed.add_field(name=i, value=str(result))
 
         # Social URL's can be given if a user wants them to show
         # Print them if they exist, otherwise don't try to include them
         social_links = data.get('social_urls')
-        if social_links:
-            fmt2 = "\n".join(
-                "\t{}: {}".format(i.title().replace("_", " "), result) for i, result in social_links.items())
-            fmt = "{}\nSocial Links:\n{}".format(fmt, fmt2)
-        await ctx.send("Picarto stats for {}: ```\n{}```".format(member.display_name, fmt))
+
+        for i, result in data['social_urls'].items():
+            embed.add_field(name=i.title(), value=result)
+
+        await ctx.send(embed=embed)
 
     @picarto.command(name='add', no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -158,13 +147,15 @@ class Picarto:
 
         EXAMPLE: !picarto add MyUsername
         RESULT: Your picarto stream is saved, and notifications should go to this guild"""
+        await ctx.message.channel.trigger_typing()
+
         # This uses a lookbehind to check if picarto.tv exists in the url given
         # If it does, it matches picarto.tv/user and sets the url as that
         # Then (in the else) add https://www. to that
         # Otherwise if it doesn't match, we'll hit an AttributeError due to .group(0)
         # This means that the url was just given as a user (or something complete invalid)
         # So set URL as https://www.picarto.tv/[url]
-        # Even if this was invalid such as https://www.picarto.tv/twitch.tv/user
+        # Even if this was invalid such as https://www.picarto.tv/picarto.tv/user
         # For example, our next check handles that
         try:
             url = re.search("((?<=://)?picarto.tv/)+(.*)", url).group(0)
@@ -173,9 +164,10 @@ class Picarto:
         else:
             url = "https://www.{}".format(url)
         channel = re.search("https://www.picarto.tv/(.*)", url).group(1)
-        url = BASE_URL + '/channel/{}'.format(channel)
+        api_url = BASE_URL + '/channel/{}'.format(channel)
         payload = {'key': api_key}
-        data = await utils.request(url, payload=payload)
+
+        data = await utils.request(api_url, payload=payload)
         if not data:
             await ctx.send("That Picarto user does not exist! What would be the point of adding a nonexistant Picarto "
                            "user? Silly")

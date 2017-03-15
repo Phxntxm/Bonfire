@@ -59,7 +59,7 @@ class StatsUpdate:
         try:
             join_leave_on = server_settings['join_leave']
             if join_leave_on:
-                channel_id = server_settings['notification_channel'] or member.guild.id
+                channel_id = server_settings.get('notification_channel') or member.guild.id
             else:
                 return
         except (IndexError, TypeError, KeyError):
@@ -75,7 +75,7 @@ class StatsUpdate:
         try:
             join_leave_on = server_settings['join_leave']
             if join_leave_on:
-                channel_id = server_settings['notification_channel'] or member.guild.id
+                channel_id = server_settings.get('notification_channel') or member.guild.id
             else:
                 return
         except (IndexError, TypeError, KeyError):

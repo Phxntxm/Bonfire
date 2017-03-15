@@ -23,8 +23,9 @@ class Twitch:
         self.key = utils.twitch_key
         self.params = {'client_id': self.key}
 
-    async def channel_online(self, channel: str):
+    async def channel_online(self, twitch_url: str):
         # Check a specific channel's data, and get the response in text format
+        channel = re.search("(?<=twitch.tv/)(.*)", twitch_url).group(1)
         url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
 
         response = await utils.request(url, payload=self.params)
@@ -42,60 +43,46 @@ class Twitch:
         await self.bot.wait_until_ready()
         # Loop through as long as the bot is connected
         try:
-            while not self.bot.is_closed:
+            while not self.bot.is_closed():
                 twitch = await utils.filter_content('twitch', {'notifications_on': 1})
-                # Online/offline is based on whether they are set to such, in the utils file
-                # This means they were detected as online/offline before and we check for a change
-                online_users = {data['member_id']: data for data in twitch if data['live']}
-                offline_users = {data['member_id']: data for data in twitch if not data['live']}
-                for m_id, result in offline_users.items():
-                    # Get their url and their user based on that url
-                    url = result['twitch_url']
-                    user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-                    # Check if they are online right now
-                    if await self.channel_online(user):
-                        for server_id in result['servers']:
-                            # Get the channel to send the message to, based on the saved alert's channel
-                            server = self.bot.get_server(server_id)
+                for data in twitch:
+                    m_id = int(data['member_id'])
+                    url = data['twitch_url']
+                    # Check if they are online
+                    online = await self.channel_online(url)
+                    # If they're currently online, but saved as not then we'll send our notification
+                    if online and data['live'] == 0:
+                        for s_id in data['servers']:
+                            server = self.bot.get_guild(int(s_id))
                             if server is None:
                                 continue
-                            server_settings = await utils.get_content('server_settings', server_id)
-                            try:
-                                channel_id = server_settings['notification_channel']
-                            except (IndexError, TypeError):
-                                channel_id = server_id
-                            channel = self.bot.get_channel(channel_id)
-                            # Get the member that has just gone live
                             member = server.get_member(m_id)
                             if member is None:
                                 continue
-
-                            fmt = "{} has just gone live! View their stream at {}".format(member.display_name, url)
-                            await channel.send(fmt)
-                        await utils.update_content('twitch', {'live': 1}, {'member_id': m_id})
-                for m_id, result in online_users.items():
-                    # Get their url and their user based on that url
-                    url = result['twitch_url']
-                    user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
-                    # Check if they are online right now
-                    if not await self.channel_online(user):
-                        for server_id in result['servers']:
-                            # Get the channel to send the message to, based on the saved alert's channel
-                            server = self.bot.get_server(server_id)
+                            server_settings = await utils.get_content('server_settings', s_id)
+                            if server_settings is not None:
+                                channel_id = int(server_settings.get('notification_channel', s_id))
+                            else:
+                                channel_id = int(s_id)
+                            channel = server.get_channel(channel_id)
+                            await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['twitch_url']))
+                            self.bot.loop.create_task(utils.update_content('twitch', {'live': 1}, str(m_id)))
+                    elif not online and data['live'] == 1:
+                        for s_id in data['servers']:
+                            server = self.bot.get_guild(int(s_id))
                             if server is None:
                                 continue
-                            server_settings = await utils.get_content('server_settings', server_id)
-                            try:
-                                channel_id = server_settings['notification_channel']
-                            except (IndexError, TypeError):
-                                channel_id = server_id
-                            channel = self.bot.get_channel(channel_id)
-                            # Get the member that has just gone live
                             member = server.get_member(m_id)
-                            fmt = "{} has just gone offline! Catch them next time they stream at {}".format(
-                                member.display_name, url)
-                            await channel.send(fmt)
-                        await utils.update_content('twitch', {'live': 0}, {'member_id': m_id})
+                            if member is None:
+                                continue
+                            server_settings = await utils.get_content('server_settings', s_id)
+                            if server_settings is not None:
+                                channel_id = int(server_settings.get('notification_channel', s_id))
+                            else:
+                                channel_id = int(s_id)
+                            channel = server.get_channel(channel_id)
+                            await channel.send("{} has just gone offline! View their stream next time at <{}>".format(member.display_name, data['twitch_url']))
+                            self.bot.loop.create_task(utils.update_content('twitch', {'live': 0}, str(m_id)))
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
@@ -109,6 +96,8 @@ class Twitch:
 
         EXAMPLE: !twitch @OtherPerson
         RESULT: Information about their twitch URL"""
+        await ctx.message.channel.trigger_typing()
+
         if member is None:
             member = ctx.message.author
 
@@ -143,6 +132,8 @@ class Twitch:
 
         EXAMPLE: !twitch add MyTwitchName
         RESULT: Saves your twitch URL; notifications will be sent to this server when you go live"""
+        await ctx.message.channel.trigger_typing()
+
         # This uses a lookbehind to check if twitch.tv exists in the url given
         # If it does, it matches twitch.tv/user and sets the url as that
         # Then (in the else) add https://www. to that
