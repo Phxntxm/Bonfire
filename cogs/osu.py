@@ -64,7 +64,7 @@ class Osu:
         if member is None:
             member = ctx.message.author
 
-        user = self.osu_users[member.id]
+        user = self.osu_users.get(member.id)
         if user is None:
             await ctx.send("I do not have {}'s Osu user saved!".format(member.display_name))
             return
