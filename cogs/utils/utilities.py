@@ -51,7 +51,7 @@ async def channel_is_nsfw(channel):
 
     try:
         return channel in server_settings['nsfw_channels']
-    except (TypeError, IndexError):
+    except (TypeError, IndexError, KeyError):
         return False
 
 
