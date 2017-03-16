@@ -40,7 +40,7 @@ class Strawpoll:
         RESULT: A list of all polls setup on this server"""
         # Strawpolls cannot be 'deleted' so to handle whether a poll is running or not on a server
         # Just save the poll, which can then be removed when it should not be "running" anymore
-        r_filter = {'server_id': ctx.message.guild.id}
+        r_filter = {'server_id': str(ctx.message.guild.id)}
         polls = await config.get_content('strawpolls', r_filter)
         # Check if there are any polls setup on this server
         try:
