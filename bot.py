@@ -30,6 +30,7 @@ async def on_ready():
         bot.uptime = pendulum.utcnow()
     await utils.db_check()
 
+
 @bot.event
 async def on_message(message):
     if message.author.bot:
