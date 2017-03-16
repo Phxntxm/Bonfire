@@ -179,7 +179,7 @@ class Pages:
         self.paginating = False
 
     def react_check(self, reaction, user):
-        if user is None or user.id != self.author.id:
+        if user is None or user.id != self.author.id or reaction.message != self.message:
             return False
 
         for (emoji, func) in self.reaction_emojis:
