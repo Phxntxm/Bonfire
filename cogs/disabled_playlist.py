@@ -16,7 +16,7 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
 
-    async def on_voice_state_update(self, before, after):
+    async def on_voice_state_update(self, member, before, after):
         pass
 
     @commands.command(no_pm=True, enabled=False)
