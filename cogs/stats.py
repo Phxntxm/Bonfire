@@ -94,7 +94,7 @@ class Stats:
                     ("Your Usage", member_usage),
                     ("This Server's Usage", server_usage)]
             banner = await utils.create_banner(ctx.message.author, "Command Stats", data)
-            await self.bot.upload(file=banner)
+            await self.bot.upload(banner)
         except (FileNotFoundError, discord.Forbidden):
             fmt = "The command {} has been used a total of {} times\n" \
                   "{} times on this server\n" \

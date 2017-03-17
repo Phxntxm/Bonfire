@@ -134,8 +134,8 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json')
 async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
-    r_filter = lambda row: (row['member_id'] == winner.id) | (row['member_id'] == loser.id)
-    matches = await config.get_content(key, r_filter)
+    r_filter = lambda row: (row['member_id'] == str(winner.id)) | (row['member_id'] == str(loser.id))
+    matches = await config.filter_content(key, r_filter)
 
     winner_stats = {}
     loser_stats = {}
@@ -183,9 +183,9 @@ async def update_records(key, winner, loser):
     winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
     loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
 
-    if not await config.update_content(key, winner_stats, {'member_id': winner.id}):
+    if not await config.update_content(key, winner_stats, winner.id):
         winner_stats['member_id'] = winner.id
-        await config.add_content(key, winner_stats, {'member_id': winner.id})
-    if not await config.update_content(key, loser_stats, {'member_id': loser.id}):
+        await config.add_content(key, winner_stats)
+    if not await config.update_content(key, loser_stats, loser.id):
         loser_stats['member_id'] = loser.id
-        await config.add_content(key, loser_stats, {'member_id': loser.id})
+        await config.add_content(key, loser_stats)

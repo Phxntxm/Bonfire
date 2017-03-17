@@ -34,7 +34,7 @@ class Tags:
          EXAMPLE: !tag butts
          RESULT: Whatever you setup for the butts tag!!"""
         r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
-        tags = await config.get_content('tags', r_filter)
+        tags = await config.filter_content('tags', r_filter)
         if tags is None:
             await self.bot.say('That tag does not exist!')
             return
