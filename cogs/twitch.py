@@ -89,7 +89,7 @@ class Twitch:
             fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 
-    @commands.group(no_pm=True, invoke_without_command=True)
+    @commands.group(no_pm=True, invoke_without_command=True, pass_context=True)
     @utils.custom_perms(send_messages=True)
     async def twitch(self, ctx, *, member: discord.Member = None):
         """Use this command to check the twitch info of a user
@@ -125,7 +125,7 @@ class Twitch:
 
         await self.bot.say(embed=embed)
 
-    @twitch.command(name='add', no_pm=True)
+    @twitch.command(name='add', no_pm=True, pass_context=True)
     @utils.custom_perms(send_messages=True)
     async def add_twitch_url(self, ctx, url: str):
         """Saves your user's twitch URL
@@ -171,7 +171,7 @@ class Twitch:
             await utils.update_content('twitch', update, key)
         await self.bot.say("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
-    @twitch.command(name='remove', aliases=['delete'], no_pm=True)
+    @twitch.command(name='remove', aliases=['delete'], no_pm=True, pass_context=True)
     @utils.custom_perms(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL
@@ -182,7 +182,7 @@ class Twitch:
         await utils.remove_content('twitch', ctx.message.author.id)
         await self.bot.say("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
-    @twitch.group(no_pm=True, invoke_without_command=True)
+    @twitch.group(no_pm=True, invoke_without_command=True, pass_context=True)
     @utils.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to modify notification settings for your twitch user
@@ -204,7 +204,7 @@ class Twitch:
             await utils.update_content('twitch', {'servers': r.row['servers'].append(ctx.message.server.id)}, key)
             await self.bot.say("This server will now be notified if you go live")
 
-    @notify.command(name='on', aliases=['start,yes'], no_pm=True)
+    @notify.command(name='on', aliases=['start,yes'], no_pm=True, pass_context=True)
     @utils.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on
@@ -217,7 +217,7 @@ class Twitch:
         else:
             await self.bot.say("I can't notify if you go live if I don't know your twitch URL yet!")
 
-    @notify.command(name='off', aliases=['stop,no'], no_pm=True)
+    @notify.command(name='off', aliases=['stop,no'], no_pm=True, pass_context=True)
     @utils.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
         """Turns twitch notifications off
