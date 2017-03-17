@@ -27,9 +27,8 @@ class Links:
         url = "https://www.google.com/search"
 
         # Turn safe filter on or off, based on whether or not this is a nsfw channel
-        r_filter = {'channel_id': ctx.message.channel.id}
-        nsfw_channels = await utils.get_content("nsfw_channels", r_filter)
-        safe = 'off' if nsfw_channels else 'on'
+        nsfw = await utils.channel_is_nsfw(ctx.message.channel)
+        safe = 'off' if nsfw else 'on'
 
         params = {'q': query,
                   'safe': safe,
@@ -181,12 +180,11 @@ class Links:
             query = ' '.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
             params = {'q': query}
 
-            r_filter = {'channel_id': ctx.message.channel.id}
-            nsfw_channels = await utils.get_content("nsfw_channels", r_filter)
+            nsfw = await utils.channel_is_nsfw(ctx.message.channel)
             # If this is a nsfw channel, we just need to tack on 'explicit' to the terms
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
-            if nsfw_channels is not None:
+            if nsfw:
                 params['q'] += ", (explicit OR suggestive)"
                 params['filter_id'] = 95938
             else:
@@ -256,12 +254,11 @@ class Links:
         # Due to this, send a message saying we're looking up the information first
         await self.bot.say("Looking up an image with those tags....")
 
-        r_filter = {'channel_id': ctx.message.channel.id}
-        nsfw_channels = await utils.get_content("nsfw_channels", r_filter)
+        nsfw = await utils.channel_is_nsfw(ctx.message.channel)
 
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
-        params['tags'] += " rating:explicit" if nsfw_channels else " rating:safe"
+        params['tags'] += " rating:explicit" if nsfw else " rating:safe"
 
         data = await utils.request(url, payload=params)
 

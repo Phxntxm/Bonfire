@@ -20,6 +20,8 @@ class StatsUpdate:
         self.bot.loop.create_task(self.session.close())
 
     async def update(self):
+        # Currently disabled
+        return
         server_count = 0
         data = await config.get_content('bot_data')
 
@@ -48,6 +50,7 @@ class StatsUpdate:
             log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
 
     async def on_server_join(self, server):
+        return
         r_filter = {'shard_id': config.shard_id}
         server_count = len(self.bot.servers)
         member_count = len(set(self.bot.get_all_members()))
@@ -58,6 +61,7 @@ class StatsUpdate:
         self.bot.loop.create_task(self.update())
 
     async def on_server_leave(self, server):
+        return
         r_filter = {'shard_id': config.shard_id}
         server_count = len(self.bot.servers)
         member_count = len(set(self.bot.get_all_members()))
@@ -68,6 +72,7 @@ class StatsUpdate:
         self.bot.loop.create_task(self.update())
 
     async def on_ready(self):
+        return
         r_filter = {'shard_id': config.shard_id}
         server_count = len(self.bot.servers)
         member_count = len(set(self.bot.get_all_members()))
@@ -79,16 +84,15 @@ class StatsUpdate:
 
     async def on_member_join(self, member):
         server = member.server
-        r_filter = {'server_id': server.id}
-        notifications = await config.get_content('user_notifications', r_filter)
+        server_settings = await config.get_content('server_settings', server.id)
 
         try:
-            channel_id = notifications[0]['channel_id']
-        except TypeError:
-            return
-
-        # By default, notifications should be off unless explicitly turned on
-        if not channel_id:
+            join_leave_on = server_settings['join_leave']
+            if join_leave_on:
+                channel_id = server_settings.get('notification_channel') or member.server.id
+            else:
+                return
+        except (IndexError, TypeError, KeyError):
             return
 
         channel = server.get_channel(channel_id)
@@ -96,22 +100,19 @@ class StatsUpdate:
 
     async def on_member_remove(self, member):
         server = member.server
-        r_filter = {'server_id': server.id}
-        notifications = await config.get_content('user_notifications', r_filter)
+        server_settings = await config.get_content('server_settings', server.id)
 
         try:
-            channel_id = notifications[0]['channel_id']
-        except TypeError:
-            return
-
-        # By default, notifications should be off unless explicitly turned on
-        if not channel_id:
+            join_leave_on = server_settings['join_leave']
+            if join_leave_on:
+                channel_id = server_settings.get('notification_channel') or member.server.id
+            else:
+                return
+        except (IndexError, TypeError, KeyError):
             return
 
         channel = server.get_channel(channel_id)
-        await self.bot.send_message(channel,
-                                    "{0} has left the server, I hope it wasn't because of something I said :c".format(
-                                        member.display_name))
+        await self.bot.send_message(channel, "{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
 
 
 def setup(bot):

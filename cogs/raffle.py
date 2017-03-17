@@ -1,7 +1,7 @@
 from discord.ext import commands
-from .utils import config
-from .utils import checks
+from . import utils
 
+import discord
 import random
 import pendulum
 import re
@@ -27,7 +27,7 @@ class Raffle:
     async def check_raffles(self):
         # This is used to periodically check the current raffles, and see if they have ended yet
         # If the raffle has ended, we'll pick a winner from the entrants
-        raffles = await config.get_content('raffles')
+        raffles = await utils.get_content('raffles')
 
         if raffles is None:
             return
@@ -73,22 +73,25 @@ class Raffle:
 
             # No matter which one of these matches were met, the raffle has ended and we want to remove it
             # We don't have to wait for it however, so create a task for it
-            r_filter = {'id': raffle_id}
-            self.bot.loop.create_task(config.remove_content('raffles', r_filter))
+            self.bot.loop.create_task(utils.remove_content('raffles', raffle_id ))
+
+            server_settings = await utils.get_content('server_settings', str(server.id))
+            channel_id = server_settings.get('notification_channel', server.id)
+            channel = self.bot.get_channel(channel_id)
             try:
-                await self.bot.send_message(server, fmt)
+                await channel.send(fmt)
             except discord.Forbidden:
                 pass
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def raffles(self, ctx):
         """Used to print the current running raffles on the server
 
         EXAMPLE: !raffles
         RESULT: A list of the raffles setup on this server"""
         r_filter = {'server_id': ctx.message.server.id}
-        raffles = await config.get_content('raffles', r_filter)
+        raffles = await utils.filter_content('raffles', r_filter)
         if raffles is None:
             await self.bot.say("There are currently no raffles setup on this server!")
             return
@@ -101,7 +104,7 @@ class Raffle:
         await self.bot.say(fmt)
 
     @commands.group(pass_context=True, no_pm=True, invoke_without_command=True)
-    @checks.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     async def raffle(self, ctx, raffle_id: int = 0):
         """Used to enter a raffle running on this server
         If there is more than one raffle running, provide an ID of the raffle you want to enter
@@ -113,7 +116,7 @@ class Raffle:
         r_filter = {'server_id': ctx.message.server.id}
         author = ctx.message.author
 
-        raffles = await config.get_content('raffles', r_filter)
+        raffles = await utils.filter_content('raffles', r_filter)
         if raffles is None:
             await self.bot.say("There are currently no raffles setup on this server!")
             return
@@ -130,9 +133,8 @@ class Raffle:
             entrants.append(author.id)
 
             # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
-            r_filter = {'id': raffles[0]['id']}
             update = {'entrants': entrants}
-            await config.update_content('raffles', update, r_filter)
+            await utils.update_content('raffles', update, raffles[0]['id'])
             await self.bot.say("{} you have just entered the raffle!".format(author.mention))
         # Otherwise, make sure the author gave a valid raffle_id
         elif raffle_id in range(raffle_count - 1):
@@ -144,10 +146,8 @@ class Raffle:
                 return
             entrants.append(author.id)
 
-            # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
-            r_filter = {'id': raffles[raffle_id]['id']}
             update = {'entrants': entrants}
-            await config.update_content('raffles', update, r_filter)
+            await utils.update_content('raffles', update, raffles[raffle_id]['id'])
             await self.bot.say("{} you have just entered the raffle!".format(author.mention))
         else:
             fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! " \
@@ -156,7 +156,7 @@ class Raffle:
             await self.bot.say(fmt)
 
     @raffle.command(pass_context=True, no_pm=True, name='create', aliases=['start', 'begin', 'add'])
-    @checks.custom_perms(kick_members=True)
+    @utils.custom_perms(kick_members=True)
     async def raffle_create(self, ctx):
         """This is used in order to create a new server raffle
 
@@ -231,7 +231,7 @@ class Raffle:
                  'server_id': server.id}
 
         # We don't want to pass a filter to this, because we can have multiple raffles per server
-        await config.add_content('raffles', entry)
+        await utils.add_content('raffles', entry)
         await self.bot.say("I have just saved your new raffle!")
 
 

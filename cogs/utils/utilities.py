@@ -5,6 +5,7 @@ import inspect
 from . import config
 from PIL import Image
 
+
 def convert_to_jpeg(pfile):
     # Open the file given
     img = Image.open(pfile)
@@ -15,6 +16,7 @@ def convert_to_jpeg(pfile):
     # In order to use the file, we need to seek back to the 0th position
     new_file.seek(0)
     return new_file
+
 
 def get_all_commands(bot):
     """Returns a list of all command names for the bot"""
@@ -31,6 +33,7 @@ def get_all_commands(bot):
 
     return all_commands
 
+
 def get_subcommands(command):
     yield command.qualified_name
     try:
@@ -39,6 +42,19 @@ def get_subcommands(command):
             yield from get_subcommands(command.commands[cmd_name])
     except AttributeError:
         pass
+
+
+async def channel_is_nsfw(channel):
+    server = channel.server.id
+    channel = channel.id
+
+    server_settings = await config.get_content('server_settings', server)
+
+    try:
+        return channel in server_settings['nsfw_channels']
+    except (TypeError, IndexError, KeyError):
+        return False
+
 
 def find_command(bot, command):
     """Finds a command (be it parent or sub command) based on string given"""
@@ -64,6 +80,7 @@ def find_command(bot, command):
 
     return cmd
 
+
 async def download_image(url):
     """Returns a file-like object based on the URL provided"""
     headers = {'User-Agent': config.user_agent}
@@ -75,6 +92,7 @@ async def download_image(url):
     # Then wrap it in a BytesIO object, to be used like an actual file
     image = BytesIO(bts)
     return image
+
 
 async def request(url, *, headers=None, payload=None, method='GET', attr='json'):
     # Make sure our User Agent is what's set, and ensure it's sent even if no headers are passed
@@ -111,6 +129,7 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json')
         # If an error was hit other than the one we want to catch, try again
         except:
             continue
+
 
 async def update_records(key, winner, loser):
     # We're using the Harkness scale to rate

@@ -50,12 +50,10 @@ async def process_command(ctx):
     server = ctx.message.server
     command = ctx.command
 
-    r_filter = {'command': command.qualified_name}
-    command_usage = await utils.get_content('command_usage', r_filter)
+    command_usage = await utils.get_content('command_usage', key=command.qualified_name)
     if command_usage is None:
         command_usage = {'command': command.qualified_name}
-    else:
-        command_usage = command_usage[0]
+
     # Add one to the total usage for this command, basing it off 0 to start with (obviously)
     total_usage = command_usage.get('total_usage', 0) + 1
     command_usage['total_usage'] = total_usage
@@ -67,15 +65,15 @@ async def process_command(ctx):
     command_usage['member_usage'] = total_member_usage
 
     # Add one to the server's usage for this command
-    if ctx.message.server is not None:
+    if ctx.message.guild is not None:
         total_server_usage = command_usage.get('server_usage', {})
         server_usage = total_server_usage.get(server.id, 0) + 1
         total_server_usage[server.id] = server_usage
         command_usage['server_usage'] = total_server_usage
 
     # Save all the changes
-    if not await utils.update_content('command_usage', command_usage, r_filter):
-        await utils.add_content('command_usage', command_usage, r_filter)
+    if not await utils.update_content('command_usage', command_usage, command.qualified_name):
+        await utils.add_content('command_usage', command_usage)
 
 
 @bot.event

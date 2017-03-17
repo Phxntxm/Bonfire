@@ -17,7 +17,7 @@ class Tags:
 
         EXAMPLE: !tags
         RESULT: All tags setup on this server"""
-        tags = await config.get_content('tags', {'server_id': ctx.message.server.id})
+        tags = await config.get_content('tags', ctx.message.server.id)
         # Simple generator that adds a tag to the list to print, if the tag is for this server
         try:
             fmt = "\n".join("{}".format(tag['tag']) for tag in tags)
@@ -72,13 +72,10 @@ class Tags:
         entry = {'server_id': ctx.message.server.id, 'tag': tag, 'result': tag_result}
         r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
         # Try to create new entry first, if that fails (it already exists) then we update it
-        if await config.add_content('tags', entry, r_filter):
-            await self.bot.say(
-                "I have just added the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
-        else:
-            await config.update_content('tags', entry, r_filter)
-            await self.bot.say(
-                "I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
+        if not await config.update_content('tags', entry, r_filter):
+            await config.add_content('tags', entry)
+        await self.bot.say(
+            "I have just updated the tag `{0}`! You can call this tag by entering !tag {0}".format(tag))
 
     @tag.command(name='delete', aliases=['remove', 'stop'], pass_context=True, no_pm=True)
     @checks.custom_perms(kick_members=True)
@@ -88,12 +85,14 @@ class Tags:
 
         EXAMPLE: !tag delete stupid_tag
         RESULT: Deletes that stupid tag"""
-        r_filter = lambda row: (row['server_id'] == ctx.message.server.id) & (row['tag'] == tag)
-        if await config.remove_content('tags', r_filter):
-            await self.bot.say('I have just removed the tag `{}`'.format(tag))
+        await self.bot.say("Temporarily disabled")
+        # TODO: Fix tags, this will inherently fix this method
+        """r_filter = lambda row: (row['server_id'] == ctx.message.guild.id) & (row['tag'] == tag)
+        if await utils.remove_content('tags', r_filter):
+            await ctx.send('I have just removed the tag `{}`'.format(tag))
         else:
-            await self.bot.say(
-                "The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))
+            await ctx.send(
+                "The tag {} does not exist! You can't remove something if it doesn't exist...".format(tag))"""
 
 
 def setup(bot):

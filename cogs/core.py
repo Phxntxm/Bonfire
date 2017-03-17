@@ -132,10 +132,9 @@ class Core:
                 await self.bot.say(fmt)
         else:
             try:
-                r_filter = pendulum.parse(date)
-                motd = await utils.get_content('motd', r_filter)
-                date = motd[0]['date']
-                motd = motd[0]['motd']
+                motd = await utils.get_content('motd', str(pendulum.parse(date).date()))
+                date = motd['date']
+                motd = motd['motd']
                 fmt = "Message of the day for {}:\n\n{}".format(date, motd)
                 await self.bot.say(fmt)
             # This one will be hit if we return None for that day
@@ -185,7 +184,7 @@ class Core:
         cal = calendar.TextCalendar().formatmonth(year, month)
         await self.bot.say("```\n{}```".format(cal))
 
-    @commands.command()
+    @commands.command(enabled=False)
     @utils.custom_perms(send_messages=True)
     async def info(self):
         """This command can be used to print out some of my information"""

@@ -74,16 +74,13 @@ class Stats:
 
         EXAMPLE: !command stats play
         RESULT: The realization that this is the only reason people use me ;-;"""
-        cmd = self.find_command(command)
+        cmd = self.bot.get_command(command)
         if cmd is None:
             await self.bot.say("`{}` is not a valid command".format(command))
             return
 
-        r_filter = {'command': cmd.qualified_name}
-        command_stats = await utils.get_content('command_usage', r_filter)
-        try:
-            command_stats = command_stats[0]
-        except TypeError:
+        command_stats = await utils.get_content('command_usage', cmd.qualified_name)
+        if command_stats is None:
             await self.bot.say("That command has never been used! You know I worked hard on that! :c")
             return
 
@@ -97,7 +94,7 @@ class Stats:
                     ("Your Usage", member_usage),
                     ("This Server's Usage", server_usage)]
             banner = await utils.create_banner(ctx.message.author, "Command Stats", data)
-            await self.bot.upload(banner)
+            await self.bot.upload(file=banner)
         except (FileNotFoundError, discord.Forbidden):
             fmt = "The command {} has been used a total of {} times\n" \
                   "{} times on this server\n" \
@@ -158,14 +155,13 @@ class Stats:
 
         EXAMPLE: !mostboops
         RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
-        r_filter = {'member_id': ctx.message.author.id}
-        boops = await utils.get_content('boops', r_filter)
+        boops = await utils.get_content('boops', ctx.message.author.id)
         if boops is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
 
         # Just to make this easier, just pay attention to the boops data, now that we have the right entry
-        boops = boops[0]['boops']
+        boops = boops['boops']
 
         # First get a list of the ID's of all members in this server, for use in list comprehension
         server_member_ids = [member.id for member in ctx.message.server.members]
@@ -189,14 +185,13 @@ class Stats:
 
         EXAMPLE: !listboops
         RESULT: The list of your booped members!"""
-        r_filter = {'member_id': ctx.message.author.id}
-        boops = await utils.get_content('boops', r_filter)
+        boops = await utils.get_content('boops', ctx.message.author.id)
         if boops is None:
             await self.bot.say("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
 
         # Just to make this easier, just pay attention to the boops data, now that we have the right entry
-        boops = boops[0]['boops']
+        boops = boops['boops']
 
         # Same concept as the mostboops method
         server_member_ids = [member.id for member in ctx.message.server.members]
