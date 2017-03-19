@@ -115,9 +115,9 @@ async def update_records(key, winner, loser):
     loser_stats = {}
     try:
         for stat in matches:
-            if stat.get('member_id') == winner.id:
+            if stat.get('member_id') == str(winner.id):
                 winner_stats = stat
-            elif stat.get('member_id') == loser.id:
+            elif stat.get('member_id') == str(loser.id):
                 loser_stats = stat
     except TypeError:
         pass
