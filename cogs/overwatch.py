@@ -51,6 +51,10 @@ class Overwatch:
             # If no hero was provided, we just want the base stats for a player
             url = BASE_URL + "{}/stats".format(bt)
             data = await utils.request(url)
+            if data is None:
+                await ctx.send("I couldn't connect to overwatch at the moment!")
+                return
+
             region = [x for x in data.keys() if data[x] is not None][0]
             stats = data[region]['stats']['quickplay']
 
@@ -61,6 +65,9 @@ class Overwatch:
             hero = hero.lower().replace('-', '')
             url = BASE_URL + "{}/heroes".format(bt)
             data = await utils.request(url)
+            if data is None:
+                await ctx.send("I couldn't connect to overwatch at the moment!")
+                return
 
             region = [x for x in data.keys() if data[x] is not None][0]
             stats = data[region]['heroes']['stats']['quickplay'].get(hero)
