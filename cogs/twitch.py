@@ -65,7 +65,10 @@ class Twitch:
                             else:
                                 channel_id = int(s_id)
                             channel = server.get_channel(channel_id)
-                            await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['twitch_url']))
+                            try:
+                                await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['twitch_url']))
+                            except discord.Forbidden:
+                                pass
                             self.bot.loop.create_task(utils.update_content('twitch', {'live': 1}, str(m_id)))
                     elif not online and data['live'] == 1:
                         for s_id in data['servers']:
@@ -81,7 +84,10 @@ class Twitch:
                             else:
                                 channel_id = int(s_id)
                             channel = server.get_channel(channel_id)
-                            await channel.send("{} has just gone offline! View their stream next time at <{}>".format(member.display_name, data['twitch_url']))
+                            try:
+                                await channel.send("{} has just gone offline! View their stream next time at <{}>".format(member.display_name, data['twitch_url']))
+                            except discord.Forbidden:
+                                pass
                             self.bot.loop.create_task(utils.update_content('twitch', {'live': 0}, str(m_id)))
                 await asyncio.sleep(30)
         except Exception as e:
