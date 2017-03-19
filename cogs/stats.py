@@ -56,6 +56,8 @@ class Stats:
 
         EXAMPLE: !command stats play
         RESULT: The realization that this is the only reason people use me ;-;"""
+        await ctx.message.channel.trigger_typing()
+
         cmd = self.bot.get_command(command)
         if cmd is None:
             await ctx.send("`{}` is not a valid command".format(command))
@@ -94,6 +96,8 @@ class Stats:
 
         EXAMPLE: !command leaderboard me
         RESULT: The realization of how little of a life you have"""
+        await ctx.message.channel.trigger_typing()
+
         if re.search('(author|me)', option):
             author = ctx.message.author
             # First lets get all the command usage
@@ -171,6 +175,8 @@ class Stats:
 
         EXAMPLE: !listboops
         RESULT: The list of your booped members!"""
+        await ctx.message.channel.trigger_typing()
+
         boops = await utils.get_content('boops', str(ctx.message.author.id))
         if boops is None:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
@@ -204,6 +210,8 @@ class Stats:
 
         EXAMPLE: !leaderboard
         RESULT: A leaderboard of this server's battle records"""
+        await ctx.message.channel.trigger_typing()
+
         # Create a list of the ID's of all members in this server, for comparison to the records saved
         server_member_ids = [member.id for member in ctx.message.guild.members]
         battles = await utils.get_content('battle_records')
@@ -235,6 +243,8 @@ class Stats:
 
         EXAMPLE: !stats @OtherPerson
         RESULT: How good they are at winning a completely luck based game"""
+        await ctx.message.channel.trigger_typing()
+
         member = member or ctx.message.author
 
         # For this one, we don't want to pass a filter, as we do need all battle records
