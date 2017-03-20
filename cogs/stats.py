@@ -164,7 +164,8 @@ class Stats:
         # Since this is sorted, we just need to get the following information on the first user in the list
         most_id, most_boops = sorted_boops[0]
 
-        member = discord.utils.find(lambda m: str(m.id) == most_id, self.bot.get_all_members())
+        member = ctx.message.guild.get_member(int(most_id))
+
         await ctx.send("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
             ctx.message.author.mention, member.display_name, most_boops))
 
