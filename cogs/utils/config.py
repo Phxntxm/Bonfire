@@ -130,13 +130,15 @@ async def add_content(table, content):
     # For our purposes however, we do not want this
     try:
         result = await r.table(table).insert(content).run(conn)
-        await conn.close()
     except r.ReqlOpFailedError:
         # This means the table does not exist
         await r.table_create(table).run(conn)
         await r.table(table).insert(content).run(conn)
-        await conn.close()
         result = {}
+
+    await conn.close()
+    if table == 'prefixes' or table == 'server_settings':
+        loop.create_task(cache[table].update())
     return result.get('inserted', 0) > 0
 
 
@@ -148,6 +150,7 @@ async def remove_content(table, key):
     except r.ReqlOpFailedError:
         result = {}
         pass
+
     await conn.close()
     if table == 'prefixes' or table == 'server_settings':
         loop.create_task(cache[table].update())
@@ -164,8 +167,8 @@ async def update_content(table, content, key):
         # This is why we're accepting a variable and using it, whatever it may be, as the query
         result = await r.table(table).get(key).update(content).run(conn)
     except r.ReqlOpFailedError:
-        await conn.close()
         result = {}
+
     await conn.close()
     if table == 'prefixes' or table == 'server_settings':
         loop.create_task(cache[table].update())
@@ -179,8 +182,8 @@ async def replace_content(table, content, key):
     try:
         result = await r.table(table).get(key).replace(content).run(conn)
     except r.ReqlOpFailedError:
-        await conn.close()
         result = {}
+
     await conn.close()
     if table == 'prefixes' or table == 'server_settings':
         loop.create_task(cache[table].update())
@@ -206,9 +209,8 @@ async def get_content(table, key=None):
             content = cursor
     except (IndexError, r.ReqlOpFailedError):
         content = None
+
     await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
     return content
 
 async def filter_content(table: str, r_filter):
@@ -221,9 +223,8 @@ async def filter_content(table: str, r_filter):
             content = None
     except (IndexError, r.ReqlOpFailedError):
         content = None
+
     await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
     return content
 
 
