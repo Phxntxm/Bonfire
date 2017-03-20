@@ -272,6 +272,10 @@ class Mod:
 
         # Since subcommands exist, base the last word in the list as the permission, and the rest of it as the command
         command = " ".join(msg[0:len(msg) - 1])
+        if command == "":
+            await ctx.send("Please provide the permissions you want to setup, the format for this must be in:\n"
+                           "`perms add <command> <permission>`")
+            return
         try:
             permissions = msg[len(msg) - 1]
         except IndexError:
