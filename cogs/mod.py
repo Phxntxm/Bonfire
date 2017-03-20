@@ -454,6 +454,10 @@ class Mod:
         EXAMPLE: !rules 5
         RESULT: Rule 5 is printed"""
         server_settings = await utils.get_content('server_settings', str(ctx.message.guild.id))
+        if server_settings is None:
+            await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
+            return
+
         rules = server_settings.get('rules')
 
         if not rules or len(rules) == 0:
