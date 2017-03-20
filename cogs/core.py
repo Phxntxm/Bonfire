@@ -176,7 +176,7 @@ class Core:
 
         # Add the normal values
         embed.add_field(name='Total Servers', value=len(self.bot.guilds))
-        embed.add_field(name='Total Members', value=len(bot.users))
+        embed.add_field(name='Total Members', value=len(self.bot.users))
 
         # Count the variable values; hangman, tictactoe, etc.
         hm_games = len(self.bot.get_cog('Hangman').games)
