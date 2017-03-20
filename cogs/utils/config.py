@@ -145,6 +145,8 @@ async def add_content(table, content):
 
     await conn.close()
     log.info("RethinkDB Instance closed. Table: {}---Content: {}---Method = add_content".format(table, content))
+    if table == 'prefixes' or table == 'server_settings':
+        loop.create_task(cache[table].update())
     return result.get('inserted', 0) > 0
 
 
@@ -225,8 +227,6 @@ async def get_content(table, key=None):
 
     await conn.close()
     log.info("RethinkDB Instance closed. Table: {}---Key: {}---Method: get_content".format(table, key))
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
     return content
 
 async def filter_content(table: str, r_filter):
