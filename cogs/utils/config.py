@@ -243,8 +243,6 @@ async def filter_content(table: str, r_filter):
 
     await conn.close()
     log.info("RethinkDB Instance closed. Table: {}---Filter: {}---Method: filter_content".format(table, r_filter))
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
     return content
 
 
