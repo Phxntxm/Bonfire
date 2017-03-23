@@ -150,7 +150,12 @@ class Mod:
 
         EXAMPLE: !nsfw add
         RESULT: ;)"""
-        key = str(ctx.message.guild.id)
+
+        if ctx.message.channel is discord.DMChannel:
+            key = 'DMs'
+        else:
+            key = str(ctx.message.guild.id)
+
         entry = {'server_id': key,
                  'nsfw_channels': [str(ctx.message.channel.id)]}
         update = {'nsfw_channels': r.row['nsfw_channels'].append(str(ctx.message.channel.id))}
@@ -173,7 +178,11 @@ class Mod:
         EXAMPLE: !nsfw remove
         RESULT: ;("""
 
-        key = str(ctx.message.guild.id)
+        if ctx.message.channel is discord.DMChannel:
+            key = 'DMs'
+        else:
+            key = str(ctx.message.guild.id)
+
         server_settings = await utils.get_content('server_settings', key)
         channel = str(ctx.message.channel.id)
         try:

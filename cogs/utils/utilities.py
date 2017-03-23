@@ -1,6 +1,7 @@
 import aiohttp
 from io import BytesIO
 import inspect
+import discord
 
 from . import config
 from PIL import Image
@@ -44,7 +45,11 @@ def get_subcommands(command):
         pass
 
 async def channel_is_nsfw(channel):
-    server = str(channel.guild.id)
+    if channel is discord.DMChannel:
+        server = 'DMs'
+    else:
+        server = str(channel.guild.id)
+
     channel = str(channel.id)
 
     server_settings = await config.get_content('server_settings', server)
