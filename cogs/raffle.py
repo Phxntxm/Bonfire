@@ -77,8 +77,11 @@ class Raffle:
             self.bot.loop.create_task(utils.remove_content('raffles', raffle_id))
 
             server_settings = await utils.get_content('server_settings', str(server.id))
-            channel_id = server_settings.get('notification_channel', server.id)
-            channel = self.bot.get_channel(channel_id)
+            if server_settings is None:
+                channel = self.bot.get_channel(server.id)
+            else:
+                channel_id = server_settings.get('notification_channel', server.id)
+                channel = self.bot.get_channel(channel_id)
             try:
                 await channel.send(fmt)
             except discord.Forbidden:
