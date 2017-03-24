@@ -241,6 +241,27 @@ class Core:
         await ctx.send("Use this URL to add me to a server that you'd like!\n{}"
                        .format(discord.utils.oauth_url(app_info.id, perms)))
 
+    @commands.command(aliases=['rc'])
+    @utils.custom_perms(send_messages=True)
+    async def cat(self, ctx):
+        """Use this to print a random cat image.
+
+        EXAMPLE: !cat
+        RESULT: A beautiful picture of a cat o3o"""
+        result = await utils.request('http://random.cat/meow')
+        if result is None:
+            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
+            return
+        filename = result.get('file', None)
+        if filename is None:
+            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
+            return
+
+        image = await utils.download_image(filename)
+        filename = re.search('.*\/i\/(.*)', filename).group(1)
+        await ctx.send(file=image, filename=filename)
+
+
     @commands.command()
     @utils.custom_perms(send_messages=True)
     async def doggo(self, ctx):
