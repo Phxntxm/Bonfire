@@ -273,11 +273,11 @@ class Core:
         result = await utils.request('http://random.dog', attr='text')
         try:
             soup = bs(result, 'html.parser')
-        except TypeError:
+            filename = soup.img.get('src')
+        except (TypeError, AttributeError):
             await ctx.send("I couldn't connect! Sorry no dogs right now ;w;")
             return
 
-        filename = soup.img.get('src')
         image = await utils.download_image("http://random.dog/{}".format(filename))
         await ctx.send(file=image, filename=filename)
 
