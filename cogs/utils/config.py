@@ -101,7 +101,6 @@ cache = {}
     ca che[k] = Cache(k)"""
 
 # We still need 'cache' for prefixes and custom permissions however, so for now, just include that
-cache['prefixes'] = Cache('prefixes')
 cache['server_settings'] = Cache('server_settings')
 
 async def update_cache():
@@ -137,7 +136,7 @@ async def add_content(table, content):
         result = {}
 
     await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
+    if table == 'server_settings':
         loop.create_task(cache[table].update())
     return result.get('inserted', 0) > 0
 
@@ -152,7 +151,7 @@ async def remove_content(table, key):
         pass
 
     await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
+    if table == 'server_settings':
         loop.create_task(cache[table].update())
     return result.get('deleted', 0) > 0
 
@@ -170,7 +169,7 @@ async def update_content(table, content, key):
         result = {}
 
     await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
+    if table == 'server_settings':
         loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
@@ -185,7 +184,7 @@ async def replace_content(table, content, key):
         result = {}
 
     await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
+    if table == 'server_settings':
         loop.create_task(cache[table].update())
     return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
 
