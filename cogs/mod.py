@@ -151,7 +151,7 @@ class Mod:
         EXAMPLE: !nsfw add
         RESULT: ;)"""
 
-        if ctx.message.channel is discord.DMChannel:
+        if type(ctx.message.channel) is discord.DMChannel:
             key = 'DMs'
         else:
             key = str(ctx.message.guild.id)
