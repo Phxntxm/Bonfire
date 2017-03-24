@@ -196,6 +196,10 @@ class Interaction:
             return
 
         battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.guild.members)
+        if battleP1 is None:
+            await ctx.send("The person who challenged you to a battle has apparently left the server....why?")
+            return
+
         battleP2 = ctx.message.author
 
         # Get a random win message from our list
@@ -228,6 +232,10 @@ class Interaction:
             return
 
         battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.guild.members)
+        if battleP1 is None:
+            await ctx.send("The person who challenged you to a battle has apparently left the server....why?")
+            return
+
         battleP2 = ctx.message.author
 
         # There's no need to update the stats for the members if they declined the battle
