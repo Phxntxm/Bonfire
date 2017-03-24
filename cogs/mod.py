@@ -23,8 +23,12 @@ class Mod:
 
         EXAMPLE: !nick Music Bot
         RESULT: My nickname is now Music Bot"""
-        await ctx.message.guild.me.edit(nick=name)
-        await ctx.send("\N{OK HAND SIGN}")
+        try:
+            await ctx.message.guild.me.edit(nick=name)
+        except discord.HTTPException:
+            await ctx.send("Sorry but I can't change my nickname to {}".format(name))
+        else:
+            await ctx.send("\N{OK HAND SIGN}")
 
     @commands.command(no_pm=True)
     @utils.custom_perms(kick_members=True)
