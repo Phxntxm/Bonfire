@@ -3,6 +3,7 @@ from discord.ext import commands
 
 from . import utils
 
+from bs4 import BeautifulSoup as bs
 import subprocess
 import glob
 import random
@@ -262,17 +263,23 @@ class Core:
         await ctx.send(file=image, filename=filename)
 
 
-    @commands.command()
+    @commands.command(aliases=['dog', 'rd'])
     @utils.custom_perms(send_messages=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
 
         EXAMPLE: !doggo
         RESULT: A beautiful picture of a dog o3o"""
-        # Find a random image based on how many we currently have
-        f = random.SystemRandom().choice(glob.glob('images/doggo*'))
-        with open(f, 'rb') as f:
-            await ctx.send(file=f)
+        result = await utils.request('http://random.dog', attr='text')
+        try:
+            soup = bs(result, 'html.parser')
+        except TypeError:
+            await ctx.send("I couldn't connect! Sorry no dogs right now ;w;")
+            return
+
+        filename = soup.img.get('src')
+        image = await utils.download_image("http://random.dog/{}".format(filename))
+        await ctx.send(file=image, filename=filename)
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
