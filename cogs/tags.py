@@ -20,7 +20,7 @@ class Tags:
         EXAMPLE: !tags
         RESULT: All tags setup on this server"""
         tags = await utils.get_content('tags', str(ctx.message.guild.id))
-        if tags:
+        if tags and len(tags['tags']) > 0:
             entries = [t['trigger'] for t in tags['tags']]
             pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
             await pages.paginate()
