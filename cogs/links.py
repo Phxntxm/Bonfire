@@ -199,6 +199,8 @@ class Links:
                 params['filter_id'] = 95938
             else:
                 params['q'] += ", safe"
+            # Lets filter out some of the "crap" that's on derpibooru by requiring an image with a score higher than 15
+            params['q'] += ', score.gt:15'
 
             try:
                 # Get the response from derpibooru and parse the 'search' result from it
