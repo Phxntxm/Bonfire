@@ -109,12 +109,14 @@ class Tags:
 
         EXAMPLE: !tag delete stupid_tag
         RESULT: Deletes that stupid tag"""
-        tags = await utils.get_content('tags', str(ctx.message.guild.id))
+        key = str(ctx.message.guild.id)
+        tags = await utils.get_content('tags', key)
         if tags:
             for t in tags['tags']:
                 if t['trigger'] == tag:
                     if ctx.message.author.permissions_in(ctx.message.channel).manage_guild or str(ctx.message.author.id) == t['author']:
                         tags['tags'].remove(t)
+                        await utils.update_content('tags', tags, key)
                         await ctx.send("I have just removed the tag {}".format(tag))
                     else:
                         await ctx.send("You don't own that tag! You can't remove it!")
