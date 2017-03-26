@@ -1,44 +1,11 @@
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
+import discord
 
 from .utils import checks
 
 import re
 import random
-
-phrases = ["Eat My Hat", "Par For the Course", "Raining Cats and Dogs", "Roll With the Punches",
-           "Curiosity Killed The Cat", "Man of Few Words", "Cry Over Spilt Milk", "Scot-free", "Rain on Your Parade",
-           "Go For Broke", "Shot In the Dark", "Mountain Out of a Molehill", "Jaws of Death", "A Dime a Dozen",
-           "Jig Is Up", "Elvis Has Left The Building", "Wake Up Call", "Jumping the Gun", "Up In Arms",
-           "Beating Around the Bush", "Flea Market", "Playing For Keeps", "Cut To The Chase", "Fight Fire With Fire",
-           "Keep Your Shirt On", "Poke Fun At", "Everything But The Kitchen Sink", "Jaws of Life",
-           "What Goes Up Must Come Down", "Give a Man a Fish", "Plot Thickens - The",
-           "Not the Sharpest Tool in the Shed", "Needle In a Haystack", "Right Off the Bat", "Throw In the Towel",
-           "Down To Earth", "Lickety Split", "I Smell a Rat", "Long In The Tooth",
-           "You Can't Teach an Old Dog New Tricks", "Back To the Drawing Board", "Down For The Count",
-           "On the Same Page", "Under Your Nose", "Cut The Mustard",
-           "If You Can't Stand the Heat, Get Out of the Kitchen", "Knock Your Socks Off", "Playing Possum",
-           "No-Brainer", "Money Doesn't Grow On Trees", "In a Pickle", "In the Red", "Fit as a Fiddle", "Hear, Hear",
-           "Hands Down", "Off One's Base", "Wild Goose Chase", "Keep Your Eyes Peeled", "A Piece of Cake",
-           "Foaming At The Mouth", "Go Out On a Limb", "Quick and Dirty", "Hit Below The Belt",
-           "Birds of a Feather Flock Together", "Wouldn't Harm a Fly", "Son of a Gun",
-           "Between a Rock and a Hard Place", "Down And Out", "Cup Of Joe", "Down To The Wire",
-           "Don't Look a Gift Horse In The Mouth", "Talk the Talk", "Close But No Cigar",
-           "Jack of All Trades Master of None", "High And Dry", "A Fool and His Money are Soon Parted",
-           "Every Cloud Has a Silver Lining", "Tough It Out", "Under the Weather", "Happy as a Clam",
-           "An Arm and a Leg", "Read 'Em and Weep", "Right Out of the Gate", "Know the Ropes",
-           "It's Not All It's Cracked Up To Be", "On the Ropes", "Burst Your Bubble", "Mouth-watering",
-           "Swinging For the Fences", "Fool's Gold", "On Cloud Nine", "Fish Out Of Water", "Ring Any Bells?",
-           "There's No I in Team", "Ride Him, Cowboy!", "Top Drawer", "No Ifs, Ands, or Buts",
-           "You Can't Judge a Book By Its Cover", "Don't Count Your Chickens Before They Hatch", "Cry Wolf",
-           "Beating a Dead Horse", "Goody Two-Shoes", "Heads Up", "Drawing a Blank", "Keep On Truckin'", "Tug of War",
-           "Short End of the Stick", "Hard Pill to Swallow", "Back to Square One", "Love Birds", "Dropping Like Flies",
-           "Break The Ice", "Knuckle Down", "Lovey Dovey", "Greased Lightning", "Let Her Rip", "All Greek To Me",
-           "Two Down, One to Go", "What Am I, Chopped Liver?", "It's Not Brain Surgery", "Like Father Like Son",
-           "Easy As Pie", "Elephant in the Room", "Quick On the Draw", "Barking Up The Wrong Tree",
-           "A Chip on Your Shoulder", "Put a Sock In It", "Quality Time", "Yada Yada", "Head Over Heels",
-           "My Cup of Tea", "Ugly Duckling", "Drive Me Nuts", "When the Rubber Hits the Road"]
-
 
 class Game:
     def __init__(self, word):
@@ -105,6 +72,7 @@ class Hangman:
         # Create a new game, then save it as the server's game
         game = Game(word)
         self.games[ctx.message.guild.id] = game
+        game.author = ctx.message.author.id
         return game
 
     @commands.group(aliases=['hm'], no_pm=True, invoke_without_command=True)
@@ -119,6 +87,9 @@ class Hangman:
         if not game:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("There are currently no hangman games running!")
+            return
+        if game.author == ctx.message.author.id:
+            await ctx.send("You cannot guess on your own hangman game!")
             return
 
         # Check if we are guessing a letter or a phrase. Only one letter can be guessed at a time
@@ -142,10 +113,10 @@ class Hangman:
                 fmt = "Sorry that's not the correct phrase..."
 
         if game.win():
-            fmt += " You guys got it! The word was `{}`".format(game.word)
+            fmt += " You guys got it! The phrase was `{}`".format(game.word)
             del self.games[ctx.message.guild.id]
         elif game.failed():
-            fmt += " Sorry, you guys failed...the word was `{}`".format(game.word)
+            fmt += " Sorry, you guys failed...the phrase was `{}`".format(game.word)
             del self.games[ctx.message.guild.id]
         else:
             fmt += str(game)
@@ -167,7 +138,24 @@ class Hangman:
             await ctx.send("Sorry but only one Hangman game can be running per server!")
             return
 
-        game = self.create(random.SystemRandom().choice(phrases), ctx)
+        try:
+            msg = await ctx.message.author.send("Please respond with a phrase you would like to use for your hangman game in **{}**\n\nPlease keep phrases less than 20 characters".format(ctx.message.guild.name))
+        except discord.Forbidden:
+            await ctx.send("I can't message you {}! Please allow DM's so I can message you and ask for the hangman phrase you want to use!".format(ctx.message.author.display_name))
+            return
+
+        await ctx.send("I have DM'd you {}, please respond there with the phrase you would like to setup".format(ctx.message.author.display_name))
+
+        def check(m):
+            return m.channel.id == msg.channel.id and len(m.content) < 20
+
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=60)
+        except asyncio.TimeoutError:
+            await ctx.send("You took too long! Please look at your DM's next to as that's where I'm asking for the phrase you want to use")
+            return
+
+        game = self.create(msg.content, ctx)
         # Let them know the game has started, then print the current game so that the blanks are shown
         await ctx.send(
             "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
