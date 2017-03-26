@@ -102,7 +102,7 @@ class Tags:
 
     @tag.command(name='edit', no_pm=True)
     @utils.custom_perms(send_messages=True)
-    async def edit_tag(self, ctx, *, tag: str)
+    async def edit_tag(self, ctx, *, tag: str):
         """This will allow you to edit a tag that you have created
         EXAMPLE: !tag edit this tag
         RESULT: I'll ask what you want the new result to be"""
