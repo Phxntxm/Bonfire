@@ -113,7 +113,7 @@ class Tags:
         if tags:
             for t in tags['tags']:
                 if t['trigger'] == tag:
-                    if ctx.message.author.permissions_in(ctx.message.channel).manage_server or str(ctx.message.author.id) == t['author']:
+                    if ctx.message.author.permissions_in(ctx.message.channel).manage_guild or str(ctx.message.author.id) == t['author']:
                         tags['tags'].remove(t)
                         await ctx.send("I have just removed the tag {}".format(trigger))
                     else:
