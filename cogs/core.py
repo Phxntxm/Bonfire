@@ -63,7 +63,7 @@ class Core:
                 example = None
                 result = None
             # Also get the subcommands for this command, if they exist
-            subcommands = [x for x in utils.get_subcommands(cmd) if x != cmd.qualified_name]
+            subcommands = [x.qualified_name for x in utils.get_all_subcommands(cmd) if x.qualified_name != cmd.qualified_name]
 
             # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
             embed = discord.Embed(title=cmd.qualified_name)

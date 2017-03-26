@@ -23,14 +23,14 @@ def get_all_commands(bot):
     """Returns a list of all command names for the bot"""
     # First lets create a set of all the parent names
     for cmd in bot.commands:
-        yield from _get_all_subcommands(cmd)
+        yield from get_all_subcommands(cmd)
 
 
-def _get_all_subcommands(command):
+def get_all_subcommands(command):
     yield command
     if type(command) is discord.ext.commands.core.Group:
         for subcmd in command.commands:
-            yield from _get_all_subcommands(subcmd)
+            yield from get_all_subcommands(subcmd)
 
 
 async def channel_is_nsfw(channel):
