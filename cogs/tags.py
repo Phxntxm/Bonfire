@@ -42,7 +42,7 @@ class Tags:
                     await ctx.send(t['result'])
                     return
             await ctx.send("There is no tag called {}".format(tag))
-        else:
+        else and len(tags['tags']) > 0:
             await ctx.send("There are no tags setup on this server!")
 
 
@@ -100,6 +100,44 @@ class Tags:
             await utils.update_content('tags', {'tags': r.row['tags'].append(tag)}, key)
         await ctx.send("I have just setup a new tag for this server! You can call your tag with {}".format(trigger))
 
+    @tag.command(name='edit', no_pm=True)
+    @utils.custom_perms(send_messages=True)
+    async def edit_tag(self, ctx, *, tag: str)
+        """This will allow you to edit a tag that you have created
+        EXAMPLE: !tag edit this tag
+        RESULT: I'll ask what you want the new result to be"""
+        key = str(ctx.message.guild.id)
+        tags = await utils.get_content('tags', key)
+        def check(m):
+            return m.channel == ctx.message.channel and m.author == ctx.message.author and len(m.content) > 0
+
+        if tags and len(tags['tags']) > 0:
+            for i, t in enumerate(tags['tags']):
+                if t['trigger'] == tag:
+                    if t['author'] == str(ctx.message.author.id):
+                        my_msg = await ctx.send("Alright, what do you want the new result for the tag {} to be".format(tag))
+                        try:
+                            msg = await self.bot.wait_for("message", check=check, timeout=60)
+                        except asyncio.TimeoutError:
+                            await ctx.send("You took too long!")
+                            return
+                        new_tag = t.copy()
+                        new_tag['result'] = msg.content
+                        tags['tags'][i] = new_tag
+                        try:
+                            await my_msg.delete()
+                            await msg.delete()
+                        except discord.Forbidden:
+                            pass
+                        await utils.update_content('tags', tags, key)
+                        await ctx.send("Alright, the tag {} has been updated".format(tag))
+                        return
+                    else:
+                        await ctx.send("You can't edit someone else's tag!")
+                        return
+        else:
+            await ctx.send("There are no tags setup on this server!")
+
 
     @tag.command(name='delete', aliases=['remove', 'stop'], no_pm=True)
     @utils.custom_perms(send_messages=True)
@@ -111,7 +149,7 @@ class Tags:
         RESULT: Deletes that stupid tag"""
         key = str(ctx.message.guild.id)
         tags = await utils.get_content('tags', key)
-        if tags:
+        if tags and len(tags['tags']) > 0:
             for t in tags['tags']:
                 if t['trigger'] == tag:
                     if ctx.message.author.permissions_in(ctx.message.channel).manage_guild or str(ctx.message.author.id) == t['author']:
