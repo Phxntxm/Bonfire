@@ -135,6 +135,7 @@ class Tags:
                     else:
                         await ctx.send("You can't edit someone else's tag!")
                         return
+            await ctx.send("There isn't a tag called {}!".format(tag))
         else:
             await ctx.send("There are no tags setup on this server!")
 
