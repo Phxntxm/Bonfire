@@ -36,13 +36,13 @@ class Tags:
         EXAMPLE: !tag butts
         RESULT: Whatever you setup for the butts tag!!"""
         tags = await utils.get_content('tags', str(ctx.message.guild.id))
-        if tags:
+        if tags and len(tags['tags']) > 0:
             for t in tags['tags']:
                 if t['trigger'] == tag:
                     await ctx.send(t['result'])
                     return
             await ctx.send("There is no tag called {}".format(tag))
-        else and len(tags['tags']) > 0:
+        else:
             await ctx.send("There are no tags setup on this server!")
 
 
