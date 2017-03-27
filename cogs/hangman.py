@@ -6,6 +6,7 @@ from .utils import checks
 
 import re
 import random
+import asyncio
 
 class Game:
     def __init__(self, word):
