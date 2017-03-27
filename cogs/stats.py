@@ -37,8 +37,8 @@ class Stats:
         embed.add_field(name='Roles', value=len(server.roles))
 
         # Split channels into voice and text channels
-        voice_channels = [c for c in server.channels if c is discord.VoiceChannel]
-        text_channels = [c for c in server.channels if c is discord.TextChannel]
+        voice_channels = [c for c in server.channels if type(c) is discord.VoiceChannel]
+        text_channels = [c for c in server.channels if type(c) is discord.TextChannel]
         embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
         embed.add_field(name='Owner', value=server.owner.display_name)
 
