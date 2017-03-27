@@ -35,12 +35,15 @@ class Tags:
         EXAMPLE: !mytags
         RESULT: All your tags setup on this server"""
         tags = await utils.get_content('tags', str(ctx.message.guild.id))
-        if tags and len(tags['tags']) > 0:
-            entries = [t['trigger'] for t in tags['tags'] if t['author'] == str(ctx.message.author.id)]
-            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
-            await pages.paginate()
-        else:
+        if not tags:
             await ctx.send("There are no tags setup on this server!")
+        else:
+            entries = [t['trigger'] for t in tags['tags'] if t['author'] == str(ctx.message.author.id)]
+            if len(entries) == 0:
+                await ctx.send("You have no tags setup on this server!")
+            else:
+                pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+                await pages.paginate()
 
     @commands.group(invoke_without_command=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
