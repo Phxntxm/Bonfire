@@ -35,6 +35,7 @@ class Tags:
 
         EXAMPLE: !tag butts
         RESULT: Whatever you setup for the butts tag!!"""
+        tag = tag.lower().strip()
         tags = await utils.get_content('tags', str(ctx.message.guild.id))
         if tags and len(tags['tags']) > 0:
             for t in tags['tags']:
@@ -63,7 +64,7 @@ class Tags:
             await ctx.send("You took too long!")
             return
 
-        trigger = msg.content
+        trigger = msg.content.lower().strip()
         try:
             await my_msg.delete()
             await msg.delete()
