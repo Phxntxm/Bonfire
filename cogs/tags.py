@@ -70,6 +70,10 @@ class Tags:
         except discord.Forbidden:
             pass
 
+        if trigger.lower() in ['edit', 'delete', 'remove', 'stop']:
+            await ctx.send("You can't create a tag with {}!".format(trigger))
+            return
+
         my_msg = await ctx.send("Alright, your new tag can be called with {}!\n\nWhat do you want to be displayed with this tag?".format(trigger))
 
         try:
