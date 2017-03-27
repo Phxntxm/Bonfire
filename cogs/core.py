@@ -45,7 +45,10 @@ class Core:
                 cmd = self.bot.get_command(message)
 
         if cmd is None:
-            entries = sorted([cmd.qualified_name for cmd in utils.get_all_commands(self.bot) if (await cmd.can_run(ctx))])
+            entries = []
+            for cmd in utils.get_all_commands(self.bot):
+                if await cmd.can_run(ctx):
+                    entries.append(cmd.qualified_name)
             try:
                 pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
                 await pages.paginate(start_page=page)
