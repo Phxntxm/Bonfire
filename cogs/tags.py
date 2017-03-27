@@ -27,6 +27,21 @@ class Tags:
         else:
             await ctx.send("There are no tags setup on this server!")
 
+    @commands.command(no_pm=True)
+    @utils.custom_perms(send_messages=True)
+    async def mytags(self, ctx):
+        """Prints all the custom tags that this server that you own
+
+        EXAMPLE: !mytags
+        RESULT: All your tags setup on this server"""
+        tags = await utils.get_content('tags', str(ctx.message.guild.id))
+        if tags and len(tags['tags']) > 0:
+            entries = [t['trigger'] for t in tags['tags'] if t['author'] == str(ctx.message.author.id)]
+            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+            await pages.paginate()
+        else:
+            await ctx.send("There are no tags setup on this server!")
+
     @commands.group(invoke_without_command=True, no_pm=True)
     @utils.custom_perms(send_messages=True)
     async def tag(self, ctx, *, tag: str):
