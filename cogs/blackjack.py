@@ -271,7 +271,7 @@ class Game:
                     return
             self.hit(self.dealer)
             fmt = "It is the dealer's turn to play\n\n{}".format(self.dealer)
-            msg = await msg.edit(content=fmt)
+            await msg.edit(content=fmt)
 
     async def round_task(self):
         """The task handling the round itself, asking each person to hit or stand"""
