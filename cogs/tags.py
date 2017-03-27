@@ -39,7 +39,7 @@ class Tags:
         tags = await utils.get_content('tags', str(ctx.message.guild.id))
         if tags and len(tags['tags']) > 0:
             for t in tags['tags']:
-                if t['trigger'] == tag:
+                if t['trigger'].lower.strip() == tag:
                     await ctx.send(t['result'])
                     return
             await ctx.send("There is no tag called {}".format(tag))
