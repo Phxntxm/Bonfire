@@ -47,7 +47,7 @@ class Roulette:
 
     @roulette.command(name='start', aliases=['create'])
     @utils.custom_perms(kick_members=True)
-    async def roulette_start(self, ctx, time: int=5)
+    async def roulette_start(self, ctx, time: int=5):
         """Starts a roulette, that will end in one of the entrants being kicked from the server
         By default, the roulette will end up 5 minutes; provide a number (up to 30) to change how many minutes until it ends
 
