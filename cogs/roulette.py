@@ -104,3 +104,6 @@ class Game:
             return random.SystemRandom().choice(self.entrants)
         except IndexError:
             return None
+
+def setup(bot):
+    bot.add_cog(Roulette(bot))
