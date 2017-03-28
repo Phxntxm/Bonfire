@@ -89,7 +89,7 @@ class Game:
 
     @property
     def time_left(self):
-        return (pendulum.utcnow() - self.bot.uptime).in_words()
+        return (pendulum.utcnow() - self.start_time).in_words()
 
     def join(self, member):
         """Adds a member to the list of entrants"""
