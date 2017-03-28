@@ -27,6 +27,12 @@ class Roulette:
             self.roulettes.append(game)
             return game
 
+    def end_game(self, server):
+        game = self.get_game(server)
+        member = game.choose()
+        self.roulettes.remove(game)
+        return member
+
     @commands.group(no_pm=True, invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
     async def roulette(self, ctx):
@@ -41,15 +47,15 @@ class Roulette:
             result = r.join(ctx.message.author)
             time_left = r.time_left
             if result:
-                await ctx.send("You have joined this roul!debug ctx.prefixette game! Good luck~ This roulette will end in " + time_left)
+                await ctx.send("You have joined this roulette game! Good luck~ This roulette will end in " + time_left)
             else:
-                await ctx.send("You have already joined this roulette game! This roulette will end in " + time_left)
+                await ctx.send("This roulette will end in " + time_left)
 
     @roulette.command(name='start', aliases=['create'])
     @utils.custom_perms(kick_members=True)
     async def roulette_start(self, ctx, time: int=5):
         """Starts a roulette, that will end in one of the entrants being kicked from the server
-        By default, the roulette will end up 5 minutes; provide a number (up to 30) to change how many minutes until it ends
+        By default, the roulette will end in 5 minutes; provide a number (up to 30) to change how many minutes until it ends
 
         EXAMPLE: !roulette start
         RESULT: A new roulette game!"""
@@ -66,7 +72,8 @@ class Roulette:
                 return
 
         await asyncio.sleep(time * 60)
-        member = game.choose()
+        member = self.end_game(ctx.message.guild)
+
         if member is None:
             await ctx.send("Well no one joined the roulette. That was boring.")
             return
@@ -89,7 +96,7 @@ class Game:
 
     @property
     def time_left(self):
-        return (pendulum.utcnow() - self.start_time).in_words()
+        return (self.start_time - pendulum.utcnow()).in_words()
 
     def join(self, member):
         """Adds a member to the list of entrants"""
