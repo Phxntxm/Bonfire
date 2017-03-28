@@ -18,12 +18,12 @@ class Roulette:
             if x.server == server:
                 return x
 
-    def start_game(self, server):
+    def start_game(self, server, time):
         game = self.get_game(server)
         if game:
             return False
         else:
-            game = Game(server)
+            game = Game(server, time)
             self.roulettes.append(game)
             return game
 
@@ -63,7 +63,7 @@ class Roulette:
             await ctx.send("Invalid time! The roulette must be set to run between 1 and 30 minutes")
             return
         else:
-            game = self.start_game(ctx.message.guild)
+            game = self.start_game(ctx.message.guild, time)
             if game:
                 await ctx.send("A new roulette game has just started! A random entrant will be kicked in {} minutes"\
                                " Type {}roulette to join this roulette...good luck~".format(game.time_left, ctx.prefix))
@@ -89,14 +89,14 @@ class Roulette:
 
 class Game:
 
-    def __init__(self, guild):
+    def __init__(self, guild, time):
         self.entrants = []
         self.server = guild
-        self.start_time = pendulum.utcnow()
+        self.end_time = pendulum.utcnow().add(minutes=time)
 
     @property
     def time_left(self):
-        return (self.start_time - pendulum.utcnow()).in_words()
+        return (self.end_time - pendulum.utcnow()).in_words()
 
     def join(self, member):
         """Adds a member to the list of entrants"""
