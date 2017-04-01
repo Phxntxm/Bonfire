@@ -142,7 +142,7 @@ class Interaction:
                 if '.gif' in url:
                     filename = 'avatar.gif'
                 else:
-                    filename = 'avatar.webp'
+                    filename = 'avatar.jpg'
                     file = utils.convert_to_jpeg(file)
                 await ctx.send(file=file, filename=filename)
         else:

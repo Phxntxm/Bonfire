@@ -65,7 +65,7 @@ class Roulette:
         else:
             game = self.start_game(ctx.message.guild, time)
             if game:
-                await ctx.send("A new roulette game has just started! A random entrant will be kicked in {} minutes"\
+                await ctx.send("A new roulette game has just started! A random entrant will be kicked in {} minutes."\
                                " Type {}roulette to join this roulette...good luck~".format(game.time_left, ctx.prefix))
             else:
                 await ctx.send("There is already a roulette game running on this server!")
