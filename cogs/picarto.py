@@ -35,7 +35,7 @@ class Picarto:
         # Channel is the name we are checking against that
         # This creates a list of all users that match this channel name (should only ever be 1)
         # And returns True as long as it is more than 0
-        if not self.channels:
+        if not self.online_channels:
             return False
         channel = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
         matches = [stream for stream in self.online_channels if stream['channel_name'].lower() == channel.lower()]
