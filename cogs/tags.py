@@ -83,10 +83,18 @@ class Tags:
             return
 
         trigger = msg.content.lower().strip()
+        if len(trigger) > 100:
+            await ctx.send("Please keep tag triggers under 100 characters")
+            return
+        forbidden_tags = ['add', 'create', 'setup', 'edit', '']
+        elif trigger in forbidden_tags:
+            await ctx.send("Sorry, but your tag trigger was detected to be forbidden. Current forbidden tag triggers are: \n{}".format("\n".join(forbidden_tags)))
+            return
+
         try:
             await my_msg.delete()
             await msg.delete()
-        except discord.Forbidden:
+        except (discord.Forbidden, discord.HTTPException):
             pass
 
         if trigger.lower() in ['edit', 'delete', 'remove', 'stop']:
@@ -105,7 +113,7 @@ class Tags:
         try:
             await my_msg.delete()
             await msg.delete()
-        except discord.Forbidden:
+        except (discord.Forbidden, discord.HTTPException):
             pass
 
         # The different DB settings
