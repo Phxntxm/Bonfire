@@ -364,6 +364,9 @@ class Mod:
         EXAMPLE: !prefix new_prefix
         RESULT: You probably screwing it up and not realizing you now need to do new_prefixprefix"""
         key = str(ctx.message.guild.id)
+        if len(prefix.strip()) > 20:
+            await ctx.send("Please keep prefixes under 20 characters")
+            return
         if prefix.lower().strip() == "none":
             prefix = None
 
