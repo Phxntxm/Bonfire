@@ -156,6 +156,11 @@ class Hangman:
             await ctx.send("You took too long! Please look at your DM's next to as that's where I'm asking for the phrase you want to use")
             return
 
+        forbidden_phrases = ['stop', 'delete', 'remove', 'end', 'create', 'start']
+        if msg.content in forbidden_phrases:
+            await ctx.send("Detected forbidden hangman phrase; current forbidden phrases are: \n{}".format("\n".join(forbidden_phrases)))
+            return
+
         game = self.create(msg.content, ctx)
         # Let them know the game has started, then print the current game so that the blanks are shown
         await ctx.send(
