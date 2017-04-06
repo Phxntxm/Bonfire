@@ -147,6 +147,10 @@ class Osu:
 
         scores = await self.api.get_user_best(user.username, limit=limit)
         entries = []
+        if len(entries) == 0:
+            await ctx.send("Sorry, but I can't find any scores for you {}!".format(member.display_name))
+            return
+    
         for i in scores:
             m = await self.api.get_beatmaps(beatmap_id=i.beatmap_id)
             m = m[0]
