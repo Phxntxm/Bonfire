@@ -150,7 +150,7 @@ class Hangman:
         await ctx.send("I have DM'd you {}, please respond there with the phrase you would like to setup".format(ctx.message.author.display_name))
 
         def check(m):
-            return m.channel.id == msg.channel.id and len(m.content) < 20
+            return m.channel == msg.channel and len(m.content) < 20
 
         try:
             msg = await self.bot.wait_for('message', check=check, timeout=60)
