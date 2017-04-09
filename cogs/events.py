@@ -66,7 +66,10 @@ class StatsUpdate:
             return
 
         channel = guild.get_channel(int(channel_id))
-        await channel.send("Welcome to the '{0.guild.name}' server {0.mention}!".format(member))
+        try:
+            await channel.send("Welcome to the '{0.guild.name}' server {0.mention}!".format(member))
+        except (discord.Forbidden, discord.HTTPException):
+            pass
 
     async def on_member_remove(self, member):
         guild = member.guild
@@ -82,7 +85,10 @@ class StatsUpdate:
             return
 
         channel = guild.get_channel(int(channel_id))
-        await channel.send("{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
+        try:
+            await channel.send("{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
+        except (discord.Forbidden, discord.HTTPException):
+            pass
 
 
 def setup(bot):
