@@ -91,33 +91,36 @@ async def on_command_error(error, ctx):
     except AttributeError:
         pass
 
-    if isinstance(error, commands.BadArgument):
-        fmt = "Please provide a valid argument to pass to the command: {}".format(error)
-        await ctx.message.channel.send(fmt)
-    elif isinstance(error, commands.CheckFailure):
-        fmt = "You can't tell me what to do!"
-        await ctx.message.channel.send(fmt)
-    elif isinstance(error, commands.CommandOnCooldown):
-        m, s = divmod(error.retry_after, 60)
-        fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
-            .format(round(m), round(s))
-        await ctx.message.channel.send(fmt)
-    elif isinstance(error, commands.NoPrivateMessage):
-        fmt = "This command cannot be used in a private message"
-        await ctx.message.channel.send(fmt)
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.message.channel.send(error)
-    else:
-        now = datetime.datetime.now()
-        with open("error_log", 'a') as f:
-            print("In server '{0.message.guild}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
-                  file=f)
-            try:
-                traceback.print_tb(error.original.__traceback__, file=f)
-                print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
-            except:
-                traceback.print_tb(error.__traceback__, file=f)
-                print('{0.__class__.__name__}: {0}'.format(error), file=f)
+    try:
+        if isinstance(error, commands.BadArgument):
+            fmt = "Please provide a valid argument to pass to the command: {}".format(error)
+            await ctx.message.channel.send(fmt)
+        elif isinstance(error, commands.CheckFailure):
+            fmt = "You can't tell me what to do!"
+            await ctx.message.channel.send(fmt)
+        elif isinstance(error, commands.CommandOnCooldown):
+            m, s = divmod(error.retry_after, 60)
+            fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
+                .format(round(m), round(s))
+            await ctx.message.channel.send(fmt)
+        elif isinstance(error, commands.NoPrivateMessage):
+            fmt = "This command cannot be used in a private message"
+            await ctx.message.channel.send(fmt)
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.message.channel.send(error)
+        else:
+            now = datetime.datetime.now()
+            with open("error_log", 'a') as f:
+                print("In server '{0.message.guild}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
+                      file=f)
+                try:
+                    traceback.print_tb(error.original.__traceback__, file=f)
+                    print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
+                except:
+                    traceback.print_tb(error.__traceback__, file=f)
+                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+    except discord.HTTPException:
+        pass
 
 
 if __name__ == '__main__':
