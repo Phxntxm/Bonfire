@@ -69,7 +69,7 @@ class Overwatch:
                 await ctx.send("I couldn't connect to overwatch at the moment!")
                 return
 
-            region = [x for x in data.keys() if data[x] is not None][0]
+            region = [x for x in data.keys() if data[x] is not None and x in ['us', 'any', 'kr', 'eu']][0]
             stats = data[region]['heroes']['stats']['quickplay'].get(hero)
 
             if stats is None:
