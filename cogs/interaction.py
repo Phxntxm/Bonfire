@@ -137,16 +137,17 @@ class Interaction:
 
         url = member.avatar_url
         if ctx.message.guild.me.permissions_in(ctx.message.channel).attach_files:
-            file = await utils.download_image(url)
-            if file is None:
+            filedata = await utils.download_image(url)
+            if filedata is None:
                 await ctx.send(url)
             else:
                 if '.gif' in url:
                     filename = 'avatar.gif'
                 else:
                     filename = 'avatar.jpg'
-                    file = utils.convert_to_jpeg(file)
-                await ctx.send(file=file, filename=filename)
+                    filedata = utils.convert_to_jpeg(filedata)
+                f = discord.File(filedata, filename=filename)
+                await ctx.send(file=f)
         else:
             await ctx.send(url)
 

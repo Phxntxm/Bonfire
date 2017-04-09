@@ -263,7 +263,8 @@ class Core:
 
         image = await utils.download_image(filename)
         filename = re.search('.*\/i\/(.*)', filename).group(1)
-        await ctx.send(file=image, filename=filename)
+        f = discord.File(image, filename=filename)
+        await ctx.send(file=f)
 
 
     @commands.command(aliases=['dog', 'rd'])
@@ -282,7 +283,8 @@ class Core:
             return
 
         image = await utils.download_image("http://random.dog/{}".format(filename))
-        await ctx.send(file=image, filename=filename)
+        f = discord.File(image, filename=filename)
+        await ctx.send(file=f)
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
@@ -294,7 +296,7 @@ class Core:
         # Find a random image based on how many we currently have
         f = random.SystemRandom().choice(glob.glob('images/snek*'))
         with open(f, 'rb') as f:
-            await ctx.send(file=f)
+            await ctx.send(file=discord.File(f))
 
     @commands.command()
     @utils.custom_perms(send_messages=True)

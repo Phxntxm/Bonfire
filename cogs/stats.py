@@ -80,7 +80,7 @@ class Stats:
                     ("Your Usage", member_usage),
                     ("This Server's Usage", server_usage)]
             banner = await utils.create_banner(ctx.message.author, "Command Stats", data)
-            await ctx.send(file=banner)
+            await ctx.send(file=discord.File(banner))
         except (FileNotFoundError, discord.Forbidden):
             fmt = "The command {} has been used a total of {} times\n" \
                   "{} times on this server\n" \
@@ -117,7 +117,7 @@ class Stats:
             try:
                 top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
                 banner = await utils.create_banner(ctx.message.author, "Your command usage", top_5)
-                await ctx.send(file=banner)
+                await ctx.send(file=discord.File(banner))
             except (FileNotFoundError, discord.Forbidden):
                 top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
                 await ctx.send(
@@ -132,7 +132,7 @@ class Stats:
             try:
                 top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
                 banner = await utils.create_banner(ctx.message.author, "Server command usage", top_5)
-                await ctx.send(file=banner)
+                await ctx.send(file=discord.File(banner))
             except (FileNotFoundError, discord.Forbidden):
                 top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
                 await ctx.send(
@@ -201,7 +201,7 @@ class Stats:
             output = [("{0.display_name}".format(ctx.message.guild.get_member(m_id)), amt)
                       for m_id, amt in sorted_booped_members]
             banner = await utils.create_banner(ctx.message.author, "Your booped victims", output)
-            await ctx.send(file=banner)
+            await ctx.send(file=discord.File(banner))
         except (FileNotFoundError, discord.Forbidden):
             output = "\n".join(
                 "{0.display_name}: {1} times".format(ctx.message.guild.get_member(m_id), amt) for
@@ -285,7 +285,7 @@ class Stats:
             fmt = [('Record', record), ('Server Rank', '{}/{}'.format(server_rank, len(server_members))),
                    ('Overall Rank', '{}/{}'.format(total_rank, len(all_members))), ('Rating', rating)]
             banner = await utils.create_banner(member, title, fmt)
-            await ctx.send(file=banner)
+            await ctx.send(file=discord.File(banner))
         except (FileNotFoundError, discord.Forbidden):
             fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
             fmt = fmt.format(member.display_name, record, server_rank, len(server_members), total_rank,
