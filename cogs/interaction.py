@@ -109,7 +109,8 @@ class Interaction:
         self.battles[ctx.message.guild.id] = {p1: p2 for p1, p2 in battles.items() if
                                               not p2 == player_id and not p1 == player_id}
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def hug(self, ctx, user: discord.Member = None):
         """Makes me hug a person!
@@ -122,7 +123,8 @@ class Interaction:
         fmt = random.SystemRandom().choice(hugs)
         await ctx.send(fmt.format(user.display_name))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def avatar(self, ctx, member: discord.Member = None):
         """Provides an image for the provided person's avatar (yours if no other member is provided)
@@ -148,7 +150,8 @@ class Interaction:
         else:
             await ctx.send(url)
 
-    @commands.group(no_pm=True, invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     @commands.cooldown(1, 180, BucketType.user)
     @utils.custom_perms(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
@@ -180,7 +183,8 @@ class Interaction:
         self.bot.loop.call_later(180, self.battling_off, ctx)
         await ctx.send(fmt.format(ctx, player2))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def accept(self, ctx):
         """Accepts the battle challenge
@@ -216,7 +220,8 @@ class Interaction:
             await ctx.send(fmt.format(battleP2.mention, battleP1.mention))
             await utils.update_records('battle_records', battleP2, battleP1)
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def decline(self, ctx):
         """Declines the battle challenge
@@ -242,7 +247,8 @@ class Interaction:
         self.battling_off(ctx)
         await ctx.send("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @commands.cooldown(1, 180, BucketType.user)
     @utils.custom_perms(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member = None, *, message=""):

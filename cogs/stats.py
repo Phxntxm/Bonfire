@@ -12,7 +12,8 @@ class Stats:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def serverinfo(self, ctx):
         """Provides information about the server
@@ -44,12 +45,13 @@ class Stats:
 
         await ctx.send(embed=embed)
 
-    @commands.group(no_pm=True, pass_context=False)
+    @commands.group(pass_context=False)
     @utils.custom_perms(send_messages=True)
     async def command(self):
         pass
 
-    @command.command(no_pm=True, name="stats")
+    @command.command(name="stats")
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def command_stats(self, ctx, *, command):
         """This command can be used to view some usage stats about a specific command
@@ -87,7 +89,7 @@ class Stats:
 
             await ctx.send(fmt)
 
-    @command.command(no_pm=True, name="leaderboard")
+    @command.command(name="leaderboard")
     @utils.custom_perms(send_messages=True)
     async def command_leaderboard(self, ctx, option="server"):
         """This command can be used to print a leaderboard of commands
@@ -138,7 +140,8 @@ class Stats:
         else:
             await ctx.send("That is not a valid option, valid options are: `server` or `me`")
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times
@@ -169,7 +172,8 @@ class Stats:
         await ctx.send("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
             ctx.message.author.mention, member.display_name, most_boops))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times
@@ -204,7 +208,8 @@ class Stats:
                 m_id, amt in sorted_booped_members)
             await ctx.send("You have booped:```\n{}```".format(output))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record
@@ -237,7 +242,8 @@ class Stats:
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def stats(self, ctx, member: discord.Member = None):
         """Prints the battling stats for you, or the user provided

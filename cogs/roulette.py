@@ -33,7 +33,8 @@ class Roulette:
         self.roulettes.remove(game)
         return member
 
-    @commands.group(no_pm=True, invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def roulette(self, ctx):
         """Joins the current running roulette
@@ -52,6 +53,7 @@ class Roulette:
                 await ctx.send("This roulette will end in " + time_left)
 
     @roulette.command(name='start', aliases=['create'])
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def roulette_start(self, ctx, time: int=5):
         """Starts a roulette, that will end in one of the entrants being kicked from the server

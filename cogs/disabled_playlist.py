@@ -19,7 +19,8 @@ class Music:
     async def on_voice_state_update(self, member, before, after):
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def progress(self, ctx):
         """Provides the progress of the current song
@@ -28,7 +29,8 @@ class Music:
         RESULT: 532 minutes! (Hopefully not)"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def join(self, ctx, *, channel: discord.TextChannel):
         """Joins a voice channel.
@@ -37,7 +39,8 @@ class Music:
         RESULT: I'm in the Music voice channel!"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def summon(self, ctx):
         """Summons the bot to join your voice channel.
@@ -46,7 +49,8 @@ class Music:
         RESULT: I'm in your voice channel!"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def play(self, ctx, *, song: str):
         """Plays a song.
@@ -61,7 +65,8 @@ class Music:
         """
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(kick_members=True)
     async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song.
@@ -70,7 +75,8 @@ class Music:
         RESULT: My volume is now set to 50"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(kick_members=True)
     async def pause(self, ctx):
         """Pauses the currently played song.
@@ -79,7 +85,8 @@ class Music:
         RESULT: I'm paused!"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(kick_members=True)
     async def resume(self, ctx):
         """Resumes the currently played song.
@@ -88,7 +95,8 @@ class Music:
         RESULT: Ain't paused no more!"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(kick_members=True)
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
@@ -98,7 +106,8 @@ class Music:
         RESULT: No more music"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def eta(self, ctx):
         """Provides an ETA on when your next song will play
@@ -107,7 +116,8 @@ class Music:
         RESULT: 5,000 days! Lol have fun"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def queue(self, ctx):
         """Provides a printout of the songs that are in the queue.
@@ -121,7 +131,8 @@ class Music:
         RESULT: A list of shitty songs you probably don't wanna listen to"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue
@@ -130,7 +141,8 @@ class Music:
         RESULT: Probably 10 songs"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
@@ -142,7 +154,8 @@ class Music:
         """
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(kick_members=True)
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator
@@ -151,7 +164,8 @@ class Music:
         RESULT: No more terrible song :D"""
         pass
 
-    @commands.command(no_pm=True, enabled=False)
+    @commands.command(enabled=False)
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def playing(self, ctx):
         """Shows info about the currently played song.

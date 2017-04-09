@@ -13,7 +13,8 @@ class Roles:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(aliases=['roles'], invoke_without_command=True, no_pm=True)
+    @commands.group(aliases=['roles'], invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def role(self, ctx):
         """This command can be used to modify the roles on the server.
@@ -25,7 +26,8 @@ class Roles:
         server_roles = [role.name for role in ctx.message.guild.roles if not role.is_default()]
         await ctx.send("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
 
-    @role.command(name='remove', no_pm=True)
+    @role.command(name='remove')
+    @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
     async def remove_role(self, ctx):
         """Use this to remove roles from a number of members
@@ -86,7 +88,8 @@ class Roles:
         await ctx.send("I have just removed the following roles:```\n{}``` from the following members:"
                        "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
-    @role.command(name='add', no_pm=True)
+    @role.command(name='add')
+    @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
     async def add_role(self, ctx):
         """Use this to add a role to multiple members.
@@ -141,7 +144,8 @@ class Roles:
         await ctx.send("I have just added the following roles:```\n{}``` to the following members:"
                        "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
-    @role.command(name='delete', no_pm=True)
+    @role.command(name='delete')
+    @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
     async def delete_role(self, ctx, *, role: discord.Role = None):
         """This command can be used to delete one of the roles from the server
@@ -182,7 +186,8 @@ class Roles:
         await role.delete()
         await ctx.send("I have just removed the role {} from this server".format(role.name))
 
-    @role.command(name='create', no_pm=True)
+    @role.command(name='create')
+    @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server

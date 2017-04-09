@@ -36,7 +36,8 @@ class Blackjack:
         game = Game(self.bot, message, self)
         self.games[message.guild.id] = game
 
-    @commands.group(no_pm=True, aliases=['bj'], invoke_without_command=True)
+    @commands.group(aliases=['bj'], invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def blackjack(self, ctx):
         """Creates a game/joins the current running game of blackjack
@@ -62,7 +63,8 @@ class Blackjack:
                 else:
                     await ctx.send("There are already a max number of players playing/waiting to play!")
 
-    @blackjack.command(no_pm=True, name='leave', aliases=['quit'])
+    @blackjack.command(name='leave', aliases=['quit'])
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def blackjack_leave(self, ctx):
         """Leaves the current game of blackjack
@@ -83,7 +85,8 @@ class Blackjack:
         else:
             await ctx.send("Either you have already bet, or you are not even playing right now!")
 
-    @blackjack.command(no_pm=True, name='forcestop', aliases=['stop'])
+    @blackjack.command(name='forcestop', aliases=['stop'])
+    @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     async def blackjack_stop(self, ctx):
         """Forces the game to stop, mostly for use if someone has gone afk

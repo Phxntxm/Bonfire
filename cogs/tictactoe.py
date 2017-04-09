@@ -108,7 +108,8 @@ class TicTacToe:
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers['x']
 
-    @commands.group(aliases=['tic', 'tac', 'toe'], no_pm=True, invoke_without_command=True)
+    @commands.group(aliases=['tic', 'tac', 'toe'], invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def tictactoe(self, ctx, *, option: str):
         """Updates the current server's tic-tac-toe board
@@ -204,7 +205,8 @@ class TicTacToe:
                 fmt = str(board) + "\n{} It is now your turn to play!".format(player_turn.display_name)
                 await ctx.send(fmt)
 
-    @tictactoe.command(name='start', aliases=['challenge', 'create'], no_pm=True)
+    @tictactoe.command(name='start', aliases=['challenge', 'create'])
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def start_game(self, ctx, player2: discord.Member):
         """Starts a game of tictactoe with another player
@@ -238,7 +240,8 @@ class TicTacToe:
             .format(x_player.display_name, ctx.prefix)
         await ctx.send(fmt)
 
-    @tictactoe.command(name='delete', aliases=['stop', 'remove', 'end'], no_pm=True)
+    @tictactoe.command(name='delete', aliases=['stop', 'remove', 'end'])
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def stop_game(self, ctx):
         """Force stops a game of tictactoe

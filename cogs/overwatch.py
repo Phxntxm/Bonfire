@@ -19,7 +19,7 @@ class Overwatch:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(no_pm=True)
+    @commands.group()
     async def ow(self):
         """Command used to lookup information on your own user, or on another's
         When adding your battletag, it is quite picky, use the exact format user#xxxx

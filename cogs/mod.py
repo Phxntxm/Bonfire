@@ -16,7 +16,8 @@ class Mod:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(no_pm=True, aliases=['nick'])
+    @commands.command(aliases=['nick'])
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def nickname(self, ctx, *, name=None):
         """Used to set the nickname for Bonfire (provide no nickname and it will reset)
@@ -30,7 +31,8 @@ class Mod:
         else:
             await ctx.send("\N{OK HAND SIGN}")
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def kick(self, ctx, member: discord.Member):
         """Used to kick a member from this server
@@ -43,7 +45,8 @@ class Mod:
         except discord.Forbidden:
             await ctx.send("But I can't, muh permissions >:c")
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(ban_members=True)
     async def unban(self, ctx, member_id: int):
         """Used to unban a member from this server
@@ -63,7 +66,8 @@ class Mod:
         except discord.HTTPException:
             await ctx.send("Sorry, I failed to unban that user!")
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(ban_members=True)
     async def ban(self, ctx, *, member):
         """Used to ban a member
@@ -104,7 +108,8 @@ class Mod:
         except discord.HTTPException:
             await ctx.send("Sorry, I failed to ban that user!")
 
-    @commands.command(no_pm=True, aliases=['alerts'])
+    @commands.command(aliases=['alerts'])
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def notifications(self, ctx, channel: discord.TextChannel):
         """This command is used to set a channel as the server's 'notifications' channel
@@ -120,7 +125,8 @@ class Mod:
         await ctx.send("I have just changed this server's 'notifications' channel"
                        "\nAll notifications will now go to `{}`".format(channel))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def usernotify(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
@@ -217,7 +223,8 @@ class Mod:
         except:
             pass
 
-    @commands.group(invoke_without_command=True, no_pm=True)
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def perms(self, ctx, *, command: str = None):
         """This command can be used to print the current allowed permissions on a specific command
@@ -273,7 +280,8 @@ class Mod:
             await ctx.send("You need to have the permission `{}` "
                            "to use the command `{}` in this server".format(needed_perm, command))
 
-    @perms.command(name="add", aliases=["setup,create"], no_pm=True)
+    @perms.command(name="add", aliases=["setup,create"])
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
@@ -337,7 +345,8 @@ class Mod:
         await ctx.send("I have just added your custom permissions; "
                        "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
 
-    @perms.command(name="remove", aliases=["delete"], no_pm=True)
+    @perms.command(name="remove", aliases=["delete"])
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def remove_perms(self, ctx, *, command: str):
         """Removes the custom permissions setup on the command specified
@@ -356,7 +365,8 @@ class Mod:
         await utils.update_content('server_settings', update, str(ctx.message.guild.id))
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     async def prefix(self, ctx, *, prefix: str):
         """This command can be used to set a custom prefix per server
@@ -383,7 +393,8 @@ class Mod:
                   "For example, you can call this command again with {0}prefix".format(prefix)
         await ctx.send(fmt)
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(manage_messages=True)
     async def purge(self, ctx, limit: int = 100):
         """This command is used to a purge a number of messages from the channel
@@ -401,7 +412,8 @@ class Mod:
                                            "back for me to delete; I can only bulk delete messages"
                                            " that are under 14 days old.")
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(manage_messages=True)
     async def prune(self, ctx, limit=None):
         """This command can be used to prune messages from certain members
@@ -466,7 +478,8 @@ class Mod:
         except:
             pass
 
-    @commands.group(aliases=['rule'], no_pm=True, invoke_without_command=True)
+    @commands.group(aliases=['rule'], invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def rules(self, ctx, rule: int = None):
         """This command can be used to view the current rules on the server
@@ -499,7 +512,8 @@ class Mod:
                 return
             await ctx.send("Rule {}: \"{}\"".format(rule, fmt))
 
-    @rules.command(name='add', aliases=['create'], no_pm=True)
+    @rules.command(name='add', aliases=['create'])
+    @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     async def rules_add(self, ctx, *, rule: str):
         """Adds a rule to this server's rules
@@ -521,7 +535,8 @@ class Mod:
 
         await ctx.send("I have just saved your new rule, use the rules command to view this server's current rules")
 
-    @rules.command(name='remove', aliases=['delete'], no_pm=True)
+    @rules.command(name='remove', aliases=['delete'])
+    @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     async def rules_delete(self, ctx, rule: int):
         """Removes one of the rules from the list of this server's rules

@@ -350,7 +350,8 @@ class Music:
 
         await ctx.send(python.format(result))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def progress(self, ctx):
         """Provides the progress of the current song"""
@@ -374,7 +375,8 @@ class Music:
             fmt = "Current song progress: {0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
             await ctx.send(fmt)
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def join(self, *, channel: discord.TextChannel):
         """Joins a voice channel."""
@@ -391,7 +393,8 @@ class Music:
         else:
             await ctx.send('Ready to play audio in ' + channel.name)
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def summon(self, ctx):
         """Summons the bot to join your voice channel."""
@@ -419,7 +422,8 @@ class Music:
                 pass
         return success
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def play(self, ctx, *, song: str):
         """Plays a song.
@@ -504,7 +508,8 @@ class Music:
             return
         await ctx.send('Enqueued ' + str(_entry))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song."""
@@ -523,7 +528,8 @@ class Music:
             player.volume = value / 100
             await ctx.send('Set the volume to {:.0%}'.format(player.volume))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def pause(self, ctx):
         """Pauses the currently played song."""
@@ -531,7 +537,8 @@ class Music:
         if state.is_playing():
             state.player.pause()
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def resume(self, ctx):
         """Resumes the currently played song."""
@@ -539,7 +546,8 @@ class Music:
         if state.is_playing():
             state.player.resume()
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
@@ -564,7 +572,8 @@ class Music:
         except:
             pass
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def eta(self, ctx):
         """Provides an ETA on when your next song will play"""
@@ -604,7 +613,8 @@ class Music:
             return
         await ctx.send("ETA till your next play is: {0[0]}m {0[1]}s".format(divmod(round(count, 0), 60)))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def queue(self, ctx):
         """Provides a printout of the songs that are in the queue"""
@@ -620,14 +630,16 @@ class Music:
         else:
             self.bot.loop.create_task(self.queue_embed_task(state, ctx.message.channel, ctx.message.author))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
         await ctx.send("There are a total of {} songs in the queue"
                            .format(len(self.get_voice_state(ctx.message.guild).songs.entries)))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
@@ -659,7 +671,8 @@ class Music:
         else:
             await ctx.send('You have already voted to skip this song.')
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
@@ -671,7 +684,8 @@ class Music:
         state.skip()
         await ctx.send('Song has just been skipped.')
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def playing(self, ctx):
         """Shows info about the currently played song."""

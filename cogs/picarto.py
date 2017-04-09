@@ -98,7 +98,7 @@ class Picarto:
             fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 
-    @commands.group(invoke_without_command=True, no_pm=True)
+    @commands.group(invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
     async def picarto(self, ctx, member: discord.Member = None):
         """This command can be used to view Picarto stats about a certain member
@@ -148,7 +148,8 @@ class Picarto:
 
         await ctx.send(embed=embed)
 
-    @picarto.command(name='add', no_pm=True)
+    @picarto.command(name='add')
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def add_picarto_url(self, ctx, url: str):
         """Saves your user's picarto URL
@@ -195,7 +196,7 @@ class Picarto:
             await utils.update_content('picarto', {'picarto_url': url}, key)
             await ctx.send("I have just updated your Picarto URL")
 
-    @picarto.command(name='remove', aliases=['delete'], no_pm=True)
+    @picarto.command(name='remove', aliases=['delete'])
     @utils.custom_perms(send_messages=True)
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
@@ -206,7 +207,8 @@ class Picarto:
                 "I do not have your picarto URL added {}. You can save your picarto url with {}picarto add".format(
                     ctx.message.author.mention, ctx.prefix))
 
-    @picarto.group(no_pm=True, invoke_without_command=True)
+    @picarto.group(invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to turn picarto notifications on or off
@@ -227,7 +229,7 @@ class Picarto:
         else:
             await utils.update_content('picarto', {'servers': r.row['servers'].append(str(ctx.message.guild.id))}, key)
 
-    @notify.command(name='on', aliases=['start,yes'], no_pm=True)
+    @notify.command(name='on', aliases=['start,yes'])
     @utils.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns picarto notifications on
@@ -238,7 +240,7 @@ class Picarto:
         await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
             ctx.message.author.mention))
 
-    @notify.command(name='off', aliases=['stop,no'], pass_context=True, no_pm=True)
+    @notify.command(name='off', aliases=['stop,no'], pass_context=True)
     @utils.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
         """Turns picarto notifications off

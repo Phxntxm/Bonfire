@@ -95,7 +95,8 @@ class Twitch:
             fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
             log.error(fmt)
 
-    @commands.group(no_pm=True, invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def twitch(self, ctx, *, member: discord.Member = None):
         """Use this command to check the twitch info of a user
@@ -134,7 +135,8 @@ class Twitch:
 
         await ctx.send(embed=embed)
 
-    @twitch.command(name='add', no_pm=True)
+    @twitch.command(name='add')
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def add_twitch_url(self, ctx, url: str):
         """Saves your user's twitch URL
@@ -180,7 +182,8 @@ class Twitch:
             await utils.update_content('twitch', update, key)
         await ctx.send("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
-    @twitch.command(name='remove', aliases=['delete'], no_pm=True)
+    @twitch.command(name='remove', aliases=['delete'])
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL
@@ -191,7 +194,8 @@ class Twitch:
         await utils.remove_content('twitch', str(ctx.message.author.id))
         await ctx.send("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
-    @twitch.group(no_pm=True, invoke_without_command=True)
+    @twitch.group(invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def notify(self, ctx):
         """This can be used to modify notification settings for your twitch user
@@ -213,7 +217,8 @@ class Twitch:
             await utils.update_content('twitch', {'servers': r.row['servers'].append(str(ctx.message.guild.id))}, key)
             await ctx.send("This server will now be notified if you go live")
 
-    @notify.command(name='on', aliases=['start,yes'], no_pm=True)
+    @notify.command(name='on', aliases=['start,yes'])
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def notify_on(self, ctx):
         """Turns twitch notifications on
@@ -226,7 +231,8 @@ class Twitch:
         else:
             await ctx.send("I can't notify if you go live if I don't know your twitch URL yet!")
 
-    @notify.command(name='off', aliases=['stop,no'], no_pm=True)
+    @notify.command(name='off', aliases=['stop,no'])
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def notify_off(self, ctx):
         """Turns twitch notifications off

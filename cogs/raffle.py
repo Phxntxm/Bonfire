@@ -87,7 +87,8 @@ class Raffle:
             except discord.Forbidden:
                 pass
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def raffles(self, ctx):
         """Used to print the current running raffles on the server
@@ -107,7 +108,8 @@ class Raffle:
             raffle['expires']) for num, raffle in enumerate(raffles))
         await ctx.send(fmt)
 
-    @commands.group(no_pm=True, invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def raffle(self, ctx, raffle_id: int = 0):
         """Used to enter a raffle running on this server
@@ -159,7 +161,8 @@ class Raffle:
                       raffle_count, ctx.prefix)
             await ctx.send(fmt)
 
-    @raffle.command(pass_context=True, no_pm=True, name='create', aliases=['start', 'begin', 'add'])
+    @raffle.command(pass_context=True, name='create', aliases=['start', 'begin', 'add'])
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def raffle_create(self, ctx):
         """This is used in order to create a new server raffle

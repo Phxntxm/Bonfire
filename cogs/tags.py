@@ -12,7 +12,8 @@ class Tags:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has
@@ -27,7 +28,8 @@ class Tags:
         else:
             await ctx.send("There are no tags setup on this server!")
 
-    @commands.command(no_pm=True)
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def mytags(self, ctx):
         """Prints all the custom tags that this server that you own
@@ -45,7 +47,8 @@ class Tags:
                 pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
                 await pages.paginate()
 
-    @commands.group(invoke_without_command=True, no_pm=True)
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
@@ -65,7 +68,8 @@ class Tags:
             await ctx.send("There are no tags setup on this server!")
 
 
-    @tag.command(name='add', aliases=['create', 'setup'], no_pm=True)
+    @tag.command(name='add', aliases=['create', 'setup'])
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def add_tag(self, ctx):
         """Use this to add a new tag that can be used in this server
@@ -131,7 +135,8 @@ class Tags:
             await utils.update_content('tags', {'tags': r.row['tags'].append(tag)}, key)
         await ctx.send("I have just setup a new tag for this server! You can call your tag with {}".format(trigger))
 
-    @tag.command(name='edit', no_pm=True)
+    @tag.command(name='edit')
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def edit_tag(self, ctx, *, tag: str):
         """This will allow you to edit a tag that you have created
@@ -171,7 +176,8 @@ class Tags:
             await ctx.send("There are no tags setup on this server!")
 
 
-    @tag.command(name='delete', aliases=['remove', 'stop'], no_pm=True)
+    @tag.command(name='delete', aliases=['remove', 'stop'])
+    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag from use for this server

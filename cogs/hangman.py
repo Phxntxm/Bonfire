@@ -76,7 +76,8 @@ class Hangman:
         game.author = ctx.message.author.id
         return game
 
-    @commands.group(aliases=['hm'], no_pm=True, invoke_without_command=True)
+    @commands.group(aliases=['hm'], invoke_without_command=True)
+    @commands.guild_only()
     @commands.cooldown(1, 7, BucketType.user)
     @checks.custom_perms(send_messages=True)
     async def hangman(self, ctx, *, guess):
@@ -124,7 +125,8 @@ class Hangman:
 
         await ctx.send(fmt)
 
-    @hangman.command(name='create', aliases=['start'], no_pm=True)
+    @hangman.command(name='create', aliases=['start'])
+    @commands.guild_only()
     @checks.custom_perms(send_messages=True)
     async def create_hangman(self, ctx):
         """This is used to create a new hangman game
@@ -166,7 +168,8 @@ class Hangman:
         await ctx.send(
             "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
 
-    @hangman.command(name='delete', aliases=['stop', 'remove', 'end'], no_pm=True)
+    @hangman.command(name='delete', aliases=['stop', 'remove', 'end'])
+    @commands.guild_only()
     @checks.custom_perms(kick_members=True)
     async def stop_game(self, ctx):
         """Force stops a game of hangman
