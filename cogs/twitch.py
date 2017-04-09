@@ -117,6 +117,9 @@ class Twitch:
         twitch_url = "https://api.twitch.tv/kraken/channels/{}".format(user)
         payload = {'client_id': self.key}
         data = await utils.request(twitch_url, payload=payload)
+        if data is None:
+            await ctx.send("Sorry but I couldn't connect to twitch right now!")
+            return
 
         embed = discord.Embed(title=data['display_name'], url=url)
         if data['logo']:
