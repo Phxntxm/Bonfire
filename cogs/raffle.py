@@ -84,7 +84,7 @@ class Raffle:
                 channel = self.bot.get_channel(channel_id)
             try:
                 await channel.send(fmt)
-            except discord.Forbidden:
+            except (discord.Forbidden, AttributeError):
                 pass
 
     @commands.command()
