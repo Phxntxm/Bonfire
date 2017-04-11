@@ -108,6 +108,55 @@ class Mod:
         except discord.HTTPException:
             await ctx.send("Sorry, I failed to ban that user!")
 
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    async def ignore(self, ctx, member_or_channel):
+        """This command can be used to have Bonfire ignore certain members/channels
+
+        EXAMPLE: !ignore #general
+        RESULT: Bonfire will ignore commands sent in the general channel"""
+        key = str(ctx.message.guild.id)
+
+        converter = commands.converter.MemberConverter()
+        converter.prepare(ctx, member_or_channel)
+        member = None
+        channel = None
+        try:
+            member = converter.convert()
+        except commands.converter.BadArgument:
+            converter = commands.converter.TextChannelConverter()
+            converter.prepare(ctx, member_or_channel)
+            try:
+                channel = converter.convert()
+            except commands.converter.BadArgument:
+                await ctx.send("{} does not appear to be a member or channel!".format(member_or_channel))
+                return
+
+        settings = await utils.get_content('server_settings', key)
+        ignored = settings.get('ignored', {'members': [], 'channels': []})
+        if member:
+            if str(member.id) in ignored['members']:
+                await ctx.send("I am already ignoring {}!".format(member.display_name))
+                return
+            elif member.guild_permissions >= ctx.message.author.guild_permissions:
+                await ctx.send("You cannot make me ignore someone at equal or higher rank than you!")
+                return
+            else:
+                ignored['members'].append(str(member.id))
+                fmt = "Ignoring {}".format(member.display_name)
+        elif channel:
+            if str(channel.id) in ignored['channels']:
+                await ctx.send("I am already ignoring {}!".format(channel.mention))
+                return
+            else:
+                ignored['channels'].append(str(channel.id))
+                fmt = "Ignoring {}".format(channel.mention)
+
+        update = {'ignored': ignored}
+        await utils.update_content('server_settings', update, key)
+        await ctx.send(fmt)
+
     @commands.command(aliases=['alerts'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)

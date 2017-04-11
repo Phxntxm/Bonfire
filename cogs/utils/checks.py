@@ -65,12 +65,24 @@ async def db_check():
 def is_owner(ctx):
     return ctx.message.author.id in config.owner_ids
 
+def should_ignore(ctx):
+    try:
+        server_settings = config.cache.get('server_settings').values
+        ignored = [x for x in server_settings if x['server_id'] == str(
+            ctx.message.guild.id)][0]['ignored']
+        return str(ctx.message.author.id) in ignored['members'] or str(ctx.message.channel.id) in ignored['channels']
+    except (TypeError, IndexError, KeyError):
+        return False
 
 def custom_perms(**perms):
     def predicate(ctx):
         # Return true if this is a private channel, we'll handle that in the registering of the command
         if type(ctx.message.channel) is discord.DMChannel:
             return True
+
+        # Now check if this channel/member should be ignored
+        if should_ignore(ctx):
+            return False
 
         # Get the member permissions so that we can compare
         member_perms = ctx.message.author.permissions_in(ctx.message.channel)
