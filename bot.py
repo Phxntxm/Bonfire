@@ -18,7 +18,7 @@ opts = {'command_prefix': utils.command_prefix,
         'command_not_found': ''}
 
 bot = commands.AutoShardedBot(**opts)
-logging.basicConfig(level=logging.WARNING, filename='bonfire.log')
+logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 
 @bot.event
@@ -33,7 +33,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if message.author.bot:
+    if message.author.bot or utils.should_ignore(message):
         return
     await bot.process_commands(message)
 
