@@ -33,7 +33,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if message.author.bot:
+    if message.author.bot or utils.should_ignore(message):
         return
     await bot.process_commands(message)
 
