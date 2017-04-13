@@ -74,6 +74,7 @@ def should_ignore(message):
     except (TypeError, IndexError, KeyError):
         return False
 
+
 def custom_perms(**perms):
     def predicate(ctx):
         # Return true if this is a private channel, we'll handle that in the registering of the command
