@@ -47,6 +47,9 @@ class Cache:
 bot_description = global_config.get("description")
 # Bot's default prefix for commands
 default_prefix = global_config.get("command_prefix", "!")
+# The sharding information
+shard_count = global_config.get("shard_count", 1)
+shard_id = global_config.get("shard_id", 1)
 # The key for bots.discord.pw and carbonitex
 discord_bots_key = global_config.get('discord_bots_key', "")
 carbon_key = global_config.get('carbon_key', "")
