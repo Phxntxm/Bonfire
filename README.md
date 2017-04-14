@@ -13,9 +13,9 @@ https://www.rethinkdb.com/docs/install/
 
 I also use a few libraries that aren't included by default, which can be installed using pip.
 ```
-python3.5 -m pip install discord.py[voice] lxml fuzzywuzzy youtube_dl rethinkdb ruamel.yaml pendulum Pillow==3.4.1 readline
+python3.5 -m pip install discord.py[voice] BeautifulSoup4 youtube_dl rethinkdb ruamel.yaml pendulum Pillow==3.4.1 readline
 # Or on windows
-py -3 -m pip install discord.py[voice] lxml fuzzywuzzy youtube_dl rethinkdb ruamel.yaml pendulum Pillow==3.4.1 readline
+py -3 -m pip install discord.py[voice] BeautifulSoup4 youtube_dl rethinkdb ruamel.yaml pendulum Pillow==3.4.1 readline
 ```
 
 Note: ATM of writing this, Pillow 3.4.2 (the stable version...good job Pillow?) is broken, do not use pip's default to install this. This is why we're using Pillow==3.4.1 above, and not just Pillow
