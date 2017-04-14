@@ -45,6 +45,7 @@ class Owner:
             'bot': self.bot,
             'message': msg,
             'guild': msg.guild,
+            'server': msg.guild,
             'channel': msg.channel,
             'author': msg.author,
             '_': None,
