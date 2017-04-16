@@ -511,7 +511,7 @@ class Mod:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_messages=True)
-    async def prune(self, ctx, *specifications=None):
+    async def prune(self, ctx, *specifications):
         """This command can be used to prune messages from certain members
         Mention any user you want to prune messages from; if no members are mentioned, the messages removed will be mine
         If no limit is provided, then 100 will be used. This is also the max limit we can use
