@@ -522,7 +522,7 @@ class Mod:
         limit = 100
         for x in specifications:
             try:
-                limit = int(limit)
+                limit = int(x)
                 if limit <= 100:
                     break
                 else:
