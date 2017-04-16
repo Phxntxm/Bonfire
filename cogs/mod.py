@@ -511,7 +511,7 @@ class Mod:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_messages=True)
-    async def prune(self, ctx, limit=None):
+    async def prune(self, ctx, *specifications=None):
         """This command can be used to prune messages from certain members
         Mention any user you want to prune messages from; if no members are mentioned, the messages removed will be mine
         If no limit is provided, then 100 will be used. This is also the max limit we can use
@@ -519,18 +519,16 @@ class Mod:
         EXAMPLE: !prune 50
         RESULT: 50 of my messages are removed from this channel"""
         # We can only get logs from 100 messages at a time, so make sure we are not above that threshold
-        try:
-            # We may not have been passed a limit, and only mentions
-            # If this happens, the limit will be set to that first mention
-            limit = int(limit)
-        except (TypeError, ValueError):
-            limit = 100
-
-        if limit > 100:
-            limit = 100
-        if limit < 0:
-            await ctx.send("Limit cannot be less than 0!")
-            return
+        limit = 100
+        for x in specifications:
+            try:
+                limit = int(limit)
+                if limit <= 100:
+                    break
+                else:
+                    limit = 100
+            except (TypeError, ValueError):
+                continue
 
         # If no members are provided, assume we're trying to prune our own messages
         members = ctx.message.mentions
