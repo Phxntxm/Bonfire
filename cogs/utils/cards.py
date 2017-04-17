@@ -44,6 +44,10 @@ class Deck:
         """Adds the provided cards to the end of the deck"""
         self.deck.extend(cards)
 
+    def pluck(self, card):
+        """Pulls the provided card from the deck"""
+        return self.deck.pop(self.deck.index(card))
+
     def shuffle(self):
         """Shuffles the deck in place"""
         random.SystemRandom().shuffle(self.deck)
