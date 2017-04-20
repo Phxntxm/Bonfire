@@ -95,6 +95,13 @@ class Tags:
             await ctx.send("Sorry, but your tag trigger was detected to be forbidden. Current forbidden tag triggers are: \n{}".format("\n".join(forbidden_tags)))
             return
 
+        tags = await utils.get_content('tags', str(ctx.message.guild.id))
+        if tags and len(tags['tags']) > 0:
+            for t in tags['tags']:
+                if t['trigger'].lower().strip() == tag:
+                    await ctx.send("There is already a tag setup called {}!".format(trigger))
+                    return
+
         try:
             await my_msg.delete()
             await msg.delete()
