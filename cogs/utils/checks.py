@@ -65,6 +65,7 @@ async def db_check():
 def is_owner(ctx):
     return ctx.message.author.id in config.owner_ids
 
+
 def should_ignore(message):
     if message.guild is None:
         return False
