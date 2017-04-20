@@ -61,7 +61,7 @@ class Tags:
         if tags and len(tags['tags']) > 0:
             for t in tags['tags']:
                 if t['trigger'].lower().strip() == tag:
-                    await ctx.send(t['result'])
+                    await ctx.send("\u200B{}".format(t['result']))
                     return
             await ctx.send("There is no tag called {}".format(tag))
         else:
