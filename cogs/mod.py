@@ -134,6 +134,8 @@ class Mod:
                 return
 
         settings = await utils.get_content('server_settings', key)
+        if settings is None:
+            settings = {}
         ignored = settings.get('ignored', {'members': [], 'channels': []})
         if member:
             if str(member.id) in ignored['members']:
@@ -184,6 +186,8 @@ class Mod:
                 return
 
         settings = await utils.get_content('server_settings', key)
+        if settings is None:
+            settings = {}
         ignored = settings.get('ignored', {'members': [], 'channels': []})
         if member:
             if str(member.id) not in ignored['members']:
