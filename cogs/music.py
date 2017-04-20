@@ -316,6 +316,12 @@ class Music:
                 return False
             channel = ctx.message.author.voice.channel
 
+        perms = channel.permissions_for(ctx.message.guild.me)
+
+        if not perms.connect or not perms.speak or not perms.use_voice_activation:
+            await ctx.send("I do not have correct permissions in {}! Please turn on `connect`, `speak`, and `use voice activation`")
+            return
+
         self.voice_states[ctx.message.guild.id] = VoiceState(ctx.message.guild, self.bot)
         await channel.connect()
         await ctx.send("Joined {} and ready to play".format(channel.name))
@@ -380,7 +386,7 @@ class Music:
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.voice_states.get(ctx.message.guild.id)
-        if state.voice.is_connected():
+        if state and state.voice.is_connected():
             state.voice.resume()
 
     @commands.command(pass_context=True)
@@ -393,7 +399,7 @@ class Music:
         state = self.voice_states.get(ctx.message.guild.id)
 
         # Stop playing whatever song is playing.
-        if state.voice.is_connected():
+        if state and state.voice.is_connected():
             state.voice.stop()
 
         state.songs.clear()
