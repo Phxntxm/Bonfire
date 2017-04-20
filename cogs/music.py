@@ -369,11 +369,11 @@ class Music:
         if value is None or not state.playing:
             volume = source.volume
             await ctx.send("Current volume is {}".format(volume))
-            return
-        if value > 200:
+        elif value > 200:
             await ctx.send("Sorry but the max volume is 200")
-            return
-        if state.playing:
+        elif source is None:
+            await ctx.send("Not playing anything right now, please set volume after playing something")
+        elif state.playing:
             source.volume = value / 100
             await ctx.send('Set the volume to {:.0%}'.format(source.volume))
 
