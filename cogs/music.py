@@ -402,13 +402,13 @@ class Music:
         if state and state.voice.is_connected():
             state.voice.stop()
 
-        state.songs.clear()
+            state.songs.clear()
 
-        # This will cancel the audio event we're using to loop through the queue
-        # Then erase the voice_state entirely, and disconnect from the channel
-        state.audio_player.cancel()
-        await state.voice.disconnect()
-        del self.voice_states[ctx.message.guild.id]
+            # This will cancel the audio event we're using to loop through the queue
+            # Then erase the voice_state entirely, and disconnect from the channel
+            state.audio_player.cancel()
+            await state.voice.disconnect()
+            del self.voice_states[ctx.message.guild.id]
 
     @commands.command(pass_context=True)
     @commands.guild_only()
