@@ -211,7 +211,7 @@ class Core:
         memory_usage = self.process.memory_full_info().uss / 1024**2
         cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
         embed.add_field(name='Memory Usage', value='{:.2f} MiB'.format(memory_usage))
-        emebd.add_field(name='CPU Usage', value='{}%'.format(cpu_usage))
+        embed.add_field(name='CPU Usage', value='{}%'.format(cpu_usage))
         embed.set_footer(text=self.bot.description)
 
         await ctx.send(embed=embed)
