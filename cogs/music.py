@@ -348,6 +348,8 @@ class Music:
             if not await ctx.invoke(self.join):
                 return
 
+        song = re.sub('[<>\[\]]', '', song)
+
         try:
             entry = await self.add_entry(song, ctx)
         except asyncio.TimeoutError:
