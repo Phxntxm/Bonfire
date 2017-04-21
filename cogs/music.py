@@ -10,6 +10,7 @@ import math
 import asyncio
 import inspect
 import time
+import re
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
