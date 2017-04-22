@@ -325,7 +325,7 @@ class Music:
             return
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if state:
+        if state and state.voice:
             await state.voice.move_to(channel)
             return True
         else:
@@ -408,7 +408,7 @@ class Music:
         state = self.voice_states.get(ctx.message.guild.id)
 
         # Stop playing whatever song is playing.
-        if state and state.voice.is_connected():
+        if state and state.voice and state.voice.is_connected():
             state.voice.stop()
 
             state.songs.clear()
