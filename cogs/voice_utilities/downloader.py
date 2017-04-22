@@ -5,6 +5,15 @@ import youtube_dl
 
 from concurrent.futures import ThreadPoolExecutor
 
+class LiveStreamError(Exception):
+    pass
+
+def match_filter(info_dict):
+    if 'is_live' in info_dict and info_dict['is_live'] == True:
+        raise LiveStreamError("Cannot download livestreams!")
+    return None
+
+
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'extractaudio': True,
@@ -16,6 +25,7 @@ ytdl_format_options = {
     'ignoreerrors': False,
     'logtostderr': False,
     'quiet': True,
+    'match_filter': match_filter,
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0'

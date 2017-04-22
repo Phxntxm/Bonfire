@@ -355,6 +355,8 @@ class Music:
             entry = await self.add_entry(song, ctx)
         except asyncio.TimeoutError:
             await ctx.send("You took too long!")
+        except ExtractionError as e:
+            await ctx.send(str(e))
         else:
             if entry is None:
                 await ctx.send("Sorry but I couldn't download/find {}".format(song))
