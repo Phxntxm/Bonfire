@@ -5,7 +5,7 @@ from itertools import islice
 from random import shuffle
 
 from .entry import URLPlaylistEntry, get_header
-from .exceptions import ExtractionError, WrongEntryTypeError
+from .exceptions import ExtractionError, WrongEntryTypeError, LiveStreamError
 from .event_emitter import EventEmitter
 
 
