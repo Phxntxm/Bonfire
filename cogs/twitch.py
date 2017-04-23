@@ -65,6 +65,8 @@ class Twitch:
                             else:
                                 channel_id = int(s_id)
                             channel = server.get_channel(channel_id)
+                            if channel is None:
+                                continue
                             try:
                                 await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['twitch_url']))
                             except discord.Forbidden:
