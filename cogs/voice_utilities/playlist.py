@@ -62,7 +62,7 @@ class Playlist(EventEmitter):
                     raise ExtractionError('Could not extract information from %s' % song_url)
                 else:
                     info = info['entries'][0]
-                    song_url = info['']
+                    song_url = info['webpage_url']
             else:
                 raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
 
