@@ -218,35 +218,7 @@ class Music:
     async def add_entry(self, song, ctx):
         requester = ctx.message.author
         state = self.voice_states[ctx.message.guild.id]
-        try:
-            entry, _ = await state.songs.add_entry(song, requester)
-        except WrongEntryTypeError:
-            info = await self.downloader.extract_info(self.bot.loop, song, download=False, process=True)
-            try:
-                songs = info.get('entries', [])[:3]
-                if len(songs) > 1:
-                    # TODO: Figures out why youtube_dl is only returning one result here
-                    fmt = "Founds multiple possibilities, which one do you want to add?\n\n"
-                    for i, entry in enumerate(songs):
-                        title = entry['title']
-                        fmt += "**{})** {}".format(i + 1, title)
-                    await ctx.send(fmt)
-
-                    def check(m):
-                        if m.channel != ctx.message.channel and m.author != ctx.message.author:
-                            return False
-                        return m.content.strip() in ['1', '2', '3']
-
-                    msg = await self.bot.wait_for('message', check=check, timeout=60)
-                    song = songs[int(msg.content) - 1]['webpage_url']
-                else:
-                    song = songs[0]['webpage_url']
-            except IndexError:
-                return None
-            entry, _ = await state.songs.add_entry(song, requester)
-
-        if entry.get('is_live', False):
-            raise LiveStreamError("I cannot download a live stream!!")
+        entry, _ = await state.songs.add_entry(song, requester)
         return entry
 
     @commands.command(pass_context=True)

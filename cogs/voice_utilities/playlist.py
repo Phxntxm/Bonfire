@@ -20,7 +20,6 @@ class Playlist(EventEmitter):
         self.loop = bot.loop
         self.downloader = bot.downloader
         self.entries = deque()
-        self.max_songs = 10
 
     def __iter__(self):
         return iter(self.entries)
@@ -30,10 +29,6 @@ class Playlist(EventEmitter):
 
     def clear(self):
         self.entries.clear()
-
-    @property
-    def full(self):
-        return self.count >= self.max_songs
 
     @property
     def count(self):
@@ -62,7 +57,14 @@ class Playlist(EventEmitter):
 
         # TODO: Sort out what happens next when this happens
         if info.get('_type', None) == 'playlist':
-            raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
+            if info.get('extractor') == 'youtube:search':
+                if len(info['entries']) == 0:
+                    raise ExtractionError('Could not extract information from %s' % song_url)
+                else:
+                    info = info['entries'][0]
+                    song_url = info['']
+            else:
+                raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
 
         if info['extractor'] in ['generic', 'Dropbox']:
             try:
@@ -83,6 +85,9 @@ class Playlist(EventEmitter):
 
                 elif not content_type.startswith(('audio/', 'video/')):
                     print("[Warning] Questionable content type \"%s\" for url %s" % (content_type, song_url))
+
+        if info.get('is_live', False):
+            raise LiveStreamError("Cannot download from a livestream")
 
         entry = URLPlaylistEntry(
             self,
@@ -277,4 +282,3 @@ class Playlist(EventEmitter):
 
     def count_for_user(self, user):
         return sum(1 for e in self.entries if e.meta.get('author', None) == user)
-
