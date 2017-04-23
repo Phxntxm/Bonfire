@@ -344,16 +344,15 @@ class Music:
         """Sets the volume of the currently playing song."""
 
         state = self.voice_states.get(ctx.message.guild.id)
-        source = state.voice.source
         if source is None:
             await ctx.send("Not playing anything right now, please set volume after playing something")
         elif value is None or not state.playing:
-            volume = source.volume
+            volume = state.voice.source.volume
             await ctx.send("Current volume is {}".format(volume))
         elif value > 200:
             await ctx.send("Sorry but the max volume is 200")
         elif state.playing:
-            source.volume = value / 100
+            state.voice.source.volume = value / 100
             await ctx.send('Set the volume to {:.0%}'.format(source.volume))
 
     @commands.command(pass_context=True)
