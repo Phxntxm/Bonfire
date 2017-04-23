@@ -245,6 +245,8 @@ class Music:
                 return None
             entry, _ = await state.songs.add_entry(song, requester)
 
+        if entry.get('is_live', False):
+            raise LiveStreamError("I cannot download a live stream!!")
         return entry
 
     @commands.command(pass_context=True)
@@ -355,7 +357,7 @@ class Music:
             entry = await self.add_entry(song, ctx)
         except asyncio.TimeoutError:
             await ctx.send("You took too long!")
-        except ExtractionError as e:
+        except LiveStreamError as e:
             await ctx.send(str(e))
         else:
             if entry is None:

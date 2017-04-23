@@ -26,6 +26,10 @@ class CommandError(MusicbotException):
 class ExtractionError(MusicbotException):
     pass
 
+# Live stream's cannot be downloaded
+class LiveStreamError(MusicbotException):
+    pass
+
 
 # The no processing entry type failed and an entry was a playlist/vice versa
 class WrongEntryTypeError(ExtractionError):
