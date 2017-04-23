@@ -31,7 +31,10 @@ class VoiceState:
 
     @property
     def playing(self):
-        return self.voice.is_playing() or self.voice.is_paused()
+        if self.voice is None:
+            return False
+        else:
+            return self.voice.is_playing() or self.voice.is_paused()
 
     def skip(self):
         self.skip_votes.clear()
@@ -209,7 +212,7 @@ class Music:
         if after is None or after.channel is None:
             return
         state = self.voice_states.get(after.channel.guild.id)
-        if state is None or state.voice is None:
+        if state is None or state.voice is None or state.voice.channel is None:
             return
         voice_channel = state.voice.channel
         num_members = len(voice_channel.members)
