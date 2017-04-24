@@ -85,7 +85,7 @@ class Overwatch:
                 output_data.append((k.title().replace("_", " "), r))
         try:
             banner = await utils.create_banner(user, "Overwatch", output_data)
-            await ctx.send(file=discord.File(banner))
+            await ctx.send(file=discord.File(banner, filename='banner.png'))
         except (FileNotFoundError, discord.Forbidden):
             fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data)
             await ctx.send("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
