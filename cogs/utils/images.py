@@ -2,11 +2,12 @@ import aiohttp
 import datetime
 import os
 from shutil import copyfile
+from io import BytesIO
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
+from . import utilities
 
 base_path = "images/banner/base"
-tmp_path = "images/banner/tmp"
 whitneyMedium = "/usr/share/fonts/whitney-medium.ttf"
 whitneyBold = "/usr/share/fonts/whitney-bold.ttf"
 header_height = 125
@@ -14,6 +15,14 @@ canvas_height = 145
 banner_background = "{}/bannerTop2.png".format(base_path)
 banner_bot = "{}/bannerBot.png".format(base_path)
 
+def convert_to_file(img):
+    """Converts a Pillow image to a file-like object"""
+    new_file = BytesIO()
+    # Save to this file as jpeg
+    img.save(new_file, format='PNG')
+    # In order to use the file, we need to seek back to the 0th position
+    new_file.seek(0)
+    return new_file
 
 async def create_banner(member, image_title, data):
     """Creates a banner based on the options passed
@@ -23,23 +32,10 @@ async def create_banner(member, image_title, data):
         data -> A dictionary that will be displayed, in the format 'Key: Value' like normal dictionaries"""
     # First ensure the paths we need are created
     os.makedirs(base_path, exist_ok=True)
-    os.makedirs(tmp_path, exist_ok=True)
     offset = 125
 
-    # Open up the avatar, save it as a temporary file
-    avatar_url = member.avatar_url
-    avatar_path = "{}/avatar_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
-    # Ensure the user has an avatar
-    if avatar_url != "":
-        with aiohttp.ClientSession() as s:
-            async with s.get(avatar_url) as r:
-                val = await r.read()
-                with open(avatar_path, "wb") as f:
-                    f.write(val)
-    # Otherwise use the default avatar
-    else:
-        avatar_src_path = "{}/default_avatar.png".format(base_path)
-        copyfile(avatar_src_path, avatar_path)
+    # Download the avatar
+    avatar = await utilities.download_image(member.avatar_url)
 
     # Parse the data we need to create our image
     username = (member.display_name[:23] + '...') if len(member.display_name) > 23 else member.display_name
@@ -47,12 +43,11 @@ async def create_banner(member, image_title, data):
     result_keys = [k for k, v in data]
     result_values = [v for k, v in data]
     lines_of_text = len(result_keys)
-    output_file = "{}/banner_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
     base_height = canvas_height + (lines_of_text * 20)
 
     # This is the background to the avatar
     mask = Image.open('{}/mask.png'.format(base_path)).convert('L')
-    user_avatar = Image.open(avatar_path)
+    user_avatar = Image.open(avatar)
     output = ImageOps.fit(user_avatar, mask.size, centering=(0.5, 0.5))
     output.putalpha(mask)
 
@@ -104,8 +99,6 @@ async def create_banner(member, image_title, data):
         offset += 20
         base_image.paste(save_me, (0, offset), save_me)
     base_image.paste(header, (0, 0), header)
-    base_image.save(output_file)
+    output = convert_to_file(base_image)
 
-    os.remove(avatar_path)
-
-    return output_file
+    return output
