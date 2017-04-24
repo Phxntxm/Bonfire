@@ -11,8 +11,8 @@ whitneyMedium = "/usr/share/fonts/whitney-medium.ttf"
 whitneyBold = "/usr/share/fonts/whitney-bold.ttf"
 header_height = 125
 canvas_height = 145
-banner_background = "{}/bannerTop2.png".format(base_path)
-banner_bot = "{}/bannerBot.png".format(base_path)
+upper_banner_image = "{}/upper_banner_image".format(base_path)
+lower_banner_image = "{}/lower_banner_image.png".format(base_path)
 
 
 async def create_banner(member, image_title, data):
@@ -28,7 +28,7 @@ async def create_banner(member, image_title, data):
 
     # Open up the avatar, save it as a temporary file
     avatar_url = member.avatar_url
-    avatar_path = "{}/avatar_{}_{}.jpg".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
+    avatar_path = "{}/avatar_{}_{}.png".format(tmp_path, member.id, int(datetime.datetime.utcnow().timestamp()))
     # Ensure the user has an avatar
     if avatar_url != "":
         with aiohttp.ClientSession() as s:
@@ -51,9 +51,9 @@ async def create_banner(member, image_title, data):
     base_height = canvas_height + (lines_of_text * 20)
 
     # This is the background to the avatar
-    mask = Image.open('{}/mask.png'.format(base_path)).convert('L')
+    mask = Image.open('{}/avatar_mask_220.png'.format(base_path)).convert('L')
     user_avatar = Image.open(avatar_path)
-    output = ImageOps.fit(user_avatar, mask.size, centering=(0.5, 0.5))
+    output = ImageOps.fit(user_avatar, (110,110), centering=(0.5, 0.5))
     output.putalpha(mask)
 
     # Here's our finalized avatar image that we'll use
@@ -63,8 +63,8 @@ async def create_banner(member, image_title, data):
     base_image = Image.new("RGB", (350, base_height), "#000000")
 
     # Create the header, including our avatar image with it
-    header_top = Image.open(banner_background).convert("RGBA")
-    header_bot = Image.open(banner_bot).convert("RGBA")
+    header_top = Image.open(upper_banner_image).convert("RGBA")
+    header_bot = Image.open(lower_banner_image).convert("RGBA")
     header_base_image = Image.new("RGB", (350, header_height), "#000000")
     header_base_image.paste(header_top, (0, 0), header_top)
     header_base_image.paste(header_bot, (0, 0), header_bot)
