@@ -302,7 +302,7 @@ class Music:
             return
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if state and state.voice:
+        if state and state.voice and state.voice.channel:
             await state.voice.move_to(channel)
             return True
         else:
