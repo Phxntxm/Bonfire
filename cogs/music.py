@@ -230,7 +230,6 @@ class Music:
         """Evaluates code."""
         code = code.strip('` ')
         python = '```py\n{}\n```'
-        result = None
 
         env = {
             'bot': self.bot,
@@ -347,7 +346,7 @@ class Music:
         """Sets the volume of the currently playing song."""
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if state is None or state.voice is None:
+        if state is None or state.voice is None or state.voice.source is None:
             await ctx.send("Not playing anything right now, please set volume after playing something")
         elif value is None:
             volume = state.voice.source.volume
@@ -356,7 +355,7 @@ class Music:
             await ctx.send("Sorry but the max volume is 200")
         elif state.playing:
             state.voice.source.volume = value / 100
-            await ctx.send('Set the volume to {:.0%}'.format(source.volume))
+            await ctx.send('Set the volume to {:.0%}'.format(state.voice.source.volume))
 
     @commands.command(pass_context=True)
     @commands.guild_only()
