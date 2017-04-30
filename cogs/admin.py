@@ -6,7 +6,8 @@ import discord
 import re
 
 class Administration:
-
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(enabled=False)
     @commands.guild_only()
