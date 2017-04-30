@@ -205,4 +205,4 @@ class Images:
             return
 
 def setup(bot):
-    bot.add_cog(Stats(bot))
+    bot.add_cog(Images(bot))
