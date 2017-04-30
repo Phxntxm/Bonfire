@@ -303,5 +303,107 @@ class Roles:
         await ctx.send("I have just added the role {} to: ```\n{}```".format(name, fmt))
 
 
+    @commands.group(invoke_without_command=True, aliases=['assign'])
+    @commands.guild_only()
+    @utils.custom_perms(manage_roles=True)
+    async def assigns(self, ctx, *role: discord.Role):
+        """Adds the provided role(s) to the list of available self-assignable roles
+
+        EXAMPLE: !assigns Member NSFW
+        RESULT: Allows users to self-assign the roles Member, and NSFW"""
+        roles = [str(r.id) for r in role]
+        key = str(ctx.message.guild.id)
+        server_settings = await utils.get_content('server_settings', key)
+
+        if server_settings is None:
+            entry = {'server_id': key, 'self_assignable_roles': roles}
+            await utils.add_content('server_settings', entry)
+        else:
+            self_assignable_roles = server_settings.get('self_assignable_roles', [])
+            self_assignable_roles.extend(roles)
+            self_assignable_roles = list(set(self_assignable_roles))
+            update = {'self_assignable_roles': self_assignable_roles}
+            await utils.update_content('server_settings', update, key)
+
+        if len(roles) == 1:
+            fmt = "Successfully added {} as a self-assignable role".format(role[0].name)
+        else:
+            fmt = "Succesfully added the following roles as self-assignable:\n{}".format(
+                "\n".join(["**{}**".format(r.name) for r in role])
+            )
+        await ctx.send(fmt)
+
+    @assigns.command(name='remove')
+    @commands.guild_only()
+    @utils.custom_perms(manage_roles=True)
+    async def _remove_assigns(self, ctx, *role: discord.Role):
+        """Removes the provided role(s) from the list of available self-assignable roles
+
+        EXAMPLE: !assigns remove Member NSFW
+        RESULT: Removes the ability for users to self-assign the roles Member, and NSFW"""
+        roles = [str(r.id) for r in role]
+        key = str(ctx.message.guild.id)
+        server_settings = await utils.get_content('server_settings', key)
+
+        if server_settings is None:
+            await ctx.send("There are no self-assignable roles on this server")
+            return
+        self_assignable_roles = server_settings.get('self_assignable_roles', [])
+        if len(self_assignable_roles) == 0:
+            await ctx.send("There are no self-assignable roles on this server")
+            return
+
+        fmt = ""
+        for r in role:
+            rid = str(r.id)
+            try:
+                self_assignable_roles.remove(rid)
+            except ValueError:
+                fmt += "\n{} is not a self-assignable role".format(r.name)
+            else:
+                fmt += "\n{} is no longer a self-assignable role".format(r.name)
+
+        update = {'self_assignable_roles': self_assignable_roles}
+        await utils.update_content('server_settings', update, key)
+        await ctx.send(fmt)
+
+    @assigns.command(name='me')
+    @commands.guild_only()
+    @commands.check(utils.is_owner)
+    async def _me_assigns(self, ctx, *role: discord.Role):
+        """Assigns the provided role(s) to you, if they can be assigned
+
+        EXAMPLE: !assign me Member
+        RESULT: You now have the Member role"""
+        if not ctx.message.guild.me.guild_permissions.manage_roles:
+            await ctx.send("I need to have manage roles permissions to assign roles")
+            return
+
+        author = ctx.message.author
+        key = str(ctx.message.guild.id)
+        server_settings = await utils.get_content('server_settings', key)
+
+        if server_settings is None:
+            await ctx.send("There are no self-assignable roles on this server")
+            return
+        self_assignable_roles = server_settings.get('self_assignable_roles', [])
+        if len(self_assignable_roles) == 0:
+            await ctx.send("There are no self-assignable roles on this server")
+            return
+
+        fmt = ""
+        roles = [r for r in role if str(r.id) in self_assignable_roles]
+        fmt += "\n".join(["Successfully added {}".format(r.name)
+                if str(r.id) in self_assignable_roles else
+                "{} is not available to be self-assigned".format(r.name)
+                for r in role])
+
+        try:
+            await author.add_roles(*roles)
+            await ctx.send(fmt)
+        except discord.HTTPException:
+            await ctx.send("I cannot assign roles to you {}".format(author.mention))
+
+
 def setup(bot):
     bot.add_cog(Roles(bot))

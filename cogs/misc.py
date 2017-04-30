@@ -14,13 +14,12 @@ import datetime
 import psutil
 
 
-class Core:
+class Miscallaneous:
     """Core commands, these are the miscallaneous commands that don't fit into other categories'"""
 
     def __init__(self, bot):
         self.bot = bot
-        # This is a dictionary used to hold information about which page a certain help message is on
-        self.help_embeds = {}
+        self.help_embeds = []
         self.results_per_page = 10
         self.commands = None
         self.process = psutil.Process()
@@ -35,55 +34,54 @@ class Core:
 
         EXAMPLE: !help help
         RESULT: This information"""
+        groups = {}
+        entries = []
 
-        cmd = None
-        page = 1
-
-        if message is not None:
-            # If something is provided, it can either be the page number or a command
-            # Try to convert to an int (the page number), if not, then a command should have been provided
-            try:
-                page = int(message)
-            except:
-                cmd = self.bot.get_command(message)
-
-        if cmd is None:
-            entries = []
-            for cmd in utils.get_all_commands(self.bot):
-                if await cmd.can_run(ctx):
-                    entries.append(cmd.qualified_name)
-            try:
-                pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
-                await pages.paginate(start_page=page)
-            except utils.CannotPaginate as e:
-                await ctx.send(str(e))
-        else:
-            # Get the description for a command
-            description = cmd.help
-            if description is not None:
-                # Split into examples, results, and the description itself based on the string
-                example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
-                result = [x.replace('RESULT: ', '') for x in description.split('\n') if 'RESULT:' in x]
-                description = [x for x in description.split('\n') if x and 'EXAMPLE:' not in x and 'RESULT:' not in x]
+        for cmd in utils.get_all_commands(self.bot):
+            cog = cmd.cog_name
+            if cog in groups:
+                groups[cog].append(cmd)
             else:
-                example = None
-                result = None
-            # Also get the subcommands for this command, if they exist
-            subcommands = [x.qualified_name for x in utils.get_all_subcommands(cmd) if x.qualified_name != cmd.qualified_name]
+                groups[cog] = [cmd]
 
-            # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
-            embed = discord.Embed(title=cmd.qualified_name)
-            embed.set_thumbnail(url=self.bot.user.avatar_url)
-            if description:
-                embed.add_field(name="Description", value="\n".join(description), inline=False)
-            if example:
-                embed.add_field(name="Example", value="\n".join(example), inline=False)
-            if result:
-                embed.add_field(name="Result", value="\n".join(result), inline=False)
-            if subcommands:
-                embed.add_field(name='Subcommands', value="\n".join(subcommands), inline=False)
+        for cog, cmds in groups.items():
+            entry = {'title': "{} Commands".format(cog),
+                     'fields': []}
 
-            await ctx.send(embed=embed)
+            for cmd in cmds:
+                if not cmd.help:
+                    # Assume if there's no description for a command, it's not supposed to be used
+                    # I.e. the !command command. It's just a parent
+                    continue
+                description = cmd.help.partition('\n')[0]
+                entry['fields'].append({
+                    'name': "**{}**".format(cmd.qualified_name),
+                    'value': description,
+                    'inline': False
+                })
+            entries.append(entry)
+
+        try:
+            pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
+            pages.embed.set_thumbnail(url=ctx.message.guild.me.avatar_url)
+            await pages.paginate()
+        except utils.CannotPaginate as e:
+            await ctx.send(str(e))
+
+
+    @commands.command()
+    @utils.custom_perms(send_messages=True)
+    async def say(self, ctx, *, msg: str):
+        """Tells the bot to repeat what you say
+
+        EXAMPLE: !say I really like orange juice
+        RESULT: I really like orange juice"""
+        fmt = "\u200B{}".format(msg)
+        await ctx.send(fmt)
+        try:
+            await ctx.message.delete()
+        except:
+            pass
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
@@ -167,7 +165,7 @@ class Core:
         cal = calendar.TextCalendar().formatmonth(year, month)
         await ctx.send("```\n{}```".format(cal))
 
-    @commands.command()
+    @commands.command(aliases=['about'])
     @utils.custom_perms(send_messages=True)
     async def info(self, ctx):
         """This command can be used to print out some of my information"""
@@ -253,59 +251,6 @@ class Core:
         await ctx.send("Use this URL to add me to a server that you'd like!\n{}"
                        .format(discord.utils.oauth_url(app_info.id, perms)))
 
-    @commands.command(aliases=['rc'])
-    @utils.custom_perms(send_messages=True)
-    async def cat(self, ctx):
-        """Use this to print a random cat image.
-
-        EXAMPLE: !cat
-        RESULT: A beautiful picture of a cat o3o"""
-        result = await utils.request('http://random.cat/meow')
-        if result is None:
-            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
-            return
-        filename = result.get('file', None)
-        if filename is None:
-            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
-            return
-
-        image = await utils.download_image(filename)
-        filename = re.search('.*\/i\/(.*)', filename).group(1)
-        f = discord.File(image, filename=filename)
-        await ctx.send(file=f)
-
-
-    @commands.command(aliases=['dog', 'rd'])
-    @utils.custom_perms(send_messages=True)
-    async def doggo(self, ctx):
-        """Use this to print a random doggo image.
-
-        EXAMPLE: !doggo
-        RESULT: A beautiful picture of a dog o3o"""
-        result = await utils.request('http://random.dog', attr='text')
-        try:
-            soup = bs(result, 'html.parser')
-            filename = soup.img.get('src')
-        except (TypeError, AttributeError):
-            await ctx.send("I couldn't connect! Sorry no dogs right now ;w;")
-            return
-
-        image = await utils.download_image("http://random.dog/{}".format(filename))
-        f = discord.File(image, filename=filename)
-        await ctx.send(file=f)
-
-    @commands.command()
-    @utils.custom_perms(send_messages=True)
-    async def snek(self, ctx):
-        """Use this to print a random snek image.
-
-        EXAMPLE: !snek
-        RESULT: A beautiful picture of a snek o3o"""
-        # Find a random image based on how many we currently have
-        f = random.SystemRandom().choice(glob.glob('images/snek*'))
-        with open(f, 'rb') as f:
-            await ctx.send(file=discord.File(f))
-
     @commands.command()
     @utils.custom_perms(send_messages=True)
     async def joke(self, ctx):
@@ -372,4 +317,4 @@ class Core:
 
 
 def setup(bot):
-    bot.add_cog(Core(bot))
+    bot.add_cog(Miscallaneous(bot))

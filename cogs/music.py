@@ -303,6 +303,7 @@ class Music:
         state = self.voice_states.get(ctx.message.guild.id)
         if state and state.voice and state.voice.channel:
             await state.voice.move_to(channel)
+            await ctx.send("Joined {} and ready to play".format(channel.name))
             return True
         else:
             self.voice_states[ctx.message.guild.id] = VoiceState(ctx.message.guild, self.bot)

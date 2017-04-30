@@ -123,34 +123,6 @@ class Interaction:
         fmt = random.SystemRandom().choice(hugs)
         await ctx.send(fmt.format(user.display_name))
 
-    @commands.command()
-    @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    async def avatar(self, ctx, member: discord.Member = None):
-        """Provides an image for the provided person's avatar (yours if no other member is provided)
-
-        EXAMPLE: !avatar @person
-        RESULT: A full image of that person's avatar"""
-
-        if member is None:
-            member = ctx.message.author
-
-        url = member.avatar_url
-        if '.gif' not in url:
-            url = member.avatar_url_as(format='png')
-            filename = 'avatar.png'
-        else:
-            filename = 'avatar.gif'
-        if ctx.message.guild.me.permissions_in(ctx.message.channel).attach_files:
-            filedata = await utils.download_image(url)
-            if filedata is None:
-                await ctx.send(url)
-            else:
-                f = discord.File(filedata, filename=filename)
-                await ctx.send(file=f)
-        else:
-            await ctx.send(url)
-
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @commands.cooldown(1, 180, BucketType.user)

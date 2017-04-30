@@ -245,7 +245,7 @@ class Stats:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
-    async def stats(self, ctx, member: discord.Member = None):
+    async def battlestats(self, ctx, member: discord.Member = None):
         """Prints the battling stats for you, or the user provided
 
         EXAMPLE: !stats @OtherPerson
