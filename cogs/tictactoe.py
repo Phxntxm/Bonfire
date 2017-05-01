@@ -229,7 +229,7 @@ class TicTacToe:
 
         # Create the board and return who has been decided to go first
         x_player = self.create(ctx.message.guild.id, player1, player2)
-        fmt = "A tictactoe game has just started between {} and {}".format(player1.display_name, player2.display_name)
+        fmt = "A tictactoe game has just started between {} and {}\n".format(player1.display_name, player2.display_name)
         # Print the board too just because
         fmt += str(self.boards[ctx.message.guild.id])
 
