@@ -3,6 +3,7 @@ import discord
 import random
 import re
 import math
+import glob
 from bs4 import BeautifulSoup as bs
 
 from . import utils
