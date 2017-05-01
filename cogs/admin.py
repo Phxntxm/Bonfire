@@ -3,7 +3,9 @@ from discord.ext import commands
 from . import utils
 
 import discord
+
 import re
+import rethinkdb as r
 
 class Administration:
     def __init__(self, bot):
