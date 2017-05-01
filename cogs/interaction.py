@@ -5,6 +5,7 @@ from . import utils
 
 import discord
 import random
+import functools
 
 battle_outcomes = \
     ["A meteor fell on {1}, {0} is left standing and has been declared the victor!",
@@ -85,6 +86,16 @@ class Interaction:
         # Format for battles: {'serverid': {'player1': 'player2', 'player1': 'player2'}}
         self.battles = {}
 
+    def get_battle(self, player):
+        battles = self.battles.get(player.guild.id)
+
+        if battles is None:
+            return None
+
+        for battle in battles:
+            if battle['p2'] == player.id:
+                return battle
+
     def can_battle(self, player):
         battles = self.battles.get(player.guild.id)
 
@@ -118,15 +129,18 @@ class Interaction:
         self.battles[player1.guild.id] = battles
 
     # Handles removing the author from the dictionary of battles
-    def battling_off(self, player):
+    def battling_off(self, player1=None, player2=None):
         battles = self.battles.get(player.guild.id, [])
         # Create a new list, exactly the way the last one was setup
         # But don't include the one start with player's ID
-        self.battles[player.guild.id] = [
-            x
-            for x in battles
-            if x['p1'] != player.id
-        ]
+        new_battles = []
+        for b in battles:
+            if player1 and b['p1'] == player1.id:
+                continue
+            if player2 and b['p2'] == player2.id:
+                continue
+            new_battles.append(b)
+        self.battles[player.guild.id] = new_battles
 
     @commands.command()
     @commands.guild_only()
@@ -174,7 +188,8 @@ class Interaction:
         fmt = "{0.message.author.mention} has challenged you to a battle {1.mention}\n" \
               "{0.prefix}accept or {0.prefix}decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
-        self.bot.loop.call_later(180, self.battling_off, ctx.message.author)
+        part = functools.partial(self.battling_off, player1=ctx.message.author)
+        self.bot.loop.call_later(180, part)
         await ctx.send(fmt.format(ctx, player2))
 
     @commands.command()
@@ -187,9 +202,8 @@ class Interaction:
         RESULT: Hopefully the other person's death"""
         # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle
-        battles = self.battles.get(ctx.message.guild.id) or {}
-        p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
-        if len(p1) == 0:
+        battle = self.get_battle(ctx.message.author)
+        if battle is None:
             await ctx.send("You are not currently being challenged to a battle!")
             return
 
@@ -203,7 +217,7 @@ class Interaction:
         # Get a random win message from our list
         fmt = random.SystemRandom().choice(battle_outcomes)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
-        self.battling_off(ctx.message.author)
+        self.battling_off(player2=ctx.message.author)
 
         # Randomize the order of who is printed/sent to the update system
         # All we need to do is change what order the challengers are printed/added as a paramater
@@ -224,9 +238,8 @@ class Interaction:
         RESULT: You chicken out"""
         # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle
-        battles = self.battles.get(ctx.message.guild.id) or {}
-        p1 = [p1_id for p1_id, p2_id in battles.items() if p2_id == ctx.message.author.id]
-        if len(p1) == 0:
+        battle = self.get_battle(ctx.message.author)
+        if battle is None:
             await ctx.send("You are not currently being challenged to a battle!")
             return
 
@@ -238,7 +251,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # There's no need to update the stats for the members if they declined the battle
-        self.battling_off(ctx)
+        self.battling_off(player2=ctx)
         await ctx.send("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
 
     @commands.command()
