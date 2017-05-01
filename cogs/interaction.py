@@ -86,7 +86,7 @@ class Interaction:
         self.battles = {}
 
     def can_battle(self, player):
-        battles = self.battles.get(ctx.message.guild.id)
+        battles = self.battles.get(player.guild.id)
 
         if battles is None:
             return True
@@ -97,7 +97,7 @@ class Interaction:
         return True
 
     def can_be_battled(self, player):
-        battles = self.battles.get(ctx.message.guild.id)
+        battles = self.battles.get(player.guild.id)
 
         if battles is None:
             return True
@@ -108,21 +108,21 @@ class Interaction:
         return True
 
 
-    def start_battle(self, guild, player1, player2):
-        battles = self.battles.get(guild.id, [])
+    def start_battle(self, player1, player2):
+        battles = self.battles.get(player1.guild.id, [])
         entry = {
             'p1': player1.id,
             'p2': player2.id
         }
         battles.append(entry)
-        self.battles[guild.id] = battles
+        self.battles[player1.guild.id] = battles
 
     # Handles removing the author from the dictionary of battles
     def battling_off(self, player):
-        battles = self.battles.get(ctx.message.guild.id, [])
+        battles = self.battles.get(player.guild.id, [])
         # Create a new list, exactly the way the last one was setup
         # But don't include the one start with player's ID
-        self.battles[ctx.message.guild.id] = [
+        self.battles[player.guild.id] = [
             x
             for x in battles
             if x['p1'] != player.id
