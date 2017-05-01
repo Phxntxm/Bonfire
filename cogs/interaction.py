@@ -85,29 +85,48 @@ class Interaction:
         # Format for battles: {'serverid': {'player1': 'player2', 'player1': 'player2'}}
         self.battles = {}
 
-    def user_battling(self, ctx, player2=None):
-        battling = self.battles.get(ctx.message.guild.id)
+    def can_battle(self, player):
+        battles = self.battles.get(ctx.message.guild.id)
 
-        # If no one is battling, obviously the user is not battling
-        if battling is None:
-            return False
-        # Check if the author is battling
-        if ctx.message.author.id in battling.values() or ctx.message.author.id in battling.keys():
+        if battles is None:
             return True
-        # Check if the player2 was provided, if they are check if they're in the list
-        if player2 and (player2.id in battling.values() or player2.id in battling.keys()):
+
+        for x in battles:
+            if x['p1'] = player.id:
+                return False
+        return True
+
+    def can_be_battled(self, player):
+        battles = self.battles.get(ctx.message.guild.id)
+
+        if battles is None:
             return True
-        # If neither are found, no one is battling
-        return False
+
+        for x in battles:
+            if x['p2'] = player.id:
+                return False
+        return True
+
+
+    def start_battle(self, guild, player1, player2):
+        battles = self.battles.get(guild.id, [])
+        entry = {
+            'p1': player1.id,
+            'p2': player2.id
+        }
+        battles.append(entry)
+        self.battles[guild.id] = battles
 
     # Handles removing the author from the dictionary of battles
-    def battling_off(self, ctx):
-        battles = self.battles.get(ctx.message.guild.id) or {}
-        player_id = ctx.message.author.id
-        # Create a new dictionary, exactly the way the last one was setup
-        # But don't include any that have the author's ID
-        self.battles[ctx.message.guild.id] = {p1: p2 for p1, p2 in battles.items() if
-                                              not p2 == player_id and not p1 == player_id}
+    def battling_off(self, player):
+        battles = self.battles.get(ctx.message.guild.id, [])
+        # Create a new list, exactly the way the last one was setup
+        # But don't include the one start with player's ID
+        self.battles[ctx.message.guild.id] = [
+            x
+            for x in battles
+            if x['p1'] != player.id
+        ]
 
     @commands.command()
     @commands.guild_only()
@@ -140,20 +159,22 @@ class Interaction:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("I always win, don't even try it.")
             return
-        if self.user_battling(ctx, player2):
+        if not self.can_battle(ctx.message.author):
             ctx.command.reset_cooldown(ctx)
-            await ctx.send("You or the person you are trying to battle is already in a battle!")
+            await ctx.send("You are already battling someone!")
+            return
+        if not self.can_be_battled(player2):
+            ctx.command.reset_cooldown(ctx)
+            await ctx.send("{} is already being challenged to a battle!")
             return
 
         # Add the author and player provided in a new battle
-        battles = self.battles.get(ctx.message.guild.id) or {}
-        battles[ctx.message.author.id] = player2.id
-        self.battles[ctx.message.guild.id] = battles
+        self.start_battle(ctx.message.guild, ctx.message.author, player2)
 
         fmt = "{0.message.author.mention} has challenged you to a battle {1.mention}\n" \
               "{0.prefix}accept or {0.prefix}decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
-        self.bot.loop.call_later(180, self.battling_off, ctx)
+        self.bot.loop.call_later(180, self.battling_off, ctx.message.author)
         await ctx.send(fmt.format(ctx, player2))
 
     @commands.command()
@@ -182,7 +203,7 @@ class Interaction:
         # Get a random win message from our list
         fmt = random.SystemRandom().choice(battle_outcomes)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
-        self.battling_off(ctx)
+        self.battling_off(ctx.message.author)
 
         # Randomize the order of who is printed/sent to the update system
         # All we need to do is change what order the challengers are printed/added as a paramater
