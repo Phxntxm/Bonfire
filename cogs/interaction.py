@@ -169,7 +169,7 @@ class Interaction:
             return
 
         # Add the author and player provided in a new battle
-        self.start_battle(ctx.message.guild, ctx.message.author, player2)
+        self.start_battle(ctx.message.author, player2)
 
         fmt = "{0.message.author.mention} has challenged you to a battle {1.mention}\n" \
               "{0.prefix}accept or {0.prefix}decline"
