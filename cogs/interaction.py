@@ -103,7 +103,7 @@ class Interaction:
             return True
 
         for x in battles:
-            if x['p2'] = player.id:
+            if x['p2'] == player.id:
                 return False
         return True
 
