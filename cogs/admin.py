@@ -7,6 +7,8 @@ import discord
 import re
 import rethinkdb as r
 
+valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
+
 class Administration:
     def __init__(self, bot):
         self.bot = bot

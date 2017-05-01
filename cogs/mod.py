@@ -7,9 +7,6 @@ import re
 import asyncio
 import rethinkdb as r
 
-valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
-
-
 class Moderation:
     """Commands that can be used by a or an admin, depending on the command"""
 
