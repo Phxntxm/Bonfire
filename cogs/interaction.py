@@ -130,7 +130,11 @@ class Interaction:
 
     # Handles removing the author from the dictionary of battles
     def battling_off(self, player1=None, player2=None):
-        battles = self.battles.get(player.guild.id, [])
+        if player1:
+            guild = player1.guild.id
+        elif player2:
+            guild = player2.guild.id
+        battles = self.battles.get(guild, [])
         # Create a new list, exactly the way the last one was setup
         # But don't include the one start with player's ID
         new_battles = []
@@ -140,7 +144,7 @@ class Interaction:
             if player2 and b['p2'] == player2.id:
                 continue
             new_battles.append(b)
-        self.battles[player.guild.id] = new_battles
+        self.battles[guild] = new_battles
 
     @commands.command()
     @commands.guild_only()
