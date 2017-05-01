@@ -207,7 +207,7 @@ class Interaction:
             await ctx.send("You are not currently being challenged to a battle!")
             return
 
-        battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.guild.members)
+        battleP1 = discord.utils.find(lambda m: m.id == battle['p1'], ctx.message.guild.members)
         if battleP1 is None:
             await ctx.send("The person who challenged you to a battle has apparently left the server....why?")
             return
@@ -243,7 +243,7 @@ class Interaction:
             await ctx.send("You are not currently being challenged to a battle!")
             return
 
-        battleP1 = discord.utils.find(lambda m: m.id == p1[0], ctx.message.guild.members)
+        battleP1 = discord.utils.find(lambda m: m.id == battle['p1'], ctx.message.guild.members)
         if battleP1 is None:
             await ctx.send("The person who challenged you to a battle has apparently left the server....why?")
             return
