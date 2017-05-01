@@ -63,7 +63,7 @@ class Miscallaneous:
 
         try:
             pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
-            pages.embed.set_thumbnail(url=ctx.message.guild.me.avatar_url)
+            pages.embed.set_thumbnail(url=self.bot.user.avatar_url)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
