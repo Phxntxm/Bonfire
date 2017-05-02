@@ -255,8 +255,8 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # There's no need to update the stats for the members if they declined the battle
-        self.battling_off(player2=ctx)
-        await ctx.send("{0} has chickened out! What a loser~".format(battleP2.mention, battleP1.mention))
+        self.battling_off(player2=battleP1)
+        await ctx.send("{} has chickened out! What a loser~".format(battleP2.mention))
 
     @commands.command()
     @commands.guild_only()
