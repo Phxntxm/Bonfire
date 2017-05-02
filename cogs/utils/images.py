@@ -1,19 +1,17 @@
-import aiohttp
-import datetime
 import os
-from shutil import copyfile
 from io import BytesIO
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from . import utilities
 
 base_path = "images/banner/base"
-whitneyMedium = "/usr/share/fonts/whitney-medium.ttf"
-whitneyBold = "/usr/share/fonts/whitney-bold.ttf"
+whitneyMedium = "../fonts/whitney-medium.ttf"
+whitneyBold = "../fonts/whitney-bold.ttf"
 header_height = 125
 canvas_height = 145
 banner_background = "{}/bannerTop2.png".format(base_path)
 banner_bot = "{}/bannerBot.png".format(base_path)
+
 
 def convert_to_file(img):
     """Converts a Pillow image to a file-like object"""
@@ -23,6 +21,7 @@ def convert_to_file(img):
     # In order to use the file, we need to seek back to the 0th position
     new_file.seek(0)
     return new_file
+
 
 async def create_banner(member, image_title, data):
     """Creates a banner based on the options passed
