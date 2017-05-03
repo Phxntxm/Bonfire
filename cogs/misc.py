@@ -258,17 +258,11 @@ class Miscallaneous:
 
         EXAMPLE: !joke
         RESULT: An absolutely terrible joke."""
-        # Use the fortune riddles command because it's funny, I promise
-        fortune_command = "/usr/bin/fortune riddles"
-        while True:
-            try:
-                fortune = subprocess.check_output(
-                    fortune_command.split()).decode("utf-8")
-                await ctx.send(fortune)
-            except discord.HTTPException:
-                pass
-            else:
-                break
+        joke = await utils.request('http://tambal.azurewebsites.net/joke/random')
+        if joke is not None and 'joke' in joke:
+            await ctx.send(joke.get('joke'))
+        else:
+            await ctx.send("Sorry, I'm not feeling funny right now...try later")
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
