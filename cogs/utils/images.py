@@ -5,8 +5,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from . import utilities
 
 base_path = "images/banner/base"
-whitneyMedium = "../fonts/whitney-medium.ttf"
-whitneyBold = "../fonts/whitney-bold.ttf"
+whitneyMedium = "fonts/whitney-medium.ttf"
+whitneyBold = "fonts/whitney-bold.ttf"
 header_height = 125
 canvas_height = 145
 banner_background = "{}/bannerTop2.png".format(base_path)
