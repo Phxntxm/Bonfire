@@ -236,9 +236,11 @@ class Picarto:
 
         EXAMPLE: !picarto notify on
         RESULT: Notifications are sent when you go live"""
-        await utils.update_content('picarto', {'notifications_on': 1}, str(ctx.message.author.id))
-        await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
-            ctx.message.author.mention))
+        if await utils.update_content('picarto', {'notifications_on': 1}, str(ctx.message.author.id)):
+            await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
+                ctx.message.author.mention))
+        else:
+            await ctx.send("I can't notify if you go live if I don't know your picarto URL yet!")
 
     @notify.command(name='off', aliases=['stop,no'], pass_context=True)
     @utils.custom_perms(send_messages=True)
@@ -247,11 +249,14 @@ class Picarto:
 
         EXAMPLE: !picarto notify off
         RESULT: No more notifications sent when you go live"""
-        await utils.update_content('picarto', {'notifications_on': 0}, str(ctx.message.author.id))
-        await ctx.send(
-            "I will not notify if you go live anymore {}, "
-            "are you going to stream some lewd stuff you don't want people to see?~".format(
-                ctx.message.author.mention))
+        if await utils.update_content('picarto', {'notifications_on': 0}, str(ctx.message.author.id)):
+            await ctx.send(
+                "I will not notify if you go live anymore {}, "
+                "are you going to stream some lewd stuff you don't want people to see?~".format(
+                    ctx.message.author.mention))
+        else:
+            await ctx.send(
+                "I mean, I'm already not going to notify anyone, because I don't have your picarto URL saved...")
 
 
 def setup(bot):
