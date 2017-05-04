@@ -369,7 +369,7 @@ class Roles:
 
     @assigns.command(name='me')
     @commands.guild_only()
-    @commands.check(utils.is_owner)
+    @utils.custom_perms(send_messages=True)
     async def _me_assigns(self, ctx, *role: discord.Role):
         """Assigns the provided role(s) to you, if they can be assigned
 
