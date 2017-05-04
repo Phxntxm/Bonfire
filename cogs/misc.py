@@ -182,26 +182,35 @@ class Miscallaneous:
         # Add the normal values
         embed.add_field(name='Total Servers', value=len(self.bot.guilds))
         embed.add_field(name='Total Members', value=len(self.bot.users))
+        hm = self.bot.get_cog('Hangman')
+        ttt = self.bot.get_cog('TicTacToe')
+        bj = self.bot.get_cog('Blackjack')
+        interaction = self.bot.get_cog('Blackjack')
+        music = self.bot.get_cog('Music')
 
         # Count the variable values; hangman, tictactoe, etc.
-        hm_games = len(self.bot.get_cog('Hangman').games)
-
-        ttt_games = len(self.bot.get_cog('TicTacToe').boards)
-
-        bj_games = len(self.bot.get_cog('Blackjack').games)
-
-        count_battles = 0
-        for battles in self.bot.get_cog('Interaction').battles.values():
-            count_battles += len(battles)
-
-        if hm_games:
-            embed.add_field(name='Total Hangman games running', value=hm_games)
-        if ttt_games:
-            embed.add_field(name='Total TicTacToe games running', value=ttt_games)
-        if count_battles:
-            embed.add_field(name='Total battles games running', value=count_battles)
-        if bj_games:
-            embed.add_field(name='Total blackjack games running', value=bj_games)
+        if hm:
+            hm_games = len(hm.games)
+            if hm_games:
+                embed.add_field(name='Total Hangman games running', value=hm_games)
+        if ttt:
+            ttt_games = len(ttt.boards)
+            if ttt_games:
+                embed.add_field(name='Total TicTacToe games running', value=ttt_games)
+        if bj:
+            bj_games = len(bj.games)
+            if bj_games:
+                embed.add_field(name='Total blackjack games running', value=bj_games)
+        if interaction:
+            count_battles = 0
+            for battles in self.bot.get_cog('Interaction').battles.values():
+                count_battles += len(battles)
+            if count_battles:
+                embed.add_field(name='Total battles games running', value=count_battles)
+        if music:
+            songs = len([x for x in music.voice_states.values() if x.playing])
+            if songs:
+                embed.add_field(name='Total songs playing', value=songs)
 
         if hasattr(self.bot, 'uptime'):
             embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
