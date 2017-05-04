@@ -367,7 +367,7 @@ class Roles:
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
 
-    @assigns.command(name='list')
+    @assigns.command(name='remove')
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def _remove_assigns(self, ctx, *role: discord.Role):
