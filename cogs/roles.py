@@ -302,7 +302,7 @@ class Roles:
         fmt = "\n".join(m.display_name for m in msg.mentions)
         await ctx.send("I have just added the role {} to: ```\n{}```".format(name, fmt))
 
-    @commands.group(invoke_without_command=True, aliases=['assign'])
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def assign(self, ctx, *role: discord.Role):
