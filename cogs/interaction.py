@@ -83,7 +83,6 @@ class Interaction:
 
     def __init__(self, bot):
         self.bot = bot
-        # Format for battles: {'serverid': {'player1': 'player2', 'player1': 'player2'}}
         self.battles = {}
 
     def get_battle(self, player):
