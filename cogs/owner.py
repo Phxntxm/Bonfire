@@ -142,7 +142,7 @@ class Owner:
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def sendtochannel(self, ctx, cid, message):
+    async def sendtochannel(self, ctx, cid: int, message):
         """Sends a message to a provided channel, by ID"""
         channel = self.bot.get_channel(cid)
         await channel.send(message)
