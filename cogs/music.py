@@ -362,7 +362,8 @@ class Music:
         """Sets the volume of the currently playing song."""
 
         state = self.voice_states.get(ctx.message.guild.id)
-        value = value / 100
+        if value:
+            value = value / 100
         if state is None or state.voice is None:
             await ctx.send("I need to be in a channel before my volume can be set")
         elif value is None:
