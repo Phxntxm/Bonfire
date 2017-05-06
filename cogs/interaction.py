@@ -183,7 +183,7 @@ class Interaction:
             return
         if not self.can_be_battled(player2):
             ctx.command.reset_cooldown(ctx)
-            await ctx.send("{} is already being challenged to a battle!")
+            await ctx.send("{} is already being challenged to a battle!".format(player2))
             return
 
         # Add the author and player provided in a new battle
@@ -255,7 +255,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # There's no need to update the stats for the members if they declined the battle
-        self.battling_off(player2=battleP1)
+        self.battling_off(player2=battleP2)
         await ctx.send("{} has chickened out! What a loser~".format(battleP2.mention))
 
     @commands.command()
