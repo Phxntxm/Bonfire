@@ -24,6 +24,17 @@ class VoiceState:
         self.required_skips = 0
         self.skip_votes = set()
         self.audio_player = bot.loop.create_task(self.audio_player_task())
+        self._volume = 50
+
+    @property
+    def volume(self):
+        return self._volume
+
+    @volume.setter
+    def volume(self, v):
+        self._volume = v
+        if self.voice and self.voice.source:
+            self.voice.source.volume = v
 
     @property
     def voice(self):
@@ -57,7 +68,7 @@ class VoiceState:
                 before_options='-nostdin',
                 options='-vn -b:a 128k'
             )
-            source = PCMVolumeTransformer(source)
+            source = PCMVolumeTransformer(source, volume=self.volume)
             self.voice.play(source, after=self.after)
             self.current.start_time = time.time()
 
@@ -351,15 +362,16 @@ class Music:
         """Sets the volume of the currently playing song."""
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if state is None or state.voice is None or state.voice.source is None:
-            await ctx.send("Not playing anything right now, please set volume after playing something")
+        if value:
+            value = value / 100
+        if state is None or state.voice is None:
+            await ctx.send("I need to be in a channel before my volume can be set")
         elif value is None:
-            volume = state.voice.source.volume
-            await ctx.send("Current volume is {}".format(volume))
-        elif value > 200:
-            await ctx.send("Sorry but the max volume is 200")
-        elif state.playing:
-            state.voice.source.volume = value / 100
+            await ctx.send('Current volume is {:.0%}'.format(state.voice.source.volume))
+        elif value > 1.0:
+            await ctx.send("Sorry but the max volume is 100%")
+        else:
+            state.volume = value
             await ctx.send('Set the volume to {:.0%}'.format(state.voice.source.volume))
 
     @commands.command(pass_context=True)
