@@ -368,7 +368,7 @@ class Music:
     async def pause(self, ctx):
         """Pauses the currently played song."""
         state = self.voice_states.get(ctx.message.guild.id)
-        if state and state.playing:
+        if state and state.voice and state.voice.is_connected():
             state.voice.pause()
 
     @commands.command(pass_context=True)
@@ -377,7 +377,7 @@ class Music:
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.voice_states.get(ctx.message.guild.id)
-        if state and state.voice.is_connected():
+        if state and state.voice and state.voice.is_connected():
             state.voice.resume()
 
     @commands.command(pass_context=True)
