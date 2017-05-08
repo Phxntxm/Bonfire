@@ -303,6 +303,7 @@ class Music:
                            "voice activation`".format(channel.name))
             return False
 
+        log.info("Connecting to {} in {}".format(channel.id, ctx.message.guild.id))
         state = self.voice_states.get(ctx.message.guild.id)
         try:
             if state and state.voice and state.voice.channel:
@@ -396,7 +397,7 @@ class Music:
         state = self.voice_states.get(ctx.message.guild.id)
 
         # Stop playing whatever song is playing.
-        if state and state.voice and state.voice.is_connected():
+        if state and state.voice:
             state.voice.stop()
 
             state.songs.clear()
