@@ -68,7 +68,7 @@ class VoiceState:
 
             try:
                 self.current = await self.songs.get_next_entry()
-                await self.current.channel.send("Now playing {}".format())
+                await song.channel.send("Now playing {}".format(self.current))
             except ExtractionError as e:
                 await song.channel.send("Failed to download {}!\nError: {}".format(self.current.title, e))
                 continue
