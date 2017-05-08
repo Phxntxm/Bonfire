@@ -285,6 +285,8 @@ class URLPlaylistEntry(BasePlaylistEntry):
         # Fill in the simple things
         embed.add_field(name='Title', value=self.title, inline=False)
         embed.add_field(name='Requester', value=self.requester.display_name, inline=False)
+        if self.thumbnail:
+            embed.set_thumbnail(url=self.thumbnail)
         # Get the current length of the song and display this
         length = divmod(round(self.length, 0), 60)
         fmt = "{0[0]}m {0[1]}s".format(length)

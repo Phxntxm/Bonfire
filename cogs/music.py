@@ -68,7 +68,9 @@ class VoiceState:
 
             try:
                 self.current = await self.songs.get_next_entry()
-                await song.channel.send("Now playing {}".format(self.current))
+                embed = self.current.to_embed()
+                embed.title = "Now playing!"
+                await song.channel.send(embed=embed)
             except ExtractionError as e:
                 await song.channel.send("Failed to download {}!\nError: {}".format(self.current.title, e))
                 continue
@@ -333,7 +335,9 @@ class Music:
             if entry is None:
                 await ctx.send("Sorry but I couldn't download/find {}".format(song))
             else:
-                await ctx.send("Enqueued {}".format(entry))
+                embed = entry.to_embed()
+                embed.title = "Enqueued song!"
+                await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
     @commands.guild_only()
