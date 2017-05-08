@@ -72,7 +72,7 @@ class VoiceState:
                 embed.title = "Now playing!"
                 await song.channel.send(embed=embed)
             except ExtractionError as e:
-                await song.channel.send("Failed to download {}!\nError: {}".format(self.current.title, e))
+                await song.channel.send("Failed to download {}!\nError: {}".format(song.title, e))
                 continue
 
             source = FFmpegPCMAudio(
