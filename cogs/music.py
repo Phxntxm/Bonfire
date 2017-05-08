@@ -11,6 +11,10 @@ import asyncio
 import inspect
 import time
 import re
+import logging
+import traceback
+
+log = logging.getLogger()
 
 if not discord.opus.is_loaded():
     discord.opus.load_opus('/usr/lib64/libopus.so.0')
@@ -75,6 +79,11 @@ class VoiceState:
                 error = str(e).partition(" ")[2]
                 await song.channel.send("Failed to download {}!\nError: {}".format(song.title, error))
                 continue
+            except Exception as e:
+                await song.channel.send("Failed to download {}!".format(song.title))
+                log.error(traceback.format_exc())
+                continue
+
 
             source = FFmpegPCMAudio(
                 self.current.filename,
