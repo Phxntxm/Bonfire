@@ -37,7 +37,7 @@ class Playlist(EventEmitter):
         else:
             return 0
 
-    async def add_entry(self, song_url, requester, **meta):
+    async def add_entry(self, song_url, ctx, **meta):
         """
             Validates and adds a song_url to be played. This does not start the download of the song.
 
@@ -97,7 +97,8 @@ class Playlist(EventEmitter):
             self,
             song_url,
             info.get('title', 'Untitled'),
-            requester,
+            ctx,
+            info.get('thumbnail', None),
             info.get('duration', 0) or 0,
             self.downloader.ytdl.prepare_filename(info),
             **meta

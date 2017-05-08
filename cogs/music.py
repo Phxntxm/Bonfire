@@ -56,12 +56,22 @@ class VoiceState:
         self.current = None
 
     async def audio_player_task(self):
+        fmt = ""
         while True:
-            if self.playing or self.songs.peek() is None:
+            if self.playing:
+                await asyncio.sleep(1)
+                continue
+            song = self.songs.peek()
+            if song is None:
                 await asyncio.sleep(1)
                 continue
 
-            self.current = await self.songs.get_next_entry()
+            try:
+                self.current = await self.songs.get_next_entry()
+                await self.current.channel.send("Now playing {}".format())
+            except ExtractionError as e:
+                await song.channel.send("Failed to download {}!\nError: {}".format(self.current.title, e))
+                continue
 
             source = FFmpegPCMAudio(
                 self.current.filename,
