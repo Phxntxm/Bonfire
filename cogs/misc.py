@@ -38,6 +38,9 @@ class Miscallaneous:
         entries = []
 
         for cmd in utils.get_all_commands(self.bot):
+            if not await cmd.can_run(ctx):
+                continue
+
             cog = cmd.cog_name
             if cog in groups:
                 groups[cog].append(cmd)
