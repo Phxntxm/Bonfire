@@ -50,7 +50,11 @@ class Playlist(EventEmitter):
         try:
             info = await self.downloader.extract_info(self.loop, song_url, download=False)
         except Exception as e:
-            raise ExtractionError('Could not extract information from {}\n\n{}'.format(song_url, e))
+            if "gaierror" in str(e):
+                song_url = "ytsearch:" + song_url
+                info = await self.downloader.extract_info(self.loop, song_url, download=False)
+            else:
+                raise ExtractionError('Could not extract information from {}\n\n{}'.format(song_url, e))
 
         if not info:
             raise ExtractionError('Could not extract information from %s' % song_url)
