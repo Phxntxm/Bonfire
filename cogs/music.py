@@ -240,9 +240,8 @@ class Music:
         state.required_skips = math.ceil((num_members + 1) / 3)
 
     async def add_entry(self, song, ctx):
-        requester = ctx.message.author
         state = self.voice_states[ctx.message.guild.id]
-        entry, _ = await state.songs.add_entry(song, requester)
+        entry, _ = await state.songs.add_entry(song, ctx)
         return entry
 
     @commands.command(pass_context=True)
