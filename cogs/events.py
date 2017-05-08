@@ -2,6 +2,7 @@ from .utils import config
 import aiohttp
 import logging
 import json
+import discord
 
 log = logging.getLogger()
 
