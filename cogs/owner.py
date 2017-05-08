@@ -164,6 +164,7 @@ class Owner:
             'message': ctx.message,
             'server': ctx.message.guild,
             'channel': ctx.message.channel,
+            'guild': ctx.message.guild,
             'author': ctx.message.author
         }
 
