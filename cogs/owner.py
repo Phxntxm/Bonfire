@@ -33,6 +33,8 @@ class Owner:
         return content.strip('` \n')
 
     def get_syntax_error(self, e):
+        if e.text is None:
+            return '```py\n{0.__class__.__name__}: {0}\n```'.format(e)
         return '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
 
     @commands.command(hidden=True)
@@ -153,36 +155,50 @@ class Owner:
 
     @commands.command()
     @commands.check(utils.is_owner)
-    async def debug(self, ctx, *, code: str):
-        """Evaluates code."""
-        code = code.strip('` ')
-        python = '```py\n{}\n```'
-
+    async def debug(self, ctx, *, body: str):
         env = {
             'bot': self.bot,
             'ctx': ctx,
-            'message': ctx.message,
-            'server': ctx.message.guild,
             'channel': ctx.message.channel,
+            'author': ctx.message.author,
+            'server': ctx.message.guild,
             'guild': ctx.message.guild,
-            'author': ctx.message.author
+            'message': ctx.message,
+            '_': self._last_result
         }
 
         env.update(globals())
 
+        body = self.cleanup_code(body)
+        stdout = io.StringIO()
+
+        to_compile = 'async def func():\n%s' % textwrap.indent(body, '  ')
+
         try:
-            result = eval(code, env)
-            if inspect.isawaitable(result):
-                result = await result
+            exec(to_compile, env)
+        except SyntaxError as e:
+            return await ctx.send(self.get_syntax_error(e))
+
+        func = env['func']
+        try:
+            with redirect_stdout(stdout):
+                ret = await func()
         except Exception as e:
-            await ctx.send(python.format(type(e).__name__ + ': ' + str(e)))
-            return
-        try:
-            await ctx.send(python.format(result))
-        except discord.HTTPException:
-            await ctx.send("Result is too long for me to send")
-        except:
-            pass
+            value = stdout.getvalue()
+            await ctx.send('```py\n{}{}\n```'.format(value, traceback.format_exc()))
+        else:
+            value = stdout.getvalue()
+            try:
+                await ctx.message.add_reaction('\u2705')
+            except:
+                pass
+
+            if ret is None:
+                if value:
+                    await ctx.send('```py\n%s\n```' % value)
+            else:
+                self._last_result = ret
+                await ctx.send('```py\n%s%s\n```' % (value, ret))
 
     @commands.command()
     @commands.check(utils.is_owner)
