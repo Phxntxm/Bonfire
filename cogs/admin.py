@@ -9,6 +9,7 @@ import rethinkdb as r
 
 valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
 
+
 class Administration:
     def __init__(self, bot):
         self.bot = bot
@@ -92,7 +93,6 @@ class Administration:
         update = {'ignored': ignored}
         await utils.update_content('server_settings', update, key)
         await ctx.send(fmt)
-
 
     @commands.command()
     @commands.guild_only()
@@ -242,7 +242,6 @@ class Administration:
             pass
 
         await ctx.send("This channel is not registered as a 'nsfw' channel!")
-
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -405,7 +404,7 @@ class Administration:
                  'prefix': prefix}
 
         if not await utils.update_content('server_settings', entry, key):
-            await utils.add_content('prefixes', entry)
+            await utils.add_content('server_settings', entry)
 
         if prefix is None:
             fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
@@ -485,6 +484,7 @@ class Administration:
             await ctx.send("That is not a valid rule number, try running the command again.")
         else:
             await ctx.send("I have just removed that rule from your list of rules!")
+
 
 def setup(bot):
     bot.add_cog(Administration(bot))
