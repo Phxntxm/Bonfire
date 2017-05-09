@@ -121,7 +121,7 @@ class Music:
         index = 0
         message = None
         fmt = None
-        possible_reactions = ['\u27A1', '\u2B05', '\u2b06', '\u2b07', '\u274c']
+        possible_reactions = ['\u27A1', '\u2B05', '\u2b06', '\u2b07', '\u274c', '\u23ea', '\u23e9']
 
         # Our check to ensure the only one who reacts is the bot
         def check(react, u):
@@ -169,8 +169,10 @@ class Music:
                         pass
             else:
                 message = await channel.send(embed=embed)
+                await message.add_reaction('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE}')
                 await message.add_reaction('\N{LEFTWARDS BLACK ARROW}')
                 await message.add_reaction('\N{BLACK RIGHTWARDS ARROW}')
+                await message.add_reaction('\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}')
                 # The moderation tools that can be used
                 if author.guild_permissions.kick_members:
                     await message.add_reaction('\N{DOWNWARDS BLACK ARROW}')
@@ -235,6 +237,12 @@ class Music:
                         new_count = count - 1
                         if index >= new_count:
                             index = new_count - 1
+            # If first is clicked
+            elif '\u23ea':
+                index = 0
+            # If last is clicked
+            elif '\u23e9':
+                index = count - 1
             try:
                 await message.remove_reaction(reaction.emoji, user)
             except discord.Forbidden:
