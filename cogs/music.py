@@ -79,6 +79,8 @@ class VoiceState:
                 error = str(e).partition(" ")[2]
                 await song.channel.send("Failed to download {}!\nError: {}".format(song.title, error))
                 continue
+            except discord.Forbidden:
+                pass
             except Exception as e:
                 await song.channel.send("Failed to download {}!".format(song.title))
                 log.error(traceback.format_exc())
@@ -350,13 +352,18 @@ class Music:
             await ctx.send("You took too long!")
         except LiveStreamError as e:
             await ctx.send(str(e))
+        except WrongEntryTypeError:
+            await ctx.send("Cannot enqueue playlists at this time.")
         else:
-            if entry is None:
-                await ctx.send("Sorry but I couldn't download/find {}".format(song))
-            else:
-                embed = entry.to_embed()
-                embed.title = "Enqueued song!"
-                await ctx.send(embed=embed)
+            try:
+                if entry is None:
+                    await ctx.send("Sorry but I couldn't download/find {}".format(song))
+                else:
+                    embed = entry.to_embed()
+                    embed.title = "Enqueued song!"
+                    await ctx.send(embed=embed)
+            except discord.Forbidden:
+                pass
 
     @commands.command(pass_context=True)
     @commands.guild_only()
