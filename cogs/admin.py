@@ -54,16 +54,14 @@ class Administration:
         key = str(ctx.message.guild.id)
 
         converter = commands.converter.MemberConverter()
-        converter.prepare(ctx, member_or_channel)
         member = None
         channel = None
         try:
-            member = converter.convert()
+            member = await converter.convert(ctx, member_or_channel)
         except commands.converter.BadArgument:
             converter = commands.converter.TextChannelConverter()
-            converter.prepare(ctx, member_or_channel)
             try:
-                channel = converter.convert()
+                channel = await converter.convert(ctx, member_or_channel)
             except commands.converter.BadArgument:
                 await ctx.send("{} does not appear to be a member or channel!".format(member_or_channel))
                 return
@@ -105,16 +103,14 @@ class Administration:
         key = str(ctx.message.guild.id)
 
         converter = commands.converter.MemberConverter()
-        converter.prepare(ctx, member_or_channel)
         member = None
         channel = None
         try:
-            member = converter.convert()
+            member = await converter.convert(ctx, member_or_channel)
         except commands.converter.BadArgument:
             converter = commands.converter.TextChannelConverter()
-            converter.prepare(ctx, member_or_channel)
             try:
-                channel = converter.convert()
+                channel = await converter.convert(ctx, member_or_channel)
             except commands.converter.BadArgument:
                 await ctx.send("{} does not appear to be a member or channel!".format(member_or_channel))
                 return

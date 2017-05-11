@@ -134,9 +134,8 @@ class Osu:
                     limit = 5
             except:
                 converter = commands.converter.MemberConverter()
-                converter.prepare(ctx, piece)
                 try:
-                    member = converter.convert()
+                    member = await converter.convert(ctx, piece)
                 except commands.converter.BadArgument:
                     pass
 

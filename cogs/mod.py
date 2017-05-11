@@ -75,9 +75,8 @@ class Moderation:
         else:
             # If no ID was provided, lets try to convert what was given using the internal coverter
             converter = commands.converter.MemberConverter()
-            converter.prepare(ctx, member)
             try:
-                member = converter.convert()
+                member = await converter.convert(ctx, member)
             except commands.converter.BadArgument:
                 await ctx.send(
                     '{} does not appear to be a valid member. If this member is not in this server, please provide '
