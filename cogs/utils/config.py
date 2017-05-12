@@ -10,6 +10,7 @@ global_config = {}
 try:
     with open("config.yml", "r") as f:
         global_config = yaml.safe_load(f)
+        global_config = {k: v if isinstance(v, str) and len(v) != 0 else None for k, v in global_config.items()}
 except FileNotFoundError:
     print("You have no config file setup! Please use config.yml.sample to setup a valid config file")
     quit()
@@ -18,13 +19,6 @@ try:
     bot_token = global_config["bot_token"]
 except KeyError:
     print("You have no bot_token saved, this is a requirement for running a bot.")
-    print("Please use config.yml.sample to setup a valid config file")
-    quit()
-
-try:
-    owner_ids = global_config["owner_id"]
-except KeyError:
-    print("You have no owner_id saved! You're not going to be able to run certain commands without this.")
     print("Please use config.yml.sample to setup a valid config file")
     quit()
 
