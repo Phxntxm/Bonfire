@@ -378,12 +378,12 @@ class Music:
         if state is None or state.voice is None:
             await ctx.send("I need to be in a channel before my volume can be set")
         elif value is None:
-            await ctx.send('Current volume is {:.0%}'.format(state.voice.source.volume))
+            await ctx.send('Current volume is {:.0%}'.format(state.volume))
         elif value > 1.0:
             await ctx.send("Sorry but the max volume is 100%")
         else:
             state.volume = value
-            await ctx.send('Set the volume to {:.0%}'.format(state.voice.source.volume))
+            await ctx.send('Set the volume to {:.0%}'.format(state.volume))
 
     @commands.command(pass_context=True)
     @commands.guild_only()
