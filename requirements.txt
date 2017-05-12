@@ -5,5 +5,5 @@ ruamel.yaml
 youtube-dl
 psutil
 pendulum
--e git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]@be2e706b2add43b88be8e5e480628cd64adbad60
--e git+https://github.com/khazhyk/osuapi.git
+-e git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]
+-e git+https://github.com/khazhyk/osuapi.git#egg=osuapi
