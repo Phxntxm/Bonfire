@@ -3,6 +3,8 @@ import asyncio
 import functools
 import youtube_dl
 
+from .. import utils
+
 from concurrent.futures import ThreadPoolExecutor
 
 def match_filter(info_dict):
@@ -25,6 +27,7 @@ ytdl_format_options = {
     'match_filter': match_filter,
     'no_warnings': True,
     'default_search': 'auto',
+    'proxy': utils.ytdl_proxy,
     'source_address': '0.0.0.0'
 }
 
