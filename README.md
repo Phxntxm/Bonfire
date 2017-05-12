@@ -1,6 +1,8 @@
 # Bonfire
 
-This is for a Discord bot using the discord.py wrapper made for fun, used in a couple of my own servers.
+![fuyu approved](https://img.shields.io/badge/fuyu-approved-green.svg)
+
+This is for a Discord bot using the discord.py wrapper made for fun, used in a couple of my own servers that somehow got popular I guess?
 
 If you'd like to add this bot to one of your own servers, please visit the following URL:
 https://discordapp.com/oauth2/authorize?client_id=183748889814237186&scope=bot&permissions=0
@@ -28,7 +30,7 @@ The only required file to modify would be the config.yml.sample file. The entrie
 - discord_bots_key: The key for the [bots.discord.pw site](https://bots.discord.pw/#g=1), if you don't have a key just leave it blank, it should fail and log the failure
 - carbon_key: The key used for the [carbonitex site](https://www.carbonitex.net/discord/bots)
 - twitch_key: The twitch token that is used for the API calls
-- youtube_dl_proxy: A URL that can be used to proxy the calls youtube_dl goes through. Useful if your server is in a location that has many youtube videos blocked. 
+- youtube_dl_proxy: A URL that can be used to proxy the calls youtube_dl goes through. Useful if your server is in a location that has many youtube videos blocked.
 - youtube_key: The key used for youtube API calls
 - osu_key: The key used for Osu API calls
 - db_*: This is the information for the rethinkdb database.
