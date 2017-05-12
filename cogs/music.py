@@ -345,6 +345,7 @@ class Music:
                 return
 
         song = re.sub('[<>\[\]]', '', song)
+        song = re.sub('[\\\/]', '', song)
 
         try:
             entry = await self.add_entry(song, ctx)
