@@ -28,6 +28,9 @@ async def on_ready():
 
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
+    if not hasattr(bot, 'owner'):
+        appinfo = await bot.application_info()
+        bot.owner = appinfo.owner
     await utils.db_check()
 
 

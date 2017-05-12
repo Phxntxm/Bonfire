@@ -63,7 +63,7 @@ async def db_check():
 
 
 def is_owner(ctx):
-    return ctx.message.author.id in config.owner_ids
+    return ctx.bot.owner.id == ctx.message.author.id
 
 
 def should_ignore(message):
