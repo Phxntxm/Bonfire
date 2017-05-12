@@ -50,7 +50,7 @@ class Playlist(EventEmitter):
         try:
             info = await self.downloader.extract_info(self.loop, song_url, download=False)
         except Exception as e:
-            if "gaierror" in str(e):
+            if "gaierror" in str(e) or "unknown url type" in str(e):
                 song_url = "ytsearch:" + song_url
                 info = await self.downloader.extract_info(self.loop, song_url, download=False)
             else:
