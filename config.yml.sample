@@ -9,6 +9,7 @@ twitch_key: 'key'
 youtube_key: 'key'
 osu_key: 'key'
 dev_server: 'https://discord.gg/123456'
+youtube_dl_proxy: 'https://myproxy.proxy:1234'
 
 user_agent: 'User-Agent/1.0.0 (Comment like link to site)'
 

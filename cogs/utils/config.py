@@ -10,7 +10,7 @@ global_config = {}
 try:
     with open("config.yml", "r") as f:
         global_config = yaml.safe_load(f)
-        global_config = {k: v if isinstance(v, str) and len(v) != 0 else None for k, v in global_config.items()}
+        global_config = {k: v for k, v in global_config.items() if v}
 except FileNotFoundError:
     print("You have no config file setup! Please use config.yml.sample to setup a valid config file")
     quit()
@@ -56,7 +56,9 @@ lol_key = global_config.get('lol_key', '')
 # The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
 # The User-Agent that we'll use for most requests
-user_agent = global_config.get('user_agent', "")
+user_agent = global_config.get('user_agent', None)
+# The URL to proxy youtube_dl's requests through
+ytdl_proxy = global_config.get('youtube_dl_proxy', None)
 # The extensions to load
 extensions = ['cogs.interaction', 'cogs.misc', 'cogs.mod', 'cogs.admin', 'cogs.images',
               'cogs.owner', 'cogs.stats', 'cogs.picarto', 'cogs.overwatch', 'cogs.links',
