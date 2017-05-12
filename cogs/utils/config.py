@@ -52,8 +52,6 @@ discord_bots_key = global_config.get('discord_bots_key', "")
 carbon_key = global_config.get('carbon_key', "")
 # The client ID for twitch requsets
 twitch_key = global_config.get('twitch_key', "")
-# The steam API key
-steam_key = global_config.get("steam_key", "")
 # The key for youtube API calls
 youtube_key = global_config.get("youtube_key", "")
 # The key for Osu API calls
@@ -61,19 +59,19 @@ osu_key = global_config.get('osu_key', '')
 # The key for League of Legends API calls
 lol_key = global_config.get('lol_key', '')
 # The keys needed for deviant art calls
-da_id = global_config.get("da_id", "")
-da_secret = global_config.get("da_secret", "")
 # The invite link for the server made for the bot
 dev_server = global_config.get("dev_server", "")
 # The User-Agent that we'll use for most requests
 user_agent = global_config.get('user_agent', "")
 # The extensions to load
-extensions = global_config.get('extensions', [])
+extensions = ['cogs.interaction', 'cogs.misc', 'cogs.mod', 'cogs.admin', 'cogs.images',
+              'cogs.owner', 'cogs.stats', 'cogs.picarto', 'cogs.overwatch', 'cogs.links',
+              'cogs.roles', 'cogs.tictactoe', 'cogs.hangman', 'cogs.events', 'cogs.raffle',
+              'cogs.twitch', 'cogs.blackjack', 'cogs.osu', 'cogs.tags', 'cogs.roulette', 'cogs.music']
+
 
 # The default status the bot will use
 default_status = global_config.get("default_status", None)
-# The URL that will be used to link to for the help command
-help_url = global_config.get("help_url", "")
 # The rethinkdb hostname
 db_host = global_config.get('db_host', 'localhost')
 # The rethinkdb database name

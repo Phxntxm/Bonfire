@@ -11,10 +11,6 @@ osu_key: 'key'
 dev_server: 'https://discord.gg/123456'
 
 user_agent: 'User-Agent/1.0.0 (Comment like link to site)'
-extensions: [cogs.cog1, cogs.cog2]
-
-shard_count: 1
-shard_id: 0
 
 db_host: 'localhost'
 db_name: 'Bot_Name'
