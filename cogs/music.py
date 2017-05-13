@@ -313,7 +313,6 @@ class Music:
                            "voice activation`".format(channel.name))
             return False
 
-        log.info("Connecting to {} in {}".format(channel.id, ctx.message.guild.id))
         state = self.voice_states.get(ctx.message.guild.id)
         try:
             if state and state.voice and state.voice.channel:
