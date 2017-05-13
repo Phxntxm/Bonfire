@@ -346,6 +346,11 @@ class Music:
 
         song = re.sub('[<>\[\]]', '', song)
         song = re.sub('[\\\/]', '', song)
+        if len (song) == 11:
+            # Youtube-dl will attempt to things with the length of 11 as a video ID
+            # If this is a search, this causes it to break
+            # Youtube will still succeed if this *is* an ID provided, if there's a . after
+            song += "."
 
         try:
             entry = await self.add_entry(song, ctx)
@@ -355,6 +360,12 @@ class Music:
             await ctx.send(str(e))
         except WrongEntryTypeError:
             await ctx.send("Cannot enqueue playlists at this time.")
+        except ExtractionError as e:
+            # The first entry is the "We couldn't download" printed by the exception
+            # The 2nd is the new line
+            # We want youtube_dl's error message, but just the first part, the actual "error"
+            error = e.message.split('\n')[2]
+            await ctx.send(error)
         else:
             try:
                 if entry is None:
@@ -429,8 +440,6 @@ class Music:
     @utils.custom_perms(send_messages=True)
     async def eta(self, ctx):
         """Provides an ETA on when your next song will play"""
-        # Note: There is no way to tell how long a song has been playing, or how long there is left on a song
-        # That is why this is called an "ETA"
         state = self.voice_states.get(ctx.message.guild.id)
         author = ctx.message.author
 
@@ -444,7 +453,7 @@ class Music:
             return
 
         # Start off by adding the remaining length of the current song
-        count = state.current.remaining
+        count = state.current.remaining or 0
         found = False
         # Loop through the songs in the queue, until the author is found as the requester
         # The found bool is used to see if we actually found the author, or we just looped through the whole queue
@@ -548,14 +557,15 @@ class Music:
             skip_count = len(state.skip_votes)
             embed.add_field(name='Skip Count', value='{}/{}'.format(skip_count, state.required_skips), inline=False)
             # Get the current progress and display this
-            progress = state.current.progress
             length = state.current.length
-            progress = divmod(round(progress, 0), 60)
-            length = divmod(round(length, 0), 60)
-            fmt = "{0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
-            embed.add_field(name='Progress', value=fmt, inline=False)
-            # And send the embed
-            await ctx.send(embed=embed)
+            if length:
+                progress = state.current.progress
+                progress = divmod(round(progress, 0), 60)
+                length = divmod(round(length, 0), 60)
+                fmt = "{0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
+                embed.add_field(name='Progress', value=fmt, inline=False)
+                # And send the embed
+                await ctx.send(embed=embed)
 
 
 def setup(bot):
