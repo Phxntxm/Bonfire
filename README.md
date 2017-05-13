@@ -20,7 +20,7 @@ In order to install the requirements for Bonfire you will first need to install 
 python -m pip install --upgrade -r requirements.txt
 ```
 
-The only required file to modify would be the config.yml.sample file. The entries are as follows:
+The only required file to modify would be the config.yml.sample file. Copy this file to config.yml and edit the entries as needed; the entries are as follows:
 
 - bot_token: The token that can be retrieved from the [bot's application page](https://discordapp.com/developers/applications/me)
 - owner_id: This is your ID, which can be retrieved by right clicking your name in the discord application, when developer mode is on
