@@ -344,7 +344,6 @@ class Music:
                 return
 
         song = re.sub('[<>\[\]]', '', song)
-        song = re.sub('[\\\/]', '', song)
         if len (song) == 11:
             # Youtube-dl will attempt to things with the length of 11 as a video ID
             # If this is a search, this causes it to break
