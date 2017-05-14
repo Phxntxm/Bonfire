@@ -308,6 +308,8 @@ class Music:
 
         perms = channel.permissions_for(ctx.message.guild.me)
 
+        log.info("Joining channel {} in guild {}".format(channel.id, ctx.message.guild.id))
+
         if not perms.connect or not perms.speak or not perms.use_voice_activation:
             await ctx.send("I do not have correct permissions in {}! Please turn on `connect`, `speak`, and `use "
                            "voice activation`".format(channel.name))
@@ -317,13 +319,10 @@ class Music:
         try:
             if state and state.voice and state.voice.channel:
                 await state.voice.move_to(channel)
-                await ctx.send("Joined {} and ready to play".format(channel.name))
-                return True
             else:
-                self.voice_states[ctx.message.guild.id] = VoiceState(ctx.message.guild, self.bot)
                 await channel.connect()
-                await ctx.send("Joined {} and ready to play".format(channel.name))
-                return True
+            self.voice_states[ctx.message.guild.id] = VoiceState(ctx.message.guild, self.bot)
+            return True
         except asyncio.TimeoutError:
             await ctx.send("Sorry, but I couldn't connect right now! Please try again later")
             return False
