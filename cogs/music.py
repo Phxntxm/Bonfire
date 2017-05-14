@@ -326,6 +326,12 @@ class Music:
         except asyncio.TimeoutError:
             await ctx.send("Sorry, but I couldn't connect right now! Please try again later")
             return False
+        except discord.ClientException:
+            if state.voice:
+                await state.voice.disconnect(force=True)
+                log.warning("Force cleared voice connection on guild {} after being stuck between connected/not connected".format(ctx.message.guild.id))
+                await channel.connect()
+
 
     @commands.command()
     @commands.guild_only()
