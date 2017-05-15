@@ -60,10 +60,28 @@ user_agent = global_config.get('user_agent', None)
 # The URL to proxy youtube_dl's requests through
 ytdl_proxy = global_config.get('youtube_dl_proxy', None)
 # The extensions to load
-extensions = ['cogs.interaction', 'cogs.misc', 'cogs.mod', 'cogs.admin', 'cogs.images',
-              'cogs.owner', 'cogs.stats', 'cogs.picarto', 'cogs.overwatch', 'cogs.links',
-              'cogs.roles', 'cogs.tictactoe', 'cogs.hangman', 'cogs.events', 'cogs.raffle',
-              'cogs.twitch', 'cogs.blackjack', 'cogs.osu', 'cogs.tags', 'cogs.roulette', 'cogs.music']
+extensions = [
+    'cogs.interaction',
+    'cogs.misc',
+    'cogs.mod',
+    'cogs.admin',
+    'cogs.images',
+    'cogs.owner',
+    'cogs.stats',
+    'cogs.picarto',
+    'cogs.overwatch',
+    'cogs.links',
+    'cogs.roles',
+    'cogs.tictactoe',
+    'cogs.hangman', 'cogs.events', 'cogs.raffle',
+    'cogs.twitch',
+    'cogs.blackjack',
+    'cogs.osu',
+    'cogs.tags',
+    'cogs.roulette',
+    'cogs.music',
+    'cogs.polls'
+]
 
 
 # The default status the bot will use
