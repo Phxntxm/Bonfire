@@ -328,7 +328,7 @@ class Music:
             return False
         except discord.ClientException:
             if channel.guild.voice_client:
-                await state.voice.disconnect(force=True)
+                await channel.guild.voice_client.disconnect(force=True)
                 log.warning("Force cleared voice connection on guild {} after being stuck between connected/not connected".format(ctx.message.guild.id))
                 await channel.connect()
 
