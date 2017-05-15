@@ -63,6 +63,8 @@ async def db_check():
 
 
 def is_owner(ctx):
+    if not hasattr(ctx.bot, "owner"):
+        return False
     return ctx.bot.owner.id == ctx.message.author.id
 
 
