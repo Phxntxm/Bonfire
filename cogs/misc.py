@@ -57,13 +57,19 @@ class Miscallaneous:
                     # I.e. the !command command. It's just a parent
                     continue
                 description = cmd.help.partition('\n')[0]
+                name_fmt = "{ctx.prefix}**{cmd.qualified_name}** {aliases}".format(
+                    ctx=ctx,
+                    cmd=cmd,
+                    aliases=cmd.aliases if len(cmd.aliases) > 0 else ""
+                )
                 entry['fields'].append({
-                    'name': "**{}**".format(cmd.qualified_name),
+                    'name': name_fmt,
                     'value': description,
                     'inline': False
                 })
             entries.append(entry)
 
+        entries = sorted(entries, key=lambda x: x['title'])
         try:
             pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
             pages.embed.set_thumbnail(url=self.bot.user.avatar_url)
