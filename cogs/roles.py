@@ -24,7 +24,11 @@ class Roles:
         RESULT: A list of all your roles"""
         # Simply get a list of all roles in this server and send them
         server_roles = [role.name for role in ctx.message.guild.roles if not role.is_default()]
-        await ctx.send("Your server's roles are: ```\n{}```".format("\n".join(server_roles)))
+        pages = utils.Pages(self.bot, message=ctx.message, entries=server_roles)
+        try:
+            await pages.paginate()
+        except utils.CannotPaginate as e:
+            await ctx.send(str(e))
 
     @role.command(name='remove')
     @commands.guild_only()
