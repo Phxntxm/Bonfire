@@ -23,8 +23,8 @@ class Roles:
         EXAMPLE: !role
         RESULT: A list of all your roles"""
         # Simply get a list of all roles in this server and send them
-        server_roles = [role.name for role in ctx.message.guild.roles if not role.is_default()]
-        pages = utils.Pages(self.bot, message=ctx.message, entries=server_roles)
+        entries = [r.name for r in ctx.guild.role_hierarchy[:-1]]
+        pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
         try:
             await pages.paginate()
         except utils.CannotPaginate as e:
