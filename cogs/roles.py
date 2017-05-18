@@ -24,6 +24,10 @@ class Roles:
         RESULT: A list of all your roles"""
         # Simply get a list of all roles in this server and send them
         entries = [r.name for r in ctx.guild.role_hierarchy[:-1]]
+        if len(entries) == 0:
+            await ctx.send("You do not have any roles setup on this server, other than the default role!")
+            return
+
         pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
         try:
             await pages.paginate()
@@ -92,7 +96,7 @@ class Roles:
         await ctx.send("I have just removed the following roles:```\n{}``` from the following members:"
                        "```\n{}```".format("\n".join(role_names), "\n".join([m.display_name for m in members])))
 
-    @role.command(name='add')
+    @role.command(name='add', aliases=['give', 'assign'])
     @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
     async def add_role(self, ctx):
