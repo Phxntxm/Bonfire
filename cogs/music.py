@@ -330,7 +330,7 @@ class Music:
             if channel.guild.voice_client:
                 await channel.guild.voice_client.disconnect(force=True)
                 log.warning("Force cleared voice connection on guild {} after being stuck between connected/not connected".format(ctx.message.guild.id))
-                await channel.connect()
+                await ctx.send("Sorry but I couldn't connect...try again?")
 
 
     @commands.command()
