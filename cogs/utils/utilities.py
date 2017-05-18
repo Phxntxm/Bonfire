@@ -34,10 +34,10 @@ def get_all_subcommands(command):
 
 
 async def channel_is_nsfw(channel):
-    if channel.is_nsfw():
-        return True
     if type(channel) is discord.DMChannel:
         server = 'DMs'
+    elif channel.is_nsfw():
+        return True
     else:
         server = str(channel.guild.id)
 
