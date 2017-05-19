@@ -274,7 +274,7 @@ class Music:
 
         # Make sure we're playing first
         state = self.voice_states.get(ctx.message.guild.id)
-        if state is None or not state.playing:
+        if state is None or not state.playing or state.current is None:
             await ctx.send('Not playing anything.')
         else:
             progress = state.current.progress
@@ -436,7 +436,10 @@ class Music:
             # Then erase the voice_state entirely, and disconnect from the channel
             state.audio_player.cancel()
             await state.voice.disconnect()
-            del self.voice_states[ctx.message.guild.id]
+            try:
+                del self.voice_states[ctx.message.guild.id]
+            except KeyError:
+                pass
 
     @commands.command(pass_context=True)
     @commands.guild_only()
