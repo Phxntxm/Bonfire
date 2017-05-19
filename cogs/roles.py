@@ -28,8 +28,8 @@ class Roles:
             await ctx.send("You do not have any roles setup on this server, other than the default role!")
             return
 
-        pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
         try:
+            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
