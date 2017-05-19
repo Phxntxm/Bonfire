@@ -60,6 +60,7 @@ class Miscallaneous:
                         # Assume if there's no description for a command, it's not supposed to be used
                         # I.e. the !command command. It's just a parent
                         continue
+
                     description = cmd.help.partition('\n')[0]
                     name_fmt = "{ctx.prefix}**{cmd.qualified_name}** {aliases}".format(
                         ctx=ctx,
@@ -85,9 +86,8 @@ class Miscallaneous:
             description = command.help
             if description is not None:
                 # Split into examples, results, and the description itself based on the string
-                example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
-                result = [x.replace('RESULT: ', '') for x in description.split('\n') if 'RESULT:' in x]
-                description = [x for x in description.split('\n') if x and 'EXAMPLE:' not in x and 'RESULT:' not in x]
+                description, _, rest = cmd.help.partition('EXAMPLE:')
+                example, _, result = rest.partition('RESULT:')
             else:
                 example = None
                 result = None
@@ -98,11 +98,11 @@ class Miscallaneous:
             embed = discord.Embed(title=command.qualified_name)
             embed.set_thumbnail(url=self.bot.user.avatar_url)
             if description:
-                embed.add_field(name="Description", value="\n".join(description), inline=False)
+                embed.add_field(name="Description", value=description.strip(), inline=False)
             if example:
-                embed.add_field(name="Example", value="\n".join(example), inline=False)
+                embed.add_field(name="Example", value=example.strip(), inline=False)
             if result:
-                embed.add_field(name="Result", value="\n".join(result), inline=False)
+                embed.add_field(name="Result", value=result.strip(), inline=False)
             if subcommands:
                 embed.add_field(name='Subcommands', value="\n".join(subcommands), inline=False)
 
