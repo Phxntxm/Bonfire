@@ -86,7 +86,7 @@ class Miscallaneous:
             description = command.help
             if description is not None:
                 # Split into examples, results, and the description itself based on the string
-                description, _, rest = cmd.help.partition('EXAMPLE:')
+                description, _, rest = command.help.partition('EXAMPLE:')
                 example, _, result = rest.partition('RESULT:')
             else:
                 example = None
