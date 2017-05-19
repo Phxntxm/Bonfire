@@ -2,16 +2,11 @@ import os
 import asyncio
 import functools
 import youtube_dl
+import discord
 
 from .. import utils
 
 from concurrent.futures import ThreadPoolExecutor
-
-def match_filter(info_dict):
-    if 'is_live' in info_dict and info_dict['is_live'] == True:
-        return "Cannot download live streams!"
-    return None
-
 
 ytdl_format_options = {
     'format': 'bestaudio/best',
@@ -24,7 +19,6 @@ ytdl_format_options = {
     'ignoreerrors': False,
     'logtostderr': False,
     'quiet': True,
-    'match_filter': match_filter,
     'no_warnings': True,
     'default_search': 'auto',
     'proxy': utils.ytdl_proxy,
