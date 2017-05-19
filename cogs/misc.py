@@ -27,7 +27,7 @@ class Miscallaneous:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
-    async def help(self, ctx, *, message=None):
+    async def help(self, ctx, *, command=None):
         """This command is used to provide a link to the help URL.
         This can be called on a command to provide more information about that command
         You can also provide a page number to pull up that page instead of the first page
@@ -37,45 +37,76 @@ class Miscallaneous:
         groups = {}
         entries = []
 
-        for cmd in utils.get_all_commands(self.bot):
-            if not await cmd.can_run(ctx):
-                continue
+        if command is not None:
+            command = self.bot.get_command(command)
 
-            cog = cmd.cog_name
-            if cog in groups:
-                groups[cog].append(cmd)
-            else:
-                groups[cog] = [cmd]
-
-        for cog, cmds in groups.items():
-            entry = {'title': "{} Commands".format(cog),
-                     'fields': []}
-
-            for cmd in cmds:
-                if not cmd.help:
-                    # Assume if there's no description for a command, it's not supposed to be used
-                    # I.e. the !command command. It's just a parent
+        if command is not None:
+            for cmd in utils.get_all_commands(self.bot):
+                if not await cmd.can_run(ctx):
                     continue
-                description = cmd.help.partition('\n')[0]
-                name_fmt = "{ctx.prefix}**{cmd.qualified_name}** {aliases}".format(
-                    ctx=ctx,
-                    cmd=cmd,
-                    aliases=cmd.aliases if len(cmd.aliases) > 0 else ""
-                )
-                entry['fields'].append({
-                    'name': name_fmt,
-                    'value': description,
-                    'inline': False
-                })
-            entries.append(entry)
 
-        entries = sorted(entries, key=lambda x: x['title'])
-        try:
-            pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
-            pages.embed.set_thumbnail(url=self.bot.user.avatar_url)
-            await pages.paginate()
-        except utils.CannotPaginate as e:
-            await ctx.send(str(e))
+                cog = cmd.cog_name
+                if cog in groups:
+                    groups[cog].append(cmd)
+                else:
+                    groups[cog] = [cmd]
+
+            for cog, cmds in groups.items():
+                entry = {'title': "{} Commands".format(cog),
+                         'fields': []}
+
+                for cmd in cmds:
+                    if not cmd.help:
+                        # Assume if there's no description for a command, it's not supposed to be used
+                        # I.e. the !command command. It's just a parent
+                        continue
+                    description = cmd.help.partition('\n')[0]
+                    name_fmt = "{ctx.prefix}**{cmd.qualified_name}** {aliases}".format(
+                        ctx=ctx,
+                        cmd=cmd,
+                        aliases=cmd.aliases if len(cmd.aliases) > 0 else ""
+                    )
+                    entry['fields'].append({
+                        'name': name_fmt,
+                        'value': description,
+                        'inline': False
+                    })
+                entries.append(entry)
+
+            entries = sorted(entries, key=lambda x: x['title'])
+            try:
+                pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
+                pages.embed.set_thumbnail(url=self.bot.user.avatar_url)
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+                    # Get the description for a command
+            description = cmd.help
+            if description is not None:
+                # Split into examples, results, and the description itself based on the string
+                example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
+                result = [x.replace('RESULT: ', '') for x in description.split('\n') if 'RESULT:' in x]
+                description = [x for x in description.split('\n') if x and 'EXAMPLE:' not in x and 'RESULT:' not in x]
+            else:
+                example = None
+                result = None
+            # Also get the subcommands for this command, if they exist
+            subcommands = [x for x in utils.get_subcommands(cmd) if x != cmd.qualified_name]
+
+            # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
+            embed = discord.Embed(title=cmd.qualified_name)
+            embed.set_thumbnail(url=self.bot.user.avatar_url)
+            if description:
+                embed.add_field(name="Description", value="\n".join(description), inline=False)
+            if example:
+                embed.add_field(name="Example", value="\n".join(example), inline=False)
+            if result:
+                embed.add_field(name="Result", value="\n".join(result), inline=False)
+            if subcommands:
+                embed.add_field(name='Subcommands', value="\n".join(subcommands), inline=False)
+
+            await ctx.send(embed=embed)
 
 
     @commands.command()
