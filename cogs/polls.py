@@ -73,8 +73,8 @@ class Polls:
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def poll(self, ctx, *, question):
-        """Sets up a poll based on the question that you have provided
-        Provide theq question on the first line and the options on the following lines
+        """Sets up a poll based on the question that you have provided.
+        Provide the question on the first line and the options on the following lines
 
         EXAMPLE: !poll This is my poll
         Option 1
