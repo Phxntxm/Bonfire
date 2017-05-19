@@ -37,6 +37,57 @@ class Owner:
             return '```py\n{0.__class__.__name__}: {0}\n```'.format(e)
         return '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
 
+    async def on_guild_join(self, guild):
+        # Create our embed that we'll use for the information
+        embed = discord.Embed(title="Joined guild {}".format(guild.name), description="Created on: {}".format(guild.created_at.date()))
+
+        # Make sure we only set the icon url if it has been set
+        if guild.icon_url != "":
+            embed.set_thumbnail(url=guild.icon_url)
+
+        # Add our fields, these are self-explanatory
+        embed.add_field(name='Region', value=str(guild.region))
+        embed.add_field(name='Total Emojis', value=len(guild.emojis))
+
+        # Get the amount of online members
+        online_members = [m for m in guild.members if str(m.status) == 'online']
+        embed.add_field(name='Total members', value='{}/{}'.format(len(online_members), guild.member_count))
+        embed.add_field(name='Roles', value=len(guild.roles))
+
+        # Split channels into voice and text channels
+        voice_channels = [c for c in guild.channels if type(c) is discord.VoiceChannel]
+        text_channels = [c for c in guild.channels if type(c) is discord.TextChannel]
+        embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
+        embed.add_field(name='Owner', value=guild.owner.display_name)
+
+        await self.bot.owner.send(embed=embed)
+
+    async def on_guild_remove(self, guild):
+        # Create our embed that we'll use for the information
+        embed = discord.Embed(title="Left guild {}".format(guild.name), description="Created on: {}".format(guild.created_at.date()))
+
+        # Make sure we only set the icon url if it has been set
+        if guild.icon_url != "":
+            embed.set_thumbnail(url=guild.icon_url)
+
+        # Add our fields, these are self-explanatory
+        embed.add_field(name='Region', value=str(guild.region))
+        embed.add_field(name='Total Emojis', value=len(guild.emojis))
+
+        # Get the amount of online members
+        online_members = [m for m in guild.members if str(m.status) == 'online']
+        embed.add_field(name='Total members', value='{}/{}'.format(len(online_members), guild.member_count))
+        embed.add_field(name='Roles', value=len(guild.roles))
+
+        # Split channels into voice and text channels
+        voice_channels = [c for c in guild.channels if type(c) is discord.VoiceChannel]
+        text_channels = [c for c in guild.channels if type(c) is discord.TextChannel]
+        embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
+        embed.add_field(name='Owner', value=guild.owner.display_name)
+
+        await self.bot.owner.send(embed=embed)
+
+
     @commands.command(hidden=True)
     @commands.check(utils.is_owner)
     async def repl(self, ctx):
