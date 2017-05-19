@@ -551,7 +551,7 @@ class Music:
         """Shows info about the currently played song."""
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if state is None or not state.playing:
+        if state is None or not state.playing or not state.current:
             await ctx.send('Not playing anything.')
         else:
             # Create the embed object we'll use
