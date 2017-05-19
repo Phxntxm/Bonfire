@@ -92,7 +92,7 @@ class Miscallaneous:
                 example = None
                 result = None
             # Also get the subcommands for this command, if they exist
-            subcommands = [x for x in utils.get_all_subcommands(command) if x != command]
+            subcommands = [x.qualified_name for x in utils.get_all_subcommands(command) if x != command]
 
             # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
             embed = discord.Embed(title=command.qualified_name)
