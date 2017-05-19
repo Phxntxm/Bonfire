@@ -40,7 +40,7 @@ class Miscallaneous:
         if command is not None:
             command = self.bot.get_command(command)
 
-        if command is not None:
+        if command is None:
             for cmd in utils.get_all_commands(self.bot):
                 if not await cmd.can_run(ctx):
                     continue
