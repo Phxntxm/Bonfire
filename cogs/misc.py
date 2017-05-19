@@ -82,7 +82,7 @@ class Miscallaneous:
                 await ctx.send(str(e))
         else:
                     # Get the description for a command
-            description = cmd.help
+            description = command.help
             if description is not None:
                 # Split into examples, results, and the description itself based on the string
                 example = [x.replace('EXAMPLE: ', '') for x in description.split('\n') if 'EXAMPLE:' in x]
@@ -92,10 +92,10 @@ class Miscallaneous:
                 example = None
                 result = None
             # Also get the subcommands for this command, if they exist
-            subcommands = [x for x in utils.get_subcommands(cmd) if x != cmd.qualified_name]
+            subcommands = [x for x in utils.get_all_subcommands(command) if x != command]
 
             # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
-            embed = discord.Embed(title=cmd.qualified_name)
+            embed = discord.Embed(title=command.qualified_name)
             embed.set_thumbnail(url=self.bot.user.avatar_url)
             if description:
                 embed.add_field(name="Description", value="\n".join(description), inline=False)
