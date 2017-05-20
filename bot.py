@@ -15,7 +15,8 @@ from cogs import utils
 opts = {'command_prefix': utils.command_prefix,
         'description': utils.bot_description,
         'pm_help': None,
-        'command_not_found': ''}
+        'command_not_found': '',
+        'game': discord.Game(name=utils.default_status, type=0)}
 
 bot = commands.AutoShardedBot(**opts)
 logging.basicConfig(level=logging.INFO, filename='bonfire.log')
@@ -23,15 +24,11 @@ logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 @bot.event
 async def on_ready():
-    # Change the status upon connection to the default status
-    await bot.change_presence(game=discord.Game(name=utils.default_status, type=0))
-
     if not hasattr(bot, 'uptime'):
         bot.uptime = pendulum.utcnow()
     if not hasattr(bot, 'owner'):
         appinfo = await bot.application_info()
         bot.owner = appinfo.owner
-    await utils.db_check()
 
 
 @bot.event
@@ -127,6 +124,7 @@ async def on_command_error(ctx, error):
 
 
 if __name__ == '__main__':
+    bot.loop.create_task(utils.db_check())
     bot.remove_command('help')
 
     for e in utils.extensions:
