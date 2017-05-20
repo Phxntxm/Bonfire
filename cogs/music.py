@@ -364,12 +364,17 @@ class Music:
         except WrongEntryTypeError:
             await ctx.send("Cannot enqueue playlists at this time.")
         except ExtractionError as e:
-            # The first entry is the "We couldn't download" printed by the exception
-            # The 2nd is the new line
-            # We want youtube_dl's error message, but just the first part, the actual "error"
-            error = e.message.split('\n')[2]
-            # This is colour formatting for the console...it's just going to show up as text on discord
-            error = error.strip("[0;31mERROR:[0m ")
+            error = e.message.split('\n')
+            if len(error) >= 3:
+                # The first entry is the "We couldn't download" printed by the exception
+                # The 2nd is the new line
+                # We want youtube_dl's error message, but just the first part, the actual "error"
+                error = error[2]
+                # This is colour formatting for the console...it's just going to show up as text on discord
+                error = error.strip("[0;31mERROR:[0m ")
+            else:
+                # This happens when the download just returns `None`
+                error = error[0]
             await ctx.send(error)
         else:
             try:
