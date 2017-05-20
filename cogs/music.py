@@ -368,6 +368,8 @@ class Music:
             # The 2nd is the new line
             # We want youtube_dl's error message, but just the first part, the actual "error"
             error = e.message.split('\n')[2]
+            # This is colour formatting for the console...it's just going to show up as text on discord
+            error = error.strip("[0;31mERROR:[0m ")
             await ctx.send(error)
         else:
             try:
