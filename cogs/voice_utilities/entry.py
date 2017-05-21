@@ -119,7 +119,7 @@ class URLPlaylistEntry(BasePlaylistEntry):
 
     @property
     def progress(self):
-        if self.start_time:
+        if hasattr(self, 'start_time') and self.start_time:
             return round(time.time() - self.start_time)
 
     @property
