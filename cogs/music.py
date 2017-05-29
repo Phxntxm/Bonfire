@@ -527,8 +527,11 @@ class Music:
     @utils.custom_perms(send_messages=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
-        await ctx.send("There are a total of {} songs in the queue"
-                       .format(len(self.voice_states.get(ctx.message.guild.id).songs.entries)))
+        state = self.voice_states.get(ctx.message.guild.id)
+        if state:
+            await ctx.send("There are a total of {} songs in the queue".format(len(state.songs.entries)))
+        else:
+            await ctx.send("There are no songs in the queue")
 
     @commands.command(pass_context=True)
     @commands.guild_only()
