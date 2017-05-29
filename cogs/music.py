@@ -8,7 +8,6 @@ from . import utils
 
 import math
 import asyncio
-import inspect
 import time
 import re
 import logging
@@ -60,7 +59,6 @@ class VoiceState:
         self.current = None
 
     async def audio_player_task(self):
-        fmt = ""
         while True:
             if self.playing:
                 await asyncio.sleep(1)
@@ -81,11 +79,10 @@ class VoiceState:
                 continue
             except discord.Forbidden:
                 pass
-            except Exception as e:
+            except:
                 await song.channel.send("Failed to download {}!".format(song.title))
                 log.error(traceback.format_exc())
                 continue
-
 
             source = FFmpegPCMAudio(
                 self.current.filename,
@@ -251,7 +248,8 @@ class Music:
                 pass
         await message.delete()
 
-    async def on_voice_state_update(self, member, before, after):
+    # noinspection PyUnusedLocal
+    async def on_voice_state_update(self, _, __, after):
         if after is None or after.channel is None:
             return
         state = self.voice_states.get(after.channel.guild.id)
@@ -265,6 +263,51 @@ class Music:
         state = self.voice_states[ctx.message.guild.id]
         entry, _ = await state.songs.add_entry(song, ctx)
         return entry
+
+    async def join_channel(self, channel):
+        state = self.voice_states.get(channel.guild.id)
+        log.info("Joining channel {} in guild {}".format(channel.id, channel.guild.id))
+
+        # Send a message letting the channel know we are attempting to join
+        try:
+            msg = await channel.send("Trying to join channel {}...".format(channel.name))
+        except discord.Forbidden:
+            msg = None
+
+        try:
+            # If we're already connected, try moving to the channel
+            if state and state.voice and state.voice.channel:
+                await state.voice.move_to(channel)
+            # Otherwise, try connecting
+            else:
+                await channel.connect()
+
+            # If we have connnected, create our voice state
+            self.voice_states[channel.guild.id] = VoiceState(channel.guild, self.bot)
+
+            # If we can send messages, edit it to let the channel know we have succesfully joined
+            if msg:
+                await msg.edit(content="Ready to play audio in channel {}".format(channel.name))
+            return True
+        # If we time out trying to join, just let them know and return False
+        except asyncio.TimeoutError:
+            if msg:
+                await msg.edit(content="Sorry, but I couldn't connect right now! Please try again later")
+            return False
+        # Theoretically this should never happen, however in rare cirumstances it does
+        # This error arises when we are already in a channel and don't use "move"
+        # We already checked if that existed above though, so this means the voice connection got stuck somewhere
+        except discord.ClientException:
+            if channel.guild.voice_client:
+                # Force a disconnection
+                await channel.guild.voice_client.disconnect(force=True)
+                # Log this so we can track it
+                log.warning(
+                    "Force cleared voice connection on guild {} after being stuck "
+                    "between connected/not connected".format(channel.guild.id))
+                # Let them know what happened
+                await channel.send("Sorry but I couldn't connect...try again?")
+                return False
 
     @commands.command(pass_context=True)
     @commands.guild_only()
@@ -308,30 +351,12 @@ class Music:
 
         perms = channel.permissions_for(ctx.message.guild.me)
 
-        log.info("Joining channel {} in guild {}".format(channel.id, ctx.message.guild.id))
-
         if not perms.connect or not perms.speak or not perms.use_voice_activation:
             await ctx.send("I do not have correct permissions in {}! Please turn on `connect`, `speak`, and `use "
                            "voice activation`".format(channel.name))
             return False
 
-        state = self.voice_states.get(ctx.message.guild.id)
-        try:
-            if state and state.voice and state.voice.channel:
-                await state.voice.move_to(channel)
-            else:
-                await channel.connect()
-            self.voice_states[ctx.message.guild.id] = VoiceState(ctx.message.guild, self.bot)
-            return True
-        except asyncio.TimeoutError:
-            await ctx.send("Sorry, but I couldn't connect right now! Please try again later")
-            return False
-        except discord.ClientException:
-            if channel.guild.voice_client:
-                await channel.guild.voice_client.disconnect(force=True)
-                log.warning("Force cleared voice connection on guild {} after being stuck between connected/not connected".format(ctx.message.guild.id))
-                await ctx.send("Sorry but I couldn't connect...try again?")
-
+        return await self.join_channel(channel)
 
     @commands.command()
     @commands.guild_only()
@@ -349,7 +374,7 @@ class Music:
                 return
 
         song = re.sub('[<>\[\]]', '', song)
-        if len (song) == 11:
+        if len(song) == 11:
             # Youtube-dl will attempt to things with the length of 11 as a video ID
             # If this is a search, this causes it to break
             # Youtube will still succeed if this *is* an ID provided, if there's a . after
@@ -395,7 +420,7 @@ class Music:
 
         state = self.voice_states.get(ctx.message.guild.id)
         if value:
-            value = value / 100
+            value /= 100
         if state is None or state.voice is None:
             await ctx.send("I need to be in a channel before my volume can be set")
         elif value is None:
@@ -432,17 +457,17 @@ class Music:
         This also clears the queue.
         """
         state = self.voice_states.get(ctx.message.guild.id)
+        voice = ctx.message.guild.voice_client
+        if voice:
+            voice.stop()
+            await voice.disconnect(force=True)
 
-        # Stop playing whatever song is playing.
-        if state and state.voice:
-            state.voice.stop()
-
+        if state:
             state.songs.clear()
 
             # This will cancel the audio event we're using to loop through the queue
             # Then erase the voice_state entirely, and disconnect from the channel
             state.audio_player.cancel()
-            await state.voice.disconnect()
             try:
                 del self.voice_states[ctx.message.guild.id]
             except KeyError:
