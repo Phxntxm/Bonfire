@@ -409,7 +409,7 @@ class Music:
                     embed = entry.to_embed()
                     embed.title = "Enqueued song!"
                     await ctx.send(embed=embed)
-            except discord.Forbidden:
+            except (discord.Forbidden, discord.HTTPException):
                 pass
 
     @commands.command(pass_context=True)
