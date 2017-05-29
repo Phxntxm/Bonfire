@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup as bs
 
 from . import utils
 
+
 class Images:
     def __init__(self, bot):
         self.bot = bot
@@ -29,10 +30,9 @@ class Images:
             return
 
         image = await utils.download_image(filename)
-        filename = re.search('.*\/i\/(.*)', filename).group(1)
+        filename = re.search('.*/i/(.*)', filename).group(1)
         f = discord.File(image, filename=filename)
         await ctx.send(file=f)
-
 
     @commands.command(aliases=['dog', 'rd'])
     @utils.custom_perms(send_messages=True)
@@ -88,8 +88,11 @@ class Images:
             if filedata is None:
                 await ctx.send(url)
             else:
-                f = discord.File(filedata, filename=filename)
-                await ctx.send(file=f)
+                try:
+                    f = discord.File(filedata, filename=filename)
+                    await ctx.send(file=f)
+                except discord.HTTPException:
+                    await ctx.send("Sorry but that avatar is too large for me to send!")
         else:
             await ctx.send(url)
 
@@ -149,7 +152,7 @@ class Images:
 
                 # Get the image link from the now random page'd and random result from that page
                 index = random.SystemRandom().randint(0, len(results) - 1)
-                #image_link = 'https://derpibooru.org/{}'.format(results[index]['id'])
+                # image_link = 'https://derpibooru.org/{}'.format(results[index]['id'])
                 image_link = 'https:{}'.format(results[index]['image'])
             else:
                 await ctx.send("No results with that search term, {0}!".format(ctx.message.author.mention))
@@ -204,6 +207,7 @@ class Images:
         except (ValueError, KeyError):
             await ctx.send("No results with that tag {}".format(ctx.message.author.mention))
             return
+
 
 def setup(bot):
     bot.add_cog(Images(bot))
