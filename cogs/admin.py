@@ -226,7 +226,7 @@ class Administration:
         server_settings = await utils.get_content('server_settings', key)
         channel = str(ctx.message.channel.id)
         try:
-            channels = server_settings['nsfw_channels']
+            channels = server_settings.get('nsfw_channels', None)
             if channel in channels:
                 channels.remove(channel)
 

@@ -3,17 +3,14 @@ from discord.ext import commands
 from . import utils
 
 import discord
-import re
 import asyncio
-import rethinkdb as r
+
 
 class Moderation:
     """Commands that can be used by a or an admin, depending on the command"""
 
     def __init__(self, bot):
         self.bot = bot
-
-
 
     @commands.command()
     @commands.guild_only()
