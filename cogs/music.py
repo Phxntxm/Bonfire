@@ -104,20 +104,28 @@ class VoiceState:
 
     async def next_song(self):
         if not self.user_queue:
-            self.current = await self.songs.get_next_entry()
+            song = await self.songs.get_next_entry()
         else:
             try:
-                self.dj = self.djs.popleft()
+                dj = self.djs.popleft()
             except IndexError:
-                self.current = None
+                song = None
             else:
-                self.current = await self.dj.get_next_entry()
+                song = await self.dj.get_next_entry()
                 self.djs.rotate(-1)
-                if self.current is None:
-                    self.djs.remove(self.dj)
+                if song is None:
+                    self.djs.remove(dj)
                     await self.next_song()
                 else:
-                    self.current.requester = self.dj.member
+                    self.current.requester = dj.member
+
+                # Add an extra check here in case in the very short period of time possible, someone has queued a
+                # song while we are downloading the next
+                if not self.playing:
+                    self.dj = dj
+
+        if not self.playing:
+            self.current = song
 
 
 class Music:
