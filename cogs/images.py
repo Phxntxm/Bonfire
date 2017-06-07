@@ -112,7 +112,7 @@ class Images:
             query = ' '.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
             params = {'q': query}
 
-            nsfw = await utils.channel_is_nsfw(ctx.message.channel)
+            nsfw = await utils.channel_is_nsfw(ctx.message.channel, self.bot.db)
             # If this is a nsfw channel, we just need to tack on 'explicit' to the terms
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
@@ -185,7 +185,7 @@ class Images:
         params = {'limit': 320,
                   'tags': tags}
 
-        nsfw = await utils.channel_is_nsfw(ctx.message.channel)
+        nsfw = await utils.channel_is_nsfw(ctx.message.channel, self.bot.db)
 
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not

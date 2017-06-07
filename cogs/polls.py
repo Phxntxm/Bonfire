@@ -1,8 +1,10 @@
 from discord.ext import commands
 from . import utils
 
+
 def to_keycap(c):
     return '\N{KEYCAP TEN}' if c == 10 else str(c) + '\u20e3'
+
 
 class Poll:
     def __init__(self, message):
@@ -67,7 +69,6 @@ class Polls:
         poll = self.get_poll(reaction.message)
         if poll:
             await poll.remove_other_reaction(reaction, user)
-
 
     @commands.command(pass_context=True)
     @commands.guild_only()

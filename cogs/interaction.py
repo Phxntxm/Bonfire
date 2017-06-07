@@ -117,7 +117,6 @@ class Interaction:
                 return False
         return True
 
-
     def start_battle(self, player1, player2):
         battles = self.battles.get(player1.guild.id, [])
         entry = {
@@ -159,9 +158,9 @@ class Interaction:
         fmt = random.SystemRandom().choice(hugs)
         await ctx.send(fmt.format(user.display_name))
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, enabled=False)
     @commands.guild_only()
-    @commands.cooldown(1, 180, BucketType.user)
+    @commands.cooldown(1, 20, BucketType.user)
     @utils.custom_perms(send_messages=True)
     async def battle(self, ctx, player2: discord.Member):
         """Challenges the mentioned user to a battle
@@ -226,10 +225,10 @@ class Interaction:
         # All we need to do is change what order the challengers are printed/added as a paramater
         if random.SystemRandom().randint(0, 1):
             await ctx.send(fmt.format(battleP1.mention, battleP2.mention))
-            await utils.update_records('battle_records', battleP1, battleP2)
+            await utils.update_records('battle_records', self.bot.db, battleP1, battleP2)
         else:
             await ctx.send(fmt.format(battleP2.mention, battleP1.mention))
-            await utils.update_records('battle_records', battleP2, battleP1)
+            await utils.update_records('battle_records', self.bot.db, battleP2, battleP1)
 
     @commands.command()
     @commands.guild_only()
@@ -257,9 +256,9 @@ class Interaction:
         self.battling_off(player2=battleP2)
         await ctx.send("{} has chickened out! What a loser~".format(battleP2.mention))
 
-    @commands.command()
+    @commands.command(enabled=False)
     @commands.guild_only()
-    @commands.cooldown(1, 180, BucketType.user)
+    @commands.cooldown(1, 10, BucketType.user)
     @utils.custom_perms(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member = None, *, message=""):
         """Boops the mentioned person
@@ -284,20 +283,15 @@ class Interaction:
             return
 
         key = str(booper.id)
-        boops = await utils.get_content('boops', key)
-        if boops is not None:
-            boops = boops['boops']
-            # If the booper has never booped the member provided, assure it's 0
-            amount = boops.get(str(boopee.id), 0) + 1
-            boops[str(boopee.id)] = amount
-
-            await utils.update_content('boops', {'boops': boops}, key)
-        else:
-            entry = {'member_id': str(booper.id),
-                     'boops': {str(boopee.id): 1}}
-
-            await utils.add_content('boops', entry)
-            amount = 1
+        boops = self.bot.db.load('boops', key=key, pluck='boops') or {}
+        amount = boops.get(str(boopee.id), 0) + 1
+        entry = {
+            'member_id': str(booper.id),
+            'boops': {
+                str(boopee.id): amount
+            }
+        }
+        self.bot.db.save('boops', entry)
 
         fmt = "{0.mention} has just booped {1.mention}{3}! That's {2} times now!"
         await ctx.send(fmt.format(booper, boopee, amount, message))

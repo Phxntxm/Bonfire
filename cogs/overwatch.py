@@ -38,14 +38,11 @@ class Overwatch:
         await ctx.message.channel.trigger_typing()
 
         user = user or ctx.message.author
-        ow_stats = await utils.get_content('overwatch', str(user.id))
+        bt = self.bot.db.load('overwatch', key=str(user.id), pluck='battletag')
 
-        if ow_stats is None:
+        if bt is None:
             await ctx.send("I do not have this user's battletag saved!")
             return
-        # This API sometimes takes a while to look up information, so send a message saying we're processing
-
-        bt = ow_stats['battletag']
 
         if hero == "":
             # If no hero was provided, we just want the base stats for a player
@@ -114,11 +111,12 @@ class Overwatch:
             return
 
         # Now just save the battletag
-        entry = {'member_id': key, 'battletag': bt}
-        update = {'battletag': bt}
-        # Try adding this first, if that fails, update the saved entry
-        if not await utils.add_content('overwatch', entry):
-            await utils.update_content('overwatch', update, key)
+        entry = {
+            'member_id': key,
+            'battletag': bt
+        }
+
+        self.bot.db.save('overwatch', entry)
         await ctx.send("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(pass_context=True, name="delete", aliases=['remove'])
@@ -128,10 +126,12 @@ class Overwatch:
 
         EXAMPLE: !ow delete
         RESULT: Your battletag is no longer saved"""
-        if await utils.remove_content('overwatch', str(ctx.message.author.id)):
-            await ctx.send("I no longer have your battletag saved {}".format(ctx.message.author.mention))
-        else:
-            await ctx.send("I don't even have your battletag saved {}".format(ctx.message.author.mention))
+        entry = {
+            'member_id': str(ctx.message.author.id),
+            'battletag': None
+        }
+        self.bot.db.save('overwatch', entry)
+        await ctx.send("I no longer have your battletag saved {}".format(ctx.message.author.mention))
 
 
 def setup(bot):

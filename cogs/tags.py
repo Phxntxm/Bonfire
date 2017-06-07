@@ -4,7 +4,7 @@ import discord
 from . import utils
 
 import asyncio
-import rethinkdb as r
+
 
 class Tags:
     """This class contains all the commands for custom tags"""
@@ -20,9 +20,9 @@ class Tags:
 
         EXAMPLE: !tags
         RESULT: All tags setup on this server"""
-        tags = await utils.get_content('tags', str(ctx.message.guild.id))
-        if tags and len(tags['tags']) > 0:
-            entries = [t['trigger'] for t in tags['tags']]
+        tags = self.bot.db.load('tags', key=ctx.message.guild.id, pluck='tags')
+        if tags:
+            entries = [t['trigger'] for t in tags]
             pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
             await pages.paginate()
         else:
@@ -36,16 +36,16 @@ class Tags:
 
         EXAMPLE: !mytags
         RESULT: All your tags setup on this server"""
-        tags = await utils.get_content('tags', str(ctx.message.guild.id))
-        if not tags:
-            await ctx.send("There are no tags setup on this server!")
-        else:
-            entries = [t['trigger'] for t in tags['tags'] if t['author'] == str(ctx.message.author.id)]
+        tags = self.bot.db.load('tags', key=ctx.message.guild.id, pluck='tags')
+        if tags:
+            entries = [t['trigger'] for t in tags if t['author'] == str(ctx.message.author.id)]
             if len(entries) == 0:
                 await ctx.send("You have no tags setup on this server!")
             else:
                 pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
                 await pages.paginate()
+        else:
+            await ctx.send("There are no tags setup on this server!")
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -57,16 +57,15 @@ class Tags:
         EXAMPLE: !tag butts
         RESULT: Whatever you setup for the butts tag!!"""
         tag = tag.lower().strip()
-        tags = await utils.get_content('tags', str(ctx.message.guild.id))
-        if tags and len(tags['tags']) > 0:
-            for t in tags['tags']:
+        tags = self.bot.db.load('tags', key=ctx.message.guild.id, pluck='tags')
+        if tags:
+            for t in tags:
                 if t['trigger'].lower().strip() == tag:
                     await ctx.send("\u200B{}".format(t['result']))
                     return
             await ctx.send("There is no tag called {}".format(tag))
         else:
             await ctx.send("There are no tags setup on this server!")
-
 
     @tag.command(name='add', aliases=['create', 'setup'])
     @commands.guild_only()
@@ -76,8 +75,10 @@ class Tags:
 
         EXAMPLE: !tag add
         RESULT: A follow-along in order to create a new tag"""
+
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author and len(m.content) > 0
+
         my_msg = await ctx.send("Ready to setup a new tag! What do you want the trigger for the tag to be?")
 
         try:
@@ -92,12 +93,14 @@ class Tags:
             await ctx.send("Please keep tag triggers under 100 characters")
             return
         elif trigger in forbidden_tags:
-            await ctx.send("Sorry, but your tag trigger was detected to be forbidden. Current forbidden tag triggers are: \n{}".format("\n".join(forbidden_tags)))
+            await ctx.send(
+                "Sorry, but your tag trigger was detected to be forbidden. "
+                "Current forbidden tag triggers are: \n{}".format("\n".join(forbidden_tags)))
             return
 
-        tags = await utils.get_content('tags', str(ctx.message.guild.id))
-        if tags and len(tags['tags']) > 0:
-            for t in tags['tags']:
+        tags = self.bot.db.load('tags', key=ctx.message.guild.id, pluck='tags') or []
+        if tags:
+            for t in tags:
                 if t['trigger'].lower().strip() == trigger:
                     await ctx.send("There is already a tag setup called {}!".format(trigger))
                     return
@@ -112,7 +115,9 @@ class Tags:
             await ctx.send("You can't create a tag with {}!".format(trigger))
             return
 
-        my_msg = await ctx.send("Alright, your new tag can be called with {}!\n\nWhat do you want to be displayed with this tag?".format(trigger))
+        my_msg = await ctx.send(
+            "Alright, your new tag can be called with {}!\n\nWhat do you want to be displayed with this tag?".format(
+                trigger))
 
         try:
             msg = await self.bot.wait_for("message", check=check, timeout=60)
@@ -133,13 +138,12 @@ class Tags:
             'trigger': trigger,
             'result': result
         }
+        tags.append(tag)
         entry = {
             'server_id': str(ctx.message.guild.id),
-            'tags': [tag]
+            'tags': tags
         }
-        key = str(ctx.message.guild.id)
-        if not await utils.add_content('tags', entry):
-            await utils.update_content('tags', {'tags': r.row['tags'].append(tag)}, key)
+        self.bot.db.save('tags', entry)
         await ctx.send("I have just setup a new tag for this server! You can call your tag with {}".format(trigger))
 
     @tag.command(name='edit')
@@ -149,16 +153,17 @@ class Tags:
         """This will allow you to edit a tag that you have created
         EXAMPLE: !tag edit this tag
         RESULT: I'll ask what you want the new result to be"""
-        key = str(ctx.message.guild.id)
-        tags = await utils.get_content('tags', key)
+        tags = self.bot.db.load('tags', key=ctx.message.guild.id, pluck='tags')
+
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author and len(m.content) > 0
 
-        if tags and len(tags['tags']) > 0:
-            for i, t in enumerate(tags['tags']):
+        if tags:
+            for i, t in enumerate(tags):
                 if t['trigger'] == tag:
                     if t['author'] == str(ctx.message.author.id):
-                        my_msg = await ctx.send("Alright, what do you want the new result for the tag {} to be".format(tag))
+                        my_msg = await ctx.send(
+                            "Alright, what do you want the new result for the tag {} to be".format(tag))
                         try:
                             msg = await self.bot.wait_for("message", check=check, timeout=60)
                         except asyncio.TimeoutError:
@@ -166,13 +171,17 @@ class Tags:
                             return
                         new_tag = t.copy()
                         new_tag['result'] = msg.content
-                        tags['tags'][i] = new_tag
+                        tags[i] = new_tag
                         try:
                             await my_msg.delete()
                             await msg.delete()
                         except discord.Forbidden:
                             pass
-                        await utils.update_content('tags', tags, key)
+                        entry = {
+                            'server_id': str(ctx.message.guild.id),
+                            'tags': tags
+                        }
+                        self.bot.db.save('tags', entry)
                         await ctx.send("Alright, the tag {} has been updated".format(tag))
                         return
                     else:
@@ -181,7 +190,6 @@ class Tags:
             await ctx.send("There isn't a tag called {}!".format(tag))
         else:
             await ctx.send("There are no tags setup on this server!")
-
 
     @tag.command(name='delete', aliases=['remove', 'stop'])
     @commands.guild_only()
@@ -192,14 +200,18 @@ class Tags:
 
         EXAMPLE: !tag delete stupid_tag
         RESULT: Deletes that stupid tag"""
-        key = str(ctx.message.guild.id)
-        tags = await utils.get_content('tags', key)
-        if tags and len(tags['tags']) > 0:
-            for t in tags['tags']:
-                if t['trigger'] == tag:
-                    if ctx.message.author.permissions_in(ctx.message.channel).manage_guild or str(ctx.message.author.id) == t['author']:
-                        tags['tags'].remove(t)
-                        await utils.update_content('tags', tags, key)
+        tags = self.bot.db.load('tags', key=ctx.message.guild.id, pluck='tags')
+        if tags:
+            for t in tags:
+                if t['trigger'].lower().strip() == tag:
+                    if ctx.message.author.permissions_in(ctx.message.channel).manage_guild or str(
+                            ctx.message.author.id) == t['author']:
+                        tags.remove(t)
+                        entry = {
+                            'server_id': str(ctx.message.guild.id),
+                            'tags': tags
+                        }
+                        self.bot.db.save('tags', entry)
                         await ctx.send("I have just removed the tag {}".format(tag))
                     else:
                         await ctx.send("You don't own that tag! You can't remove it!")

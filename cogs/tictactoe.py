@@ -191,7 +191,7 @@ class TicTacToe:
             await ctx.send("{} has won this game of TicTacToe, better luck next time {}".format(winner.display_name,
                                                                                                 loser.display_name))
             # Handle updating ratings based on the winner and loser
-            await utils.update_records('tictactoe', winner, loser)
+            await utils.update_records('tictactoe', self.bot.db, winner, loser)
             # This game has ended, delete it so another one can be made
             del self.boards[ctx.message.guild.id]
         else:

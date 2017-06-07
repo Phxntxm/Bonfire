@@ -3,9 +3,6 @@ from discord.ext import commands
 
 from . import utils
 
-from bs4 import BeautifulSoup as bs
-import subprocess
-import glob
 import random
 import re
 import calendar
@@ -42,7 +39,7 @@ class Miscallaneous:
 
         if command is None:
             for cmd in utils.get_all_commands(self.bot):
-                if not await cmd.can_run(ctx):
+                if not await cmd.can_run(ctx) or not cmd.enabled:
                     continue
 
                 cog = cmd.cog_name
@@ -82,7 +79,7 @@ class Miscallaneous:
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
         else:
-                    # Get the description for a command
+            # Get the description for a command
             description = command.help
             if description is not None:
                 # Split into examples, results, and the description itself based on the string
@@ -108,7 +105,6 @@ class Miscallaneous:
 
             await ctx.send(embed=embed)
 
-
     @commands.command()
     @utils.custom_perms(send_messages=True)
     async def say(self, ctx, *, msg: str):
@@ -122,49 +118,6 @@ class Miscallaneous:
             await ctx.message.delete()
         except:
             pass
-
-    @commands.command()
-    @utils.custom_perms(send_messages=True)
-    async def motd(self, ctx, *, date=None):
-        """This command can be used to print the current MOTD (Message of the day)
-        This will most likely not be updated every day, however messages will still be pushed to this every now and then
-
-        EXAMPLE: !motd
-        RESULT: 'This is an example message of the day!'"""
-        if date is None:
-            motd = await utils.get_content('motd')
-            try:
-                # Lets set this to the first one in the list first
-                latest_motd = motd[0]
-                for entry in motd:
-                    d = pendulum.parse(entry['date'])
-
-                    # Check if the date for this entry is newer than our currently saved latest entry
-                    if d > pendulum.parse(latest_motd['date']):
-                        latest_motd = entry
-
-                date = latest_motd['date']
-                motd = latest_motd['motd']
-            # This will be hit if we do not have any entries for motd
-            except TypeError:
-                await ctx.send("No message of the day!")
-            else:
-                fmt = "Last updated: {}\n\n{}".format(date, motd)
-                await ctx.send(fmt)
-        else:
-            try:
-                motd = await utils.get_content('motd', str(pendulum.parse(date).date()))
-                date = motd['date']
-                motd = motd['motd']
-                fmt = "Message of the day for {}:\n\n{}".format(date, motd)
-                await ctx.send(fmt)
-            # This one will be hit if we return None for that day
-            except TypeError:
-                await ctx.send("No message of the day for {}!".format(date))
-            # This will be hit if pendulum fails to parse the date passed
-            except ValueError:
-                now = pendulum.utcnow().to_date_string()
-                await ctx.send("Invalid date format! Try like {}".format(now))
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
@@ -255,7 +208,7 @@ class Miscallaneous:
         if hasattr(self.bot, 'uptime'):
             embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
 
-        memory_usage = self.process.memory_full_info().uss / 1024**2
+        memory_usage = self.process.memory_full_info().uss / 1024 ** 2
         cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
         embed.add_field(name='Memory Usage', value='{:.2f} MiB'.format(memory_usage))
         embed.add_field(name='CPU Usage', value='{}%'.format(cpu_usage))
@@ -300,18 +253,15 @@ class Miscallaneous:
         await ctx.send("Use this URL to add me to a server that you'd like!\n{}"
                        .format(discord.utils.oauth_url(app_info.id, perms)))
 
-    @commands.command()
+    @commands.command(enabled=False)
     @utils.custom_perms(send_messages=True)
     async def joke(self, ctx):
         """Prints a random riddle
 
         EXAMPLE: !joke
         RESULT: An absolutely terrible joke."""
-        joke = await utils.request('http://tambal.azurewebsites.net/joke/random')
-        if joke is not None and 'joke' in joke:
-            await ctx.send(joke.get('joke'))
-        else:
-            await ctx.send("Sorry, I'm not feeling funny right now...try later")
+        # Currently disabled until I can find a free API
+        pass
 
     @commands.command()
     @utils.custom_perms(send_messages=True)

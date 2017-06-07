@@ -33,7 +33,7 @@ def get_all_subcommands(command):
             yield from get_all_subcommands(subcmd)
 
 
-async def channel_is_nsfw(channel):
+async def channel_is_nsfw(channel, db):
     if type(channel) is discord.DMChannel:
         server = 'DMs'
     elif channel.is_nsfw():
@@ -43,12 +43,8 @@ async def channel_is_nsfw(channel):
 
     channel = str(channel.id)
 
-    server_settings = await config.get_content('server_settings', server)
-
-    try:
-        return channel in server_settings['nsfw_channels']
-    except (TypeError, IndexError, KeyError):
-        return False
+    channels = db.load('server_settings', key=server, pluck='nsfw_channels') or []
+    return channel in channels
 
 
 async def download_image(url):
@@ -101,11 +97,11 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json')
             continue
 
 
-async def update_records(key, winner, loser):
+async def update_records(key, db, winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
     r_filter = lambda row: (row['member_id'] == str(winner.id)) | (row['member_id'] == str(loser.id))
-    matches = await config.filter_content(key, r_filter)
+    matches = db.load(key, table_filter=r_filter)
 
     winner_stats = {}
     loser_stats = {}
@@ -150,12 +146,8 @@ async def update_records(key, winner, loser):
     loser_losses += 1
 
     # Now save the new wins, losses, and ratings
-    winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating}
-    loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating}
+    winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating, 'member_id': str(winner.id)}
+    loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating, 'member_id': str(loser.id)}
 
-    if not await config.update_content(key, winner_stats, str(winner.id)):
-        winner_stats['member_id'] = str(winner.id)
-        await config.add_content(key, winner_stats)
-    if not await config.update_content(key, loser_stats, str(loser.id)):
-        loser_stats['member_id'] = str(loser.id)
-        await config.add_content(key, loser_stats)
+    db.save(key, winner_stats)
+    db.save(key, loser_stats)

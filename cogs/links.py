@@ -5,9 +5,7 @@ from . import utils
 from bs4 import BeautifulSoup as bs
 
 import discord
-import random
 import re
-import math
 
 
 class Links:
@@ -29,7 +27,7 @@ class Links:
         url = "https://www.google.com/search"
 
         # Turn safe filter on or off, based on whether or not this is a nsfw channel
-        nsfw = await utils.channel_is_nsfw(ctx.message.channel)
+        nsfw = await utils.channel_is_nsfw(ctx.message.channel, self.bot.db)
         safe = 'off' if nsfw else 'on'
 
         params = {'q': query,

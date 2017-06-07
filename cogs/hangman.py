@@ -8,6 +8,7 @@ import re
 import random
 import asyncio
 
+
 class Game:
     def __init__(self, word):
         self.word = word
@@ -142,12 +143,17 @@ class Hangman:
             return
 
         try:
-            msg = await ctx.message.author.send("Please respond with a phrase you would like to use for your hangman game in **{}**\n\nPlease keep phrases less than 20 characters".format(ctx.message.guild.name))
+            msg = await ctx.message.author.send(
+                "Please respond with a phrase you would like to use for your hangman game in **{}**\n\nPlease keep phrases less than 20 characters".format(
+                    ctx.message.guild.name))
         except discord.Forbidden:
-            await ctx.send("I can't message you {}! Please allow DM's so I can message you and ask for the hangman phrase you want to use!".format(ctx.message.author.display_name))
+            await ctx.send(
+                "I can't message you {}! Please allow DM's so I can message you and ask for the hangman phrase you want to use!".format(
+                    ctx.message.author.display_name))
             return
 
-        await ctx.send("I have DM'd you {}, please respond there with the phrase you would like to setup".format(ctx.message.author.display_name))
+        await ctx.send("I have DM'd you {}, please respond there with the phrase you would like to setup".format(
+            ctx.message.author.display_name))
 
         def check(m):
             return m.channel == msg.channel and len(m.content) < 20
@@ -155,12 +161,14 @@ class Hangman:
         try:
             msg = await self.bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
-            await ctx.send("You took too long! Please look at your DM's next to as that's where I'm asking for the phrase you want to use")
+            await ctx.send(
+                "You took too long! Please look at your DM's next to as that's where I'm asking for the phrase you want to use")
             return
 
         forbidden_phrases = ['stop', 'delete', 'remove', 'end', 'create', 'start']
         if msg.content in forbidden_phrases:
-            await ctx.send("Detected forbidden hangman phrase; current forbidden phrases are: \n{}".format("\n".join(forbidden_phrases)))
+            await ctx.send("Detected forbidden hangman phrase; current forbidden phrases are: \n{}".format(
+                "\n".join(forbidden_phrases)))
             return
 
         game = self.create(msg.content, ctx)

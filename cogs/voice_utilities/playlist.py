@@ -37,7 +37,7 @@ class Playlist(EventEmitter):
         else:
             return 0
 
-    async def add_entry(self, song_url, ctx, **meta):
+    async def add_entry(self, song_url, **meta):
         """
             Validates and adds a song_url to be played. This does not start the download of the song.
 
@@ -76,19 +76,14 @@ class Playlist(EventEmitter):
                 # https://github.com/KeepSafe/aiohttp/issues/758
                 # https://github.com/KeepSafe/aiohttp/issues/852
                 content_type = await get_header(self.bot.aiosession, info['url'], 'CONTENT-TYPE')
-                print("Got content type", content_type)
 
             except Exception as e:
-                print("[Warning] Failed to get content type for url %s (%s)" % (song_url, e))
                 content_type = None
 
             if content_type:
                 if content_type.startswith(('application/', 'image/')):
                     if '/ogg' not in content_type:  # How does a server say `application/ogg` what the actual fuck
                         raise ExtractionError("Invalid content type \"%s\" for url %s" % (content_type, song_url))
-
-                elif not content_type.startswith(('audio/', 'video/')):
-                    print("[Warning] Questionable content type \"%s\" for url %s" % (content_type, song_url))
 
         if info.get('is_live', False):
             raise LiveStreamError("Cannot download from a livestream")
@@ -97,7 +92,6 @@ class Playlist(EventEmitter):
             self,
             song_url,
             info.get('title', 'Untitled'),
-            ctx,
             info.get('thumbnail', None),
             info.get('duration', 0) or 0,
             self.downloader.ytdl.prepare_filename(info),
@@ -151,13 +145,8 @@ class Playlist(EventEmitter):
                     baditems += 1
                     # Once I know more about what's happening here I can add a proper message
                     traceback.print_exc()
-                    print(items)
-                    print("Could not add item")
             else:
                 baditems += 1
-
-        if baditems:
-            print("Skipped %s bad entries" % baditems)
 
         return entry_list, position
 
@@ -191,13 +180,8 @@ class Playlist(EventEmitter):
                     baditems += 1
                 except Exception as e:
                     baditems += 1
-                    print("There was an error adding the song {}: {}: {}\n".format(
-                        entry_data['id'], e.__class__.__name__, e))
             else:
                 baditems += 1
-
-        if baditems:
-            print("Skipped %s bad entries" % baditems)
 
         return gooditems
 
@@ -230,13 +214,8 @@ class Playlist(EventEmitter):
                     baditems += 1
                 except Exception as e:
                     baditems += 1
-                    print("There was an error adding the song {}: {}: {}\n".format(
-                        entry_data['id'], e.__class__.__name__, e))
             else:
                 baditems += 1
-
-        if baditems:
-            print("Skipped %s bad entries" % baditems)
 
         return gooditems
 

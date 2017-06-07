@@ -324,12 +324,8 @@ class Roles:
 
         author = ctx.message.author
         key = str(ctx.message.guild.id)
-        server_settings = await utils.get_content('server_settings', key)
+        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
 
-        if server_settings is None:
-            await ctx.send("There are no self-assignable roles on this server")
-            return
-        self_assignable_roles = server_settings.get('self_assignable_roles', [])
         if len(self_assignable_roles) == 0:
             await ctx.send("There are no self-assignable roles on this server")
             return
@@ -361,12 +357,8 @@ class Roles:
 
         author = ctx.message.author
         key = str(ctx.message.guild.id)
-        server_settings = await utils.get_content('server_settings', key)
+        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
 
-        if server_settings is None:
-            await ctx.send("There are no self-assignable roles on this server")
-            return
-        self_assignable_roles = server_settings.get('self_assignable_roles', [])
         if len(self_assignable_roles) == 0:
             await ctx.send("There are no self-assignable roles on this server")
             return
@@ -394,17 +386,16 @@ class Roles:
         RESULT: Allows users to self-assign the roles Member, and NSFW"""
         roles = [str(r.id) for r in role]
         key = str(ctx.message.guild.id)
-        server_settings = await utils.get_content('server_settings', key)
 
-        if server_settings is None:
-            entry = {'server_id': key, 'self_assignable_roles': roles}
-            await utils.add_content('server_settings', entry)
-        else:
-            self_assignable_roles = server_settings.get('self_assignable_roles', [])
-            self_assignable_roles.extend(roles)
-            self_assignable_roles = list(set(self_assignable_roles))
-            update = {'self_assignable_roles': self_assignable_roles}
-            await utils.update_content('server_settings', update, key)
+        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
+        self_assignable_roles.extend(roles)
+        self_assignable_roles = list(set(self_assignable_roles))
+        entry = {
+            'server_id': key,
+            'self_assignable_roles': self_assignable_roles
+        }
+
+        self.bot.db.save('server_settings', entry)
 
         if len(roles) == 1:
             fmt = "Successfully added {} as a self-assignable role".format(role[0].name)
@@ -423,12 +414,7 @@ class Roles:
         EXAMPLE: !assigns list
         RESUL: A list of all the self-assignable roles"""
         key = str(ctx.message.guild.id)
-        server_settings = await utils.get_content('server_settings', key)
-
-        if server_settings is None:
-            await ctx.send("There are no self-assignable roles on this server")
-            return
-        self_assignable_roles = server_settings.get('self_assignable_roles', [])
+        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
         if len(self_assignable_roles) == 0:
             await ctx.send("There are no self-assignable roles on this server")
             return
@@ -458,12 +444,7 @@ class Roles:
         EXAMPLE: !assigns remove Member NSFW
         RESULT: Removes the ability for users to self-assign the roles Member, and NSFW"""
         key = str(ctx.message.guild.id)
-        server_settings = await utils.get_content('server_settings', key)
-
-        if server_settings is None:
-            await ctx.send("There are no self-assignable roles on this server")
-            return
-        self_assignable_roles = server_settings.get('self_assignable_roles', [])
+        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
         if len(self_assignable_roles) == 0:
             await ctx.send("There are no self-assignable roles on this server")
             return
@@ -478,8 +459,11 @@ class Roles:
             else:
                 fmt += "\n{} is no longer a self-assignable role".format(r.name)
 
-        update = {'self_assignable_roles': self_assignable_roles}
-        await utils.update_content('server_settings', update, key)
+        update = {
+            'self_assignable_roles': self_assignable_roles,
+            'server_id': key
+        }
+        self.bot.db.save('server_settings', update)
         await ctx.send(fmt)
 
 
