@@ -77,6 +77,10 @@ class VoiceState:
         fut.result()
 
     async def play_next_song(self):
+        # This should never happnen, but thanks to good ol' Discord...
+        if not self.voice:
+            return
+
         self.skip_votes.clear()
         try:
             await self.next_song()
@@ -355,7 +359,7 @@ class Music:
                     "Force cleared voice connection on guild {} after being stuck "
                     "between connected/not connected".format(channel.guild.id))
                 # Let them know what happened
-                await channel.send("Sorry but I couldn't connect...try again?")
+                await text_channel.send("Sorry but I couldn't connect...try again?")
                 return False
 
     @commands.command()
@@ -612,7 +616,7 @@ class Music:
 
         # Check if the person requesting a skip is the requester of the song, if so automatically skip
         voter = ctx.message.author
-        if voter == state.current.requester:
+        if hasattr(state.current, 'requester') and voter == state.current.requester:
             await ctx.send('Requester requested skipping song...')
             state.skip()
         # Otherwise check if the voter has already voted
