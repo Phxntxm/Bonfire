@@ -105,9 +105,7 @@ class DB:
                 # We have content...we either need to update it, or replace
                 # Update will typically be more common so lets try that first
                 result = await self.query(r.table(table).get(key).update(content))
-                print(result)
                 if result.get('replaced', 0) == 0 and result.get('unchanged', 0) == 0:
-                    print("Replacing...")
                     await self.query(r.table(table).get(key).replace(content))
             else:
                 await self.query(r.table(table).insert(content))
