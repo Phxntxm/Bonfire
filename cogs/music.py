@@ -77,8 +77,7 @@ class VoiceState:
         fut.result()
 
     async def play_next_song(self):
-        # This should never happnen, but thanks to good ol' Discord...
-        if not self.voice:
+        if self.playing or not self.voice:
             return
 
         self.skip_votes.clear()
@@ -88,6 +87,9 @@ class VoiceState:
             # For now lets just silently continue in the queue
             # Implementation to the music notifications channel will change what we do here
             return await self.play_next_song()
+
+        if self.playing or not self.voice:
+            return
         if self.current:
             source = FFmpegPCMAudio(
                 self.current.filename,
@@ -102,9 +104,13 @@ class VoiceState:
             # 1) The queue type is `user`
             # 2) Someone joined for the first time, starting off the queue
             # 3) They don't have a song in their playlist ready yet
-            # So what we'll do here is just call this again a few seconds later
-            await asyncio.sleep(2)
-            return await self.play_next_song()
+            # Or....this is a song queue, and the last song in the queue was retrieved, and failed to download
+            # So what we'll do here is just call this again a few seconds later if it's a user queue, otherwise return
+            if self.user_queue:
+                await asyncio.sleep(2)
+                return await self.play_next_song()
+            else:
+                return
 
     async def next_song(self):
         if not self.user_queue:
@@ -116,12 +122,11 @@ class VoiceState:
                 song = None
             else:
                 song = await self.dj.get_next_entry()
-                self.djs.rotate(-1)
                 if song is None:
                     self.djs.remove(dj)
                     await self.next_song()
                 else:
-                    self.current.requester = dj.member
+                    song.requester = dj.member
 
                 # Add an extra check here in case in the very short period of time possible, someone has queued a
                 # song while we are downloading the next
