@@ -101,7 +101,7 @@ async def update_records(key, db, winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
     r_filter = lambda row: (row['member_id'] == str(winner.id)) | (row['member_id'] == str(loser.id))
-    matches = db.load(key, table_filter=r_filter)
+    matches = await db.actual_load(key, table_filter=r_filter)
 
     winner_stats = {}
     loser_stats = {}
