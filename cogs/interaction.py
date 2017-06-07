@@ -256,7 +256,7 @@ class Interaction:
         self.battling_off(player2=battleP2)
         await ctx.send("{} has chickened out! What a loser~".format(battleP2.mention))
 
-    @commands.command(enabled=False)
+    @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 10, BucketType.user)
     @utils.custom_perms(send_messages=True)
