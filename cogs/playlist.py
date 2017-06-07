@@ -267,6 +267,9 @@ class Playlist:
         while True:
             response = await self.get_response(ctx, q1)
 
+            if not response:
+                break
+
             if 'add' in response:
                 # Ask the user what song to add, get the response, add it
                 question = "What is the song you would like to add to {}?".format(playlist)
