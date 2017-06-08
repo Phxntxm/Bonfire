@@ -615,7 +615,7 @@ class Music:
         """
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if state is None or not state.playing or state.current is None:
+        if state is None or not state.playing:
             await ctx.send('Not playing any music right now...')
             return
 
