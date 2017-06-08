@@ -36,7 +36,7 @@ class Playlist:
                 pass
 
             # For our case here, everything needs to be lowered and stripped, so just do this now
-            return response.content.lower().strip()
+            return response.content
 
     async def get_info(self, song_url):
         try:
@@ -236,7 +236,8 @@ class Playlist:
         EXAMPLE: !playlist edit
         RESULT: A followalong asking for what you need"""
         # Load the playlists for the author
-        key = str(ctx.message.author.id)
+        author = ctx.message.author
+        key = str(author.id)
         playlists = self.bot.db.load('user_playlists', key=key, pluck='playlists') or []
         # Also create a list of the names for easy comparision
         names = [x['name'] for x in playlists]
@@ -281,7 +282,7 @@ class Playlist:
                 # The "error" message is sent with our `get_response` helper method
                 if response:
                     await ctx.message.channel.trigger_typing()
-                    if await self.add_to_playlist(ctx.message.author, playlist, response):
+                    if await self.add_to_playlist(author, playlist, response):
                         delete_msgs.append(await ctx.send("Successfully added song {} to playlist {}".format(response,
                                                                                                          playlist)))
                     else:
@@ -292,7 +293,7 @@ class Playlist:
                 try:
                     response = await self.get_response(ctx, question)
                     if response:
-                        num = int(response) - 1
+                        num = int(response.lower().strip()) - 1
                         song = await self.remove_from_playlist(ctx.author, playlist, num)
                         await ctx.send("Successfully removed {} from {}".format(song['title'], playlist))
                 except (ValueError, IndexError):
@@ -313,6 +314,7 @@ class Playlist:
                 new_name = await self.get_response(ctx, question)
                 if new_name:
                     await self.rename_playlist(ctx.message.author, playlist, new_name)
+                    new_name = new_name.lower().strip()
                     playlist = new_name
                     delete_msgs.append(await ctx.send("Successfully renamed {} to {}!".format(playlist, new_name)))
             elif 'activate' in response:
