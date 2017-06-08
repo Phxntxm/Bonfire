@@ -90,6 +90,7 @@ class Playlist:
                         'playlists': playlists
                     }
                     self.bot.db.save('user_playlists', update)
+                    await self.update_dj_for_member(author)
                     return True
 
     async def rename_playlist(self, author, old_name, new_name):
@@ -109,6 +110,7 @@ class Playlist:
                     'playlists': playlists
                 }
                 self.bot.db.save('user_playlists', update)
+                await self.update_dj_for_member(author)
                 return True
 
     async def remove_from_playlist(self, author, playlist, index):
@@ -128,6 +130,7 @@ class Playlist:
                     'playlists': playlists
                 }
                 self.bot.db.save('user_playlists', update)
+                await self.update_dj_for_member(author)
                 return song
 
     async def update_dj_for_member(self, member):
@@ -278,9 +281,11 @@ class Playlist:
                 # The "error" message is sent with our `get_response` helper method
                 if response:
                     await ctx.message.channel.trigger_typing()
-                    await self.add_to_playlist(ctx.message.author, playlist, response)
-                    delete_msgs.append(await ctx.send("Successfully added song {} to playlist {}".format(response,
+                    if await self.add_to_playlist(ctx.message.author, playlist, response):
+                        delete_msgs.append(await ctx.send("Successfully added song {} to playlist {}".format(response,
                                                                                                          playlist)))
+                    else:
+                        delete_msgs.append(await ctx.send("Failed to lookup {}".format(response)))
             elif 'remove' in response:
                 await ctx.invoke(self.playlist, playlist_name=playlist)
                 question = "Please provide just the number of the song you want to delete"
@@ -326,9 +331,6 @@ class Playlist:
                 break
             else:
                 delete_msgs.append(await ctx.send("That is not a valid option!"))
-
-            # After whatever has been edited, we need to update the live DJ's
-            await self.update_dj_for_member(ctx.message.author)
 
         if len(delete_msgs) == 1:
             await delete_msgs[0].delete()
