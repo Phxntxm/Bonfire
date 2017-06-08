@@ -250,6 +250,7 @@ class Playlist:
         await ctx.invoke(self.playlists)
         question = "Please provide what playlist you would like to edit, the playlists you have available are above."
         playlist = await self.get_response(ctx, question)
+        playlist = playlist.lower().strip()
         if not playlist:
             return
         if playlist not in names:
@@ -270,6 +271,7 @@ class Playlist:
         # We want to loop this in order to continue editing, till the user is done
         while True:
             response = await self.get_response(ctx, q1)
+            response = response.lower().strip()
 
             if not response:
                 break
