@@ -336,10 +336,11 @@ class Playlist:
             else:
                 delete_msgs.append(await ctx.send("That is not a valid option!"))
 
-        if len(delete_msgs) == 1:
-            await delete_msgs[0].delete()
-        elif len(delete_msgs) > 1:
-            await ctx.message.channel.delete_messages(delete_msgs)
+        if not isinstance(ctx.message.channel, discord.DMChannel):
+            if len(delete_msgs) == 1:
+                await delete_msgs[0].delete()
+            elif len(delete_msgs) > 1:
+                await ctx.message.channel.delete_messages(delete_msgs)
 
 
 def setup(bot):

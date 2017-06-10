@@ -121,7 +121,7 @@ class VoiceState:
             except IndexError:
                 song = None
             else:
-                song = await self.dj.get_next_entry()
+                song = await dj.get_next_entry()
                 if song is None:
                     self.djs.remove(dj)
                     await self.next_song()
@@ -345,12 +345,18 @@ class Music:
 
             # If we can send messages, edit it to let the channel know we have succesfully joined
             if msg:
-                await msg.edit(content="Ready to play audio in channel {}".format(channel.name))
+                try:
+                    await msg.edit(content="Ready to play audio in channel {}".format(channel.name))
+                except discord.NotFound:
+                    pass
             return True
         # If we time out trying to join, just let them know and return False
         except asyncio.TimeoutError:
             if msg:
-                await msg.edit(content="Sorry, but I couldn't connect right now! Please try again later")
+                try:
+                    await msg.edit(content="Sorry, but I couldn't connect right now! Please try again later")
+                except discord.NotFound:
+                    pass
             return False
         # Theoretically this should never happen, however in rare cirumstances it does
         # This error arises when we are already in a channel and don't use "move"
