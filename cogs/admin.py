@@ -387,8 +387,8 @@ class Administration:
     async def prefix(self, ctx, *, prefix: str):
         """This command can be used to set a custom prefix per server
 
-        EXAMPLE: !prefix new_prefix
-        RESULT: You probably screwing it up and not realizing you now need to do new_prefixprefix"""
+        EXAMPLE: !prefix $
+        RESULT: You now need to call commands like: $help"""
         key = str(ctx.message.guild.id)
         if len(prefix.strip()) > 20:
             await ctx.send("Please keep prefixes under 20 characters")
