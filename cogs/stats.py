@@ -65,7 +65,7 @@ class Stats:
             await ctx.send("`{}` is not a valid command".format(command))
             return
 
-        command_stats = await utils.get_content('command_usage', cmd.qualified_name)
+        command_stats = self.bot.db.load('command_usage', key=cmd.qualified_name)
         if command_stats is None:
             await ctx.send("That command has never been used! You know I worked hard on that! :c")
             return
@@ -103,7 +103,7 @@ class Stats:
         if re.search('(author|me)', option):
             author = ctx.message.author
             # First lets get all the command usage
-            command_stats = await utils.get_content('command_usage')
+            command_stats = self.bot.db.load('command_usage')
             # Now use a dictionary comprehension to get just the command name, and usage
             # Based on the author's usage of the command
             stats = {data['command']: data['member_usage'].get(str(author.id)) for data in command_stats
@@ -125,7 +125,7 @@ class Stats:
         elif re.search('server', option):
             # This is exactly the same as above, except server usage instead of member usage
             server = ctx.message.guild
-            command_stats = await utils.get_content('command_usage')
+            command_stats = self.bot.db.load('command_usage')
             stats = {data['command']: data['server_usage'].get(str(server.id)) for data in command_stats
                      if data['server_usage'].get(str(server.id), 0) > 0}
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
@@ -148,7 +148,7 @@ class Stats:
 
         EXAMPLE: !mostboops
         RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
-        boops = await utils.get_content('boops', str(ctx.message.author.id))
+        boops = self.bot.db.load('boops', key=ctx.message.author.id)
         if boops is None:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -182,7 +182,7 @@ class Stats:
         RESULT: The list of your booped members!"""
         await ctx.message.channel.trigger_typing()
 
-        boops = await utils.get_content('boops', str(ctx.message.author.id))
+        boops = self.bot.db.load('boops', key=ctx.message.author.id)
         if boops is None:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
@@ -220,7 +220,7 @@ class Stats:
 
         # Create a list of the ID's of all members in this server, for comparison to the records saved
         server_member_ids = [member.id for member in ctx.message.guild.members]
-        battles = await utils.get_content('battle_records')
+        battles = self.bot.db.load('battle_records')
         if battles is None or len(battles) == 0:
             await ctx.send("No one has battled on this server!")
 
@@ -256,9 +256,10 @@ class Stats:
 
         # For this one, we don't want to pass a filter, as we do need all battle records
         # We need this because we want to make a comparison for overall rank
-        all_members = await utils.get_content('battle_records')
+        all_members = self.bot.db.load('battle_records')
         if all_members is None or len(all_members) == 0:
-            await ctx.send("You have not battled anyone!")
+            await ctx.send("That user has not battled yet!")
+            return
 
         # Make a list comprehension to just check if the user has battled
         if len([entry for entry in all_members if entry['member_id'] == str(member.id)]) == 0:

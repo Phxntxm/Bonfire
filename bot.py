@@ -24,8 +24,6 @@ logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 @bot.event
 async def on_ready():
-    if not hasattr(bot, 'uptime'):
-        bot.uptime = pendulum.utcnow()
     if not hasattr(bot, 'owner'):
         appinfo = await bot.application_info()
         bot.owner = appinfo.owner
@@ -33,7 +31,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if message.author.bot or utils.should_ignore(message):
+    if message.author.bot or utils.should_ignore(bot, message):
         return
     await bot.process_commands(message)
 
@@ -49,9 +47,8 @@ async def process_command(ctx):
     server = ctx.message.guild
     command = ctx.command
 
-    command_usage = await utils.get_content('command_usage', key=command.qualified_name)
-    if command_usage is None:
-        command_usage = {'command': command.qualified_name}
+    command_usage = await bot.db.actual_load('command_usage', key=command.qualified_name) or \
+                    {'command': command.qualified_name}
 
     # Add one to the total usage for this command, basing it off 0 to start with (obviously)
     total_usage = command_usage.get('total_usage', 0) + 1
@@ -71,8 +68,7 @@ async def process_command(ctx):
         command_usage['server_usage'] = total_server_usage
 
     # Save all the changes
-    if not await utils.update_content('command_usage', command_usage, command.qualified_name):
-        await utils.add_content('command_usage', command_usage)
+    bot.db.save('command_usage', command_usage)
 
 
 @bot.event
@@ -129,4 +125,7 @@ if __name__ == '__main__':
 
     for e in utils.extensions:
         bot.load_extension(e)
+
+    bot.db = utils.DB()
+    bot.uptime = pendulum.utcnow()
     bot.run(utils.bot_token)

@@ -5,7 +5,6 @@ from . import utils
 import discord
 
 import re
-import rethinkdb as r
 
 valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
 
@@ -51,7 +50,7 @@ class Administration:
 
         EXAMPLE: !ignore #general
         RESULT: Bonfire will ignore commands sent in the general channel"""
-        key = str(ctx.message.guild.id)
+        key = ctx.message.guild.id
 
         converter = commands.converter.MemberConverter()
         member = None
@@ -66,9 +65,7 @@ class Administration:
                 await ctx.send("{} does not appear to be a member or channel!".format(member_or_channel))
                 return
 
-        settings = await utils.get_content('server_settings', key)
-        if settings is None:
-            settings = {}
+        settings = self.bot.db.load('server_settings', key=key, pluck='ignored') or {}
         ignored = settings.get('ignored', {'members': [], 'channels': []})
         if member:
             if str(member.id) in ignored['members']:
@@ -80,7 +77,7 @@ class Administration:
             else:
                 ignored['members'].append(str(member.id))
                 fmt = "Ignoring {}".format(member.display_name)
-        elif channel:
+        else:
             if str(channel.id) in ignored['channels']:
                 await ctx.send("I am already ignoring {}!".format(channel.mention))
                 return
@@ -88,8 +85,12 @@ class Administration:
                 ignored['channels'].append(str(channel.id))
                 fmt = "Ignoring {}".format(channel.mention)
 
-        update = {'ignored': ignored}
-        await utils.update_content('server_settings', update, key)
+        entry = {
+            'ignored': ignored,
+            'server_id': str(key)
+        }
+
+        self.bot.db.save('server_settings', entry)
         await ctx.send(fmt)
 
     @commands.command()
@@ -115,9 +116,7 @@ class Administration:
                 await ctx.send("{} does not appear to be a member or channel!".format(member_or_channel))
                 return
 
-        settings = await utils.get_content('server_settings', key)
-        if settings is None:
-            settings = {}
+        settings = self.bot.db.load('server_settings', key=key) or {}
         ignored = settings.get('ignored', {'members': [], 'channels': []})
         if member:
             if str(member.id) not in ignored['members']:
@@ -126,7 +125,7 @@ class Administration:
 
             ignored['members'].remove(str(member.id))
             fmt = "I am no longer ignoring {}".format(member.display_name)
-        elif channel:
+        else:
             if str(channel.id) not in ignored['channels']:
                 await ctx.send("I'm not even ignoring {}!".format(channel.mention))
                 return
@@ -134,8 +133,12 @@ class Administration:
             ignored['channels'].remove(str(channel.id))
             fmt = "I am no longer ignoring {}".format(channel.mention)
 
-        update = {'ignored': ignored}
-        await utils.update_content('server_settings', update, key)
+        entry = {
+            'ignored': ignored,
+            'server_id': str(key)
+        }
+
+        self.bot.db.save('server_settings', entry)
         await ctx.send(fmt)
 
     @commands.command(aliases=['alerts'])
@@ -147,11 +150,12 @@ class Administration:
 
         EXAMPLE: !alerts #alerts
         RESULT: No more alerts spammed in #general!"""
-        key = str(ctx.message.guild.id)
-        entry = {'server_id': key,
-                 'notification_channel': str(channel.id)}
-        if not await utils.update_content('server_settings', entry, key):
-            await utils.add_content('server_settings', entry)
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'notifications_channel': str(channel.id)
+        }
+
+        self.bot.db.save('server_settings', entry)
         await ctx.send("I have just changed this server's 'notifications' channel"
                        "\nAll notifications will now go to `{}`".format(channel))
 
@@ -168,12 +172,13 @@ class Administration:
         # So we base this channel on it's own and not from alerts
         # When mod logging becomes available, that will be kept to it's own channel if wanted as well
         on_off = True if re.search("(on|yes|true)", on_off.lower()) else False
-        key = str(ctx.message.guild.id)
-        entry = {'server_id': key,
-                 'join_leave': on_off}
-        if not await utils.update_content('server_settings', entry, key):
-            await utils.add_content('server_settings', entry)
 
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'join_leave': on_off
+        }
+
+        self.bot.db.save('server_settings',entry)
         fmt = "notify" if on_off else "not notify"
         await ctx.send("This server will now {} if someone has joined or left".format(fmt))
 
@@ -196,17 +201,15 @@ class Administration:
         else:
             key = str(ctx.message.guild.id)
 
-        entry = {'server_id': key,
-                 'nsfw_channels': [str(ctx.message.channel.id)]}
-        update = {'nsfw_channels': r.row['nsfw_channels'].append(str(ctx.message.channel.id))}
+        channels = self.bot.db.load('server_settings', key=key, pluck='nsfw_channels') or []
+        channels.append(str(ctx.message.channel.id))
 
-        server_settings = await utils.get_content('server_settings', key)
-        if server_settings and 'nsfw_channels' in server_settings.keys():
-            await utils.update_content('server_settings', update, key)
-        elif server_settings:
-            await utils.update_content('server_settings', entry, key)
-        else:
-            await utils.add_content('server_settings', entry)
+        entry = {
+            'server_id': key,
+            'nsfw_channels': channels
+        }
+
+        self.bot.db.save('server_settings', entry)
 
         await ctx.send("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
@@ -217,27 +220,24 @@ class Administration:
 
         EXAMPLE: !nsfw remove
         RESULT: ;("""
-
+        channel = str(ctx.message.channel.id)
         if type(ctx.message.channel) is discord.DMChannel:
             key = 'DMs'
         else:
             key = str(ctx.message.guild.id)
 
-        server_settings = await utils.get_content('server_settings', key)
-        channel = str(ctx.message.channel.id)
-        try:
-            channels = server_settings.get('nsfw_channels', None)
-            if channel in channels:
-                channels.remove(channel)
+        channels = self.bot.db.load('server_settings', key=key, pluck='nsfw_channels') or []
+        if channel in channels:
+            channels.remove(channel)
 
-                entry = {'nsfw_channels': channels}
-                await utils.update_content('server_settings', entry, key)
-                await ctx.send("This channel has just been unregistered as a nsfw channel")
-                return
-        except (TypeError, IndexError):
-            pass
-
-        await ctx.send("This channel is not registered as a 'nsfw' channel!")
+            entry = {
+                'server_id': key,
+                'nsfw_channels': channels
+            }
+            self.bot.db.save('server_settings', entry)
+            await ctx.send("This channel has just been unregistered as a nsfw channel")
+        else:
+            await ctx.send("This channel is not registerred as a nsfw channel!")
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -259,11 +259,7 @@ class Administration:
             await ctx.send("That is not a valid command!")
             return
 
-        server_settings = await utils.get_content('server_settings', str(ctx.message.guild.id))
-        try:
-            server_perms = server_settings['permissions']
-        except (TypeError, IndexError, KeyError):
-            server_perms = {}
+        server_perms = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='permissions') or {}
 
         perms_value = server_perms.get(cmd.qualified_name)
         if perms_value is None:
@@ -351,12 +347,12 @@ class Administration:
                 await ctx.send("This command cannot have custom permissions setup!")
                 return
 
-        key = str(ctx.message.guild.id)
-        entry = {'server_id': key,
-                 'permissions': {cmd.qualified_name: perm_value}}
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'permissions': {cmd.qualified_name: perm_value}
+        }
 
-        if not await utils.update_content('server_settings', entry, key):
-            await utils.add_content('server_settings', entry)
+        self.bot.db.save('server_settings', entry)
 
         await ctx.send("I have just added your custom permissions; "
                        "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
@@ -377,8 +373,12 @@ class Administration:
                 "That command does not exist! You can't have custom permissions on a non-existant command....")
             return
 
-        update = {'permissions': {cmd.qualified_name: None}}
-        await utils.update_content('server_settings', update, str(ctx.message.guild.id))
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'permissions': {cmd.qualified_name: None}
+        }
+
+        self.bot.db.save('server_settings', entry)
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
     @commands.command()
@@ -396,11 +396,12 @@ class Administration:
         if prefix.lower().strip() == "none":
             prefix = None
 
-        entry = {'server_id': key,
-                 'prefix': prefix}
+        entry = {
+            'server_id': key,
+            'prefix': prefix
+        }
 
-        if not await utils.update_content('server_settings', entry, key):
-            await utils.add_content('server_settings', entry)
+        self.bot.db.save('server_settings', entry)
 
         if prefix is None:
             fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
@@ -417,14 +418,9 @@ class Administration:
 
         EXAMPLE: !rules 5
         RESULT: Rule 5 is printed"""
-        server_settings = await utils.get_content('server_settings', str(ctx.message.guild.id))
-        if server_settings is None:
-            await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
-            return
+        rules = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='rules')
 
-        rules = server_settings.get('rules')
-
-        if not rules or len(rules) == 0:
+        if rules is None:
             await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
             return
 
@@ -452,17 +448,15 @@ class Administration:
         EXAMPLE: !rules add No fun allowed in this server >:c
         RESULT: No more fun...unless they break the rules!"""
         key = str(ctx.message.guild.id)
-        entry = {'server_id': key,
-                 'rules': [rule]}
-        update = {'rules': r.row['rules'].append(rule)}
+        rules = self.bot.db.load('server_settings', key=key, pluck='rules') or []
+        rules.append(rule)
 
-        server_settings = await utils.get_content('server_settings', key)
-        if server_settings and 'rules' in server_settings.keys():
-            await utils.update_content('server_settings', update, key)
-        elif server_settings:
-            await utils.update_content('server_settings', entry, key)
-        else:
-            await utils.add_content('server_settings', entry)
+        entry = {
+            'server_id': key,
+            'rules': rules
+        }
+
+        self.bot.db.save('server_settings', entry)
 
         await ctx.send("I have just saved your new rule, use the rules command to view this server's current rules")
 
@@ -475,11 +469,55 @@ class Administration:
 
         EXAMPLE: !rules delete 5
         RESULT: Freedom from opression!"""
-        update = {'rules': r.row['rules'].delete_at(rule - 1)}
-        if not await utils.update_content('server_settings', update, str(ctx.message.guild.id)):
-            await ctx.send("That is not a valid rule number, try running the command again.")
-        else:
+        key = str(ctx.message.guild.id)
+        rules = self.bot.db.load('server_settings', key=key, pluck='rules') or []
+        try:
+            rules.pop(rule - 1)
+            entry = {
+                'server_id': key,
+                'rules': rules
+            }
+            self.bot.db.save('server_settings', entry)
             await ctx.send("I have just removed that rule from your list of rules!")
+        except IndexError:
+            await ctx.send("That is not a valid rule number, try running the command again.")
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    async def queuetype(self, ctx, new_type=None):
+        """Switches the song queue type for music
+        Choices are `user` or `song` queue
+        The `user` queue rotates off of a wait list, where people join the waitlist and the next song in their
+        playlist is the one that is played.
+
+        The `song` queue rotates based on songs themselves, where people add a song to the server's playlist,
+        and these are rotated through.
+
+        EXAMPLE: !queuetype user
+        RESULT: !queuetype """
+        key = str(ctx.message.guild.id)
+
+        if new_type is None:
+            cur_type = self.bot.db.load('server_settings', key=key, pluck='queue_type') or 'song'
+            await ctx.send("Current queue type is {}".format(cur_type))
+            return
+
+        new_type = new_type.lower().strip()
+        if new_type not in ['user', 'song']:
+            await ctx.send("Queue choices are either `user` or `song`. "
+                           "Run `{}help queuetype` if you need more information".format(ctx.prefix))
+        else:
+            entry = {
+                'server_id': key,
+                'queue_type': new_type
+            }
+            self.bot.db.save('server_settings', entry)
+            state = self.bot.get_cog('Music').voice_states.get(ctx.message.guild.id)
+            if state:
+                if new_type == "user" and not state.user_queue or new_type == "song" and state.user_queue:
+                    state.switch_queue_type()
+            await ctx.send("Current queue type is now `{}`".format(new_type))
 
 
 def setup(bot):

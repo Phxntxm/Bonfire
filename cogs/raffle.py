@@ -8,6 +8,7 @@ import pendulum
 import re
 import asyncio
 import traceback
+import rethinkdb as r
 
 
 class Raffle:
@@ -28,16 +29,20 @@ class Raffle:
     async def check_raffles(self):
         # This is used to periodically check the current raffles, and see if they have ended yet
         # If the raffle has ended, we'll pick a winner from the entrants
-        raffles = await utils.get_content('raffles')
+        raffles = self.bot.db.load('raffles')
 
         if raffles is None:
             return
 
         for raffle in raffles:
             server = self.bot.get_guild(int(raffle['server_id']))
+            title = raffle['title']
+            entrants = raffle['entrants']
+            raffle_id = raffle['id']
 
             # Check to see if this cog can find the server in question
             if server is None:
+                await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
                 continue
 
             now = pendulum.utcnow()
@@ -46,10 +51,6 @@ class Raffle:
             # Now lets compare and see if this raffle has ended, if not just continue
             if expires > now:
                 continue
-
-            title = raffle['title']
-            entrants = raffle['entrants']
-            raffle_id = raffle['id']
 
             # Make sure there are actually entrants
             if len(entrants) == 0:
@@ -72,20 +73,16 @@ class Raffle:
                 else:
                     fmt = 'The raffle `{}` has just ended! The winner is {}!'.format(title, winner.display_name)
 
-            # No matter which one of these matches were met, the raffle has ended and we want to remove it
-            # We don't have to wait for it however, so create a task for it
-            self.bot.loop.create_task(utils.remove_content('raffles', raffle_id))
-
-            server_settings = await utils.get_content('server_settings', str(server.id))
-            if server_settings is None:
-                channel = self.bot.get_channel(server.id)
-            else:
-                channel_id = server_settings.get('notification_channel', server.id)
-                channel = self.bot.get_channel(channel_id)
+            channel_id = self.bot.db.load('server_settings', key=server.id,
+                                                pluck='notifications_channel') or server.id
+            channel = self.bot.get_channel(channel_id)
             try:
                 await channel.send(fmt)
             except (discord.Forbidden, AttributeError):
                 pass
+
+            # No matter which one of these matches were met, the raffle has ended and we want to remove it
+            await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
 
     @commands.command()
     @commands.guild_only()
@@ -96,11 +93,16 @@ class Raffle:
         EXAMPLE: !raffles
         RESULT: A list of the raffles setup on this server"""
         r_filter = {'server_id': str(ctx.message.guild.id)}
-        raffles = await utils.filter_content('raffles', r_filter)
+        raffles = self.bot.db.load('raffles', table_filter=r_filter)
         if raffles is None:
             await ctx.send("There are currently no raffles setup on this server!")
             return
 
+        # For EVERY OTHER COG, when we get one result, it is nice to have it return that exact object
+        # This is the only cog where that is different, so just to make this easier lets throw it
+        # back in a one-indexed list, for easier parsing
+        if isinstance(raffles, dict):
+            raffles = [raffles]
         fmt = "\n\n".join("**Raffle:** {}\n**Title:** {}\n**Total Entrants:** {}\n**Ends:** {} UTC".format(
             num + 1,
             raffle['title'],
@@ -122,12 +124,16 @@ class Raffle:
         r_filter = {'server_id': str(ctx.message.guild.id)}
         author = ctx.message.author
 
-        raffles = await utils.filter_content('raffles', r_filter)
+        raffles = self.bot.db.load('raffles', table_filter=r_filter)
         if raffles is None:
             await ctx.send("There are currently no raffles setup on this server!")
             return
 
-        raffle_count = len(raffles)
+        if isinstance(raffles, list):
+            raffle_count = len(raffles)
+        elif isinstance(raffles, dict):
+            raffles = [raffles]
+            raffle_count = 1
 
         # There is only one raffle, so use the first's info
         if raffle_count == 1:
@@ -138,8 +144,11 @@ class Raffle:
                 return
             entrants.append(str(author.id))
 
-            update = {'entrants': entrants}
-            await utils.update_content('raffles', update, raffles[0]['id'])
+            update = {
+                'entrants': entrants,
+                'id': raffles[0]['id']
+            }
+            self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         # Otherwise, make sure the author gave a valid raffle_id
         elif raffle_id in range(raffle_count - 1):
@@ -152,13 +161,17 @@ class Raffle:
             entrants.append(str(author.id))
 
             # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
-            update = {'entrants': entrants}
-            await utils.update_content('raffles', update, raffles[raffle_id]['id'])
+
+            update = {
+                'entrants': entrants,
+                'id': raffles[0]['id']
+            }
+            self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         else:
             fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! " \
                   "There are currently `{}` raffles running, use {}raffles to view the current running raffles".format(
-                      raffle_count, ctx.prefix)
+                    raffle_count, ctx.prefix)
             await ctx.send(fmt)
 
     @raffle.command(pass_context=True, name='create', aliases=['start', 'begin', 'add'])
@@ -198,6 +211,7 @@ class Raffle:
                 return re.search("\d+ (minutes?|hours?|days?|weeks?|months?)", m.content.lower()) is not None
             else:
                 return False
+
         try:
             msg = await self.bot.wait_for('message', timeout=120, check=check)
         except asyncio.TimeoutError:
@@ -238,14 +252,16 @@ class Raffle:
         expires = now.add(**payload)
 
         # Now we're ready to add this as a new raffle
-        entry = {'title': title,
-                 'expires': expires.to_datetime_string(),
-                 'entrants': [],
-                 'author': str(author.id),
-                 'server_id': str(server.id)}
+        entry = {
+            'title': title,
+            'expires': expires.to_datetime_string(),
+            'entrants': [],
+            'author': str(author.id),
+            'server_id': str(server.id)
+        }
 
         # We don't want to pass a filter to this, because we can have multiple raffles per server
-        await utils.add_content('raffles', entry)
+        self.bot.db.save('raffles', entry)
         await ctx.send("I have just saved your new raffle!")
 
 

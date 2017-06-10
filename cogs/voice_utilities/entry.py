@@ -92,7 +92,7 @@ class BasePlaylistEntry:
 
 
 class URLPlaylistEntry(BasePlaylistEntry):
-    def __init__(self, playlist, url, title, ctx, thumbnail, duration=0, expected_filename=None, **meta):
+    def __init__(self, playlist, url, title, thumbnail, duration=0, expected_filename=None, **meta):
         super().__init__()
 
         self.playlist = playlist
@@ -102,8 +102,6 @@ class URLPlaylistEntry(BasePlaylistEntry):
         self.thumbnail = thumbnail
         self.expected_filename = expected_filename
         self.meta = meta
-        self.requester = ctx.message.author
-        self.channel = ctx.message.channel
         self.download_folder = self.playlist.downloader.download_folder
 
     def __str__(self):
@@ -132,7 +130,6 @@ class URLPlaylistEntry(BasePlaylistEntry):
     @classmethod
     def from_json(cls, playlist, jsonstring):
         data = json.loads(jsonstring)
-        print(data)
         # TODO: version check
         url = data['url']
         title = data['title']
@@ -187,7 +184,6 @@ class URLPlaylistEntry(BasePlaylistEntry):
 
             # the generic extractor requires special handling
             if extractor == 'generic':
-                # print("Handling generic")
                 flistdir = [f.rsplit('-', 1)[0] for f in os.listdir(self.download_folder)]
                 expected_fname_noex, fname_ex = os.path.basename(self.expected_filename).rsplit('.', 1)
 
@@ -202,18 +198,14 @@ class URLPlaylistEntry(BasePlaylistEntry):
                         os.listdir(self.download_folder)[flistdir.index(expected_fname_noex)]
                     )
 
-                    # print("Resolved %s to %s" % (self.expected_filename, lfile))
                     lsize = os.path.getsize(lfile)
-                    # print("Remote size: %s Local size: %s" % (rsize, lsize))
 
                     if lsize != rsize:
                         await self._really_download(hash=True)
                     else:
-                        # print("[Download] Cached:", self.url)
                         self.filename = lfile
 
                 else:
-                    # print("File not found in cache (%s)" % expected_fname_noex)
                     await self._really_download(hash=True)
 
             else:
@@ -227,15 +219,9 @@ class URLPlaylistEntry(BasePlaylistEntry):
 
                 if expected_fname_base in ldir:
                     self.filename = os.path.join(self.download_folder, expected_fname_base)
-                    print("[Download] Cached:", self.url)
 
                 elif expected_fname_noex in flistdir:
-                    print("[Download] Cached (different extension):", self.url)
                     self.filename = os.path.join(self.download_folder, ldir[flistdir.index(expected_fname_noex)])
-                    print("Expected %s, got %s" % (
-                        self.expected_filename.rsplit('.', 1)[-1],
-                        self.filename.rsplit('.', 1)[-1]
-                    ))
 
                 else:
                     await self._really_download()
@@ -252,14 +238,11 @@ class URLPlaylistEntry(BasePlaylistEntry):
 
     # noinspection PyShadowingBuiltins
     async def _really_download(self, *, hash=False):
-        print("[Download] Started:", self.url)
 
         try:
             result = await self.playlist.downloader.extract_info(self.playlist.loop, self.url, download=True)
         except Exception as e:
             raise ExtractionError(e)
-
-        print("[Download] Complete:", self.url)
 
         if result is None:
             raise ExtractionError("ytdl broke and hell if I know why")

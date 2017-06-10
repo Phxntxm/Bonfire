@@ -23,20 +23,6 @@ except KeyError:
     quit()
 
 
-# This is a simple class for the cache concept, all it holds is it's own key and the values
-# With a method that gets content based on it's key
-class Cache:
-    def __init__(self, key):
-        self.key = key
-        self.values = {}
-        self.refreshed = pendulum.utcnow()
-        loop.create_task(self.update())
-
-    async def update(self):
-        self.values = await get_content(self.key)
-        self.refreshed = pendulum.utcnow()
-
-
 # Default bot's description
 bot_description = global_config.get("description")
 # Bot's default prefix for commands
@@ -80,7 +66,9 @@ extensions = [
     'cogs.tags',
     'cogs.roulette',
     'cogs.music',
-    'cogs.polls'
+    'cogs.polls',
+    'cogs.playlist',
+    'cogs.dj'
 ]
 
 
@@ -103,155 +91,8 @@ db_pass = global_config.get('db_pass', '')
 # {'ca_certs': db_cert}, 'user': db_user, 'password': db_pass}
 db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'user': db_user, 'password': db_pass}
 
-possible_keys = ['prefixes', 'battle_records', 'boops', 'server_alerts', 'user_notifications', 'nsfw_channels',
-                 'custom_permissions', 'rules', 'overwatch', 'picarto', 'twitch', 'strawpolls', 'tags',
-                 'tictactoe', 'bot_data', 'command_manage']
-
-# This will be a dictionary that holds the cache object, based on the key that is saved
-cache = {}
-
-# Populate cache with each object
-# With the new saving method, we're not going to be able to cache the way that I was before
-# This is on standby until I rethink how to do this, because I do still want to cache data
-"""for k in possible_keys:
-    ca che[k] = Cache(k)"""
-
-# We still need 'cache' for prefixes and custom permissions however, so for now, just include that
-cache['prefixes'] = Cache('prefixes')
-cache['server_settings'] = Cache('server_settings')
-
-async def update_cache():
-    for value in cache.values():
-        await value.update()
-
 
 def command_prefix(bot, message):
-    # We do not want to make a query for every message that is sent
-    # So assume it's in cache, or it doesn't exist
-    # If the prefix does exist in the database and isn't in our cache; too bad, something has messed up
-    # But it is not worth a query for every single message the bot detects, to fix
-    try:
-        prefixes = cache['server_settings'].values
-        prefix = [x for x in prefixes if x['server_id'] == str(message.guild.id)][0]['prefix']
-        return prefix or default_prefix
-    except (KeyError, TypeError, IndexError, AttributeError, KeyError):
+    if not message.guild:
         return default_prefix
-
-
-async def add_content(table, content):
-    r.set_loop_type("asyncio")
-    conn = await r.connect(**db_opts)
-    # First we need to make sure that this entry doesn't exist
-    # For all rethinkDB cares, multiple entries can exist with the same content
-    # For our purposes however, we do not want this
-    try:
-        result = await r.table(table).insert(content).run(conn)
-    except r.ReqlOpFailedError:
-        # This means the table does not exist
-        await r.table_create(table).run(conn)
-        await r.table(table).insert(content).run(conn)
-        result = {}
-
-    await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
-    return result.get('inserted', 0) > 0
-
-
-async def remove_content(table, key):
-    r.set_loop_type("asyncio")
-    conn = await r.connect(**db_opts)
-    try:
-        result = await r.table(table).get(key).delete().run(conn)
-    except r.ReqlOpFailedError:
-        result = {}
-        pass
-
-    await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
-    return result.get('deleted', 0) > 0
-
-
-async def update_content(table, content, key):
-    r.set_loop_type("asyncio")
-    conn = await r.connect(**db_opts)
-    # This method is only for updating content, so if we find that it doesn't exist, just return false
-    try:
-        # Update based on the content and filter passed to us
-        # rethinkdb allows you to do many many things inside of update
-        # This is why we're accepting a variable and using it, whatever it may be, as the query
-        result = await r.table(table).get(key).update(content).run(conn)
-    except r.ReqlOpFailedError:
-        result = {}
-
-    await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
-    return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
-
-
-async def replace_content(table, content, key):
-    # This method is here because .replace and .update can have some different functionalities
-    r.set_loop_type("asyncio")
-    conn = await r.connect(**db_opts)
-    try:
-        result = await r.table(table).get(key).replace(content).run(conn)
-    except r.ReqlOpFailedError:
-        result = {}
-
-    await conn.close()
-    if table == 'prefixes' or table == 'server_settings':
-        loop.create_task(cache[table].update())
-    return result.get('replaced', 0) > 0 or result.get('unchanged', 0) > 0
-
-
-async def get_content(table, key=None):
-    r.set_loop_type("asyncio")
-    conn = await r.connect(**db_opts)
-
-    try:
-        if key:
-            cursor = await r.table(table).get(key).run(conn)
-        else:
-            cursor = await r.table(table).run(conn)
-        if cursor is None:
-            content = None
-        elif type(cursor) is not dict:
-            content = await _convert_to_list(cursor)
-            if len(content) == 0:
-                content = None
-        else:
-            content = cursor
-    except (IndexError, r.ReqlOpFailedError):
-        content = None
-
-    await conn.close()
-    return content
-
-async def filter_content(table: str, r_filter):
-    r.set_loop_type("asyncio")
-    conn = await r.connect(**db_opts)
-    try:
-        cursor = await r.table(table).filter(r_filter).run(conn)
-        content = await _convert_to_list(cursor)
-        if len(content) == 0:
-            content = None
-    except (IndexError, r.ReqlOpFailedError):
-        content = None
-
-    await conn.close()
-    return content
-
-
-async def _convert_to_list(cursor):
-    # This method is here because atm, AsyncioCursor is not iterable
-    # For our purposes, we want a list, so we need to do this manually
-    cursor_list = []
-    while True:
-        try:
-            val = await cursor.next()
-            cursor_list.append(val)
-        except r.ReqlCursorEmpty:
-            break
-    return cursor_list
+    return bot.db.load('server_settings', key=message.guild.id, pluck='prefix') or default_prefix

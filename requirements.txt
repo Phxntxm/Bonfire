@@ -1,9 +1,9 @@
-beautifulsoup4
+beautifulsoup4==4.6.0
 Pillow==3.4.1
-rethinkdb
-ruamel.yaml
+rethinkdb==2.3.0.post6
+ruamel.yaml==0.14.12
 youtube-dl
-psutil
-pendulum
+psutil==5.2.2
+pendulum==1.2.0
 -e git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]
 -e git+https://github.com/khazhyk/osuapi.git#egg=osuapi

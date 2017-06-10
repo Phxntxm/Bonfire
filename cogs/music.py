@@ -11,7 +11,7 @@ import asyncio
 import time
 import re
 import logging
-import traceback
+from collections import deque
 
 log = logging.getLogger()
 
@@ -20,13 +20,16 @@ if not discord.opus.is_loaded():
 
 
 class VoiceState:
-    def __init__(self, guild, bot):
+    def __init__(self, guild, bot, user_queue=False):
         self.guild = guild
         self.songs = Playlist(bot)
+        self.djs = deque()
+        self.dj = None
         self.current = None
         self.required_skips = 0
         self.skip_votes = set()
-        self.audio_player = bot.loop.create_task(self.audio_player_task())
+        self.user_queue = user_queue
+        self.loop = bot.loop
         self._volume = 50
 
     @property
@@ -50,40 +53,44 @@ class VoiceState:
         else:
             return self.voice.is_playing() or self.voice.is_paused()
 
+    def switch_queue_type(self):
+        self.songs.clear()
+        self.djs.clear()
+        self.dj = None
+        self.user_queue = not self.user_queue
+        self.skip()
+
+    def get_dj(self, member):
+        for x in self.djs:
+            if x.member.id == member.id:
+                return x
+
     def skip(self):
         self.skip_votes.clear()
         if self.playing:
             self.voice.stop()
 
-    def after(self):
-        self.current = None
+    def after(self, _=None):
+        if self.user_queue:
+            self.djs.append(self.dj)
+        fut = asyncio.run_coroutine_threadsafe(self.play_next_song(), self.loop)
+        fut.result()
 
-    async def audio_player_task(self):
-        while True:
-            if self.playing:
-                await asyncio.sleep(1)
-                continue
-            song = self.songs.peek()
-            if song is None:
-                await asyncio.sleep(1)
-                continue
+    async def play_next_song(self):
+        if self.playing or not self.voice:
+            return
 
-            try:
-                self.current = await self.songs.get_next_entry()
-                embed = self.current.to_embed()
-                embed.title = "Now playing!"
-                await song.channel.send(embed=embed)
-            except ExtractionError as e:
-                error = str(e).partition(" ")[2]
-                await song.channel.send("Failed to download {}!\nError: {}".format(song.title, error))
-                continue
-            except discord.Forbidden:
-                pass
-            except:
-                await song.channel.send("Failed to download {}!".format(song.title))
-                log.error(traceback.format_exc())
-                continue
+        self.skip_votes.clear()
+        try:
+            await self.next_song()
+        except ExtractionError:
+            # For now lets just silently continue in the queue
+            # Implementation to the music notifications channel will change what we do here
+            return await self.play_next_song()
 
+        if self.playing or not self.voice:
+            return
+        if self.current:
             source = FFmpegPCMAudio(
                 self.current.filename,
                 before_options='-nostdin',
@@ -92,6 +99,42 @@ class VoiceState:
             source = PCMVolumeTransformer(source, volume=self.volume)
             self.voice.play(source, after=self.after)
             self.current.start_time = time.time()
+        else:
+            # If we're here what we can assume is the following took place:
+            # 1) The queue type is `user`
+            # 2) Someone joined for the first time, starting off the queue
+            # 3) They don't have a song in their playlist ready yet
+            # Or....this is a song queue, and the last song in the queue was retrieved, and failed to download
+            # So what we'll do here is just call this again a few seconds later if it's a user queue, otherwise return
+            if self.user_queue:
+                await asyncio.sleep(2)
+                return await self.play_next_song()
+            else:
+                return
+
+    async def next_song(self):
+        if not self.user_queue:
+            song = await self.songs.get_next_entry()
+        else:
+            try:
+                dj = self.djs.popleft()
+            except IndexError:
+                song = None
+            else:
+                song = await self.dj.get_next_entry()
+                if song is None:
+                    self.djs.remove(dj)
+                    await self.next_song()
+                else:
+                    song.requester = dj.member
+
+                # Add an extra check here in case in the very short period of time possible, someone has queued a
+                # song while we are downloading the next
+                if not self.playing:
+                    self.dj = dj
+
+        if not self.playing:
+            self.current = song
 
 
 class Music:
@@ -105,16 +148,6 @@ class Music:
         down = Downloader(download_folder='audio_tmp')
         self.downloader = down
         self.bot.downloader = down
-
-    def __unload(self):
-        # If this is unloaded, cancel all players and disconnect from all channels
-        for state in self.voice_states.values():
-            try:
-                state.audio_player.cancel()
-                if state.voice:
-                    self.bot.loop.create_task(state.voice.disconnect())
-            except:
-                pass
 
     async def queue_embed_task(self, state, channel, author):
         index = 0
@@ -136,7 +169,10 @@ class Music:
         while True:
             # Get the current queue (It might change while we're doing this)
             # So do this in the while loop
-            queue = state.songs.entries
+            if state.user_queue:
+                queue = state.djs
+            else:
+                queue = state.songs.entries
             count = len(queue)
             # This means the last song was removed
             if count == 0:
@@ -144,8 +180,13 @@ class Music:
                 break
             # Get the current entry
             entry = queue[index]
+            dj = None
+            if state.user_queue:
+                dj = entry
+                entry = entry.peek()
             # Get the entry's embed
             embed = entry.to_embed()
+
             # Set the embed's title to indicate the amount of things in the queue
             count = len(queue)
             embed.title = "Current Queue [{}/{}]".format(index + 1, count)
@@ -201,33 +242,45 @@ class Music:
             elif '\u2b06' in reaction.emoji:
                 # A second check just to make sure, as well as ensuring index is higher than 0
                 if author.guild_permissions.kick_members and index > 0:
-                    if entry != queue[index]:
+                    if dj and dj != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    elif not dj and entry != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     else:
                         # Remove the current entry
                         del queue[index]
                         # Add it one position higher
-                        queue.insert(index - 1, entry)
+                        if state.user_queue:
+                            queue.insert(index - 1, dj)
+                        else:
+                            queue.insert(index - 1, entry)
                         # Lets move the index to look at the new place of the entry
                         index -= 1
             # If down is clicked
             elif '\u2b07' in reaction.emoji:
                 # A second check just to make sure, as well as ensuring index is lower than last
                 if author.guild_permissions.kick_members and index < (count - 1):
-                    if entry != queue[index]:
+                    if dj and dj != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    elif not dj and entry != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     else:
                         # Remove the current entry
                         del queue[index]
                         # Add it one position lower
-                        queue.insert(index + 1, entry)
+                        if state.user_queue:
+                            queue.insert(index + 1, dj)
+                        else:
+                            queue.insert(index + 1, entry)
                         # Lets move the index to look at the new place of the entry
                         index += 1
             # If x is clicked
             elif '\u274c' in reaction.emoji:
                 # A second check just to make sure
                 if author.guild_permissions.kick_members or author == entry.requester:
-                    if entry != queue[index]:
+                    if dj and dj != queue[index]:
+                        fmt = "`Error: Position of this entry has changed, cannot complete your action`"
+                    elif not dj and entry != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     else:
                         # Simply remove the entry in place
@@ -261,16 +314,19 @@ class Music:
 
     async def add_entry(self, song, ctx):
         state = self.voice_states[ctx.message.guild.id]
-        entry, _ = await state.songs.add_entry(song, ctx)
+        entry, _ = await state.songs.add_entry(song)
+        if not state.playing:
+            await state.play_next_song()
+        entry.requester = ctx.message.author
         return entry
 
-    async def join_channel(self, channel):
+    async def join_channel(self, channel, text_channel):
         state = self.voice_states.get(channel.guild.id)
         log.info("Joining channel {} in guild {}".format(channel.id, channel.guild.id))
 
         # Send a message letting the channel know we are attempting to join
         try:
-            msg = await channel.send("Trying to join channel {}...".format(channel.name))
+            msg = await text_channel.send("Trying to join channel {}...".format(channel.name))
         except discord.Forbidden:
             msg = None
 
@@ -283,7 +339,9 @@ class Music:
                 await channel.connect()
 
             # If we have connnected, create our voice state
-            self.voice_states[channel.guild.id] = VoiceState(channel.guild, self.bot)
+            queue_type = self.bot.db.load('server_settings', key=channel.guild.id, pluck='queue_type')
+            user_queue = queue_type == "user"
+            self.voice_states[channel.guild.id] = VoiceState(channel.guild, self.bot, user_queue=user_queue)
 
             # If we can send messages, edit it to let the channel know we have succesfully joined
             if msg:
@@ -306,10 +364,10 @@ class Music:
                     "Force cleared voice connection on guild {} after being stuck "
                     "between connected/not connected".format(channel.guild.id))
                 # Let them know what happened
-                await channel.send("Sorry but I couldn't connect...try again?")
+                await text_channel.send("Sorry but I couldn't connect...try again?")
                 return False
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def progress(self, ctx):
@@ -356,7 +414,7 @@ class Music:
                            "voice activation`".format(channel.name))
             return False
 
-        return await self.join_channel(channel)
+        return await self.join_channel(channel, ctx.channel)
 
     @commands.command()
     @commands.guild_only()
@@ -372,6 +430,10 @@ class Music:
         if ctx.message.guild.id not in self.voice_states:
             if not await ctx.invoke(self.join):
                 return
+        if self.voice_states.get(ctx.message.guild.id).user_queue:
+            await ctx.send("The current queue type is the DJ queue. "
+                           "Use the command {}dj to join this queue".format(ctx.prefix))
+            return
 
         song = re.sub('[<>\[\]]', '', song)
         if len(song) == 11:
@@ -382,8 +444,6 @@ class Music:
 
         try:
             entry = await self.add_entry(song, ctx)
-        except asyncio.TimeoutError:
-            await ctx.send("You took too long!")
         except LiveStreamError as e:
             await ctx.send(str(e))
         except WrongEntryTypeError:
@@ -396,7 +456,7 @@ class Music:
                 # We want youtube_dl's error message, but just the first part, the actual "error"
                 error = error[2]
                 # This is colour formatting for the console...it's just going to show up as text on discord
-                error = error.strip("[0;31mERROR:[0m ")
+                error = error.replace("[0;31mERROR:[0m ", "")
             else:
                 # This happens when the download just returns `None`
                 error = error[0]
@@ -409,10 +469,10 @@ class Music:
                     embed = entry.to_embed()
                     embed.title = "Enqueued song!"
                     await ctx.send(embed=embed)
-            except (discord.Forbidden, discord.HTTPException):
+            except discord.Forbidden:
                 pass
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def volume(self, ctx, value: int = None):
@@ -431,7 +491,7 @@ class Music:
             state.volume = value
             await ctx.send('Set the volume to {:.0%}'.format(state.volume))
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def pause(self, ctx):
@@ -440,7 +500,7 @@ class Music:
         if state and state.voice and state.voice.is_connected():
             state.voice.pause()
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def resume(self, ctx):
@@ -449,7 +509,7 @@ class Music:
         if state and state.voice and state.voice.is_connected():
             state.voice.resume()
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def stop(self, ctx):
@@ -457,23 +517,22 @@ class Music:
         This also clears the queue.
         """
         state = self.voice_states.get(ctx.message.guild.id)
-        voice = ctx.message.guild.voice_client
-        if voice:
-            voice.stop()
-            await voice.disconnect(force=True)
 
-        if state:
+        # Stop playing whatever song is playing.
+        if state and state.voice:
+            state.voice.stop()
+
             state.songs.clear()
 
             # This will cancel the audio event we're using to loop through the queue
             # Then erase the voice_state entirely, and disconnect from the channel
-            state.audio_player.cancel()
+            await state.voice.disconnect()
             try:
                 del self.voice_states[ctx.message.guild.id]
             except KeyError:
                 pass
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def eta(self, ctx):
@@ -485,7 +544,10 @@ class Music:
             await ctx.send('Not playing any music right now...')
             return
 
-        queue = state.songs.entries
+        if state.user_queue:
+            queue = [x.peek() for x in state.djs if x.peek()]
+        else:
+            queue = state.songs.entries
         if len(queue) == 0:
             await ctx.send("Nothing currently in the queue")
             return
@@ -506,7 +568,7 @@ class Music:
             return
         await ctx.send("ETA till your next play is: {0[0]}m {0[1]}s".format(divmod(round(count, 0), 60)))
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def queue(self, ctx):
@@ -515,25 +577,35 @@ class Music:
         if state is None:
             await ctx.send("Nothing currently in the queue")
             return
-        # Asyncio provides no non-private way to access the queue, so we have to use _queue
-        _queue = state.songs.entries
+
+        if state.user_queue:
+            _queue = [x.peek() for x in state.djs if x.peek()]
+        else:
+            _queue = state.songs.entries
         if len(_queue) == 0:
             await ctx.send("Nothing currently in the queue")
         else:
             self.bot.loop.create_task(self.queue_embed_task(state, ctx.message.channel, ctx.message.author))
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
         state = self.voice_states.get(ctx.message.guild.id)
-        if state:
-            await ctx.send("There are a total of {} songs in the queue".format(len(state.songs.entries)))
-        else:
-            await ctx.send("There are no songs in the queue")
+        if state is None:
+            await ctx.send("Nothing currently in the queue")
+            return
 
-    @commands.command(pass_context=True)
+        if state.user_queue:
+            _queue = [x.peek() for x in state.djs if x.peek()]
+        else:
+            _queue = state.songs.entries
+        if len(_queue) == 0:
+            await ctx.send("Nothing currently in the queue")
+        await ctx.send("There are a total of {} songs in the queue".format(len(_queue)))
+
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def skip(self, ctx):
@@ -543,13 +615,13 @@ class Music:
         """
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if state is None or not state.playing or state.current is None:
+        if state is None or not state.playing:
             await ctx.send('Not playing any music right now...')
             return
 
         # Check if the person requesting a skip is the requester of the song, if so automatically skip
         voter = ctx.message.author
-        if voter == state.current.requester:
+        if hasattr(state.current, 'requester') and voter == state.current.requester:
             await ctx.send('Requester requested skipping song...')
             state.skip()
         # Otherwise check if the voter has already voted
@@ -566,7 +638,7 @@ class Music:
         else:
             await ctx.send('You have already voted to skip this song.')
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def modskip(self, ctx):
@@ -579,7 +651,7 @@ class Music:
         state.skip()
         await ctx.send('Song has just been skipped.')
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     async def playing(self, ctx):
@@ -607,6 +679,38 @@ class Music:
                 embed.add_field(name='Progress', value=fmt, inline=False)
                 # And send the embed
                 await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(send_messages=True)
+    async def dj(self, ctx):
+        """Attempts to join the current DJ queue
+
+        EXAMPLE: !dj
+        RESULT: You are 7th on the waitlist for the queue"""
+        if ctx.message.guild.id not in self.voice_states:
+            if not await ctx.invoke(self.join):
+                return
+
+        state = self.voice_states.get(ctx.message.guild.id)
+        if not state.user_queue:
+            await ctx.send("The current queue type is the song queue. "
+                           "Use the command {}play to add a song to the queue".format(ctx.prefix))
+            return
+
+        if state.get_dj(ctx.message.author):
+            await ctx.send("You are already in the DJ queue!")
+        else:
+            new_dj = self.bot.get_cog('DJEvents').djs[ctx.message.author.id]
+            state.djs.append(new_dj)
+            try:
+                await ctx.send("You have joined the DJ queue; there are currently {} people ahead of you".format(
+                    state.djs.index(new_dj)))
+            except discord.Forbidden:
+                pass
+
+            if not state.playing:
+                await state.play_next_song()
 
 
 def setup(bot):

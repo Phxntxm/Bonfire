@@ -12,7 +12,6 @@ required_tables = {
     'battle_records': 'member_id',
     'boops': 'member_id',
     'command_usage': 'command',
-    'motd': 'date',
     'overwatch': 'member_id',
     'picarto': 'member_id',
     'server_settings': 'server_id',
@@ -21,7 +20,8 @@ required_tables = {
     'osu': 'member_id',
     'tags': 'server_id',
     'tictactoe': 'member_id',
-    'twitch': 'member_id'
+    'twitch': 'member_id',
+    'user_playlists': 'member_id'
 }
 
 
@@ -68,16 +68,13 @@ def is_owner(ctx):
     return ctx.bot.owner.id == ctx.message.author.id
 
 
-def should_ignore(message):
+def should_ignore(bot, message):
     if message.guild is None:
         return False
-    try:
-        server_settings = config.cache.get('server_settings').values
-        ignored = [x for x in server_settings if x['server_id'] == str(
-            message.guild.id)][0]['ignored']
-        return str(message.author.id) in ignored['members'] or str(message.channel.id) in ignored['channels']
-    except (TypeError, IndexError, KeyError):
+    ignored = bot.db.load('server_settings', key=message.guild.id, pluck='ignored')
+    if not ignored:
         return False
+    return str(message.author.id) in ignored['members'] or str(message.channel.id) in ignored['channels']
 
 
 def custom_perms(**perms):
@@ -94,13 +91,10 @@ def custom_perms(**perms):
         for perm, setting in perms.items():
             setattr(required_perm, perm, setting)
 
-        try:
-            server_settings = config.cache.get('server_settings').values
-            required_perm_value = [x for x in server_settings if x['server_id'] == str(
-                ctx.message.guild.id)][0]['permissions'][ctx.command.qualified_name]
+        required_perm_value = ctx.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='permissions') or {}
+        required_perm_value = required_perm_value.get(ctx.command.qualified_name)
+        if required_perm_value:
             required_perm = discord.Permissions(required_perm_value)
-        except (TypeError, IndexError, KeyError):
-            pass
 
         # Now just check if the person running the command has these permissions
         return member_perms >= required_perm

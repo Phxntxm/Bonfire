@@ -44,7 +44,7 @@ class Osu:
 
     async def get_users(self):
         """A task used to 'cache' all member's and their Osu profile's"""
-        data = await utils.get_content('osu')
+        data = await self.bot.db.actual_load('osu')
         if data is None:
             return
 
@@ -56,11 +56,12 @@ class Osu:
 
     @commands.group(invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
-    async def osu(self, ctx, member: discord.Member=None):
+    async def osu(self, ctx, member: discord.Member = None):
         """Provides basic information about a specific user
 
         EXAMPLE: !osu @Person
         RESULT: Informationa bout that person's osu account"""
+        await ctx.message.channel.trigger_typing()
         if member is None:
             member = ctx.message.author
 
@@ -92,6 +93,7 @@ class Osu:
 
         EXAMPLE: !osu add username
         RESULT: Links your username to your account, and allows stats to be pulled from it"""
+        await ctx.message.channel.trigger_typing()
         author = ctx.message.author
         user = await self.get_user(author, username)
         if user is None:
@@ -103,8 +105,7 @@ class Osu:
             'osu_username': user.username
         }
 
-        if not await utils.add_content('osu', entry):
-            await utils.update_content('osu', entry, str(author.id))
+        self.bot.db.save('osu', entry)
 
         await ctx.send("I have just saved your Osu user {}".format(author.display_name))
 
@@ -116,7 +117,7 @@ class Osu:
 
         EXAMPLE: !osu scores @Person 5
         RESULT: The top 5 maps for the user @Person"""
-
+        await ctx.message.channel.trigger_typing()
         # Set the defaults before we go through our passed data to figure out what we want
         limit = 5
         member = ctx.message.author
@@ -166,7 +167,9 @@ class Osu:
                     {'name': 'Length', 'value': m.total_length},
                     {'name': 'Score', 'value': i.score},
                     {'name': 'Max Combo', 'value': i.maxcombo},
-                    {'name': 'Hits', 'value': "{}/{}/{}/{} (300/100/50/misses)".format(i.count300, i.count100, i.count50, i.countmiss), "inline": False},
+                    {'name': 'Hits',
+                     'value': "{}/{}/{}/{} (300/100/50/misses)".format(i.count300, i.count100, i.count50, i.countmiss),
+                     "inline": False},
                     {'name': 'Perfect', 'value': "Yes" if i.perfect else "No"},
                     {'name': 'Rank', 'value': i.rank},
                     {'name': 'PP', 'value': i.pp},
@@ -181,6 +184,7 @@ class Osu:
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
+
 
 def setup(bot):
     bot.add_cog(Osu(bot))

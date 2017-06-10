@@ -44,10 +44,10 @@ class StatsUpdate:
         async with self.session.post(url, data=payload, headers=headers) as resp:
             log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
 
-    async def on_server_join(self, server):
+    async def on_guild_join(self, _):
         self.bot.loop.create_task(self.update())
 
-    async def on_server_leave(self, server):
+    async def on_guild_leave(self, _):
         self.bot.loop.create_task(self.update())
 
     async def on_ready(self):
@@ -55,12 +55,12 @@ class StatsUpdate:
 
     async def on_member_join(self, member):
         guild = member.guild
-        server_settings = await config.get_content('server_settings', str(guild.id))
+        server_settings = self.bot.db.load('server_settings', key=str(guild.id))
 
         try:
             join_leave_on = server_settings['join_leave']
             if join_leave_on:
-                channel_id = server_settings.get('notification_channel') or member.guild.id
+                channel_id = server_settings.get('notifications_channel') or member.guild.id
             else:
                 return
         except (IndexError, TypeError, KeyError):
@@ -74,12 +74,12 @@ class StatsUpdate:
 
     async def on_member_remove(self, member):
         guild = member.guild
-        server_settings = await config.get_content('server_settings', str(guild.id))
+        server_settings = self.bot.db.load('server_settings', key=str(guild.id))
 
         try:
             join_leave_on = server_settings['join_leave']
             if join_leave_on:
-                channel_id = server_settings.get('notification_channel') or member.guild.id
+                channel_id = server_settings.get('notifications_channel') or member.guild.id
             else:
                 return
         except (IndexError, TypeError, KeyError):

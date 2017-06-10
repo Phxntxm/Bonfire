@@ -44,7 +44,7 @@ class Twitch:
         # Loop through as long as the bot is connected
         try:
             while not self.bot.is_closed():
-                twitch = await utils.filter_content('twitch', {'notifications_on': 1})
+                twitch = self.bot.db.load('twitch', table_filter={'notifications_on': 1})
                 for data in twitch:
                     m_id = int(data['member_id'])
                     url = data['twitch_url']
@@ -59,11 +59,8 @@ class Twitch:
                             member = server.get_member(m_id)
                             if member is None:
                                 continue
-                            server_settings = await utils.get_content('server_settings', s_id)
-                            if server_settings is not None:
-                                channel_id = int(server_settings.get('notification_channel', s_id))
-                            else:
-                                channel_id = int(s_id)
+                            channel_id = self.bot.db.load('server_settings', key=s_id,
+                                                                pluck='notifications_channel') or int(s_id)
                             channel = server.get_channel(channel_id)
                             if channel is None:
                                 continue
@@ -71,7 +68,7 @@ class Twitch:
                                 await channel.send("{} has just gone live! View their stream at <{}>".format(member.display_name, data['twitch_url']))
                             except discord.Forbidden:
                                 pass
-                            self.bot.loop.create_task(utils.update_content('twitch', {'live': 1}, str(m_id)))
+                                self.bot.db.save('twitch', {'live': 1, 'member_id': str(m_id)})
                     elif not online and data['live'] == 1:
                         for s_id in data['servers']:
                             server = self.bot.get_guild(int(s_id))
@@ -80,17 +77,14 @@ class Twitch:
                             member = server.get_member(m_id)
                             if member is None:
                                 continue
-                            server_settings = await utils.get_content('server_settings', s_id)
-                            if server_settings is not None:
-                                channel_id = int(server_settings.get('notification_channel', s_id))
-                            else:
-                                channel_id = int(s_id)
+                            channel_id = self.bot.db.load('server_settings', key=s_id,
+                                                                pluck='notifications_channel') or int(s_id)
                             channel = server.get_channel(channel_id)
                             try:
                                 await channel.send("{} has just gone offline! View their stream next time at <{}>".format(member.display_name, data['twitch_url']))
                             except discord.Forbidden:
                                 pass
-                            self.bot.loop.create_task(utils.update_content('twitch', {'live': 0}, str(m_id)))
+                                self.bot.db.save('twitch', {'live': 0, 'member_id': str(m_id)})
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
@@ -110,12 +104,11 @@ class Twitch:
         if member is None:
             member = ctx.message.author
 
-        result = await utils.get_content('twitch', str(member.id))
-        if result is None:
+        url = self.bot.db.load('twitch', key=member.id, pluck='twitch_url')
+        if url is None:
             await ctx.send("{} has not saved their twitch URL yet!".format(member.name))
             return
 
-        url = result['twitch_url']
         user = re.search("(?<=twitch.tv/)(.*)", url).group(1)
         twitch_url = "https://api.twitch.tv/kraken/channels/{}".format(user)
         payload = {'client_id': self.key}
@@ -170,18 +163,23 @@ class Twitch:
             return
 
         key = str(ctx.message.author.id)
-        entry = {'twitch_url': url,
-                 'servers': [str(ctx.message.guild.id)],
-                 'notifications_on': 1,
-                 'live': 0,
-                 'member_id': key}
-        update = {'twitch_url': url}
 
-        # Check to see if this user has already saved a twitch URL
-        # If they have, update the URL, otherwise create a new entry
-        # Assuming they're not live, and notifications should be on
-        if not await utils.add_content('twitch', entry):
-            await utils.update_content('twitch', update, key)
+        # Check if it exists first, if it does we don't want to override some of the settings
+        result = self.bot.db.load('twitch', key=key)
+        if result:
+            entry = {
+                'twitch_url': url,
+                'member_id': key
+            }
+        else:
+            entry = {
+                'twitch_url': url,
+                'servers': [str(ctx.message.guild.id)],
+                'notifications_on': 1,
+                'live': 0,
+                'member_id': key
+            }
+        self.bot.db.save('twitch', entry)
         await ctx.send("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'])
@@ -192,8 +190,12 @@ class Twitch:
 
         EXAMPLE: !twitch remove
         RESULT: I stop saving your twitch URL"""
-        # Just try to remove it, if it doesn't exist, nothing is going to happen
-        await utils.remove_content('twitch', str(ctx.message.author.id))
+        entry = {
+            'twitch_url': None,
+            'member_id': str(ctx.message.author.id)
+        }
+
+        self.bot.db.save('twitch', entry)
         await ctx.send("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
     @twitch.group(invoke_without_command=True)
@@ -206,17 +208,22 @@ class Twitch:
         EXAMPLE: !twitch notify
         RESULT: This server will now be notified when you go live"""
         key = str(ctx.message.author.id)
-        result = await utils.get_content('twitch', key)
+        servers = self.bot.db.load('twitch', key=key, pluck='servers')
         # Check if this user is saved at all
-        if result is None:
+        if servers is None:
             await ctx.send(
                 "I do not have your twitch URL added {}. You can save your twitch url with !twitch add".format(
                     ctx.message.author.mention))
         # Then check if this server is already added as one to notify in
-        elif str(ctx.message.guild.id) in result['servers']:
+        elif str(ctx.message.guild.id) in servers:
             await ctx.send("I am already set to notify in this server...")
         else:
-            await utils.update_content('twitch', {'servers': r.row['servers'].append(str(ctx.message.guild.id))}, key)
+            servers.append(str(ctx.message.guild.id))
+            entry = {
+                'member_id': key,
+                'servers': servers
+            }
+            self.bot.db.save('twitch', entry)
             await ctx.send("This server will now be notified if you go live")
 
     @notify.command(name='on', aliases=['start,yes'])
@@ -227,7 +234,14 @@ class Twitch:
 
         EXAMPLE: !twitch notify on
         RESULT: Notifications will be sent when you go live"""
-        if await utils.update_content('twitch', {"notifications_on": 1}, str(ctx.message.author.id)):
+        key = str(ctx.message.author.id)
+        result = self.bot.db.load('twitch', key=key)
+        if result:
+            entry = {
+                'member_id': key,
+                'notifications_on': 1
+            }
+            self.bot.db.save('twitch', entry)
             await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
         else:
@@ -241,7 +255,14 @@ class Twitch:
 
         EXAMPLE: !twitch notify off
         RESULT: Notifications will not be sent when you go live"""
-        if await utils.update_content('twitch', {"notifications_on": 0}, str(ctx.message.author.id)):
+        key = str(ctx.message.author.id)
+        result = self.bot.db.load('twitch', key=key)
+        if result:
+            entry = {
+                'member_id': key,
+                'notifications_on': 0
+            }
+            self.bot.db.save('twitch', entry)
             await ctx.send(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(
