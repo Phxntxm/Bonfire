@@ -99,18 +99,13 @@ class VoiceState:
             source = PCMVolumeTransformer(source, volume=self.volume)
             self.voice.play(source, after=self.after)
             self.current.start_time = time.time()
-        else:
-            # If we're here what we can assume is the following took place:
-            # 1) The queue type is `user`
-            # 2) Someone joined for the first time, starting off the queue
-            # 3) They don't have a song in their playlist ready yet
-            # Or....this is a song queue, and the last song in the queue was retrieved, and failed to download
-            # So what we'll do here is just call this again a few seconds later if it's a user queue, otherwise return
-            if self.user_queue:
-                await asyncio.sleep(2)
-                return await self.play_next_song()
-            else:
-                return
+        # We handle users who join a user queue without songs (either at all, or ready) elsewhere
+        # So if self.current is None here, there are a few reasons:
+        # User queue, last song failed to download
+        # Either queue, all songs/dj's have gone been gone through
+        # The first one sucks, but there's not much we can do about it here, blame youtube
+        # Second one just means we're done and don't want to do anything
+        # So in either case....we simply do nothing here, and just the playing end
 
     async def next_song(self):
         if not self.user_queue:
@@ -120,11 +115,11 @@ class VoiceState:
                 dj = self.djs.popleft()
             except IndexError:
                 song = None
+                self.dj = None
             else:
                 song = await dj.get_next_entry()
                 if song is None:
-                    self.djs.remove(dj)
-                    await self.next_song()
+                    return await self.next_song()
                 else:
                     song.requester = dj.member
 
@@ -132,6 +127,10 @@ class VoiceState:
                 # song while we are downloading the next
                 if not self.playing:
                     self.dj = dj
+                # If this rare case does happen, we want to insert this dj back into the deque at the front
+                else:
+                    self.djs.insert(0, dj)
+
 
         if not self.playing:
             self.current = song
@@ -351,7 +350,7 @@ class Music:
                     pass
             return True
         # If we time out trying to join, just let them know and return False
-        except asyncio.TimeoutError:
+    except (asyncio.TimeoutError, OSError):
             if msg:
                 try:
                     await msg.edit(content="Sorry, but I couldn't connect right now! Please try again later")
@@ -708,15 +707,22 @@ class Music:
             await ctx.send("You are already in the DJ queue!")
         else:
             new_dj = self.bot.get_cog('DJEvents').djs[ctx.message.author.id]
-            state.djs.append(new_dj)
-            try:
-                await ctx.send("You have joined the DJ queue; there are currently {} people ahead of you".format(
-                    state.djs.index(new_dj)))
-            except discord.Forbidden:
-                pass
+            if not new_dj.peek():
+                await ctx.send("You currently have nothing in your playlist! This can happen for two reasons:\n"\
+                               "1) You actually have nothing in your active playlist\n"\
+                               "2) You just joined the voice channel and your playlist is still being downloaded\n\n"\
+                               "If the first one is true, then you need to manage your playlist to have an active playlist with songs in it. "\
+                               "Otherwise, you will need to wait while your songs are being downloaded before you can join")
+            else:
+                state.djs.append(new_dj)
+                try:
+                    await ctx.send("You have joined the DJ queue; there are currently {} people ahead of you".format(
+                        state.djs.index(new_dj)))
+                except discord.Forbidden:
+                    pass
 
-            if not state.playing:
-                await state.play_next_song()
+                if not state.playing:
+                    await state.play_next_song()
 
 
 def setup(bot):
