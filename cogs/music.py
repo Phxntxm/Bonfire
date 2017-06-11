@@ -114,8 +114,8 @@ class VoiceState:
             try:
                 dj = self.djs.popleft()
             except IndexError:
-                song = None
                 self.dj = None
+                self.current = None
             else:
                 song = await dj.get_next_entry()
                 # Add an extra check here in case in the very short period of time possible, someone has queued a
@@ -133,7 +133,7 @@ class VoiceState:
                 else:
                     song.requester = dj.member
                     self.dj = dj
-                    self.current = current
+                    self.current = song
 
 
 class Music:
