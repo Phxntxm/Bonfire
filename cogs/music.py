@@ -350,7 +350,7 @@ class Music:
                     pass
             return True
         # If we time out trying to join, just let them know and return False
-    except (asyncio.TimeoutError, OSError):
+        except (asyncio.TimeoutError, OSError):
             if msg:
                 try:
                     await msg.edit(content="Sorry, but I couldn't connect right now! Please try again later")
