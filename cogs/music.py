@@ -109,7 +109,7 @@ class VoiceState:
 
     async def next_song(self):
         if not self.user_queue:
-            song = await self.songs.get_next_entry()
+            self.current = await self.songs.get_next_entry()
         else:
             try:
                 dj = self.djs.popleft()
@@ -118,22 +118,22 @@ class VoiceState:
                 self.dj = None
             else:
                 song = await dj.get_next_entry()
+                # Add an extra check here in case in the very short period of time possible, someone has queued a
+                # song while we are downloading the next...which caused 2 play calls to be done
+                # The 2nd may be called while the first has already started playing...this check is for that 2nd one
+                # If this rare case does happen, we want to insert this dj back into the deque at the front
+                # Also rotate their songs back, since it shouldn't have been retrieved
+                if self.playing:
+                    self.djs.insert(0, dj)
+                    dj.entries.rotate()
+                    return
+
                 if song is None:
                     return await self.next_song()
                 else:
                     song.requester = dj.member
-
-                # Add an extra check here in case in the very short period of time possible, someone has queued a
-                # song while we are downloading the next
-                if not self.playing:
                     self.dj = dj
-                # If this rare case does happen, we want to insert this dj back into the deque at the front
-                else:
-                    self.djs.insert(0, dj)
-
-
-        if not self.playing:
-            self.current = song
+                    self.current = current
 
 
 class Music:
