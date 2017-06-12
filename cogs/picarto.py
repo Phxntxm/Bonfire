@@ -34,7 +34,7 @@ class Picarto:
         if not self.online_channels:
             return False
         channel = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
-        return channel in [stream['name'].lower() for stream in self.online_channels]
+        return channel.lower() in [stream['name'].lower() for stream in self.online_channels]
 
     async def check_channels(self):
         await self.bot.wait_until_ready()
@@ -120,8 +120,8 @@ class Picarto:
         things_to_print = ['comissions', 'adult', 'followers', 'category', 'online']
 
         embed = discord.Embed(title='{}\'s Picarto'.format(data['name']), url=member_url)
-        if data.get('avatar_url'):
-            embed.set_thumbnail(url=data['avatar_url'])
+        avatar_url = 'https://picarto.tv/user_data/usrimg/{}/dsdefault.jpg'.format(data['name'].lower())
+        embed.set_thumbnail(url=avatar_url)
 
         for i, result in data.items():
             if i in things_to_print and str(result):
