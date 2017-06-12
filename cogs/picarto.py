@@ -42,7 +42,7 @@ class Picarto:
         try:
             while not self.bot.is_closed():
                 await self.get_online_users()
-                picarto = self.bot.db.load('picarto', table_filter={'notifications_on': 1})
+                picarto = await self.bot.db.actual_load('picarto', table_filter={'notifications_on': 1})
                 for data in picarto:
                     m_id = int(data['member_id'])
                     url = data['picarto_url']
