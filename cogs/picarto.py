@@ -22,8 +22,8 @@ class Picarto:
         # This method is in place to just return all online users so we can compare against it
         url = BASE_URL + '/online'
         payload = {
-            'adult': True,
-            'gaming': True
+            'adult': 'true',
+            'gaming': 'true'
         }
         self.online_channels = await utils.request(url, payload=payload)
 
