@@ -118,8 +118,8 @@ class Picarto:
         # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
         things_to_print = ['comissions', 'adult', 'followers', 'category', 'online']
 
-        embed = discord.Embed(title='{}\'s Picarto'.format(data['channel']), url=member_url)
-        if data['avatar_url']:
+        embed = discord.Embed(title='{}\'s Picarto'.format(data['name']), url=member_url)
+        if data.get('avatar_url'):
             embed.set_thumbnail(url=data['avatar_url'])
 
         for i, result in data.items():
