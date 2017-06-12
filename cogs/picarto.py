@@ -15,6 +15,7 @@ BASE_URL = 'https://api.picarto.tv/v1'
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
+        self.bot.loop.create_task(self.check_channels())
 
     # noinspection PyAttributeOutsideInit
     async def get_online_users(self):
