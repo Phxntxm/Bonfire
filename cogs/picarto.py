@@ -1,8 +1,6 @@
-import aiohttp
 import asyncio
 import discord
 import re
-import rethinkdb as r
 import traceback
 import logging
 
@@ -11,20 +9,21 @@ from discord.ext import commands
 from . import utils
 
 log = logging.getLogger()
-BASE_URL = 'https://ptvappapi.picarto.tv'
-
-# This is a public key for use, I don't care if this is seen
-api_key = '03e26294-b793-11e5-9a41-005056984bd4'
+BASE_URL = 'https://api.picarto.tv/v1'
 
 
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
 
+    # noinspection PyAttributeOutsideInit
     async def get_online_users(self):
         # This method is in place to just return all online users so we can compare against it
-        url = BASE_URL + '/online/all'
-        payload = {'key': api_key}
+        url = BASE_URL + '/online'
+        payload = {
+            'adult': True,
+            'gaming': True
+        }
         self.online_channels = await utils.request(url, payload=payload)
 
     def channel_online(self, channel):
@@ -34,8 +33,7 @@ class Picarto:
         if not self.online_channels:
             return False
         channel = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
-        matches = [stream for stream in self.online_channels if stream['channel_name'].lower() == channel.lower()]
-        return len(matches) > 0
+        return channel in [stream['name'].lower() for stream in self.online_channels]
 
     async def check_channels(self):
         await self.bot.wait_until_ready()
@@ -59,7 +57,7 @@ class Picarto:
                             if member is None:
                                 continue
                             channel_id = self.bot.db.load('server_settings', key=s_id,
-                                                                pluck='notifications_channel') or int(s_id)
+                                                          pluck='notifications_channel') or int(s_id)
                             channel = server.get_channel(channel_id)
                             try:
                                 await channel.send(
@@ -77,7 +75,7 @@ class Picarto:
                             if member is None:
                                 continue
                             channel_id = self.bot.db.load('server_settings', key=s_id,
-                                                                pluck='notifications_channel') or int(s_id)
+                                                          pluck='notifications_channel') or int(s_id)
                             channel = server.get_channel(channel_id)
                             try:
                                 await channel.send(
@@ -110,19 +108,17 @@ class Picarto:
 
         # Use regex to get the actual username so that we can make a request to the API
         stream = re.search("(?<=picarto.tv/)(.*)", member_url).group(1)
-        url = BASE_URL + '/channel/{}'.format(stream)
-        payload = {'key': api_key}
+        url = BASE_URL + '/channel/name/{}'.format(stream)
 
-        data = await utils.request(url, payload=payload)
+        data = await utils.request(url)
         if data is None:
             await ctx.send("I couldn't connect to Picarto!")
             return
 
         # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
-        things_to_print = ['channel', 'commissions_enabled', 'is_nsfw', 'program', 'tablet', 'followers',
-                           'content_type']
+        things_to_print = ['comissions', 'adult', 'followers', 'category', 'online']
 
-        embed = discord.Embed(title='{}\'s Picarto'.format(data['channel']), url=url)
+        embed = discord.Embed(title='{}\'s Picarto'.format(data['channel']), url=member_url)
         if data['avatar_url']:
             embed.set_thumbnail(url=data['avatar_url'])
 
@@ -165,10 +161,9 @@ class Picarto:
         else:
             url = "https://www.{}".format(url)
         channel = re.search("https://www.picarto.tv/(.*)", url).group(1)
-        api_url = BASE_URL + '/channel/{}'.format(channel)
-        payload = {'key': api_key}
+        api_url = BASE_URL + '/channel/name/{}'.format(channel)
 
-        data = await utils.request(api_url, payload=payload)
+        data = await utils.request(api_url)
         if not data:
             await ctx.send("That Picarto user does not exist! What would be the point of adding a nonexistant Picarto "
                            "user? Silly")
@@ -193,8 +188,8 @@ class Picarto:
             }
         self.bot.db.save('picarto', entry)
         await ctx.send(
-                "I have just saved your Picarto URL {}, this guild will now be notified when you go live".format(
-                    ctx.message.author.mention))
+            "I have just saved your Picarto URL {}, this guild will now be notified when you go live".format(
+                ctx.message.author.mention))
 
     @picarto.command(name='remove', aliases=['delete'])
     @utils.custom_perms(send_messages=True)
