@@ -59,12 +59,15 @@ class Cache:
         elif table_filter:
             req_key = list(table_filter.keys())[0]
             req_val = list(table_filter.values())[0]
+            matched_values = []
             for value in self.values:
                 if value[req_key] == req_val:
                     if pluck:
                         return value.get(pluck)
                     else:
-                        return value
+                        matched_values.append(value)
+
+            return matched_values
 
 
 class DB:
