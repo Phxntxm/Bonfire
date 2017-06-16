@@ -60,6 +60,8 @@ class Picarto:
                             channel_id = self.bot.db.load('server_settings', key=s_id,
                                                           pluck='notifications_channel') or int(s_id)
                             channel = server.get_channel(channel_id)
+                            if channel is None:
+                                channel = server.default_channel
                             try:
                                 await channel.send(
                                     "{} has just gone live! View their stream at <{}>".format(member.display_name,
