@@ -31,7 +31,7 @@ class Picarto:
         # Channel is the name we are checking against that
         # This creates a list of all users that match this channel name (should only ever be 1)
         # And returns True as long as it is more than 0
-        if not self.online_channels:
+        if not self.online_channels or channel is None:
             return False
         channel = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
         return channel.lower() in [stream['name'].lower() for stream in self.online_channels]
@@ -68,7 +68,7 @@ class Picarto:
                                                                                               data['picarto_url']))
                             except discord.Forbidden:
                                 pass
-                            self.bot.db.save('picarto', {'live': 1, 'member_id': str(m_id)})
+                        self.bot.db.save('picarto', {'live': 1, 'member_id': str(m_id)})
                     elif not online and data['live'] == 1:
                         for s_id in data['servers']:
                             server = self.bot.get_guild(int(s_id))
@@ -88,7 +88,7 @@ class Picarto:
                                         member.display_name, data['picarto_url']))
                             except discord.Forbidden:
                                 pass
-                            self.bot.db.save('picarto', {'live': 0, 'member_id': str(m_id)})
+                        self.bot.db.save('picarto', {'live': 0, 'member_id': str(m_id)})
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
