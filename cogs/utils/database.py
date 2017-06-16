@@ -29,11 +29,15 @@ class Cache:
         self.loop = loop
         self.values = []  # The values returned from the database
         self.refreshed_time = None
-        self.loop.create_task(self.check_refresh())
+        self.loop.create_task(self.refresh_task())
 
     async def refresh(self):
         self.values = await self.db.actual_load(self.table)
         self.refreshed_time = datetime.now()
+
+    async def refresh_task(self):
+        await self.check_refresh()
+        await asyncio.sleep(60)
 
     async def check_refresh(self):
         if self.refreshed_time is None:
@@ -42,8 +46,6 @@ class Cache:
             difference = datetime.now() - self.refreshed_time
             if difference.total_seconds() > 300:
                 await self.refresh()
-
-        self.loop.call_later(60, self.check_refresh())
 
     def get(self, key=None, table_filter=None, pluck=None):
         """This simulates the database call, to make it easier to get the data"""
