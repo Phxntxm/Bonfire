@@ -145,23 +145,19 @@ class Administration:
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     async def notifications(self, ctx, channel: discord.TextChannel):
-        """This command is used to set a channel as the server's default 'notifications' channel
-        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel by default
-        This can be overridden with specific alerts command, such as `!picarto alerts #channel`
-        This command is just the default; the one used if there is no other one set.
+        """This command is used to set a channel as the server's 'notifications' channel
+        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel
 
         EXAMPLE: !alerts #alerts
         RESULT: No more alerts spammed in #general!"""
         entry = {
             'server_id': str(ctx.message.guild.id),
-            'notifications': {
-                'default': str(channel.id)
-            }
+            'notifications_channel': str(channel.id)
         }
 
         self.bot.db.save('server_settings', entry)
-        await ctx.send("I have just changed this server's default 'notifications' channel"
-                       "\nAll notifications will now default to `{}`".format(channel))
+        await ctx.send("I have just changed this server's 'notifications' channel"
+                       "\nAll notifications will now go to `{}`".format(channel))
 
     @commands.command()
     @commands.guild_only()
