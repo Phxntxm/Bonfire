@@ -80,7 +80,7 @@ async def on_command_error(ctx, error):
     try:
         if isinstance(error.original, discord.Forbidden):
             return
-        elif isinstance(error.original, discord.HTTPException) and 'empty message' in str(error.original):
+        elif isinstance(error.original, discord.HTTPException) and ('empty message' in str(error.original) or 'INTERNAL SERVER ERROR' in str(error.original)):
             return
         elif isinstance(error.original, aiohttp.ClientOSError):
             return
