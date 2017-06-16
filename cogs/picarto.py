@@ -58,8 +58,8 @@ class Picarto:
                             if member is None:
                                 continue
                             channel_id = self.bot.db.load('server_settings', key=s_id,
-                                                          pluck='notifications_channel') or int(s_id)
-                            channel = server.get_channel(channel_id)
+                                                          pluck='notifications_channel') or s_id
+                            channel = server.get_channel(int(channel_id))
                             if channel is None:
                                 channel = server.default_channel
                             try:
@@ -78,8 +78,8 @@ class Picarto:
                             if member is None:
                                 continue
                             channel_id = self.bot.db.load('server_settings', key=s_id,
-                                                          pluck='notifications_channel') or int(s_id)
-                            channel = server.get_channel(channel_id)
+                                                          pluck='notifications_channel') or s_id
+                            channel = server.get_channel(int(channel_id))
                             if channel is None:
                                 channel = server.default_channel
                             try:
@@ -283,6 +283,4 @@ class Picarto:
 
 
 def setup(bot):
-    p = Picarto(bot)
-    bot.loop.create_task(p.check_channels())
     bot.add_cog(Picarto(bot))
