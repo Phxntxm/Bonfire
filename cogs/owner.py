@@ -101,6 +101,7 @@ class Owner:
             'server': msg.guild,
             'channel': msg.channel,
             'author': msg.author,
+            'self': self,
             '_': None,
         }
 
@@ -202,6 +203,7 @@ class Owner:
             'server': ctx.message.guild,
             'guild': ctx.message.guild,
             'message': ctx.message,
+            'self': self,
             '_': self._last_result
         }
 
@@ -231,12 +233,15 @@ class Owner:
             except:
                 pass
 
-            if ret is None:
-                if value:
-                    await ctx.send('```py\n%s\n```' % value)
-            else:
-                self._last_result = ret
-                await ctx.send('```py\n%s%s\n```' % (value, ret))
+            try:
+                if ret is None:
+                    if value:
+                        await ctx.send('```py\n%s\n```' % value)
+                else:
+                    self._last_result = ret
+                    await ctx.send('```py\n%s%s\n```' % (value, ret))
+            except discord.HTTPException:
+                await ctx.send("Content too large for me to print!")
 
     @commands.command()
     @commands.check(utils.is_owner)
