@@ -141,33 +141,37 @@ class Administration:
         self.bot.db.save('server_settings', entry)
         await ctx.send(fmt)
 
-    @commands.command(aliases=['alerts'])
+    @commands.command(aliases=['notifications'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
-    async def notifications(self, ctx, channel: discord.TextChannel):
-        """This command is used to set a channel as the server's 'notifications' channel
-        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel
+    async def alerts(self, ctx, channel: discord.TextChannel):
+        """This command is used to set a channel as the server's default 'notifications' channel
+        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel by default
+        This can be overridden with specific alerts command, such as `!picarto alerts #channel`
+        This command is just the default; the one used if there is no other one set.
 
         EXAMPLE: !alerts #alerts
         RESULT: No more alerts spammed in #general!"""
         entry = {
             'server_id': str(ctx.message.guild.id),
-            'notifications_channel': str(channel.id)
+            'notifications': {
+                'default': str(channel.id)
+            }
         }
 
         self.bot.db.save('server_settings', entry)
-        await ctx.send("I have just changed this server's 'notifications' channel"
-                       "\nAll notifications will now go to `{}`".format(channel))
+        await ctx.send("I have just changed this server's default 'notifications' channel"
+                       "\nAll notifications will now default to `{}`".format(channel))
 
-    @commands.command()
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
-    async def usernotify(self, ctx, on_off: str):
+    async def welcome(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
         Provide on, yes, or true to set it on; otherwise it will be turned off
 
-        EXAMPLE: !usernotify on
-        RESULT: Annying join/leave notifications! Yay!"""
+        EXAMPLE: !welcome on
+        RESULT: Annoying join/leave notifications! Yay!"""
         # Join/Leave notifications can be kept separate from normal alerts
         # So we base this channel on it's own and not from alerts
         # When mod logging becomes available, that will be kept to it's own channel if wanted as well
@@ -181,6 +185,25 @@ class Administration:
         self.bot.db.save('server_settings',entry)
         fmt = "notify" if on_off else "not notify"
         await ctx.send("This server will now {} if someone has joined or left".format(fmt))
+
+    @welcome.command(name='alerts', aliases=['notifications'])
+    @commands.guild_only()
+    @utils.custom_perms(kick_members=True)
+    async def _welcome_alerts(self, ctx, *, channel: discord.TextChannel):
+        """A command used to set the override for notifications about users joining/leaving
+
+        EXAMPLE: !welcome alerts #notifications
+        RESULT: All user joins/leaves will be sent to the #notificatoins channel"""
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'notifications': {
+                'welcome': str(channel.id)
+            }
+        }
+
+        self.bot.db.save('server_settings', entry)
+        await ctx.send("I have just changed this server's welcome/goodbye notifications channel to {}".format(channel.name))
+
 
     @commands.group()
     async def nsfw(self, ctx):
