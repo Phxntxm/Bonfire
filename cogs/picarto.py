@@ -27,6 +27,38 @@ class Picarto:
         }
         self.online_channels = await utils.request(url, payload=payload)
 
+    async def channel_embed(self, channel):
+        # Use regex to get the actual username so that we can make a request to the API
+        stream = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
+        url = BASE_URL + '/channel/name/{}'.format(stream)
+
+        data = await utils.request(url)
+        if data is None:
+            await ctx.send("I couldn't connect to Picarto!")
+            return
+
+        # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
+        things_to_print = ['comissions', 'adult', 'followers', 'category', 'online']
+
+        embed = discord.Embed(title='{}\'s Picarto'.format(data['name']), url=channel)
+        avatar_url = 'https://picarto.tv/user_data/usrimg/{}/dsdefault.jpg'.format(data['name'].lower())
+        embed.set_thumbnail(url=avatar_url)
+
+        for i, result in data.items():
+            if i in things_to_print and str(result):
+                i = i.title().replace('_', ' ')
+                embed.add_field(name=i, value=str(result))
+
+        # Social URL's can be given if a user wants them to show
+        # Print them if they exist, otherwise don't try to include them
+        social_links = data.get('social_urls', {})
+
+        for i, result in social_links.items():
+            embed.add_field(name=i.title(), value=result)
+
+        return embed
+
+
     def channel_online(self, channel):
         # Channel is the name we are checking against that
         # This creates a list of all users that match this channel name (should only ever be 1)
@@ -48,47 +80,47 @@ class Picarto:
                     url = data['picarto_url']
                     # Check if they are online
                     online = self.channel_online(url)
-                    # If they're currently online, but saved as not then we'll send our notification
+                    # If they're currently online, but saved as not then we'll let servers know they are now online
                     if online and data['live'] == 0:
-                        for s_id in data['servers']:
-                            server = self.bot.get_guild(int(s_id))
-                            if server is None:
-                                continue
-                            member = server.get_member(m_id)
-                            if member is None:
-                                continue
-                            channel_id = self.bot.db.load('server_settings', key=s_id,
-                                                          pluck='notifications_channel') or s_id
-                            channel = server.get_channel(int(channel_id))
-                            if channel is None:
-                                channel = server.default_channel
-                            try:
-                                await channel.send(
-                                    "{} has just gone live! View their stream at <{}>".format(member.display_name,
-                                                                                              data['picarto_url']))
-                            except discord.Forbidden:
-                                pass
+                        msg = "{member.display_name} has just gone live!"
                         self.bot.db.save('picarto', {'live': 1, 'member_id': str(m_id)})
+                    # Otherwise our notification will say they've gone offline
                     elif not online and data['live'] == 1:
-                        for s_id in data['servers']:
-                            server = self.bot.get_guild(int(s_id))
-                            if server is None:
-                                continue
-                            member = server.get_member(m_id)
-                            if member is None:
-                                continue
-                            channel_id = self.bot.db.load('server_settings', key=s_id,
-                                                          pluck='notifications_channel') or s_id
-                            channel = server.get_channel(int(channel_id))
-                            if channel is None:
-                                channel = server.default_channel
-                            try:
-                                await channel.send(
-                                    "{} has just gone offline! View their stream next time at <{}>".format(
-                                        member.display_name, data['picarto_url']))
-                            except discord.Forbidden:
-                                pass
+                        msg = "{member.display_name} has just gone offline!"
                         self.bot.db.save('picarto', {'live': 0, 'member_id': str(m_id)})
+                    else:
+                        continue
+
+                    embed = await self.channel_embed(url)
+                    # Loop through each server that they are set to notify
+                    for s_id in data['servers']:
+                        server = self.bot.get_guild(int(s_id))
+                        # If we can't find it, ignore this one
+                        if server is None:
+                            continue
+                        member = server.get_member(m_id)
+                        # If we can't find them in this server, also ignore
+                        if member is None:
+                            continue
+
+                        # Get the notifications settings, get the picarto setting
+                        notifications = self.bot.db.load('server_settings', key=s_id, pluck='notifications') or {}
+                        # Set our default to either the one set, or the default channel of the server
+                        default_channel_id = notifications.get('default') or s_id
+                        # If it is has been overriden by picarto notifications setting, use this
+                        channel_id = notifications.get('picarto') or default_channel_id
+                        # Now get the channel
+                        channel = server.get_channel(int(channel_id))
+                        # Unfortunately we need one more check, to ensure a channel hasn't been chosen, then deleted
+                        if channel is None:
+                            channel = server.default_channel
+
+                        # Then just send our message
+                        try:
+                            await channel.send(msg.format(member=member), embed=embed)
+                        except (discord.Forbidden, discord.HTTPException):
+                            pass
+
                 await asyncio.sleep(30)
         except Exception as e:
             tb = traceback.format_exc()
@@ -111,33 +143,7 @@ class Picarto:
             await ctx.send("That user does not have a picarto url setup!")
             return
 
-        # Use regex to get the actual username so that we can make a request to the API
-        stream = re.search("(?<=picarto.tv/)(.*)", member_url).group(1)
-        url = BASE_URL + '/channel/name/{}'.format(stream)
-
-        data = await utils.request(url)
-        if data is None:
-            await ctx.send("I couldn't connect to Picarto!")
-            return
-
-        # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
-        things_to_print = ['comissions', 'adult', 'followers', 'category', 'online']
-
-        embed = discord.Embed(title='{}\'s Picarto'.format(data['name']), url=member_url)
-        avatar_url = 'https://picarto.tv/user_data/usrimg/{}/dsdefault.jpg'.format(data['name'].lower())
-        embed.set_thumbnail(url=avatar_url)
-
-        for i, result in data.items():
-            if i in things_to_print and str(result):
-                i = i.title().replace('_', ' ')
-                embed.add_field(name=i, value=str(result))
-
-        # Social URL's can be given if a user wants them to show
-        # Print them if they exist, otherwise don't try to include them
-        social_links = data.get('social_urls', {})
-
-        for i, result in social_links.items():
-            embed.add_field(name=i.title(), value=result)
+        embed = await self.channel_embed(member_url)
 
         await ctx.send(embed=embed)
 
@@ -207,6 +213,24 @@ class Picarto:
 
         self.bot.db.save('picarto', entry)
         await ctx.send("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
+
+    @picarto.command(name='alerts')
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    async def picarto_alerts_channel(self, ctx, channel: discord.TextChannel):
+        """Sets the notifications channel for picarto notifications
+
+        EXAMPLE: !picarto alerts #picarto
+        RESULT: Picarto notifications will go to this channel
+        """
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'notifications': {
+                'picarto': str(channel.id)
+            }
+        }
+        self.bot.db.save('server_settings', entry)
+        await ctx.send("All Picarto notifications will now go to {}".format(channel.mention))
 
     @picarto.group(invoke_without_command=True)
     @commands.guild_only()
@@ -279,7 +303,7 @@ class Picarto:
                     ctx.message.author.mention))
         else:
             await ctx.send(
-                "I mean, I'm already not going to notify anyone, because I don't have your picarto URL saved...")
+                "I'm already not going to notify anyone, because I don't have your picarto URL saved...")
 
 
 def setup(bot):
