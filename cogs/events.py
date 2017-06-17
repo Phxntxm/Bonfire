@@ -60,7 +60,12 @@ class StatsUpdate:
         try:
             join_leave_on = server_settings['join_leave']
             if join_leave_on:
-                channel_id = server_settings.get('notifications_channel') or member.guild.id
+                # Get the notifications settings, get the welcome setting
+                notifications = self.bot.db.load('server_settings', key=guild.id, pluck='notifications') or {}
+                # Set our default to either the one set, or the default channel of the server
+                default_channel_id = notifications.get('default') or guild.id
+                # If it is has been overriden by picarto notifications setting, use this
+                channel_id = notifications.get('welcome') or default_channel_id
             else:
                 return
         except (IndexError, TypeError, KeyError):
@@ -79,7 +84,12 @@ class StatsUpdate:
         try:
             join_leave_on = server_settings['join_leave']
             if join_leave_on:
-                channel_id = server_settings.get('notifications_channel') or member.guild.id
+                # Get the notifications settings, get the welcome setting
+                notifications = self.bot.db.load('server_settings', key=guild.id, pluck='notifications') or {}
+                # Set our default to either the one set, or the default channel of the server
+                default_channel_id = notifications.get('default') or guild.id
+                # If it is has been overriden by picarto notifications setting, use this
+                channel_id = notifications.get('welcome') or default_channel_id
             else:
                 return
         except (IndexError, TypeError, KeyError):
