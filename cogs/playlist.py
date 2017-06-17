@@ -271,10 +271,11 @@ class Playlist:
         # We want to loop this in order to continue editing, till the user is done
         while True:
             response = await self.get_response(ctx, q1)
-            response = response.lower().strip()
 
             if not response:
                 break
+
+            response = response.lower().strip()
 
             if 'add' in response:
                 # Ask the user what song to add, get the response, add it
