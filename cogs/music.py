@@ -522,20 +522,23 @@ class Music:
         This also clears the queue.
         """
         state = self.voice_states.get(ctx.message.guild.id)
+        voice = ctx.message.guild.voice_client
 
-        # Stop playing whatever song is playing.
-        if state and state.voice:
-            state.voice.stop()
-
+        # If we have a state, clear the songs, dj's, then skip the current song
+        if state:
             state.songs.clear()
-
-            # This will cancel the audio event we're using to loop through the queue
-            # Then erase the voice_state entirely, and disconnect from the channel
-            await state.voice.disconnect()
+            state.djs.clear()
+            state.skip()
             try:
                 del self.voice_states[ctx.message.guild.id]
             except KeyError:
                 pass
+
+        # If we have a voice connection (separate from state...just in case....)
+        # Then stop playing, and disconnect
+        if voice:
+            voice.stop()
+            await state.voice.disconnect()
 
     @commands.command()
     @commands.guild_only()
