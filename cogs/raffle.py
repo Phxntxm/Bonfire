@@ -73,9 +73,15 @@ class Raffle:
                 else:
                     fmt = 'The raffle `{}` has just ended! The winner is {}!'.format(title, winner.display_name)
 
-            channel_id = self.bot.db.load('server_settings', key=server.id,
-                                                pluck='notifications_channel') or server.id
-            channel = self.bot.get_channel(channel_id)
+            # Get the notifications settings, get the raffle setting
+            notifications = self.bot.db.load('server_settings', key=server.id, pluck='notifications') or {}
+            # Set our default to either the one set, or the default channel of the server
+            default_channel_id = notifications.get('default') or server.id
+            # If it is has been overriden by picarto notifications setting, use this
+            channel_id = notifications.get('raffle') or default_channel_id
+            channel = self.bot.get_channel(int(channel_id))
+            if channel is None:
+                channel = server.default_channel
             try:
                 await channel.send(fmt)
             except (discord.Forbidden, AttributeError):
@@ -83,6 +89,9 @@ class Raffle:
 
             # No matter which one of these matches were met, the raffle has ended and we want to remove it
             await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
+            # Now...this is an ugly idea yes, but due to the way raffles are setup currently (they'll be changed in the future)
+            # The cache does not update, and leaves behind this deletion....so we need to manually update the cache here
+            await self.bot.db.cache.get('raffles').refresh()
 
     @commands.command()
     @commands.guild_only()
@@ -94,7 +103,7 @@ class Raffle:
         RESULT: A list of the raffles setup on this server"""
         r_filter = {'server_id': str(ctx.message.guild.id)}
         raffles = self.bot.db.load('raffles', table_filter=r_filter)
-        if raffles is None:
+        if not raffles:
             await ctx.send("There are currently no raffles setup on this server!")
             return
 
@@ -263,6 +272,24 @@ class Raffle:
         # We don't want to pass a filter to this, because we can have multiple raffles per server
         self.bot.db.save('raffles', entry)
         await ctx.send("I have just saved your new raffle!")
+
+    @raffle.command(name='alerts')
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    async def raffle_alerts_channel(self, ctx, channel: discord.TextChannel):
+        """Sets the notifications channel for raffle notifications
+
+        EXAMPLE: !raffle alerts #raffle
+        RESULT: raffle notifications will go to this channel
+        """
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'notifications': {
+                'raffle': str(channel.id)
+            }
+        }
+        self.bot.db.save('server_settings', entry)
+        await ctx.send("All raffle notifications will now go to {}".format(channel.mention))
 
 
 def setup(bot):
