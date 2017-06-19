@@ -161,7 +161,7 @@ class Raffle:
             self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         # Otherwise, make sure the author gave a valid raffle_id
-        elif raffle_id in range(raffle_count + 1):
+        elif raffle_id in range(raffle_count):
             entrants = raffles[raffle_id]['entrants']
 
             # Lets make sure that the user hasn't already entered the raffle
@@ -174,7 +174,7 @@ class Raffle:
 
             update = {
                 'entrants': entrants,
-                'id': raffles[0]['id']
+                'id': raffles[raffle_id]['id']
             }
             self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
