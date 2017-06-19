@@ -24,7 +24,7 @@ class Raffle:
                 with open("error_log", 'a') as f:
                     traceback.print_tb(error.__traceback__, file=f)
                     print('{0.__class__.__name__}: {0}'.format(error), file=f)
-            await asyncio.sleep(900)
+            await asyncio.sleep(60)
 
     async def check_raffles(self):
         # This is used to periodically check the current raffles, and see if they have ended yet
@@ -89,8 +89,9 @@ class Raffle:
 
             # No matter which one of these matches were met, the raffle has ended and we want to remove it
             await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
-            # Now...this is an ugly idea yes, but due to the way raffles are setup currently (they'll be changed in the future)
-            # The cache does not update, and leaves behind this deletion....so we need to manually update the cache here
+            # Now...this is an ugly idea yes, but due to the way raffles are setup currently (they'll be changed in
+            # the future) The cache does not update, and leaves behind this deletion....so we need to manually update
+            #  the cache here
             await self.bot.db.cache.get('raffles').refresh()
 
     @commands.command()
@@ -140,7 +141,7 @@ class Raffle:
 
         if isinstance(raffles, list):
             raffle_count = len(raffles)
-        elif isinstance(raffles, dict):
+        else:
             raffles = [raffles]
             raffle_count = 1
 
@@ -160,7 +161,7 @@ class Raffle:
             self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         # Otherwise, make sure the author gave a valid raffle_id
-        elif raffle_id in range(raffle_count - 1):
+        elif raffle_id in range(raffle_count + 1):
             entrants = raffles[raffle_id]['entrants']
 
             # Lets make sure that the user hasn't already entered the raffle
