@@ -45,7 +45,8 @@ class DJ(Playlist):
         else:
             entry = self.entries[0]
             self.entries.rotate(-1)
-            return await entry.get_ready_future()
+            fut = entry.get_ready_future()
+            return fut, await fut
 
     async def resolve_playlist(self):
         self.playlists = self.bot.db.load('user_playlists', key=self.member.id, pluck='playlists') or []
