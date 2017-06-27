@@ -13,19 +13,324 @@ class Administration:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(enabled=False)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     async def restrict(self, ctx, *options):
         """
-        This is an intuitive command to restrict something to something
-        The format is `!restrict what who/where`
+        This is an intuitive command to restrict something to/from something
+        The format is `!restrict what from/to who/where`
 
-        For example, `!restrict command role` will require a user to have `role`
+        For example, `!restrict command to role` will require a user to have `role`
         to be able to run `command`
-        `!restrict command channel` will only allow `command` to be ran in `channel`
+        `!restrict command to channel` will only allow `command` to be ran in `channel`
+
+        EXAMPLE: !restrict boop from @user
+        RESULT: This user can no longer use the boop command
         """
-        pass
+        # First make sure we're given three options
+        if len(options) != 3:
+            await ctx.send("You need to provide 3 options! Such as `command from @User`")
+            return
+        else:
+            # Get the three arguments from this list, then make sure the 2nd is either from or to
+            arg1, arg2, arg3 = options
+            if arg2.lower() not in ['from', 'to']:
+                await ctx.send("The 2nd option needs to be either \"to\" or \"from\". Such as: `command from @user` "
+                               "or `command to Role`")
+                return
+            else:
+                # Try to convert the other arguments
+                arg2 = arg2.lower()
+                option1 = await utils.convert(ctx, arg1)
+                option2 = await utils.convert(ctx, arg3)
+                if option1 is None or option2 is None:
+                    await ctx.send("Sorry, but I don't know how to restrict {} {} {}".format(arg1, arg2, arg3))
+                    return
+
+        from_entry = None
+        to_entry = None
+        overwrites = None
+
+        # The possible options:
+        # Member
+        # Role
+        # Command
+        # Text/Voice Channel
+
+        if isinstance(option1, (commands.core.Command, commands.core.Group)):
+            # From:
+            # Users - Command can't be run by this person
+            # Channels - Command can't be ran in this channel
+            # Roles - Command can't be ran by anyone in this role (least likely, but still possible uses)
+            if arg2 == "from":
+                if isinstance(option2, (discord.Member, discord.Role, discord.TextChannel)):
+                    from_entry = {
+                        'source': option1.qualified_name,
+                        'destination': str(option2.id)
+                    }
+            # To:
+            # Channels - Command can only be run in this channel
+            # Roles - This role is required in order to run this command
+            else:
+                if isinstance(option2, (discord.Role, discord.TextChannel)):
+                    to_entry = {
+                        'source': option1.qualified_name,
+                        'destination': str(option2.id)
+                    }
+        elif isinstance(option1, discord.Member):
+            # From:
+            # Channels - Setup an overwrite for this channel so that they cannot read it
+            # Command - Command cannot be used by this user
+            if arg2 == "from":
+                if isinstance(option2, (discord.TextChannel, discord.VoiceChannel)):
+                    ov = discord.utils.find(lambda t: t[0] == option1, option2.overwrites)
+                    if ov:
+                        ov = ov[1]
+                        ov.update(read_messages=False)
+                    else:
+                        ov = discord.PermissionOverwrite(read_messages=False)
+                    overwrites = {
+                        'channel': option2,
+                        option1: ov
+                    }
+                elif isinstance(option2, (commands.core.Command, commands.core.Group)):
+                    from_entry = {
+                        'source': option2.qualified_name,
+                        'destination': str(option1.id)
+                    }
+        elif isinstance(option1, (discord.TextChannel, discord.VoiceChannel)):
+            # From:
+            # Command - Command cannot be used in this channel
+            # Member - Setup an overwrite for this channel so that they cannot read it
+            # Role - Setup an overwrite for this channel so that this Role cannot read it
+            if arg2 == "from":
+                if isinstance(option2, (discord.Member, discord.Role)):
+                    ov = discord.utils.find(lambda t: t[0] == option2, option1.overwrites)
+                    if ov:
+                        ov = ov[1]
+                        ov.update(read_messages=False)
+                    else:
+                        ov = discord.PermissionOverwrite(read_messages=False)
+                    overwrites = {
+                        'channel': option1,
+                        option2: ov
+                    }
+                elif isinstance(option2, (commands.core.Command, commands.core.Group)) \
+                        and isinstance(option1, discord.TextChannel):
+                    from_entry = {
+                        'source': option2.qualified_name,
+                        'destination': str(option1.id)
+                    }
+            # To:
+            # Command - Command can only be used in this channel
+            # Role - Setup an overwrite so only this role can read this channel
+            else:
+                if isinstance(option2, (commands.core.Command, commands.core.Group)) \
+                        and isinstance(option1, discord.TextChannel):
+                    to_entry = {
+                        'source': option2.qualified_name,
+                        'destination': str(option1.id)
+                    }
+                elif isinstance(option2, (discord.Member, discord.Role)):
+                    ov = discord.utils.find(lambda t: t[0] == option2, option1.overwrites)
+                    if ov:
+                        ov = ov[1]
+                        ov.update(read_messages=True)
+                    else:
+                        ov = discord.PermissionOverwrite(read_messages=True)
+                    ov2 = discord.utils.find(lambda t: t[0] == ctx.message.guild.default_role,
+                                             option1.overwrites)
+                    if ov2:
+                        ov2 = ov2[1]
+                        ov2.update(read_messages=False)
+                    else:
+                        ov2 = discord.PermissionOverwrite(read_messages=False)
+                    overwrites = {
+                        'channel': option1,
+                        option2: ov,
+                        ctx.message.guild.default_role: ov2
+                    }
+        elif isinstance(option1, discord.Role):
+            # From:
+            # Command - No one with this role can run this command
+            # Channel - Setup an overwrite for this channel so that this Role cannot read it
+            if arg2 == "from":
+                if isinstance(option2, (commands.core.Command, commands.core.Group)):
+                    from_entry = {
+                        'source': option2.qualified_name,
+                        'destination': str(option1.id)
+                    }
+                elif isinstance(option2, (discord.TextChannel, discord.VoiceChannel)):
+                    ov = discord.utils.find(lambda t: t[0] == option1, option2.overwrites)
+                    if ov:
+                        ov = ov[1]
+                        ov.update(read_messages=False)
+                    else:
+                        ov = discord.PermissionOverwrite(read_messages=False)
+                    overwrites = {
+                        'channel': option2,
+                        option1: ov
+                    }
+            # To:
+            # Command - You have to have this role to run this command
+            # Channel - Setup an overwrite so you have to have this role to read this channel
+            else:
+                if isinstance(option2, (discord.TextChannel, discord.VoiceChannel)):
+                    ov = discord.utils.find(lambda t: t[0] == option1, option2.overwrites)
+                    if ov:
+                        ov = ov[1]
+                        ov.update(read_messages=True)
+                    else:
+                        ov = discord.PermissionOverwrite(read_messages=True)
+                    ov2 = discord.utils.find(lambda t: t[0] == ctx.message.guild.default_role,
+                                             option2.overwrites)
+                    if ov2:
+                        ov2 = ov2[1]
+                        ov2.update(read_messages=False)
+                    else:
+                        ov2 = discord.PermissionOverwrite(read_messages=False)
+                    overwrites = {
+                        'channel': option2,
+                        option1: ov,
+                        ctx.message.guild.default_role: ov2
+                    }
+                elif isinstance(option2, (commands.core.Command, commands.core.Group)):
+                    to_entry = {
+                        'source': option2.qualified_name,
+                        'destination': str(option1.id)
+                    }
+
+        if to_entry:
+            restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+            to = restrictions.get('to', [])
+            if to_entry not in to:
+                to.append(to_entry)
+            update = {
+                'server_id': str(ctx.message.guild.id),
+                'restrictions': {
+                    'to': to
+                }
+            }
+            self.bot.db.save('server_settings', update)
+        elif from_entry:
+            restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+            _from = restrictions.get('from', [])
+            if from_entry not in _from:
+                _from.append(from_entry)
+            update = {
+                'server_id': str(ctx.message.guild.id),
+                'restrictions': {
+                    'from': _from
+                }
+            }
+            self.bot.db.save('server_settings', update)
+        elif overwrites:
+            channel = overwrites.pop('channel')
+            for target, setting in overwrites.items():
+                await channel.set_permissions(target, overwrite=setting)
+        else:
+            await ctx.send("Sorry but I don't know how to restrict {} {} {}".format(arg1, arg2, arg3))
+            return
+
+        await ctx.send("I have just restricted {} {} {}".format(arg1, arg2, arg3))
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    async def unrestrict(self, ctx, *options):
+        """
+        This is an intuitive command to unrestrict something to/from something
+        The format is `!restrict what from/to who/where`
+
+        For example, `!unrestrict command to role` will remove the restriction on this command, requiring role
+
+        EXAMPLE: !unrestrict boop from @user
+        RESULT: The restriction on this user to use boop has been lifted
+        """
+        # First make sure we're given three options
+        if len(options) != 3:
+            await ctx.send("You need to provide 3 options! Such as `command from @User`")
+            return
+        else:
+            # Get the three arguments from this list, then make sure the 2nd is either from or to
+            arg1, arg2, arg3 = options
+            if arg2.lower() not in ['from', 'to']:
+                await ctx.send("The 2nd option needs to be either \"to\" or \"from\". Such as: `command from @user` "
+                               "or `command to Role`")
+                return
+            else:
+                # Try to convert the other arguments
+                arg2 = arg2.lower()
+                option1 = await utils.convert(ctx, arg1)
+                option2 = await utils.convert(ctx, arg3)
+                if option1 is None or option2 is None:
+                    await ctx.send("Sorry, but I don't know how to restrict {} {} {}".format(arg1, arg2, arg3))
+                    return
+
+        # First check if this is a blacklist/whitelist (by checking if we are unrestricting commands)
+        if any(isinstance(x, (commands.core.Command, commands.core.Group)) for x in [option1, option2]):
+            # The source should always be the command, so just set this based on which order is given (either is
+            # allowed)
+            if isinstance(option1, (commands.core.Command, commands.core.Group)):
+                restriction = {
+                    'source': option1,
+                    'destination': option2
+                }
+            else:
+                restriction = {
+                    'source': option2,
+                    'destination': option1
+                }
+
+            # Load restrictions
+            restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+            # Attempt to remove the restriction provided
+            try:
+                restrictions.get(arg2, []).remove(restriction)
+            # If it doesn't exist, nothing is needed to be done
+            except ValueError:
+                await ctx.send("The restriction {} {} {} does not exist!".format(arg1, arg2, arg3))
+            # If it was removed succesfully, save the change and let the author know this has been done
+            else:
+                entry = {
+                    'server_id': str(ctx.message.guild.id),
+                    'restrictions': restrictions
+                }
+                self.bot.db.save('server_settings', entry)
+                await ctx.send("I have just unrestricted {} {} {}".format(arg1, arg2, arg2))
+        # If this isn't a blacklist/whitelist, then we are attempting to remove an overwrite
+        else:
+            # Get the source and destination based on whatever order is provided
+            if isinstance(option1, (discord.TextChannel, discord.VoiceChannel)):
+                source = option2
+                destination = option1
+            else:
+                source = option1
+                destination = option2
+
+            # See if it's the blacklist that we're removing from
+            if arg2 == "from":
+                # Get overwrites if they exist
+                # If it doesn't, there's nothing to do here
+                ov = discord.utils.find(lambda t: t[0] == source, destination.overwrites)
+                if ov:
+                    ov = ov[1]
+                    ov.update(read_messages=True)
+                    await destination.set_permissions(source, overwrite=ov)
+            else:
+                ov = discord.utils.find(lambda t: t[0] == source, destination.overwrites)
+                ov2 = discord.utils.find(lambda t: t[0] == ctx.message.guild.default_role, destination.overwrites)
+                if ov:
+                    ov = ov[1]
+                    ov.update(read_messages=None)
+                    await destination.set_permissions(source, overwrite=ov)
+                if ov2:
+                    ov2 = ov2[1]
+                    ov2.update(read_messages=True)
+                    await destination.set_permissions(source, overwrite=ov2)
+
+        await ctx.send("I have just unrestricted {} {} {}".format(arg1, arg2, arg3))
 
     @commands.command(aliases=['nick'])
     @commands.guild_only()
@@ -182,7 +487,7 @@ class Administration:
             'join_leave': on_off
         }
 
-        self.bot.db.save('server_settings',entry)
+        self.bot.db.save('server_settings', entry)
         fmt = "notify" if on_off else "not notify"
         await ctx.send("This server will now {} if someone has joined or left".format(fmt))
 
@@ -202,8 +507,8 @@ class Administration:
         }
 
         self.bot.db.save('server_settings', entry)
-        await ctx.send("I have just changed this server's welcome/goodbye notifications channel to {}".format(channel.name))
-
+        await ctx.send(
+            "I have just changed this server's welcome/goodbye notifications channel to {}".format(channel.name))
 
     @commands.group()
     async def nsfw(self, ctx):
