@@ -359,10 +359,15 @@ class BattleRankings:
         return data.get('rank'), len(self.ratings)
 
     def get_server_rank(self, member):
+        # Get the id's of all the members to compare to
         server_ids = [str(m.id) for m in member.guild.members]
-
-        server_ratings = self.build_dict([x for x in self.ratings.values()
-                                          if x['member_id'] in server_ids], 'member_id')
+        # Get all the ratings for members in this server
+        ratings = [x for x in self.ratings.values() if x['member_id'] in server_ids]
+        # Since we went from a dictionary to a list, we're no longer sorted, sort this
+        ratings = sorted(ratings, key=lambda x: x['rating'])
+        # Build our dictionary to get correct rankings
+        server_ratings = self.build_dict(ratings, 'member_id')
+        # Return the rank
         return server_ratings.get(str(member.id), {}).get('rank'), len(server_ratings)
 
 
