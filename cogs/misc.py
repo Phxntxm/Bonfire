@@ -273,7 +273,7 @@ class Miscallaneous:
     @commands.command()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
-    async def roll(self, ctx, notation: str = "d6"):
+    async def roll(self, ctx, *, notation: str = "d6"):
         """Rolls a die based on the notation given
         Format should be #d#
 
@@ -285,6 +285,9 @@ class Miscallaneous:
             # be a valid notation
             dice = re.search("(\d*)d(\d*)", notation).group(1)
             num = int(re.search("(\d*)d(\d*)", notation).group(2))
+            # Attempt to get addition/subtraction
+            add = re.search("\+ ?(\d+)", notation)
+            subtract = re.search("- ?(\d+)", notation)
         # Check if something like ed3 was provided, or something else entirely
         # was provided
         except (AttributeError, ValueError):
@@ -307,14 +310,37 @@ class Miscallaneous:
             return
 
         nums = [random.SystemRandom().randint(1, num) for _ in range(0, int(dice))]
-        total = sum(nums)
+        subtotal = total = sum(nums)
+        # After totalling, if we have add/subtract seperately, apply them
+        if add:
+            add = int(add.group(1))
+            total += add
+        if subtract:
+            subtract = int(subtract.group(1))
+            total -= subtract
         value_str = ", ".join("{}".format(x) for x in nums)
 
         if dice == 1:
-            fmt = '{0.message.author.name} has rolled a {2} sided die and got the number {3}!'
+            fmt = '{0.message.author.name} has rolled a {1} sided die and got the number {2}!'.format(ctx, num, value_str)
+            if add or subtract:
+                fmt += "\nTotal: {} ({}".format(total, subtotal)
+                if add:
+                    fmt += " + {}".format(add)
+                if subtract:
+                    fmt += " - {}".format(subtract)
+                fmt += ")"
         else:
-            fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}, for a total of {4}!'
-        await ctx.send(fmt.format(ctx, dice, num, value_str, total))
+            fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'.format(ctx, dice, num, value_str)
+            if add or subtract:
+                fmt += "\nTotal: {} ({}".format(total, subtotal)
+                if add:
+                    fmt += " + {}".format(add)
+                if subtract:
+                    fmt += " - {}".format(subtract)
+                fmt += ")"
+            else:
+                fmt += "\nTotal: {}".format(total)
+        await ctx.send(fmt)
 
 
 def setup(bot):
