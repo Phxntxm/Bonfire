@@ -144,12 +144,13 @@ class Hangman:
 
         try:
             msg = await ctx.message.author.send(
-                "Please respond with a phrase you would like to use for your hangman game in **{}**\n\nPlease keep phrases less than 20 characters".format(
+                "Please respond with a phrase you would like to use for your hangman game in **{}**\n\nPlease keep "
+                "phrases less than 20 characters".format(
                     ctx.message.guild.name))
         except discord.Forbidden:
             await ctx.send(
-                "I can't message you {}! Please allow DM's so I can message you and ask for the hangman phrase you want to use!".format(
-                    ctx.message.author.display_name))
+                "I can't message you {}! Please allow DM's so I can message you and ask for the hangman phrase you "
+                "want to use!".format(ctx.message.author.display_name))
             return
 
         await ctx.send("I have DM'd you {}, please respond there with the phrase you would like to setup".format(
@@ -162,7 +163,7 @@ class Hangman:
             msg = await self.bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
             await ctx.send(
-                "You took too long! Please look at your DM's next to as that's where I'm asking for the phrase you want to use")
+                "You took too long! Please look at your DM's as that's where I'm asking for the phrase you want to use")
             return
 
         forbidden_phrases = ['stop', 'delete', 'remove', 'end', 'create', 'start']
