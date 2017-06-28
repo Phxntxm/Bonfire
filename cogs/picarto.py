@@ -34,8 +34,7 @@ class Picarto:
 
         data = await utils.request(url)
         if data is None:
-            await ctx.send("I couldn't connect to Picarto!")
-            return
+            return None
 
         # Not everyone has all these settings, so use this as a way to print information if it does, otherwise ignore it
         things_to_print = ['comissions', 'adult', 'followers', 'category', 'online']
@@ -57,7 +56,6 @@ class Picarto:
             embed.add_field(name=i.title(), value=result)
 
         return embed
-
 
     def channel_online(self, channel):
         # Channel is the name we are checking against that
