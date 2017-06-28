@@ -37,12 +37,15 @@ class Administration:
             if dest:
                 entries.append("{} to {}".format(source, dest))
 
-        # Then paginate
-        try:
-            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
-            await pages.paginate()
-        except utils.CannotPaginate as e:
-            await ctx.send(str(e))
+        if entries:
+            # Then paginate
+            try:
+                pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            await ctx.send("There are no restrictions!")
 
     @commands.command()
     @commands.guild_only()
