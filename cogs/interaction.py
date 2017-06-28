@@ -1,3 +1,4 @@
+import rethinkdb as r
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 
@@ -84,6 +85,8 @@ class Interaction:
     def __init__(self, bot):
         self.bot = bot
         self.battles = {}
+        self.bot.br = BattleRankings(self.bot.db)
+        bot.loop.create_task(self.bot.br.update())
 
     def get_battle(self, player):
         battles = self.battles.get(player.guild.id)
@@ -130,7 +133,7 @@ class Interaction:
     def battling_off(self, player1=None, player2=None):
         if player1:
             guild = player1.guild.id
-        elif player2:
+        else:
             guild = player2.guild.id
         battles = self.battles.get(guild, [])
         # Create a new list, exactly the way the last one was setup
@@ -227,10 +230,16 @@ class Interaction:
         # Randomize the order of who is printed/sent to the update system
         # All we need to do is change what order the challengers are printed/added as a paramater
         if random.SystemRandom().randint(0, 1):
-            await ctx.send(fmt.format(battleP1.mention, battleP2.mention))
+            outcome = self.bot.br.simulate_differences(battleP1, battleP2)
+            fmt1 = "{} - {}".format(battleP1.mention, outcome.get('winner'))
+            fmt2 = "{} - {}".format(battleP2.mention, outcome.get('loser'))
+            await ctx.send(fmt.format(fmt1, fmt2))
             await utils.update_records('battle_records', self.bot.db, battleP1, battleP2)
         else:
-            await ctx.send(fmt.format(battleP2.mention, battleP1.mention))
+            outcome = self.bot.br.simulate_differences(battleP2, battleP1)
+            fmt1 = "{} - {}".format(battleP2.mention, outcome.get('winner'))
+            fmt2 = "{} - {}".format(battleP1.mention, outcome.get('loser'))
+            await ctx.send(fmt.format(fmt1, fmt2))
             await utils.update_records('battle_records', self.bot.db, battleP2, battleP1)
 
     @commands.command()
@@ -300,6 +309,65 @@ class Interaction:
 
         fmt = "{0.mention} has just booped {1.mention}{3}! That's {2} times now!"
         await ctx.send(fmt.format(booper, boopee, amount, message))
+
+
+class BattleRankings:
+    def __init__(self, db):
+        self.db = db
+        self.ratings = None
+
+    async def update(self):
+        ratings = await self.db.query(r.table('battle_records').order_by('rating'))
+
+        # Create a dictionary so that we have something to "get" from easily
+        def build_dict(seq, key):
+            return dict((d[key], dict(d, rank=index + 1)) for (index, d) in enumerate(seq[::-1]))
+
+        self.ratings = build_dict(ratings, 'member_id')
+
+    def simulate_differences(self, winner, loser):
+        # Get our ratings and our difference
+        winner_stats = self.get(winner.id) or {}
+        loser_stats = self.get(loser.id) or {}
+        winner_rating = winner_stats.get('rating') or 1000
+        loser_rating = loser_stats.get('rating') or 1000
+        difference = abs(winner_rating - loser_rating)
+
+        # Calculate rating change based off this
+        rating_change = 0
+        count = 25
+        while count <= difference:
+            if count > 300:
+                break
+            rating_change += 1
+            count += 25
+
+        # Contstruct our dict to simulate the changes in rating
+        entry = {
+            'winner': "{} ( +{} )".format(winner_rating + rating_change, rating_change),
+            'loser': "{} ( -{} )".format(loser_rating - rating_change, rating_change),
+        }
+        return entry
+
+    def get(self, key):
+        return self.ratings.get(str(key))
+
+    def get_rating(self, member):
+        data = self.ratings.get(member.id, {})
+        return data.get('rating')
+
+    def get_rank(self, member):
+        data = self.ratings.get(member.id, {})
+        return data.get('rank'), len(self.ratings)
+
+    def get_server_rank(self, member):
+        server_ids = [str(m.id) for m in member.guild.members]
+
+        def build_dict(seq, key):
+            return dict((d[key], dict(d, rank=index + 1)) for (index, d) in enumerate(seq[::-1]))
+
+        server_ratings = build_dict([x for x in self.ratings.values() if x['member_id'] in server_ids], 'member_id')
+        return server_ratings.get(str(member.id), {}).get('rating'), len(server_ratings)
 
 
 def setup(bot):
