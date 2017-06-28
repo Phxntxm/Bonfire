@@ -2,6 +2,7 @@ import aiohttp
 from io import BytesIO
 import inspect
 import discord
+from discord.ext import commands
 
 from . import config
 from PIL import Image
@@ -95,6 +96,34 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json')
         # If an error was hit other than the one we want to catch, try again
         except:
             continue
+
+async def convert(ctx, option):
+    """Tries to convert a string to an object of useful representiation"""
+    cmd = ctx.bot.get_command(option)
+    if cmd:
+        return cmd
+
+    async def do_convert(converter, _ctx, _option):
+        try:
+            return await converter.convert(_ctx, _option)
+        except commands.converter.BadArgument:
+            return None
+
+    member = await do_convert(commands.converter.MemberConverter(), ctx, option)
+    if member:
+        return member
+
+    channel = await do_convert(commands.converter.TextChannelConverter(), ctx, option)
+    if channel:
+        return channel
+
+    channel = await do_convert(commands.converter.VoiceChannelConverter(), ctx, option)
+    if channel:
+        return channel
+
+    role = await do_convert(commands.converter.RoleConverter(), ctx, option)
+    if role:
+        return role
 
 
 async def update_records(key, db, winner, loser):
