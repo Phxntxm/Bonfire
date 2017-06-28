@@ -252,7 +252,7 @@ class Interaction:
         new_loser_rank, _ = self.bot.br.get_server_rank(loser)
         fmt = msg.content
         fmt += "\n{} - Rank: {} ( +{} )".format(winner.display_name, new_winner_rank, old_winner_rank - new_winner_rank)
-        fmt += "\n{} - Rank: {} ( +{} )".format(loser.display_name, new_loser_rank, old_loser_rank - new_loser_rank)
+        fmt += "\n{} - Rank: {} ( -{} )".format(loser.display_name, new_loser_rank, new_loser_rank - old_loser_rank)
 
         try:
             await msg.edit(content=fmt)
@@ -363,7 +363,7 @@ class BattleRankings:
 
         server_ratings = self.build_dict([x for x in self.ratings.values()
                                           if x['member_id'] in server_ids], 'member_id')
-        return server_ratings.get(str(member.id), {}).get('rating'), len(server_ratings)
+        return server_ratings.get(str(member.id), {}).get('rank'), len(server_ratings)
 
 
 def setup(bot):
