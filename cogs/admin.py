@@ -25,14 +25,14 @@ class Administration:
         for _from in restrictions.get('from', []):
             source = _from.get('source')
             # Resolve our destination based on the ID
-            dest = utils.convert(ctx, _from.get('destination'))
+            dest = await utils.convert(ctx, _from.get('destination'))
             # Don't add it if it doesn't exist
             if dest:
                 entries.append("{} from {}".format(source, dest))
         for _to in restrictions.get('to', []):
             source = _to.get('source')
             # Resolve our destination based on the ID
-            dest = utils.convert(ctx, _to.get('destination'))
+            dest = await utils.convert(ctx, _to.get('destination'))
             # Don't add it if it doesn't exist
             if dest:
                 entries.append("{} to {}".format(source, dest))
