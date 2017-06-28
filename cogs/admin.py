@@ -534,7 +534,7 @@ class Administration:
         parent = ctx.message.content.split()[0]
         parent = parent[len(ctx.prefix):]
 
-        if re.search("{.*token.*}", msg):
+        if msg and re.search("{.*token.*}", msg):
             await ctx.send("Illegal content in {} message".format(parent))
         else:
             entry = {
