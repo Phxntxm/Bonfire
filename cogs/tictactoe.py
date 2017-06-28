@@ -111,6 +111,7 @@ class TicTacToe:
     @commands.group(aliases=['tic', 'tac', 'toe'], invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def tictactoe(self, ctx, *, option: str):
         """Updates the current server's tic-tac-toe board
         You obviously need to be one of the players to use this
@@ -208,6 +209,7 @@ class TicTacToe:
     @tictactoe.command(name='start', aliases=['challenge', 'create'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def start_game(self, ctx, player2: discord.Member):
         """Starts a game of tictactoe with another player
 
@@ -243,6 +245,7 @@ class TicTacToe:
     @tictactoe.command(name='delete', aliases=['stop', 'remove', 'end'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def stop_game(self, ctx):
         """Force stops a game of tictactoe
         This should realistically only be used in a situation like one player leaves

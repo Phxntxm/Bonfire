@@ -17,6 +17,7 @@ class Links:
 
     @commands.command(aliases=['g'])
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def google(self, ctx, *, query: str):
         """Searches google for a provided query
 
@@ -71,6 +72,7 @@ class Links:
 
     @commands.command(aliases=['yt'])
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def youtube(self, ctx, *, query: str):
         """Searches youtube for a provided query
 
@@ -106,6 +108,7 @@ class Links:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def wiki(self, ctx, *, query: str):
         """Pulls the top match for a specific term from wikipedia, and returns the result
 
@@ -145,6 +148,7 @@ class Links:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def urban(self, ctx, *, msg: str):
         """Pulls the top urbandictionary.com definition for a term
 

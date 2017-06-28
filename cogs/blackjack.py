@@ -39,6 +39,7 @@ class Blackjack:
     @commands.group(aliases=['bj'], invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def blackjack(self, ctx):
         """Creates a game/joins the current running game of blackjack
 
@@ -66,6 +67,7 @@ class Blackjack:
     @blackjack.command(name='leave', aliases=['quit'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def blackjack_leave(self, ctx):
         """Leaves the current game of blackjack
 
@@ -88,6 +90,7 @@ class Blackjack:
     @blackjack.command(name='forcestop', aliases=['stop'])
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def blackjack_stop(self, ctx):
         """Forces the game to stop, mostly for use if someone has gone afk
 

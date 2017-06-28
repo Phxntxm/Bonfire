@@ -15,6 +15,7 @@ class Images:
 
     @commands.command(aliases=['rc'])
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def cat(self, ctx):
         """Use this to print a random cat image.
 
@@ -36,6 +37,7 @@ class Images:
 
     @commands.command(aliases=['dog', 'rd'])
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
 
@@ -55,6 +57,7 @@ class Images:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def snek(self, ctx):
         """Use this to print a random snek image.
 
@@ -68,6 +71,7 @@ class Images:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def avatar(self, ctx, member: discord.Member = None):
         """Provides an image for the provided person's avatar (yours if no other member is provided)
 
@@ -98,6 +102,7 @@ class Images:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term
 
@@ -166,6 +171,7 @@ class Images:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def e621(self, ctx, *, tags: str):
         """Searches for a random image from e621.net
         Format for the search terms need to be 'search term 1, search term 2, etc.'

@@ -127,6 +127,7 @@ class Picarto:
 
     @commands.group(invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def picarto(self, ctx, member: discord.Member = None):
         """This command can be used to view Picarto stats about a certain member
 
@@ -148,6 +149,7 @@ class Picarto:
     @picarto.command(name='add')
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def add_picarto_url(self, ctx, url: str):
         """Saves your user's picarto URL
 
@@ -202,6 +204,7 @@ class Picarto:
 
     @picarto.command(name='remove', aliases=['delete'])
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
         entry = {
@@ -215,6 +218,7 @@ class Picarto:
     @picarto.command(name='alerts')
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def picarto_alerts_channel(self, ctx, channel: discord.TextChannel):
         """Sets the notifications channel for picarto notifications
 
@@ -233,6 +237,7 @@ class Picarto:
     @picarto.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def notify(self, ctx):
         """This can be used to turn picarto notifications on or off
         Call this command by itself, to add this guild to the list of guilds to be notified
@@ -261,6 +266,7 @@ class Picarto:
     @notify.command(name='on', aliases=['start,yes'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def notify_on(self, ctx):
         """Turns picarto notifications on
 
@@ -282,6 +288,7 @@ class Picarto:
     @notify.command(name='off', aliases=['stop,no'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def notify_off(self, ctx):
         """Turns picarto notifications off
 

@@ -36,6 +36,7 @@ class Roulette:
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def roulette(self, ctx):
         """Joins the current running roulette
 
@@ -55,6 +56,7 @@ class Roulette:
     @roulette.command(name='start', aliases=['create'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def roulette_start(self, ctx, time: int=5):
         """Starts a roulette, that will end in one of the entrants being kicked from the server
         By default, the roulette will end in 5 minutes; provide a number (up to 30) to change how many minutes until it ends

@@ -15,6 +15,12 @@ from contextlib import redirect_stdout
 import io
 
 
+def get_syntax_error(e):
+    if e.text is None:
+        return '```py\n{0.__class__.__name__}: {0}\n```'.format(e)
+    return '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
+
+
 class Owner:
     """Commands that can only be used by Phantom, bot management commands"""
 
@@ -31,11 +37,6 @@ class Owner:
 
         # remove `foo`
         return content.strip('` \n')
-
-    def get_syntax_error(self, e):
-        if e.text is None:
-            return '```py\n{0.__class__.__name__}: {0}\n```'.format(e)
-        return '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
 
     async def on_guild_join(self, guild):
         # Create our embed that we'll use for the information
@@ -146,7 +147,7 @@ class Owner:
                 try:
                     code = compile(cleaned, '<repl session>', 'exec')
                 except SyntaxError as e:
-                    await ctx.send(self.get_syntax_error(e))
+                    await ctx.send(get_syntax_error(e))
                     continue
 
             variables['message'] = response
@@ -217,7 +218,7 @@ class Owner:
         try:
             exec(to_compile, env)
         except SyntaxError as e:
-            return await ctx.send(self.get_syntax_error(e))
+            return await ctx.send(get_syntax_error(e))
 
         func = env['func']
         try:

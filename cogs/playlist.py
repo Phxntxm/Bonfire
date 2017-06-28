@@ -146,6 +146,7 @@ class Playlist:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def playlists(self, ctx):
         """Displays the playlists you have
 
@@ -172,6 +173,7 @@ class Playlist:
 
     @commands.group(invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def playlist(self, ctx, *, playlist_name):
         """Used to view your playlists
 
@@ -195,6 +197,7 @@ class Playlist:
 
     @playlist.command(name='create')
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def _pl_create(self, ctx, *, name):
         """Used to create a new playlist
 
@@ -229,6 +232,7 @@ class Playlist:
 
     @playlist.command(name='edit')
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def _pl_edit(self, ctx):
         """A command used to edit a current playlist
         The available ways to edit a playlist are to rename, add a song, remove a song, or delete the playlist

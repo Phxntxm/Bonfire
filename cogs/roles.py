@@ -16,6 +16,7 @@ class Roles:
     @commands.group(aliases=['roles'], invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def role(self, ctx):
         """This command can be used to modify the roles on the server.
         Pass no subcommands and this will print the roles currently available on this server
@@ -37,6 +38,7 @@ class Roles:
     @role.command(name='remove')
     @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
+    @utils.check_restricted()
     async def remove_role(self, ctx):
         """Use this to remove roles from a number of members
 
@@ -99,6 +101,7 @@ class Roles:
     @role.command(name='add', aliases=['give', 'assign'])
     @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
+    @utils.check_restricted()
     async def add_role(self, ctx):
         """Use this to add a role to multiple members.
         Provide the list of members, and I'll ask for the role
@@ -155,6 +158,7 @@ class Roles:
     @role.command(name='delete')
     @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
+    @utils.check_restricted()
     async def delete_role(self, ctx, *, role: discord.Role = None):
         """This command can be used to delete one of the roles from the server
 
@@ -197,6 +201,7 @@ class Roles:
     @role.command(name='create')
     @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
+    @utils.check_restricted()
     async def create_role(self, ctx):
         """This command can be used to create a new role for this server
         A prompt will follow asking what settings you would like for this new role
@@ -313,6 +318,7 @@ class Roles:
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def assign(self, ctx, *role: discord.Role):
         """Assigns the provided role(s) to you, if they can be assigned
 
@@ -346,6 +352,7 @@ class Roles:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def unassign(self, ctx, *role: discord.Role):
         """Unassigns the provided role(s) to you, if they can be assigned
 
@@ -379,6 +386,7 @@ class Roles:
     @assign.command(name='add')
     @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
+    @utils.check_restricted()
     async def _add_assigns(self, ctx, *role: discord.Role):
         """Adds the provided role(s) to the list of available self-assignable roles
 
@@ -408,6 +416,7 @@ class Roles:
     @assign.command(name='list')
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def _list_assigns(self, ctx):
         """Lists the roles that can be self-assigned
 
@@ -438,6 +447,7 @@ class Roles:
     @assign.command(name='remove', aliases=['delete'])
     @commands.guild_only()
     @utils.custom_perms(manage_roles=True)
+    @utils.check_restricted()
     async def _delete_assigns(self, ctx, *role: discord.Role):
         """Removes the provided role(s) from the list of available self-assignable roles
 

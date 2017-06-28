@@ -97,6 +97,7 @@ class Raffle:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def raffles(self, ctx):
         """Used to print the current running raffles on the server
 
@@ -123,6 +124,7 @@ class Raffle:
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def raffle(self, ctx, raffle_id: int = 0):
         """Used to enter a raffle running on this server
         If there is more than one raffle running, provide an ID of the raffle you want to enter
@@ -187,6 +189,7 @@ class Raffle:
     @raffle.command(pass_context=True, name='create', aliases=['start', 'begin', 'add'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def raffle_create(self, ctx):
         """This is used in order to create a new server raffle
 
@@ -277,6 +280,7 @@ class Raffle:
     @raffle.command(name='alerts')
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def raffle_alerts_channel(self, ctx, channel: discord.TextChannel):
         """Sets the notifications channel for raffle notifications
 

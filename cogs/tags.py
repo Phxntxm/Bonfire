@@ -15,6 +15,7 @@ class Tags:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def tags(self, ctx):
         """Prints all the custom tags that this server currently has
 
@@ -31,6 +32,7 @@ class Tags:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def mytags(self, ctx):
         """Prints all the custom tags that this server that you own
 
@@ -50,6 +52,7 @@ class Tags:
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def tag(self, ctx, *, tag: str):
         """This can be used to call custom tags
         The format to call a custom tag is !tag <tag>
@@ -70,6 +73,7 @@ class Tags:
     @tag.command(name='add', aliases=['create', 'setup'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def add_tag(self, ctx):
         """Use this to add a new tag that can be used in this server
 
@@ -149,6 +153,7 @@ class Tags:
     @tag.command(name='edit')
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def edit_tag(self, ctx, *, tag: str):
         """This will allow you to edit a tag that you have created
         EXAMPLE: !tag edit this tag
@@ -194,6 +199,7 @@ class Tags:
     @tag.command(name='delete', aliases=['remove', 'stop'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def del_tag(self, ctx, *, tag: str):
         """Use this to remove a tag from use for this server
         Format to delete a tag is !tag delete <tag>

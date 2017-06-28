@@ -380,6 +380,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def progress(self, ctx):
         """Provides the progress of the current song"""
 
@@ -405,6 +406,7 @@ class Music:
     @commands.command(aliases=['summon'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def join(self, ctx, *, channel: discord.VoiceChannel = None):
         """Joins a voice channel. Provide the name of a voice channel after the command, and
         I will attempt to join this channel. Otherwise, I will join the channel you are in.
@@ -429,6 +431,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def play(self, ctx, *, song: str):
         """Plays a song.
         If there is a song currently in the queue, then it is
@@ -494,6 +497,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(mute_members=True)
+    @utils.check_restricted()
     async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song."""
 
@@ -513,6 +517,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(mute_members=True)
+    @utils.check_restricted()
     async def pause(self, ctx):
         """Pauses the currently played song."""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -522,6 +527,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(mute_members=True)
+    @utils.check_restricted()
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -531,6 +537,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(mute_members=True)
+    @utils.check_restricted()
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
         This also clears the queue.
@@ -557,6 +564,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def eta(self, ctx):
         """Provides an ETA on when your next song will play"""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -593,6 +601,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def queue(self, ctx):
         """Provides a printout of the songs that are in the queue"""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -612,6 +621,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def queuelength(self, ctx):
         """Prints the length of the queue"""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -630,6 +640,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def skip(self, ctx):
         """Vote to skip a song. The song requester can automatically skip.
         approximately 1/3 of the members in the voice channel
@@ -669,6 +680,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(mute_members=True)
+    @utils.check_restricted()
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -682,6 +694,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def playing(self, ctx):
         """Shows info about the currently played song."""
 
@@ -711,6 +724,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def dj(self, ctx):
         """Attempts to join the current DJ queue
 
@@ -752,6 +766,7 @@ class Music:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(mute_members=True)
+    @utils.check_restricted()
     async def shuffle(self, ctx):
         """Shuffles the current playlist, be it users or songs
 

@@ -141,6 +141,7 @@ class Twitch:
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def twitch(self, ctx, *, member: discord.Member = None):
         """Use this command to check the twitch info of a user
 
@@ -162,6 +163,7 @@ class Twitch:
     @twitch.command(name='add')
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def add_twitch_url(self, ctx, url: str):
         """Saves your user's twitch URL
 
@@ -214,6 +216,7 @@ class Twitch:
     @twitch.command(name='remove', aliases=['delete'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def remove_twitch_url(self, ctx):
         """Removes your twitch URL
 
@@ -230,6 +233,7 @@ class Twitch:
     @twitch.command(name='alerts', aliases=['notifications'])
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def twitch_alerts_channel(self, ctx, channel: discord.TextChannel):
         """Sets the notifications channel for twitch notifications
 
@@ -248,6 +252,7 @@ class Twitch:
     @twitch.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def notify(self, ctx):
         """This can be used to modify notification settings for your twitch user
         Call this command by itself to add 'this' server as one that will be notified when you on/offline
@@ -276,6 +281,7 @@ class Twitch:
     @notify.command(name='on', aliases=['start,yes'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def notify_on(self, ctx):
         """Turns twitch notifications on
 
@@ -297,6 +303,7 @@ class Twitch:
     @notify.command(name='off', aliases=['stop,no'])
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def notify_off(self, ctx):
         """Turns twitch notifications off
 

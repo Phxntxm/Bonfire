@@ -16,6 +16,7 @@ class Administration:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def restrict(self, ctx, *options):
         """
         This is an intuitive command to restrict something to/from something
@@ -238,6 +239,7 @@ class Administration:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def unrestrict(self, ctx, *options):
         """
         This is an intuitive command to unrestrict something to/from something
@@ -335,6 +337,7 @@ class Administration:
     @commands.command(aliases=['nick'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def nickname(self, ctx, *, name=None):
         """Used to set the nickname for Bonfire (provide no nickname and it will reset)
 
@@ -350,6 +353,7 @@ class Administration:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def ignore(self, ctx, member_or_channel):
         """This command can be used to have Bonfire ignore certain members/channels
 
@@ -401,6 +405,7 @@ class Administration:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def unignore(self, ctx, member_or_channel):
         """This command can be used to have Bonfire stop ignoring certain members/channels
 
@@ -449,6 +454,7 @@ class Administration:
     @commands.command(aliases=['notifications'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def alerts(self, ctx, channel: discord.TextChannel):
         """This command is used to set a channel as the server's default 'notifications' channel
         Any notifications (like someone going live on Twitch, or Picarto) will go to that channel by default
@@ -471,6 +477,7 @@ class Administration:
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def welcome(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
         Provide on, yes, or true to set it on; otherwise it will be turned off
@@ -494,6 +501,7 @@ class Administration:
     @welcome.command(name='alerts', aliases=['notifications'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def _welcome_alerts(self, ctx, *, channel: discord.TextChannel):
         """A command used to set the override for notifications about users joining/leaving
 
@@ -511,6 +519,7 @@ class Administration:
             "I have just changed this server's welcome/goodbye notifications channel to {}".format(channel.name))
 
     @commands.group()
+    @utils.check_restricted()
     async def nsfw(self, ctx):
         """Handles adding or removing a channel as a nsfw channel"""
         # This command isn't meant to do anything, so just send an error if an invalid subcommand is passed
@@ -518,6 +527,7 @@ class Administration:
 
     @nsfw.command(name="add")
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel
 
@@ -543,6 +553,7 @@ class Administration:
 
     @nsfw.command(name="remove", aliases=["delete"])
     @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel
 
@@ -570,6 +581,7 @@ class Administration:
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def perms(self, ctx, *, command: str = None):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions
@@ -623,6 +635,7 @@ class Administration:
     @perms.command(name="add", aliases=["setup,create"])
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
+    @utils.check_restricted()
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'
@@ -688,6 +701,7 @@ class Administration:
     @perms.command(name="remove", aliases=["delete"])
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
+    @utils.check_restricted()
     async def remove_perms(self, ctx, *, command: str):
         """Removes the custom permissions setup on the command specified
 
@@ -712,6 +726,7 @@ class Administration:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def prefix(self, ctx, *, prefix: str):
         """This command can be used to set a custom prefix per server
 
@@ -741,6 +756,7 @@ class Administration:
     @commands.group(aliases=['rule'], invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def rules(self, ctx, rule: int = None):
         """This command can be used to view the current rules on the server
 
@@ -770,6 +786,7 @@ class Administration:
     @rules.command(name='add', aliases=['create'])
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def rules_add(self, ctx, *, rule: str):
         """Adds a rule to this server's rules
 
@@ -791,6 +808,7 @@ class Administration:
     @rules.command(name='remove', aliases=['delete'])
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def rules_delete(self, ctx, rule: int):
         """Removes one of the rules from the list of this server's rules
         Provide a number to delete that rule
@@ -813,6 +831,7 @@ class Administration:
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def queuetype(self, ctx, new_type=None):
         """Switches the song queue type for music
         Choices are `user` or `song` queue

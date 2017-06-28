@@ -24,6 +24,7 @@ class Miscallaneous:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def help(self, ctx, *, command=None):
         """This command is used to provide a link to the help URL.
         This can be called on a command to provide more information about that command
@@ -107,6 +108,7 @@ class Miscallaneous:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say
 
@@ -121,6 +123,7 @@ class Miscallaneous:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def calendar(self, ctx, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month
@@ -160,6 +163,7 @@ class Miscallaneous:
 
     @commands.command(aliases=['about'])
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def info(self, ctx):
         """This command can be used to print out some of my information"""
         # fmt is a dictionary so we can set the key to it's output, then print both
@@ -218,6 +222,7 @@ class Miscallaneous:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def uptime(self, ctx):
         """Provides a printout of the current bot's uptime
 
@@ -230,6 +235,7 @@ class Miscallaneous:
 
     @commands.command(aliases=['invite'])
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def addbot(self, ctx):
         """Provides a link that you can use to add me to a server
 
@@ -255,6 +261,7 @@ class Miscallaneous:
 
     @commands.command(enabled=False)
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def joke(self, ctx):
         """Prints a random riddle
 
@@ -265,6 +272,7 @@ class Miscallaneous:
 
     @commands.command()
     @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
     async def roll(self, ctx, notation: str = "d6"):
         """Rolls a die based on the notation given
         Format should be #d#
