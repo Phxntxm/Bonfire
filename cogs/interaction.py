@@ -85,8 +85,8 @@ class Interaction:
     def __init__(self, bot):
         self.bot = bot
         self.battles = {}
-        self.bot.br = BattleRankings(self.bot.db)
-        bot.loop.create_task(self.bot.br.update())
+        self.bot.br = BattleRankings(self.bot)
+        self.bot.br.update()
 
     def get_battle(self, player):
         battles = self.battles.get(player.guild.id)
@@ -226,6 +226,7 @@ class Interaction:
         fmt = random.SystemRandom().choice(battle_outcomes)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
         self.battling_off(player2=ctx.message.author)
+        self.bot.br.update()
 
         # Randomize the order of who is printed/sent to the update system
         # All we need to do is change what order the challengers are printed/added as a paramater
@@ -312,11 +313,15 @@ class Interaction:
 
 
 class BattleRankings:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, bot):
+        self.db = bot.db
+        self.loop = bot.loop
         self.ratings = None
 
-    async def update(self):
+    def update(self):
+        self.loop.create_task(self._update())
+
+    async def _update(self):
         ratings = await self.db.query(r.table('battle_records').order_by('rating'))
 
         # Create a dictionary so that we have something to "get" from easily
@@ -344,8 +349,8 @@ class BattleRankings:
 
         # Contstruct our dict to simulate the changes in rating
         entry = {
-            'winner': "{} ( +{} )".format(winner_rating + rating_change, rating_change),
-            'loser': "{} ( -{} )".format(loser_rating - rating_change, rating_change),
+            'winner': "{} ( +{} )".format(winner_rating + (16 - rating_change), rating_change),
+            'loser': "{} ( -{} )".format(loser_rating - (16 + rating_change), rating_change),
         }
         return entry
 
