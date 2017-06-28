@@ -18,6 +18,10 @@ class Administration:
     @utils.custom_perms(kick_members=True)
     @utils.check_restricted()
     async def restrictions(self, ctx):
+        """Used to list all the current restrictions set
+
+        EXAMPLE: !restrictions
+        RESULT: All the current restrictions"""
         # Get the restrictions
         restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
         entries = []
