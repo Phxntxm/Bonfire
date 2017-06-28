@@ -32,7 +32,7 @@ class Playlist:
             try:
                 await my_msg.delete()
                 await response.delete()
-            except discord.Forbidden:
+            except (discord.Forbidden, discord.NotFound):
                 pass
 
             # For our case here, everything needs to be lowered and stripped, so just do this now
@@ -159,7 +159,7 @@ class Playlist:
                 "{} ({} songs)".format(x['name'], len(x['songs'])) if not x.get('active')
                 else "{} ({} songs) - Active playlist".format(x['name'], len(x['songs']))
                 for x in playlists
-                ]
+            ]
 
             try:
                 # And paginate
@@ -257,10 +257,12 @@ class Playlist:
             await ctx.send("You do not have a playlist named {}!".format(playlist))
             return
 
-        q1 = "How would you like to edit {}? Choices are `add`, `remove`, `rename`, `delete`, or `activate`.\n" \
+        q1 = "How would you like to edit {}? Choices are `add`, `remove`, " \
+             "`rename`, `delete`, `list`, or `activate`.\n" \
              "**add** - Adds a song to this playlist\n" \
              "**remove** - Removes a song from this playlist\n" \
              "**rename** - Changes the name of this playlist\n" \
+             "**list** - Lists the songs in this playlist\n" \
              "**delete** - Deletes this playlist\n" \
              "**activate** - Sets this as the active playlist\n\n" \
              "Type **quit** to stop editing this playlist".format(playlist)
@@ -287,7 +289,7 @@ class Playlist:
                     await ctx.message.channel.trigger_typing()
                     if await self.add_to_playlist(author, playlist, response):
                         delete_msgs.append(await ctx.send("Successfully added song {} to playlist {}".format(response,
-                                                                                                         playlist)))
+                                                                                                             playlist)))
                     else:
                         delete_msgs.append(await ctx.send("Failed to lookup {}".format(response)))
             elif 'remove' in response:
@@ -320,6 +322,8 @@ class Playlist:
                     new_name = new_name.lower().strip()
                     playlist = new_name
                     delete_msgs.append(await ctx.send("Successfully renamed {} to {}!".format(playlist, new_name)))
+            elif 'list' in response:
+                await ctx.invoke(self.playlist, playlist_name=playlist)
             elif 'activate' in response:
                 for x in playlists:
                     x['active'] = x['name'] == playlist
