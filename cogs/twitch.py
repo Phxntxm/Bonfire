@@ -46,7 +46,11 @@ class Twitch:
 
         return embed
 
-    async def online_embed(self, twitch_url: str):
+    async def online_embed(self, twitch_url):
+        # First make sure the twitch URL is actually given
+        if not twitch_url:
+            return None
+
         # Check a specific channel's data, and get the response in text format
         channel = re.search("(?<=twitch.tv/)(.*)", twitch_url).group(1)
         url = "https://api.twitch.tv/kraken/streams/{}".format(channel)
@@ -64,8 +68,11 @@ class Twitch:
         except (KeyError, TypeError):
             return None
 
+    async def offline_embed(self, twitch_url):
+        # First make sure the twitch URL is actually given
+        if not twitch_url:
+            return None
 
-    async def offline_embed(self, twitch_url: str):
         # Check a specific channel's data, and get the response in text format
         channel = re.search("(?<=twitch.tv/)(.*)", twitch_url).group(1)
         url = "https://api.twitch.tv/kraken/channels/{}".format(channel)
