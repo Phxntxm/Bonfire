@@ -293,6 +293,7 @@ class Administration:
             # If it doesn't exist, nothing is needed to be done
             except ValueError:
                 await ctx.send("The restriction {} {} {} does not exist!".format(arg1, arg2, arg3))
+                return
             # If it was removed succesfully, save the change and let the author know this has been done
             else:
                 entry = {
@@ -300,7 +301,6 @@ class Administration:
                     'restrictions': restrictions
                 }
                 self.bot.db.save('server_settings', entry)
-                await ctx.send("I have just unrestricted {} {} {}".format(arg1, arg2, arg2))
         # If this isn't a blacklist/whitelist, then we are attempting to remove an overwrite
         else:
             # Get the source and destination based on whatever order is provided
