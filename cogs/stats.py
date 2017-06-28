@@ -261,44 +261,20 @@ class Stats:
         await ctx.message.channel.trigger_typing()
 
         member = member or ctx.message.author
-
-        # For this one, we don't want to pass a filter, as we do need all battle records
-        # We need this because we want to make a comparison for overall rank
-        all_members = self.bot.db.load('battle_records')
-        if all_members is None or len(all_members) == 0:
-            await ctx.send("That user has not battled yet!")
-            return
-
-        # Make a list comprehension to just check if the user has battled
-        if len([entry for entry in all_members if entry['member_id'] == str(member.id)]) == 0:
-            await ctx.send("That user has not battled yet!")
-            return
-
-        # Same concept as the leaderboard
-        server_member_ids = [member.id for member in ctx.message.guild.members]
-        server_members = [stats for stats in all_members if int(stats['member_id']) in server_member_ids]
-        sorted_server_members = sorted(server_members, key=lambda x: x['rating'], reverse=True)
-        sorted_all_members = sorted(all_members, key=lambda x: x['rating'], reverse=True)
-
-        # Enumurate the list so that we can go through, find the user's place in the list
-        # and get just that for the rank
-        server_rank = [i for i, x in enumerate(sorted_server_members) if x['member_id'] == str(member.id)][0] + 1
-        total_rank = [i for i, x in enumerate(sorted_all_members) if x['member_id'] == str(member.id)][0] + 1
-        # The rest of this is straight forward, just formatting
-
-        entry = [m for m in server_members if m['member_id'] == str(member.id)][0]
-        rating = entry['rating']
-        record = "{}-{}".format(entry['wins'], entry['losses'])
+        # Get the different data that we'll display
+        server_rank = "{}/{}".format(*self.bot.br.get_server_rank(member))
+        overall_rank = "{}/{}".format(*self.bot.br.get_rank(member))
+        rating = self.bot.br.get_rating(member)
+        record = self.bot.br.get_record(member)
         try:
+            # Create our banner
             title = 'Stats for {}'.format(member.display_name)
-            fmt = [('Record', record), ('Server Rank', '{}/{}'.format(server_rank, len(server_members))),
-                   ('Overall Rank', '{}/{}'.format(total_rank, len(all_members))), ('Rating', rating)]
+            fmt = [('Record', record), ('Server Rank', server_rank), ('Overall Rank', overall_rank), ('Rating', rating)]
             banner = await utils.create_banner(member, title, fmt)
             await ctx.send(file=discord.File(banner, filename='banner.png'))
         except (FileNotFoundError, discord.Forbidden):
-            fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}/{}\n\tOverall Rank: {}/{}\n\tRating: {}'
-            fmt = fmt.format(member.display_name, record, server_rank, len(server_members), total_rank,
-                             len(all_members), rating)
+            fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}\n\tOverall Rank: {}\n\tRating: {}'
+            fmt = fmt.format(member.display_name, record, server_rank, overall_rank, rating)
             await ctx.send('```\n{}```'.format(fmt))
 
 
