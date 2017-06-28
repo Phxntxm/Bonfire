@@ -11,6 +11,7 @@ import asyncio
 import time
 import re
 import logging
+import random
 from collections import deque
 
 log = logging.getLogger()
@@ -30,7 +31,7 @@ class VoiceState:
         self.skip_votes = set()
         self.user_queue = user_queue
         self.loop = bot.loop
-        self._volume = 50
+        self._volume = .5
 
     @property
     def volume(self):
@@ -99,17 +100,19 @@ class VoiceState:
             source = PCMVolumeTransformer(source, volume=self.volume)
             self.voice.play(source, after=self.after)
             self.current.start_time = time.time()
-        # We handle users who join a user queue without songs (either at all, or ready) elsewhere
-        # So if self.current is None here, there are a few reasons:
-        # User queue, last song failed to download
-        # Either queue, all songs/dj's have gone been gone through
-        # The first one sucks, but there's not much we can do about it here, blame youtube
-        # Second one just means we're done and don't want to do anything
-        # So in either case....we simply do nothing here, and just the playing end
+            # We handle users who join a user queue without songs (either at all, or ready) elsewhere
+            # So if self.current is None here, there are a few reasons:
+            # User queue, last song failed to download
+            # Either queue, all songs/dj's have gone been gone through
+            # The first one sucks, but there's not much we can do about it here, blame youtube
+            # Second one just means we're done and don't want to do anything
+            # So in either case....we simply do nothing here, and just the playing end
 
     async def next_song(self):
         if not self.user_queue:
-            self.current = await self.songs.get_next_entry()
+            fut, self.current = await self.songs.get_next_entry()
+            if fut.exception():
+                raise ExtractionError(fut.exception())
         else:
             try:
                 dj = self.djs.popleft()
@@ -117,7 +120,9 @@ class VoiceState:
                 self.dj = None
                 self.current = None
             else:
-                song = await dj.get_next_entry()
+                fut, song = await dj.get_next_entry()
+                if fut.exception():
+                    raise ExtractionError(fut.exception())
                 # Add an extra check here in case in the very short period of time possible, someone has queued a
                 # song while we are downloading the next...which caused 2 play calls to be done
                 # The 2nd may be called while the first has already started playing...this check is for that 2nd one
@@ -196,12 +201,12 @@ class Music:
                 # There's only one reaction we want to make sure we remove in the circumstances
                 # If the member doesn't have kick_members permissions, and isn't the requester
                 # Then they can't remove the song, otherwise they can
-                if not author.guild_permissions.kick_members and author.id != entry.requester.id:
+                if not author.guild_permissions.mute_members and author.id != entry.requester.id:
                     try:
                         await message.remove_reaction('\u274c', channel.server.me)
                     except:
                         pass
-                elif not author.guild_permissions.kick_members and author.id == entry.requester.id:
+                elif not author.guild_permissions.mute_members and author.id == entry.requester.id:
                     try:
                         await message.add_reaction('\u274c')
                     except:
@@ -213,7 +218,7 @@ class Music:
                 await message.add_reaction('\N{BLACK RIGHTWARDS ARROW}')
                 await message.add_reaction('\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE}')
                 # The moderation tools that can be used
-                if author.guild_permissions.kick_members:
+                if author.guild_permissions.mute_members:
                     await message.add_reaction('\N{DOWNWARDS BLACK ARROW}')
                     await message.add_reaction('\N{UPWARDS BLACK ARROW}')
                     await message.add_reaction('\N{CROSS MARK}')
@@ -240,7 +245,7 @@ class Music:
             # If up is clicked
             elif '\u2b06' in reaction.emoji:
                 # A second check just to make sure, as well as ensuring index is higher than 0
-                if author.guild_permissions.kick_members and index > 0:
+                if author.guild_permissions.mute_members and index > 0:
                     if dj and dj != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     elif not dj and entry != queue[index]:
@@ -258,7 +263,7 @@ class Music:
             # If down is clicked
             elif '\u2b07' in reaction.emoji:
                 # A second check just to make sure, as well as ensuring index is lower than last
-                if author.guild_permissions.kick_members and index < (count - 1):
+                if author.guild_permissions.mute_members and index < (count - 1):
                     if dj and dj != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     elif not dj and entry != queue[index]:
@@ -276,7 +281,7 @@ class Music:
             # If x is clicked
             elif '\u274c' in reaction.emoji:
                 # A second check just to make sure
-                if author.guild_permissions.kick_members or author == entry.requester:
+                if author.guild_permissions.mute_members or author == entry.requester:
                     if dj and dj != queue[index]:
                         fmt = "`Error: Position of this entry has changed, cannot complete your action`"
                     elif not dj and entry != queue[index]:
@@ -432,13 +437,22 @@ class Music:
         The list of supported sites can be found here:
         https://rg3.github.io/youtube-dl/supportedsites.html
         """
+        # If we don't have a voice state yet, create one
         if ctx.message.guild.id not in self.voice_states:
             if not await ctx.invoke(self.join):
                 return
+
+        # If this is a user queue, this is the wrong command
         if self.voice_states.get(ctx.message.guild.id).user_queue:
             await ctx.send("The current queue type is the DJ queue. "
                            "Use the command {}dj to join this queue".format(ctx.prefix))
             return
+        # Ensure the user is in the voice channel
+        try:
+            if ctx.message.author.voice.channel != ctx.message.guild.me.voice.channel:
+                await ctx.send("You need to be in the channel to use this command!")
+        except AttributeError:
+                await ctx.send("You need to be in the channel to use this command!")
 
         song = re.sub('[<>\[\]]', '', song)
         if len(song) == 11:
@@ -479,7 +493,7 @@ class Music:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(mute_members=True)
     async def volume(self, ctx, value: int = None):
         """Sets the volume of the currently playing song."""
 
@@ -498,7 +512,7 @@ class Music:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(mute_members=True)
     async def pause(self, ctx):
         """Pauses the currently played song."""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -507,7 +521,7 @@ class Music:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(mute_members=True)
     async def resume(self, ctx):
         """Resumes the currently played song."""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -516,7 +530,7 @@ class Music:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(mute_members=True)
     async def stop(self, ctx):
         """Stops playing audio and leaves the voice channel.
         This also clears the queue.
@@ -626,6 +640,12 @@ class Music:
         if state is None or not state.playing:
             await ctx.send('Not playing any music right now...')
             return
+        # Ensure the user is in our channel
+        try:
+            if ctx.message.author.voice.channel != ctx.message.guild.me.voice.channel:
+                await ctx.send("You need to be in the channel to use this command!")
+        except AttributeError:
+                await ctx.send("You need to be in the channel to use this command!")
 
         # Check if the person requesting a skip is the requester of the song, if so automatically skip
         voter = ctx.message.author
@@ -648,7 +668,7 @@ class Music:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(mute_members=True)
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
         state = self.voice_states.get(ctx.message.guild.id)
@@ -679,8 +699,8 @@ class Music:
             embed.add_field(name='Skip Count', value='{}/{}'.format(skip_count, state.required_skips), inline=False)
             # Get the current progress and display this
             length = state.current.length
-            if length:
-                progress = state.current.progress
+            progress = state.current.progress
+            if length and progress:
                 progress = divmod(round(progress, 0), 60)
                 length = divmod(round(length, 0), 60)
                 fmt = "{0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
@@ -711,11 +731,13 @@ class Music:
         else:
             new_dj = self.bot.get_cog('DJEvents').djs[ctx.message.author.id]
             if not new_dj.peek():
-                await ctx.send("You currently have nothing in your playlist! This can happen for two reasons:\n"\
-                               "1) You actually have nothing in your active playlist\n"\
-                               "2) You just joined the voice channel and your playlist is still being downloaded\n\n"\
-                               "If the first one is true, then you need to manage your playlist to have an active playlist with songs in it. "\
-                               "Otherwise, you will need to wait while your songs are being downloaded before you can join")
+                await ctx.send("You currently have nothing in your playlist! This can happen for two reasons:\n"
+                               "1) You actually have nothing in your active playlist\n"
+                               "2) You just joined the voice channel and your playlist is still being downloaded\n\n"
+                               "If the first one is true, then you need to manage your playlist to have an active "
+                               "playlist with songs in it. "
+                               "Otherwise, you will need to wait while your songs are being downloaded before you can "
+                               "join")
             else:
                 state.djs.append(new_dj)
                 try:
@@ -726,6 +748,24 @@ class Music:
 
                 if not state.playing:
                     await state.play_next_song()
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(mute_members=True)
+    async def shuffle(self, ctx):
+        """Shuffles the current playlist, be it users or songs
+
+        EXAMPLE: !shuffle
+        RESULT: The queue is shuffled"""
+        state = self.voice_states.get(ctx.message.guild.id)
+        if state:
+            if state.user_queue:
+                random.SystemRandom().shuffle(state.djs)
+            else:
+                state.songs.shuffle()
+            await ctx.send("The queue has been shuffled!")
+        else:
+            await ctx.send("There needs to be a queue before I can shuffle it!")
 
 
 def setup(bot):
