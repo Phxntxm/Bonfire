@@ -255,7 +255,7 @@ class Interaction:
         fmt += "\n{} - Rank: {} ( +{} )".format(loser.display_name, new_loser_rank, old_loser_rank - new_loser_rank)
 
         try:
-            await msg.edit(fmt)
+            await msg.edit(content=fmt)
         except:
             pass
 
