@@ -347,20 +347,17 @@ class BattleRankings:
         # Create a dictionary so that we have something to "get" from easily
         self.ratings = self.build_dict(ratings, 'member_id')
 
-    def get(self, key):
-        return self.ratings.get(str(key))
-
     def get_record(self, member):
-        data = self.ratings.get(member.id, {})
+        data = self.ratings.get(str(member.id), {})
         fmt = "{} - {}".format(data.get('wins'), data.get('losses'))
         return fmt
 
     def get_rating(self, member):
-        data = self.ratings.get(member.id, {})
+        data = self.ratings.get(str(member.id), {})
         return data.get('rating')
 
     def get_rank(self, member):
-        data = self.ratings.get(member.id, {})
+        data = self.ratings.get(str(member.id), {})
         return data.get('rank'), len(self.ratings)
 
     def get_server_rank(self, member):
