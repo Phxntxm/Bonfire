@@ -110,9 +110,11 @@ class VoiceState:
 
     async def next_song(self):
         if not self.user_queue:
-            fut, self.current = await self.songs.get_next_entry()
-            if fut.exception():
-                raise ExtractionError(fut.exception())
+            _result = await self.songs.get_next_entry()
+            if _result:
+                fut, self.current = _result
+                if fut.exception():
+                    raise ExtractionError(fut.exception())
         else:
             try:
                 dj = self.djs.popleft()
@@ -120,7 +122,11 @@ class VoiceState:
                 self.dj = None
                 self.current = None
             else:
-                fut, song = await dj.get_next_entry()
+                _result = await dj.get_next_entry()
+                if _result:
+                    fut, song = _result
+                else:
+                    return await self.next_song()
                 if fut.exception():
                     raise ExtractionError(fut.exception())
                 # Add an extra check here in case in the very short period of time possible, someone has queued a
@@ -459,7 +465,7 @@ class Music:
 
         song = re.sub('[<>\[\]]', '', song)
         if len(song) == 11:
-            # Youtube-dl will attempt to things with the length of 11 as a video ID
+            # Youtube-dl will attempt to use results with a length of 11 as a video ID
             # If this is a search, this causes it to break
             # Youtube will still succeed if this *is* an ID provided, if there's a . after
             song += "."
