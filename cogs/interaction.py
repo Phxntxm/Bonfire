@@ -7,6 +7,7 @@ from . import utils
 import discord
 import random
 import functools
+import asyncio
 
 battle_outcomes = \
     ["A meteor fell on {1}, {0} is left standing and has been declared the victor!",
@@ -86,7 +87,7 @@ class Interaction:
         self.bot = bot
         self.battles = {}
         self.bot.br = BattleRankings(self.bot)
-        self.bot.br.update()
+        self.bot.br.update_start()
 
     def get_battle(self, player):
         battles = self.battles.get(player.guild.id)
@@ -226,22 +227,37 @@ class Interaction:
         fmt = random.SystemRandom().choice(battle_outcomes)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
         self.battling_off(player2=ctx.message.author)
-        self.bot.br.update()
+        await self.bot.br.update()
 
         # Randomize the order of who is printed/sent to the update system
-        # All we need to do is change what order the challengers are printed/added as a paramater
         if random.SystemRandom().randint(0, 1):
-            outcome = self.bot.br.simulate_differences(battleP1, battleP2)
-            fmt1 = "{} - {}".format(battleP1.mention, outcome.get('winner'))
-            fmt2 = "{} - {}".format(battleP2.mention, outcome.get('loser'))
-            await ctx.send(fmt.format(fmt1, fmt2))
-            await utils.update_records('battle_records', self.bot.db, battleP1, battleP2)
+            winner = battleP1
+            loser = battleP2
         else:
-            outcome = self.bot.br.simulate_differences(battleP2, battleP1)
-            fmt1 = "{} - {}".format(battleP2.mention, outcome.get('winner'))
-            fmt2 = "{} - {}".format(battleP1.mention, outcome.get('loser'))
-            await ctx.send(fmt.format(fmt1, fmt2))
-            await utils.update_records('battle_records', self.bot.db, battleP2, battleP1)
+            winner = battleP2
+            loser = battleP1
+
+        msg = await ctx.send(fmt.format(winner.mention, loser.mention))
+        old_winner_rank, _ = self.bot.br.get_server_rank(winner)
+        old_loser_rank, _ = self.bot.br.get_server_rank(loser)
+
+        # Update our records; this will update our cache
+        await utils.update_records('battle_records', self.bot.db, winner, loser)
+        # Now wait a couple seconds to ensure cache is updated
+        await asyncio.sleep(2)
+        await self.bot.br.update()
+
+        # Now get the new ranks after this stuff has been updated
+        new_winner_rank, _ = self.bot.br.get_server_rank(winner)
+        new_loser_rank, _ = self.bot.br.get_server_rank(loser)
+        fmt = msg.content
+        fmt += "\n{} - Rank: {} ( +{} )".format(winner.display_name, new_winner_rank, old_winner_rank - new_winner_rank)
+        fmt += "\n{} - Rank: {} ( +{} )".format(loser.display_name, new_loser_rank, old_loser_rank - new_loser_rank)
+
+        try:
+            await msg.edit(fmt)
+        except:
+            pass
 
     @commands.command()
     @commands.guild_only()
@@ -312,47 +328,24 @@ class Interaction:
         await ctx.send(fmt.format(booper, boopee, amount, message))
 
 
+# noinspection PyMethodMayBeStatic
 class BattleRankings:
     def __init__(self, bot):
         self.db = bot.db
         self.loop = bot.loop
         self.ratings = None
 
-    def update(self):
-        self.loop.create_task(self._update())
+    def build_dict(self, seq, key):
+        return dict((d[key], dict(d, rank=index + 1)) for (index, d) in enumerate(seq[::-1]))
 
-    async def _update(self):
+    def update_start(self):
+        self.loop.create_task(self.update())
+
+    async def update(self):
         ratings = await self.db.query(r.table('battle_records').order_by('rating'))
 
         # Create a dictionary so that we have something to "get" from easily
-        def build_dict(seq, key):
-            return dict((d[key], dict(d, rank=index + 1)) for (index, d) in enumerate(seq[::-1]))
-
-        self.ratings = build_dict(ratings, 'member_id')
-
-    def simulate_differences(self, winner, loser):
-        # Get our ratings and our difference
-        winner_stats = self.get(winner.id) or {}
-        loser_stats = self.get(loser.id) or {}
-        winner_rating = winner_stats.get('rating') or 1000
-        loser_rating = loser_stats.get('rating') or 1000
-        difference = abs(winner_rating - loser_rating)
-
-        # Calculate rating change based off this
-        rating_change = 0
-        count = 25
-        while count <= difference:
-            if count > 300:
-                break
-            rating_change += 1
-            count += 25
-
-        # Contstruct our dict to simulate the changes in rating
-        entry = {
-            'winner': "{} ( +{} )".format(winner_rating + (16 - rating_change), (16 - rating_change)),
-            'loser': "{} ( -{} )".format(loser_rating - (16 + rating_change), (16 + rating_change)),
-        }
-        return entry
+        self.ratings = self.build_dict(ratings, 'member_id')
 
     def get(self, key):
         return self.ratings.get(str(key))
@@ -368,10 +361,8 @@ class BattleRankings:
     def get_server_rank(self, member):
         server_ids = [str(m.id) for m in member.guild.members]
 
-        def build_dict(seq, key):
-            return dict((d[key], dict(d, rank=index + 1)) for (index, d) in enumerate(seq[::-1]))
-
-        server_ratings = build_dict([x for x in self.ratings.values() if x['member_id'] in server_ids], 'member_id')
+        server_ratings = self.build_dict([x for x in self.ratings.values()
+                                          if x['member_id'] in server_ids], 'member_id')
         return server_ratings.get(str(member.id), {}).get('rating'), len(server_ratings)
 
 
