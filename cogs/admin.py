@@ -276,13 +276,13 @@ class Administration:
             # allowed)
             if isinstance(option1, (commands.core.Command, commands.core.Group)):
                 restriction = {
-                    'source': option1,
-                    'destination': option2
+                    'source': option1.qualified_name,
+                    'destination': str(option2.id)
                 }
             else:
                 restriction = {
-                    'source': option2,
-                    'destination': option1
+                    'source': option2.qualified_name,
+                    'destination': str(option1.id)
                 }
 
             # Load restrictions
