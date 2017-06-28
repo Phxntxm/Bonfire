@@ -254,9 +254,9 @@ class Playlist:
         await ctx.invoke(self.playlists)
         question = "Please provide what playlist you would like to edit, the playlists you have available are above."
         playlist = await self.get_response(ctx, question)
-        playlist = playlist.lower().strip()
         if not playlist:
             return
+        playlist = playlist.lower().strip()
         if playlist not in names:
             await ctx.send("You do not have a playlist named {}!".format(playlist))
             return
