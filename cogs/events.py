@@ -69,7 +69,7 @@ class StatsUpdate:
                 # Get the message if it exists
                 join_message = self.bot.db.load('server_settings', key=guild.id, pluck='welcome_message')
                 if not join_message:
-                    join_message = "Welcome to the '{server.name}' server {member}!"
+                    join_message = "Welcome to the '{server}' server {member}!"
             else:
                 return
         except (IndexError, TypeError, KeyError):
