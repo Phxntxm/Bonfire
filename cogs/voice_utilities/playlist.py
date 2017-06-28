@@ -246,7 +246,8 @@ class Playlist(EventEmitter):
             if next_entry:
                 next_entry.get_ready_future()
 
-        return await entry.get_ready_future()
+        fut = entry.get_ready_future()
+        return fut, await fut
 
     def peek(self):
         """
