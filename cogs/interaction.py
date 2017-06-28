@@ -349,8 +349,8 @@ class BattleRankings:
 
         # Contstruct our dict to simulate the changes in rating
         entry = {
-            'winner': "{} ( +{} )".format(winner_rating + (16 - rating_change), rating_change),
-            'loser': "{} ( -{} )".format(loser_rating - (16 + rating_change), rating_change),
+            'winner': "{} ( +{} )".format(winner_rating + (16 - rating_change), (16 - rating_change)),
+            'loser': "{} ( -{} )".format(loser_rating - (16 + rating_change), (16 + rating_change)),
         }
         return entry
 
