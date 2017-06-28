@@ -15,6 +15,37 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
+    @utils.custom_perms(kick_members=True)
+    @utils.check_restricted()
+    async def restrictions(self, ctx):
+        # Get the restrictions
+        restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+        entries = []
+        # Loop through all the from restrictions
+        for _from in restrictions.get('from', []):
+            source = _from.get('source')
+            # Resolve our destination based on the ID
+            dest = utils.convert(ctx, _from.get('destination'))
+            # Don't add it if it doesn't exist
+            if dest:
+                entries.append("{} from {}".format(source, dest))
+        for _to in restrictions.get('to', []):
+            source = _to.get('source')
+            # Resolve our destination based on the ID
+            dest = utils.convert(ctx, _to.get('destination'))
+            # Don't add it if it doesn't exist
+            if dest:
+                entries.append("{} to {}".format(source, dest))
+
+        # Then paginate
+        try:
+            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+            await pages.paginate()
+        except utils.CannotPaginate as e:
+            await ctx.send(str(e))
+
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     @utils.check_restricted()
     async def restrict(self, ctx, *options):
@@ -271,7 +302,7 @@ class Administration:
                 option1 = await utils.convert(ctx, arg1)
                 option2 = await utils.convert(ctx, arg3)
                 if option1 is None or option2 is None:
-                    await ctx.send("Sorry, but I don't know how to restrict {} {} {}".format(arg1, arg2, arg3))
+                    await ctx.send("Sorry, but I don't know how to unrestrict {} {} {}".format(arg1, arg2, arg3))
                     return
 
         # First check if this is a blacklist/whitelist (by checking if we are unrestricting commands)
