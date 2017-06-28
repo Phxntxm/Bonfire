@@ -66,6 +66,10 @@ class StatsUpdate:
                 default_channel_id = notifications.get('default') or guild.id
                 # If it is has been overriden by picarto notifications setting, use this
                 channel_id = notifications.get('welcome') or default_channel_id
+                # Get the message if it exists
+                join_message = self.bot.db.load('server_settings', key=guild.id, pluck='welcome_message')
+                if not join_message:
+                    join_message = "Welcome to the '{server.name}' server {member}!"
             else:
                 return
         except (IndexError, TypeError, KeyError):
@@ -73,7 +77,7 @@ class StatsUpdate:
 
         channel = guild.get_channel(int(channel_id))
         try:
-            await channel.send("Welcome to the '{0.guild.name}' server {0.mention}!".format(member))
+            await channel.send(join_message.format(server=member.server.name, member=member.mention))
         except (discord.Forbidden, discord.HTTPException):
             pass
 
@@ -90,6 +94,10 @@ class StatsUpdate:
                 default_channel_id = notifications.get('default') or guild.id
                 # If it is has been overriden by picarto notifications setting, use this
                 channel_id = notifications.get('welcome') or default_channel_id
+                # Get the message if it exists
+                leave_message = self.bot.db.load('server_settings', key=guild.id, pluck='goodbye_message')
+                if not leave_message:
+                    leave_message = "{member} has left the server, I hope it wasn't because of something I said :c"
             else:
                 return
         except (IndexError, TypeError, KeyError):
@@ -97,7 +105,7 @@ class StatsUpdate:
 
         channel = guild.get_channel(int(channel_id))
         try:
-            await channel.send("{0} has left the server, I hope it wasn't because of something I said :c".format(member.display_name))
+            await channel.send(leave_message.format(server=member.server.name, member=member.mention))
         except (discord.Forbidden, discord.HTTPException):
             pass
 

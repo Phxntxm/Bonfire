@@ -453,7 +453,7 @@ class Administration:
 
     @commands.command(aliases=['notifications'])
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(manage_guild=True)
     @utils.check_restricted()
     async def alerts(self, ctx, channel: discord.TextChannel):
         """This command is used to set a channel as the server's default 'notifications' channel
@@ -474,9 +474,9 @@ class Administration:
         await ctx.send("I have just changed this server's default 'notifications' channel"
                        "\nAll notifications will now default to `{}`".format(channel))
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(invoke_without_command=True, aliases=['goodbye'])
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(manage_guild=True)
     @utils.check_restricted()
     async def welcome(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
@@ -500,7 +500,7 @@ class Administration:
 
     @welcome.command(name='alerts', aliases=['notifications'])
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
+    @utils.custom_perms(manage_guild=True)
     @utils.check_restricted()
     async def _welcome_alerts(self, ctx, *, channel: discord.TextChannel):
         """A command used to set the override for notifications about users joining/leaving
@@ -517,6 +517,32 @@ class Administration:
         self.bot.db.save('server_settings', entry)
         await ctx.send(
             "I have just changed this server's welcome/goodbye notifications channel to {}".format(channel.name))
+
+    @welcome.command(name='message')
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
+    async def _welcome_message(self, ctx, *, msg = None):
+        """A command to customize the welcome/goodbye message
+        There are a couple things that can be set to customize the message
+        {member} - Will mention the user joining
+        {server} - Will display the server's name
+
+        Give no message and it will be set to the default
+        EXAMPLE: !welcome message {member} to {server}
+        RESULT: Welcome Member#1234 to ServerName"""
+        parent = ctx.message.content.split()[0]
+        parent = parent[len(ctx.prefix):]
+
+        if re.search("{.*token.*}", msg):
+            await ctx.send("Illegal content in {} message".format(parent))
+        else:
+            entry = {
+                'server_id': str(ctx.message.guild.id),
+                parent + '_message': msg
+            }
+            self.bot.db.save('server_settings', entry)
+            await ctx.send("I have just updated your {} message".format(parent))
 
     @commands.group()
     @utils.check_restricted()
