@@ -93,7 +93,7 @@ async def on_command_error(ctx, error):
             await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.CheckFailure):
             fmt = "You can't tell me what to do!"
-            await ctx.message.channel.send(fmt)
+            #await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.CommandOnCooldown):
             m, s = divmod(error.retry_after, 60)
             fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
@@ -122,10 +122,10 @@ async def on_command_error(ctx, error):
 if __name__ == '__main__':
     bot.loop.create_task(utils.db_check())
     bot.remove_command('help')
+    bot.db = utils.DB()
 
     for e in utils.extensions:
         bot.load_extension(e)
 
-    bot.db = utils.DB()
     bot.uptime = pendulum.utcnow()
     bot.run(utils.bot_token)
