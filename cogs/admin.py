@@ -33,6 +33,10 @@ class Administration:
         if len(options) != 3:
             await ctx.send("You need to provide 3 options! Such as `command from @User`")
             return
+        elif ctx.message.mention_everyone:
+            arg1, arg2, arg3 = options
+            await ctx.send("Please do not restrict something {} everyone".format(arg2))
+            return
         else:
             # Get the three arguments from this list, then make sure the 2nd is either from or to
             arg1, arg2, arg3 = options
