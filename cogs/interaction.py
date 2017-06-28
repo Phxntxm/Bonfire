@@ -251,8 +251,14 @@ class Interaction:
         new_winner_rank, _ = self.bot.br.get_server_rank(winner)
         new_loser_rank, _ = self.bot.br.get_server_rank(loser)
         fmt = msg.content
-        fmt += "\n{} - Rank: {} ( +{} )".format(winner.display_name, new_winner_rank, old_winner_rank - new_winner_rank)
-        fmt += "\n{} - Rank: {} ( -{} )".format(loser.display_name, new_loser_rank, new_loser_rank - old_loser_rank)
+        if old_winner_rank:
+            fmt += "\n{} - Rank: {} ( +{} )".format(winner.display_name, new_winner_rank, old_winner_rank - new_winner_rank)
+        else:
+            fmt += "\n{} - Rank: {}".format(winner.display_name, new_winner_rank)
+        if old_loser_rank:
+            fmt += "\n{} - Rank: {} ( -{} )".format(loser.display_name, new_loser_rank, new_loser_rank - old_loser_rank)
+        else:
+            fmt += "\n{} - Rank: {}".format(loser.display_name, new_loser_rank)
 
         try:
             await msg.edit(content=fmt)
