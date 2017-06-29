@@ -22,7 +22,7 @@ def get_syntax_error(e):
 
 
 class Owner:
-    """Commands that can only be used by Phantom, bot management commands"""
+    """Commands that can only be used by the owner of the bot, bot management commands"""
 
     def __init__(self, bot):
         self.bot = bot
