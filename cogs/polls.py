@@ -84,6 +84,7 @@ class Polls:
         Option 3
         RESULT: A new poll people can vote on"""
         await self.create_poll(ctx, question)
+        await ctx.message.delete()
 
 
 def setup(bot):
