@@ -105,7 +105,7 @@ class StatsUpdate:
 
         channel = guild.get_channel(int(channel_id))
         try:
-            await channel.send(leave_message.format(server=guild.name, member=member.mention))
+            await channel.send(leave_message.format(server=guild.name, member=member.name))
         except (discord.Forbidden, discord.HTTPException):
             pass
 
