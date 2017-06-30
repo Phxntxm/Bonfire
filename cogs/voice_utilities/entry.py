@@ -10,9 +10,9 @@ from hashlib import md5
 from .exceptions import ExtractionError
 
 
-async def get_header(session, url, headerfield=None, *, timeout=5):
+async def get_header(url, headerfield=None, *, timeout=5):
     with aiohttp.Timeout(timeout):
-        async with session.head(url) as response:
+        async with aiohttp.ClientSession().head(url) as response:
             if headerfield:
                 return response.headers.get(headerfield)
             else:

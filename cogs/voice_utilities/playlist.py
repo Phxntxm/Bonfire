@@ -78,8 +78,8 @@ class Playlist(EventEmitter):
                 # unfortunately this is literally broken
                 # https://github.com/KeepSafe/aiohttp/issues/758
                 # https://github.com/KeepSafe/aiohttp/issues/852
-                content_type = await get_header(self.bot.aiosession, info['url'], 'CONTENT-TYPE')
-
+                headers = await get_header(info['url'])
+                content_type = headers.get('Content-Type')
             except Exception as e:
                 content_type = None
 
@@ -87,6 +87,9 @@ class Playlist(EventEmitter):
                 if content_type.startswith(('application/', 'image/')):
                     if '/ogg' not in content_type:  # How does a server say `application/ogg` what the actual fuck
                         raise ExtractionError("Invalid content type \"%s\" for url %s" % (content_type, song_url))
+                if headers.get('ice-audio-info'):
+                    raise LiveStreamError("Cannot download from a livestream")
+
 
         if info.get('is_live', False):
             raise LiveStreamError("Cannot download from a livestream")
