@@ -115,6 +115,8 @@ class VoiceState:
                 fut, self.current = _result
                 if fut.exception():
                     raise ExtractionError(fut.exception())
+            else:
+                self.current = None
         else:
             try:
                 dj = self.djs.popleft()
