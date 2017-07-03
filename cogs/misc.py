@@ -256,7 +256,7 @@ class Miscallaneous:
         perms.attach_files = True
         perms.add_reactions = True
         app_info = await self.bot.application_info()
-        await ctx.send("Use this URL to add me to a server that you'd like!\n{}"
+        await ctx.send("Use this URL to add me to a server that you'd like!\n<{}>"
                        .format(discord.utils.oauth_url(app_info.id, perms)))
 
     @commands.command(enabled=False)
