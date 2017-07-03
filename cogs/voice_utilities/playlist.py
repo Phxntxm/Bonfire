@@ -1,9 +1,11 @@
 import datetime
 import traceback
+import asyncio
 from collections import deque
 from itertools import islice
 from random import shuffle
 
+from .source import YoutubeDLSource
 from .entry import URLPlaylistEntry, get_header
 from .exceptions import ExtractionError, WrongEntryTypeError, LiveStreamError
 from .event_emitter import EventEmitter
@@ -38,82 +40,19 @@ class Playlist(EventEmitter):
             return 0
 
     async def add_entry(self, song_url, **meta):
-        """
-            Validates and adds a song_url to be played. This does not start the download of the song.
+        """Adds a song to this playlist"""
+        entry = YoutubeDLSource(self, song_url)
+        await entry.prepare()
+        self.entries.append(entry)
+        return entry
 
-            Returns the entry & the position it is in the queue.
-
-            :param song_url: The song url to add to the playlist.
-            :param meta: Any additional metadata to add to the playlist entry.
-        """
-
-        try:
-            info = await self.downloader.extract_info(self.loop, song_url, download=False)
-        except Exception as e:
-            if "gaierror" in str(e) or "unknown url type" in str(e):
-                song_url = "ytsearch:" + song_url
-                try:
-                    info = await self.downloader.extract_info(self.loop, song_url, download=False)
-                except Exception as e2:
-                    raise ExtractionError('Could not extract information from {}\n\n{}'.format(song_url, e))
-            else:
-                raise ExtractionError('Could not extract information from {}\n\n{}'.format(song_url, e))
-
-        if not info:
-            raise ExtractionError('Could not extract information from %s' % song_url)
-
-        # TODO: Sort out what happens next when this happens
-        if info.get('_type', None) == 'playlist':
-            if info.get('extractor') == 'youtube:search':
-                if len(info['entries']) == 0:
-                    raise ExtractionError('Could not extract information from %s' % song_url)
-                else:
-                    info = info['entries'][0]
-                    song_url = info['webpage_url']
-            else:
-                raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
-
-        if info['extractor'] in ['generic', 'Dropbox']:
-            try:
-                # unfortunately this is literally broken
-                # https://github.com/KeepSafe/aiohttp/issues/758
-                # https://github.com/KeepSafe/aiohttp/issues/852
-                headers = await get_header(info['url'])
-                content_type = headers.get('Content-Type')
-            except Exception as e:
-                content_type = None
-
-            if content_type:
-                if content_type.startswith(('application/', 'image/')):
-                    if '/ogg' not in content_type:  # How does a server say `application/ogg` what the actual fuck
-                        raise ExtractionError("Invalid content type \"%s\" for url %s" % (content_type, song_url))
-                if headers.get('ice-audio-info'):
-                    raise LiveStreamError("Cannot download from a livestream")
-
-
-        if info.get('is_live', False):
-            raise LiveStreamError("Cannot download from a livestream")
-
-        entry = URLPlaylistEntry(
-            self,
-            song_url,
-            info.get('title', 'Untitled'),
-            info.get('thumbnail', None),
-            info.get('duration', 0) or 0,
-            self.downloader.ytdl.prepare_filename(info),
-            **meta
-        )
-        self._add_entry(entry)
-        return entry, len(self.entries)
-
-    async def import_from(self, playlist_url, **meta):
+    async def import_from(self, playlist_url, requester):
         """
             Imports the songs from `playlist_url` and queues them to be played.
 
             Returns a list of `entries` that have been enqueued.
 
             :param playlist_url: The playlist url to be cut into individual urls and added to the playlist
-            :param meta: Any additional metadata to add to the playlist entry
         """
         position = len(self.entries) + 1
         entry_list = []
@@ -132,29 +71,21 @@ class Playlist(EventEmitter):
         else:
             url_field = 'webpage_url'
 
-        baditems = 0
+        yield len(info['entries'])
+
         for items in info['entries']:
             if items:
+                entry = YoutubeDLSource(self, items[url_field])
                 try:
-                    entry = URLPlaylistEntry(
-                        self,
-                        items[url_field],
-                        items.get('title', 'Untitled'),
-                        items.get('duration', 0) or 0,
-                        self.downloader.ytdl.prepare_filename(items),
-                        **meta
-                    )
-
-                    self._add_entry(entry)
-                    entry_list.append(entry)
+                    await entry.prepare()
                 except:
-                    baditems += 1
-                    # Once I know more about what's happening here I can add a proper message
-                    traceback.print_exc()
+                    yield False
+                else:
+                    entry.requester = requester
+                    self.entries.append(entry)
+                    yield True
             else:
-                baditems += 1
-
-        return entry_list, position
+                yield False
 
     async def async_process_youtube_playlist(self, playlist_url, **meta):
         """
@@ -227,30 +158,22 @@ class Playlist(EventEmitter):
 
     def _add_entry(self, entry):
         self.entries.append(entry)
-        self.emit('entry-added', playlist=self, entry=entry)
 
-        if self.peek() is entry:
-            entry.get_ready_future()
+    async def next_entry(self):
+        """Get the next song in the playlist; this class will wait until the next song is ready"""
+        entry = self.peek()
 
-    async def get_next_entry(self, predownload_next=True):
-        """
-            A coroutine which will return the next song or None if no songs left to play.
+        # While we have an entry available
+        while entry:
+            # Check if we are ready or if we've errored, either way we'll pop it from the deque
+            if entry.ready or entry.error:
+                return self.entries.popleft()
+            # Otherwise, wait a second and check again
+            else:
+                await asyncio.sleep(1)
 
-            Additionally, if predownload_next is set to True, it will attempt to download the next
-            song to be played - so that it's ready by the time we get to it.
-        """
-        if not self.entries:
-            return None
-
-        entry = self.entries.popleft()
-
-        if predownload_next:
-            next_entry = self.peek()
-            if next_entry:
-                next_entry.get_ready_future()
-
-        fut = entry.get_ready_future()
-        return fut, await fut
+        # If we've reached here, we have no entries
+        return None
 
     def peek(self):
         """
@@ -258,18 +181,6 @@ class Playlist(EventEmitter):
         """
         if self.entries:
             return self.entries[0]
-
-    async def estimate_time_until(self, position, player):
-        """
-            (very) Roughly estimates the time till the queue will 'position'
-        """
-        estimated_time = sum([e.duration for e in islice(self.entries, position - 1)])
-
-        # When the player plays a song, it eats the first playlist item, so we just have to add the time back
-        if not player.is_stopped and player.current_entry:
-            estimated_time += player.current_entry.duration - player.progress
-
-        return datetime.timedelta(seconds=estimated_time)
 
     def count_for_user(self, user):
         return sum(1 for e in self.entries if e.meta.get('author', None) == user)
