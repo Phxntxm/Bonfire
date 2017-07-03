@@ -1,5 +1,5 @@
 beautifulsoup4==4.6.0
-Pillow==3.4.1
+Pillow==4.2.0
 rethinkdb==2.3.0.post6
 ruamel.yaml==0.14.12
 youtube-dl

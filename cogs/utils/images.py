@@ -92,7 +92,8 @@ async def create_banner(member, image_title, data):
         stat_offset = draw.textsize(text, font=font, spacing=0)
 
         font = ImageFont.truetype(whitneyMedium, 96)
-        draw.text((360, -4), text, (255, 255, 255), font=font, align="center")
+        # draw.text((360, -4), text, (255, 255, 255), font=font, align="center")
+        draw.text((360, -4), text, (255, 255, 255), font=font)
         draw.text((360 + stat_offset[0], -4), stat_text, (0, 402, 504), font=font)
         save_me = text_bar.resize((350, 20), Image.ANTIALIAS)
         offset += 20
