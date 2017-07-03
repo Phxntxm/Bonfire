@@ -305,13 +305,17 @@ class Game:
             # Let them know it's their turn to play
             fmt = "It is your turn to play {0.member.mention}\n\n{0}".format(player)
             await self.channel.send(fmt)
+            first = True
 
             # If they're not playing anymore (i.e. they busted, are standing, etc.) then we don't want to keep asking
             #  them to hit or stand
             while entry['status'] not in ['stand', 'bust']:
 
                 # Ask if they want to hit or stand
-                fmt = "Hit, stand, or double?"
+                if first:
+                    fmt = "Hit, stand, or double?"
+                else:
+                    fmt = "Hit or stand?"
                 await self.channel.send(fmt)
 
                 try:
@@ -327,10 +331,12 @@ class Game:
                     # If they want to stand
                     elif 'stand' in msg.content.lower():
                         self.stand(player)
-                    elif 'double' in msg.content.lower():
+                    elif 'double' in msg.content.lower() and first:
                         self.double(player)
                         await self.channel.send(player)
                         # TODO: Handle double, split
+
+                    first = False
 
     async def bet_task(self):
         """Performs the task of betting"""
