@@ -15,6 +15,27 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
+    async def allowplaylists(self, ctx, setting):
+        """Turns on/off the ability to playlists
+
+        EXAMPLE: !allowplaylists on
+        RESULT: Playlists can now be used"""
+        if setting.lower() in ['on', 'yes', 'true']:
+            allowed = True
+        else:
+            allowed = False
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'playlists_allowed': allowed
+        }
+        self.bot.db.save('server_settings', entry)
+        fmt = "The ability to use playlists has just been turned {}".format("on" if allowed else "off")
+        await ctx.send(fmt)
+
+    @commands.command()
+    @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     @utils.check_restricted()
     async def restrictions(self, ctx):
