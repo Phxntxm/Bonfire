@@ -39,14 +39,22 @@ class DJ(Playlist):
         self.member = member
         self.playlists = []
 
-    async def get_next_entry(self, predownload_next=True):
-        if not self.entries:
-            return None
-        else:
-            entry = self.entries[0]
-            self.entries.rotate(-1)
-            fut = entry.get_ready_future()
-            return fut, await fut
+    async def next_entry(self):
+        """Get the next song in the playlist; this class will wait until the next song is ready"""
+        entry = self.peek()
+
+        # While we have an entry available
+        while entry:
+            # Check if we are ready or if we've errored, either way we'll pop it from the deque
+            if entry.ready or entry.error:
+                self.entries.rotate(-1)
+                return entry
+            # Otherwise, wait a second and check again
+            else:
+                await asyncio.sleep(1)
+
+        # If we've reached here, we have no entries
+        return None
 
     async def resolve_playlist(self):
         self.playlists = self.bot.db.load('user_playlists', key=self.member.id, pluck='playlists') or []
