@@ -92,12 +92,8 @@ class VoiceState:
         if self.playing or not self.voice:
             return
         if self.current:
-            source = FFmpegPCMAudio(
-                self.current.filename,
-                before_options='-nostdin',
-                options='-vn -b:a 128k'
-            )
-            source = PCMVolumeTransformer(source, volume=self.volume)
+            # Transform our source into a volume source
+            source = PCMVolumeTransformer(self.current, volume=self.volume)
             self.voice.play(source, after=self.after)
             self.current.start_time = time.time()
             # We handle users who join a user queue without songs (either at all, or ready) elsewhere
@@ -110,13 +106,7 @@ class VoiceState:
 
     async def next_song(self):
         if not self.user_queue:
-            _result = await self.songs.get_next_entry()
-            if _result:
-                fut, self.current = _result
-                if fut.exception():
-                    raise ExtractionError(fut.exception())
-            else:
-                self.current = None
+            self.current = await self.songs.next_entry()
         else:
             try:
                 dj = self.djs.popleft()
@@ -124,13 +114,7 @@ class VoiceState:
                 self.dj = None
                 self.current = None
             else:
-                _result = await dj.get_next_entry()
-                if _result:
-                    fut, song = _result
-                else:
-                    return await self.next_song()
-                if fut.exception():
-                    raise ExtractionError(fut.exception())
+                song = await dj.next_entry()
                 # Add an extra check here in case in the very short period of time possible, someone has queued a
                 # song while we are downloading the next...which caused 2 play calls to be done
                 # The 2nd may be called while the first has already started playing...this check is for that 2nd one
@@ -160,6 +144,15 @@ class Music:
         down = Downloader(download_folder='audio_tmp')
         self.downloader = down
         self.bot.downloader = down
+
+    def __unload(self):
+        for state in self.voice_states.values():
+            try:
+                if state.voice:
+                    state.voice.stop()
+                    self.bot.loop.create_task(state.voice.disconnect())
+            except:
+                pass
 
     async def queue_embed_task(self, state, channel, author):
         index = 0
@@ -197,7 +190,7 @@ class Music:
                 dj = entry
                 entry = entry.peek()
             # Get the entry's embed
-            embed = entry.to_embed()
+            embed = entry.embed
 
             # Set the embed's title to indicate the amount of things in the queue
             count = len(queue)
@@ -326,11 +319,43 @@ class Music:
 
     async def add_entry(self, song, ctx):
         state = self.voice_states[ctx.message.guild.id]
-        entry, _ = await state.songs.add_entry(song)
+        entry = await state.songs.add_entry(song)
         if not state.playing:
-            await state.play_next_song()
+            self.bot.loop.create_task(state.play_next_song())
         entry.requester = ctx.message.author
         return entry
+
+    async def import_playlist(self, url, ctx):
+        state = self.voice_states[ctx.message.guild.id]
+        try:
+            msg = await ctx.send("Looking up {}\nThis may take a while...".format(url))
+        except:
+            msg = None
+
+        num_songs = None
+        successful = 0
+        failed = 0
+        fmt = "Downloading {} songs\n{} successful\n{} failed"
+        if msg:
+            # Go through each song in the playlist
+            async for success in state.songs.import_from(url, ctx.message.author):
+                # If this hasn't been set yet, the first yield is the number of songs
+                # Otherwise just add one based on successful or not
+                if not num_songs:
+                    num_songs = success
+                elif success:
+                    # If we're not playing yet and this is the first successful one we found
+                    if not state.playing and successful == 0:
+                        await state.play_next_song()
+                    successful += 1
+                else:
+                    failed += 1
+                try:
+                    await msg.edit(content=fmt.format(num_songs, successful, failed))
+                except:
+                    pass
+        else:
+            await state.songs.import_from(url)
 
     async def join_channel(self, channel, text_channel):
         state = self.voice_states.get(channel.guild.id)
@@ -436,6 +461,37 @@ class Music:
 
         return await self.join_channel(channel, ctx.channel)
 
+    @commands.command(name='import')
+    @commands.guild_only()
+    @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
+    async def _import(self, ctx, *, song: str):
+        """Imports a song into the current voice queue"""
+        # If we don't have a voice state yet, create one
+        if not self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='playlists_allowed'):
+            await ctx.send("You cannot import playlists at this time; the {}allowplaylists command can be used to change this setting".format(ctx.prefix))
+            return
+        if ctx.message.guild.id not in self.voice_states:
+            if not await ctx.invoke(self.join):
+                return
+        state = self.voice_states.get(ctx.message.guild.id)
+        # If this is a user queue, this is the wrong command
+        if state.user_queue:
+            await ctx.send("The current queue type is the DJ queue. "
+                           "Use the command {}dj to join this queue".format(ctx.prefix))
+            return
+        # Ensure the user is in the voice channel
+        try:
+            if ctx.message.author.voice.channel != ctx.message.guild.me.voice.channel:
+                await ctx.send("You need to be in the channel to use this command!")
+                return
+        except AttributeError:
+                await ctx.send("You need to be in the channel to use this command!")
+                return
+
+        song = re.sub('[<>\[\]]', '', song)
+        await self.import_playlist(song, ctx)
+
     @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
@@ -462,8 +518,10 @@ class Music:
         try:
             if ctx.message.author.voice.channel != ctx.message.guild.me.voice.channel:
                 await ctx.send("You need to be in the channel to use this command!")
+                return
         except AttributeError:
                 await ctx.send("You need to be in the channel to use this command!")
+                return
 
         song = re.sub('[<>\[\]]', '', song)
         if len(song) == 11:
@@ -473,11 +531,16 @@ class Music:
             song += "."
 
         try:
+            msg = await ctx.send("Looking up {}...".format(song))
+        except:
+            msg = None
+
+        try:
             entry = await self.add_entry(song, ctx)
         except LiveStreamError as e:
             await ctx.send(str(e))
         except WrongEntryTypeError:
-            await ctx.send("Cannot enqueue playlists at this time.")
+            await ctx.send("Please use the {}import command to import a playlist.".format(ctx.prefix))
         except ExtractionError as e:
             error = e.message.split('\n')
             if len(error) >= 3:
@@ -496,9 +559,12 @@ class Music:
                 if entry is None:
                     await ctx.send("Sorry but I couldn't download/find {}".format(song))
                 else:
-                    embed = entry.to_embed()
+                    embed = entry.embed
                     embed.title = "Enqueued song!"
-                    await ctx.send(embed=embed)
+                    try:
+                        await msg.edit(content=None, embed=embed)
+                    except:
+                        await ctx.send(embed=embed)
             except discord.Forbidden:
                 pass
 
@@ -727,7 +793,7 @@ class Music:
                 fmt = "{0[0]}m {0[1]}s/{1[0]}m {1[1]}s".format(progress, length)
                 embed.add_field(name='Progress', value=fmt, inline=False)
                 # And send the embed
-                await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
