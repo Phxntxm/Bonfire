@@ -17,6 +17,27 @@ class Administration:
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     @utils.check_restricted()
+    async def allowbirthdays(self, ctx, setting):
+        """Turns on/off the birthday announcements in this server
+
+        EXAMPLE: !allowbirthdays on
+        RESULT: Playlists can now be used"""
+        if setting.lower() in ['on', 'yes', 'true']:
+            allowed = True
+        else:
+            allowed = False
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'birthdays_allowed': allowed
+        }
+        self.bot.db.save('server_settings', entry)
+        fmt = "The birthday announcements have just been turned {}".format("on" if allowed else "off")
+        await ctx.send(fmt)
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def allowplaylists(self, ctx, setting):
         """Turns on/off the ability to playlists
 
