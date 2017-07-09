@@ -15,7 +15,6 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
         self.info = None
         self.ready = False
         self.error = False
-        asyncio.run_coroutine_threadsafe(self.download(), self.loop)
 
     async def get_info(self):
         try:
@@ -64,6 +63,7 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
 
     async def prepare(self):
         await self.get_info()
+        asyncio.run_coroutine_threadsafe(self.download(), self.loop)
         return self.info
 
     async def download(self):
@@ -78,7 +78,7 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
                 'before_options': '-nostdin',
                 'options': '-vn -b:a 128k'
             }
-            super().__init__(self.downloader.ytdl.prepare_filename(result), **opts)
+            super().__init__(self.downloader.ytdl.prepare_filename(self.info), **opts)
 
     @property
     def title(self):
