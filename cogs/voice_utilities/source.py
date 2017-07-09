@@ -3,9 +3,10 @@ import time
 import asyncio
 
 from .exceptions import ExtractionError, WrongEntryTypeError, LiveStreamError
+from .entry import get_header
+
 
 class YoutubeDLSource(discord.FFmpegPCMAudio):
-
     def __init__(self, playlist, url):
         self.playlist = playlist
         self.loop = playlist.loop
@@ -33,10 +34,10 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
                 # Otherwise get the first result
                 else:
                     info = info['entries'][0]
-                    self.url = info['webpage_url']
             # If this isn't a search, then it is a playlist, this can't be done
             else:
-                raise WrongEntryTypeError("This is a playlist.", True, info.get('webpage_url', None) or info.get('url', None))
+                raise WrongEntryTypeError("This is a playlist.", True,
+                                          info.get('webpage_url', None) or info.get('url', None))
 
         if info['extractor'] in ['generic', 'Dropbox']:
             try:
@@ -54,7 +55,6 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
                         raise ExtractionError("Invalid content type \"%s\" for url %s" % (content_type, song_url))
                 if headers.get('ice-audio-info'):
                     raise LiveStreamError("Cannot download from a livestream")
-
 
         if info.get('is_live', False):
             raise LiveStreamError("Cannot download from a livestream")
