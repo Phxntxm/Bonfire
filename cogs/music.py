@@ -633,7 +633,7 @@ class Music:
         # Then stop playing, and disconnect
         if voice:
             voice.stop()
-            await voice.disconnect()
+            await voice.disconnect(force=True)
 
     @commands.command()
     @commands.guild_only()
