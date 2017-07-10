@@ -333,7 +333,7 @@ class Stats:
         EXAMPLE: !donators
         RESULT: A list of the donators"""
         try:
-            pages = utils.Pages(self.bot, message=ctx.message, entries=self.names)
+            pages = utils.Pages(self.bot, message=ctx.message, entries=self.donators)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
