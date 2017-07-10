@@ -325,10 +325,10 @@ class Stats:
             fmt = fmt.format(member.display_name, record, server_rank, overall_rank, rating)
             await ctx.send('```\n{}```'.format(fmt))
 
-    @commands.command(aliases=['patrons'])
+    @commands.command(aliases=['donators'])
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
-    async def donators(self, ctx):
+    async def patrons(self, ctx):
         """Prints a list of all the patrons for Bonfire
 
         EXAMPLE: !donators
