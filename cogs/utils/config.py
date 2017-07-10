@@ -45,6 +45,9 @@ dev_server = global_config.get("dev_server", "")
 user_agent = global_config.get('user_agent', None)
 # The URL to proxy youtube_dl's requests through
 ytdl_proxy = global_config.get('youtube_dl_proxy', None)
+# The patreon key, as well as the patreon ID to use
+patreon_key = global_config.get('patreon_key', None)
+patreon_id = global_config.get('patreon_id', None)
 # The extensions to load
 extensions = [
     'cogs.interaction',
