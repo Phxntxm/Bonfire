@@ -30,7 +30,7 @@ class Stats:
         # We need to page through, so lets create a loop and break when we find out we're done
         while True:
             # Simply get data based on the URL
-            data = await utils.request(url, headers=headers)
+            data = await utils.request(url, headers=headers, force_content_type_json=True)
             # First check if the data failed to retrieve, if so just return
             if data is None:
                 return
@@ -40,11 +40,12 @@ class Stats:
                 # We only carry about the user's
                 if include['type'] != 'user':
                     continue
-                # This check checks the user's connected campaign (should only exist for *our* user) and checks if it matches
+                # This check checks the user's connected campaign (should only exist for *our* user) and checks if it
+                #  matches
                 if include.get('relationshipos', {}).get('campaign', {}).get('data', {}).get('id', {}) == str(utils.patreon_id):
                     continue
 
-                # Otherwuse the only way this user was included, was if they are a patron, so include them
+                # Otherwise the only way this user was included, was if they are a patron, so include them
                 name = include['attributes']['full_name']
                 if name:
                     names.append(name)
