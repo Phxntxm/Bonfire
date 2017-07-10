@@ -42,7 +42,8 @@ class Stats:
                     continue
                 # This check checks the user's connected campaign (should only exist for *our* user) and checks if it
                 #  matches
-                if include.get('relationshipos', {}).get('campaign', {}).get('data', {}).get('id', {}) == str(utils.patreon_id):
+                if include.get('relationshipos', {}).get('campaign', {}).get('data', {}).get('id', {}) == str(
+                        utils.patreon_id):
                     continue
 
                 # Otherwise the only way this user was included, was if they are a patron, so include them
@@ -58,7 +59,6 @@ class Stats:
 
         # Now just set the names
         self.donators = names
-
 
     @commands.command()
     @commands.guild_only()
