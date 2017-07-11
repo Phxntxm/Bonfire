@@ -80,7 +80,10 @@ async def on_command_error(ctx, error):
     try:
         if isinstance(error.original, discord.Forbidden):
             return
-        elif isinstance(error.original, discord.HTTPException) and ('empty message' in str(error.original) or 'INTERNAL SERVER ERROR' in str(error.original)):
+        elif isinstance(error.original, discord.HTTPException) and (
+                'empty message' in str(error.original) or
+                'INTERNAL SERVER ERROR' in str(error.original) or
+                'REQUEST ENTITY TOO LARGE' in str(error.original)):
             return
         elif isinstance(error.original, aiohttp.ClientOSError):
             return
@@ -93,7 +96,7 @@ async def on_command_error(ctx, error):
             await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.CheckFailure):
             fmt = "You can't tell me what to do!"
-            #await ctx.message.channel.send(fmt)
+            # await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.CommandOnCooldown):
             m, s = divmod(error.retry_after, 60)
             fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
