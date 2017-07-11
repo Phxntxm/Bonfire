@@ -51,11 +51,7 @@ class Playlist(EventEmitter):
             Imports the songs from `playlist_url` and queues them to be played.
 
             Returns a list of `entries` that have been enqueued.
-
-            :param playlist_url: The playlist url to be cut into individual urls and added to the playlist
         """
-        position = len(self.entries) + 1
-        entry_list = []
 
         try:
             info = await self.downloader.safe_extract_info(self.loop, playlist_url, download=False)
@@ -64,6 +60,9 @@ class Playlist(EventEmitter):
 
         if not info:
             raise ExtractionError('Could not extract information from %s' % playlist_url)
+
+        if info.get('playlist') is None:
+            raise WrongEntryTypeError('This is not a playlist!')
 
         # Once again, the generic extractor fucks things up.
         if info.get('extractor', None) == 'generic':
