@@ -174,7 +174,7 @@ class Miscallaneous:
         # Set the description include dev server (should be required) and the optional patreon link
         description = "[Dev Server]({})".format(utils.dev_server)
         if utils.patreon_link:
-            description += "[Patreon]({})".format(utils.patreon_link)
+            description += "\n[Patreon]({})".format(utils.patreon_link)
         # Now creat the object
         opts = {'title': 'Bonfire',
                 'description': description,
@@ -194,7 +194,7 @@ class Miscallaneous:
         value += 'Memory: {:.2f} MiB'.format(memory_usage)
         value += '\nCPU: {}%'.format(cpu_usage)
         if hasattr(self.bot, 'uptime'):
-            value += (pendulum.utcnow() - self.bot.uptime).in_words()
+            value += "\nUptime: {}".format((pendulum.utcnow() - self.bot.uptime).in_words())
         embed.add_field(name=name, value=value, inline=False)
 
         # Setup the user and guild statistics
