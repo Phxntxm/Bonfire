@@ -171,52 +171,68 @@ class Miscallaneous:
         # in this command is changed
 
         # Create the original embed object
-        opts = {'title': 'Dev Server',
-                'description': 'Join the server above for any questions/suggestions about me.',
-                'url': utils.dev_server}
-        embed = discord.Embed(**opts)
+        # Set the description include dev server (should be required) and the optional patreon link
+        description = "[Dev Server]({})".format(utils.dev_server)
+        if utils.patreon_link:
+            description += "[Patreon]({})".format(utils.patreon_link)
+        # Now creat the object
+        opts = {'title': 'Bonfire',
+                'description': description,
+                'colour': discord.Colour.green()}
 
-        # Add the normal values
-        embed.add_field(name='Total Servers', value=len(self.bot.guilds))
-        embed.add_field(name='Total Members', value=len(self.bot.users))
+        # Set the owner
+        embed = discord.Embed(**opts)
+        if hasattr(self.bot, 'owner'):
+            embed.set_author(name=str(self.bot.owner), icon_url=self.bot.avatar_url)
+
+        # Setup the process statistics
+        name = "Process stats"
+        value = ""
+
+        memory_usage = self.process.memory_full_info().uss / 1024 ** 2
+        cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
+        value += 'Memory: {:.2f} MiB'.format(memory_usage)
+        value += '\nCPU: {}%'.format(cpu_usage)
+        if hasattr(self.bot, 'uptime'):
+            value += (pendulum.utcnow() - self.bot.uptime).in_words()
+        embed.add_field(name=name, value=value, inline=False)
+
+        # Setup the user and guild statistics
+        name = "User/Guild stats"
+        value = ""
+
+        value += "Channels: {}".format(len(list(self.bot.get_all_channels())))
+        value += "\nUsers: {}".format(len(self.bot.users))
+        value += "\nServers: {}".format(len(self.bot.guilds))
+        embed.add_field(name=name, value=value, inline=False)
+
+        # The game statistics
+        name = "Game statistics"
+        # To get the newlines right, since we're not sure what will and won't be included
+        # Lets make this one a list and join it at the end
+        value = []
+
         hm = self.bot.get_cog('Hangman')
         ttt = self.bot.get_cog('TicTacToe')
         bj = self.bot.get_cog('Blackjack')
-        interaction = self.bot.get_cog('Blackjack')
+        interaction = self.bot.get_cog('Interaction')
         music = self.bot.get_cog('Music')
 
-        # Count the variable values; hangman, tictactoe, etc.
         if hm:
-            hm_games = len(hm.games)
-            if hm_games:
-                embed.add_field(name='Total Hangman games running', value=hm_games)
+            value.append("Hangman games: {}".format(len(hm.games)))
         if ttt:
-            ttt_games = len(ttt.boards)
-            if ttt_games:
-                embed.add_field(name='Total TicTacToe games running', value=ttt_games)
+            value.append("TicTacToe games: {}".format(len(ttt.boards)))
         if bj:
-            bj_games = len(bj.games)
-            if bj_games:
-                embed.add_field(name='Total blackjack games running', value=bj_games)
+            value.append("Blackjack games: {}".format(len(bj.games)))
         if interaction:
             count_battles = 0
             for battles in self.bot.get_cog('Interaction').battles.values():
                 count_battles += len(battles)
-            if count_battles:
-                embed.add_field(name='Total battles games running', value=count_battles)
+            value.append("Battles running: {}".format(len(bj.games)))
         if music:
             songs = len([x for x in music.voice_states.values() if x.playing])
-            if songs:
-                embed.add_field(name='Total songs playing', value=songs)
-
-        if hasattr(self.bot, 'uptime'):
-            embed.add_field(name='Uptime', value=(pendulum.utcnow() - self.bot.uptime).in_words())
-
-        memory_usage = self.process.memory_full_info().uss / 1024 ** 2
-        cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
-        embed.add_field(name='Memory Usage', value='{:.2f} MiB'.format(memory_usage))
-        embed.add_field(name='CPU Usage', value='{}%'.format(cpu_usage))
-        embed.set_footer(text=self.bot.description)
+            value.append("Total songs playing: {}".format(songs))
+        embed.add_field(name=name, value="\n".join(value), inline=False)
 
         await ctx.send(embed=embed)
 
