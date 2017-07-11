@@ -183,7 +183,7 @@ class Miscallaneous:
         # Set the owner
         embed = discord.Embed(**opts)
         if hasattr(self.bot, 'owner'):
-            embed.set_author(name=str(self.bot.owner), icon_url=self.bot.avatar_url)
+            embed.set_author(name=str(self.bot.owner), icon_url=self.bot.owner.avatar_url)
 
         # Setup the process statistics
         name = "Process stats"
