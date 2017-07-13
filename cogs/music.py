@@ -1,5 +1,5 @@
 from .voice_utilities import *
-from discord import FFmpegPCMAudio, PCMVolumeTransformer
+from discord import PCMVolumeTransformer
 
 import discord
 from discord.ext import commands
@@ -21,7 +21,7 @@ if not discord.opus.is_loaded():
 
 
 class VoiceState:
-    def __init__(self, guild, bot, user_queue=False):
+    def __init__(self, guild, bot, user_queue=False, volume=None):
         self.guild = guild
         self.songs = Playlist(bot)
         self.djs = deque()
@@ -31,7 +31,7 @@ class VoiceState:
         self.skip_votes = set()
         self.user_queue = user_queue
         self.loop = bot.loop
-        self._volume = .5
+        self._volume = volume or .5
 
     @property
     def volume(self):
@@ -377,8 +377,10 @@ class Music:
 
             # If we have connnected, create our voice state
             queue_type = self.bot.db.load('server_settings', key=channel.guild.id, pluck='queue_type')
+            volume = self.bot.db.load('server_settings', key=channel.guild.id, pluck='volume')
             user_queue = queue_type == "user"
-            self.voice_states[channel.guild.id] = VoiceState(channel.guild, self.bot, user_queue=user_queue)
+            self.voice_states[channel.guild.id] = VoiceState(channel.guild, self.bot, user_queue=user_queue,
+                                                             volume=volume)
 
             # If we can send messages, edit it to let the channel know we have succesfully joined
             if msg:
@@ -469,7 +471,8 @@ class Music:
         """Imports a song into the current voice queue"""
         # If we don't have a voice state yet, create one
         if not self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='playlists_allowed'):
-            await ctx.send("You cannot import playlists at this time; the {}allowplaylists command can be used to change this setting".format(ctx.prefix))
+            await ctx.send("You cannot import playlists at this time; the {}allowplaylists command can be used to "
+                           "change this setting".format(ctx.prefix))
             return
         if ctx.message.guild.id not in self.voice_states:
             if not await ctx.invoke(self.join):
@@ -490,7 +493,16 @@ class Music:
                 return
 
         song = re.sub('[<>\[\]]', '', song)
-        await self.import_playlist(song, ctx)
+        # Check if we've got the list variable in the URL, if so lets just use this
+        playlist_id = re.search(r'list=(.+)', song)
+        if playlist_id:
+            song = playlist_id.group(1)
+        try:
+            await self.import_playlist(song, ctx)
+        except WrongEntryTypeError:
+            await ctx.send("This URL is not a playlist! If you want to play this song just use `play`")
+        except ExtractionError:
+            await ctx.send("Failed to download {}! If this is not a playlist, use the `play` command".format(song))
 
     @commands.command()
     @commands.guild_only()
@@ -537,6 +549,9 @@ class Music:
 
         try:
             entry = await self.add_entry(song, ctx)
+        # This error only happens if Discord has derped, and the voice state didn't get created succesfully
+        except KeyError:
+            await ctx.send("Sorry, but I failed to connect! Please try again!")
         except LiveStreamError as e:
             await ctx.send(str(e))
         except WrongEntryTypeError:
@@ -586,6 +601,8 @@ class Music:
             await ctx.send("Sorry but the max volume is 100%")
         else:
             state.volume = value
+            entry = {'server_id': str(ctx.message.guild.id), 'volume': value}
+            self.bot.db.save('server_settings', entry)
             await ctx.send('Set the volume to {:.0%}'.format(state.volume))
 
     @commands.command()
@@ -633,7 +650,7 @@ class Music:
         # Then stop playing, and disconnect
         if voice:
             voice.stop()
-            await voice.disconnect()
+            await voice.disconnect(force=True)
 
     @commands.command()
     @commands.guild_only()

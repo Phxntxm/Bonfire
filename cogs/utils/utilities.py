@@ -60,7 +60,7 @@ async def download_image(url):
     return image
 
 
-async def request(url, *, headers=None, payload=None, method='GET', attr='json'):
+async def request(url, *, headers=None, payload=None, method='GET', attr='json', force_content_type_json=False):
     # Make sure our User Agent is what's set, and ensure it's sent even if no headers are passed
     if headers is None:
         headers = {}
@@ -83,7 +83,13 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json')
                         return_value = getattr(response, attr)
                         # Next check if this can be called
                         if callable(return_value):
-                            return_value = return_value()
+                            # This is use for json; it checks the mimetype instead of checking if the actual data
+                            # This causes some places with different mimetypes to fail, even if it's valid json
+                            # This check allows us to force the content_type to use whatever content type is given
+                            if force_content_type_json:
+                                return_value = return_value(content_type=response.headers['content-type'])
+                            else:
+                                return_value = return_value()
                         # If this is awaitable, await it
                         if inspect.isawaitable(return_value):
                             return_value = await return_value

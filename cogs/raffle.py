@@ -8,7 +8,6 @@ import pendulum
 import re
 import asyncio
 import traceback
-import rethinkdb as r
 
 
 class Raffle:
@@ -36,63 +35,66 @@ class Raffle:
 
         for raffle in raffles:
             server = self.bot.get_guild(int(raffle['server_id']))
-            title = raffle['title']
-            entrants = raffle['entrants']
-            raffle_id = raffle['id']
+            for r in raffle['raffles']:
+                title = r['title']
+                entrants = r['entrants']
+                raffle_id = r['id']
 
-            # Check to see if this cog can find the server in question
-            if server is None:
-                await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
-                continue
+                # Check to see if this cog can find the server in question
+                if server is None:
+                    await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
+                    continue
 
-            now = pendulum.utcnow()
-            expires = pendulum.parse(raffle['expires'])
+                now = pendulum.utcnow()
+                expires = pendulum.parse(r['expires'])
 
-            # Now lets compare and see if this raffle has ended, if not just continue
-            if expires > now:
-                continue
+                # Now lets compare and see if this raffle has ended, if not just continue
+                if expires > now:
+                    continue
 
-            # Make sure there are actually entrants
-            if len(entrants) == 0:
-                fmt = 'Sorry, but there were no entrants for the raffle `{}`!'.format(title)
-            else:
-                winner = None
-                count = 0
-                while winner is None:
-                    winner = server.get_member(int(random.SystemRandom().choice(entrants)))
-
-                    # Lets make sure we don't get caught in an infinite loop
-                    # Realistically having more than 50 random entrants found that aren't in the server anymore
-                    # Isn't something that should be an issue, but better safe than sorry
-                    count += 1
-                    if count >= 50:
-                        break
-
-                if winner is None:
-                    fmt = 'I couldn\'t find an entrant that is still in this server, for the raffle `{}`!'.format(title)
+                # Make sure there are actually entrants
+                if len(entrants) == 0:
+                    fmt = 'Sorry, but there were no entrants for the raffle `{}`!'.format(title)
                 else:
-                    fmt = 'The raffle `{}` has just ended! The winner is {}!'.format(title, winner.display_name)
+                    winner = None
+                    count = 0
+                    while winner is None:
+                        winner = server.get_member(int(random.SystemRandom().choice(entrants)))
 
-            # Get the notifications settings, get the raffle setting
-            notifications = self.bot.db.load('server_settings', key=server.id, pluck='notifications') or {}
-            # Set our default to either the one set, or the default channel of the server
-            default_channel_id = notifications.get('default') or server.id
-            # If it is has been overriden by picarto notifications setting, use this
-            channel_id = notifications.get('raffle') or default_channel_id
-            channel = self.bot.get_channel(int(channel_id))
-            if channel is None:
-                channel = server.default_channel
-            try:
-                await channel.send(fmt)
-            except (discord.Forbidden, AttributeError):
-                pass
+                        # Lets make sure we don't get caught in an infinite loop
+                        # Realistically having more than 50 random entrants found that aren't in the server anymore
+                        # Isn't something that should be an issue, but better safe than sorry
+                        count += 1
+                        if count >= 50:
+                            break
 
-            # No matter which one of these matches were met, the raffle has ended and we want to remove it
-            await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
-            # Now...this is an ugly idea yes, but due to the way raffles are setup currently (they'll be changed in
-            # the future) The cache does not update, and leaves behind this deletion....so we need to manually update
-            #  the cache here
-            await self.bot.db.cache.get('raffles').refresh()
+                    if winner is None:
+                        fmt = 'I couldn\'t find an entrant that is still in this server, for the raffle `{}`!'.format(
+                            title)
+                    else:
+                        fmt = 'The raffle `{}` has just ended! The winner is {}!'.format(title, winner.display_name)
+
+                # Get the notifications settings, get the raffle setting
+                notifications = self.bot.db.load('server_settings', key=server.id, pluck='notifications') or {}
+                # Set our default to either the one set, or the default channel of the server
+                default_channel_id = notifications.get('default') or server.id
+                # If it is has been overriden by picarto notifications setting, use this
+                channel_id = notifications.get('raffle') or default_channel_id
+                channel = self.bot.get_channel(int(channel_id))
+                if channel is None:
+                    channel = server.default_channel
+                try:
+                    await channel.send(fmt)
+                except (discord.Forbidden, AttributeError):
+                    pass
+
+                # No matter which one of these matches were met, the raffle has ended and we want to remove it
+                raffle['raffles'].remove(r)
+                entry = {
+                    'server_id': raffle['server_id'],
+                    'raffles': raffle['raffles']
+                }
+                self.bot.db.save('raffles', entry)
 
     @commands.command()
     @commands.guild_only()
@@ -103,8 +105,7 @@ class Raffle:
 
         EXAMPLE: !raffles
         RESULT: A list of the raffles setup on this server"""
-        r_filter = {'server_id': str(ctx.message.guild.id)}
-        raffles = self.bot.db.load('raffles', table_filter=r_filter)
+        raffles = self.bot.db.load('raffles', key=ctx.message.guild.id, pluck='raffles')
         if not raffles:
             await ctx.send("There are currently no raffles setup on this server!")
             return
@@ -133,19 +134,15 @@ class Raffle:
         RESULT: You've entered the first raffle!"""
         # Lets let people use 1 - (length of raffles) and handle 0 base ourselves
         raffle_id -= 1
-        r_filter = {'server_id': str(ctx.message.guild.id)}
         author = ctx.message.author
+        key = str(ctx.message.guild.id)
 
-        raffles = self.bot.db.load('raffles', table_filter=r_filter)
+        raffles = self.bot.db.load('raffles', key=key, pluck='raffles')
         if raffles is None:
             await ctx.send("There are currently no raffles setup on this server!")
             return
 
-        if isinstance(raffles, list):
-            raffle_count = len(raffles)
-        else:
-            raffles = [raffles]
-            raffle_count = 1
+        raffle_count = len(raffles)
 
         # There is only one raffle, so use the first's info
         if raffle_count == 1:
@@ -157,8 +154,8 @@ class Raffle:
             entrants.append(str(author.id))
 
             update = {
-                'entrants': entrants,
-                'id': raffles[0]['id']
+                'raffles': raffles,
+                'server_id': key
             }
             self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
@@ -175,8 +172,8 @@ class Raffle:
             # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
 
             update = {
-                'entrants': entrants,
-                'id': raffles[raffle_id]['id']
+                'raffles': raffles,
+                'server_id': key
             }
             self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
@@ -270,11 +267,15 @@ class Raffle:
             'expires': expires.to_datetime_string(),
             'entrants': [],
             'author': str(author.id),
-            'server_id': str(server.id)
         }
 
-        # We don't want to pass a filter to this, because we can have multiple raffles per server
-        self.bot.db.save('raffles', entry)
+        raffles = self.bot.db.load('raffles', key=server.id, pluck='raffles') or []
+        raffles.append(entry)
+        update = {
+            'server_id': str(server.id),
+            'raffles': raffles
+        }
+        self.bot.db.save('raffles', update)
         await ctx.send("I have just saved your new raffle!")
 
     @raffle.command(name='alerts')
