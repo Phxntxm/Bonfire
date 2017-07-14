@@ -56,6 +56,7 @@ extensions = [
     'cogs.mod',
     'cogs.admin',
     'cogs.images',
+    'cogs.birthday',
     'cogs.owner',
     'cogs.stats',
     'cogs.picarto',
