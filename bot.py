@@ -83,7 +83,8 @@ async def on_command_error(ctx, error):
         elif isinstance(error.original, discord.HTTPException) and (
                 'empty message' in str(error.original) or
                 'INTERNAL SERVER ERROR' in str(error.original) or
-                'REQUEST ENTITY TOO LARGE' in str(error.original)):
+                'REQUEST ENTITY TOO LARGE' in str(error.original) or
+                'Unknown Message' in str(error.original)):
             return
         elif isinstance(error.original, aiohttp.ClientOSError):
             return
