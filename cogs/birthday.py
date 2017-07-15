@@ -106,7 +106,7 @@ class Birthday:
             date = pendulum.parse(date)
             # We'll save in a specific way so that it can be parsed how we want, so do this
             date = date.format("%B %-d")
-        except ParserError:
+        except (ValueError, ParserError):
             await ctx.send("Please provide date in a valid format, such as December 1st!")
         else:
             entry = {
