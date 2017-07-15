@@ -28,6 +28,9 @@ class Picarto:
         self.online_channels = await utils.request(url, payload=payload)
 
     async def channel_embed(self, channel):
+        # First make sure the picarto URL is actually given
+        if not channel:
+            return None
         # Use regex to get the actual username so that we can make a request to the API
         stream = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
         url = BASE_URL + '/channel/name/{}'.format(stream)
