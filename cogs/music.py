@@ -521,8 +521,9 @@ class Music:
             if not await ctx.invoke(self.join):
                 return
 
+        state = self.voice_states.get(ctx.message.guild.id)
         # If this is a user queue, this is the wrong command
-        if self.voice_states.get(ctx.message.guild.id).user_queue:
+        if state and state.user_queue:
             await ctx.send("The current queue type is the DJ queue. "
                            "Use the command {}dj to join this queue".format(ctx.prefix))
             return
