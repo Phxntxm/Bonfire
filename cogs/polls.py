@@ -70,7 +70,7 @@ class Polls:
         if poll:
             await poll.remove_other_reaction(reaction, user)
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()

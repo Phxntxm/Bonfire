@@ -89,7 +89,7 @@ class Overwatch:
             fmt = "\n".join("{}: {}".format(k, r) for k, r in output_data)
             await ctx.send("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
-    @ow.command(pass_context=True, name="add")
+    @ow.command(name="add")
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def add(self, ctx, bt: str):
@@ -122,7 +122,7 @@ class Overwatch:
         self.bot.db.save('overwatch', entry)
         await ctx.send("I have just saved your battletag {}".format(ctx.message.author.mention))
 
-    @ow.command(pass_context=True, name="delete", aliases=['remove'])
+    @ow.command(name="delete", aliases=['remove'])
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def delete(self, ctx):

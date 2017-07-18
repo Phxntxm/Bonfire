@@ -183,7 +183,7 @@ class Raffle:
                     raffle_count, ctx.prefix)
             await ctx.send(fmt)
 
-    @raffle.command(pass_context=True, name='create', aliases=['start', 'begin', 'add'])
+    @raffle.command(name='create', aliases=['start', 'begin', 'add'])
     @commands.guild_only()
     @utils.custom_perms(kick_members=True)
     @utils.check_restricted()
