@@ -22,7 +22,8 @@ required_tables = {
     'tags': 'server_id',
     'tictactoe': 'member_id',
     'twitch': 'member_id',
-    'user_playlists': 'member_id'
+    'user_playlists': 'member_id',
+    'birthdays': 'member_id'
 }
 
 

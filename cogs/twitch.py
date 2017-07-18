@@ -24,6 +24,8 @@ class Twitch:
         self.params = {'client_id': self.key}
 
     def _form_embed(self, data):
+        if not data:
+            return None
         # I want to make the least API calls possible, however there's a few things to note here:
         # 1) When requesting /streams and a channel is offline, the channel data is not provided
         # 2) When requesting /streams and a channel is online, the channel data is provided
