@@ -21,7 +21,7 @@ class Administration:
         """Turns on/off the birthday announcements in this server
 
         EXAMPLE: !allowbirthdays on
-        RESULT: Playlists can now be used"""
+        RESULT: Birthdays will now be announced"""
         if setting.lower() in ['on', 'yes', 'true']:
             allowed = True
         else:
