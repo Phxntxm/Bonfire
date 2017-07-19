@@ -55,9 +55,9 @@ class Birthday:
             bds = self.get_birthdays_for_server(server, today=True)
             for bd in bds:
                 # Set our default to either the one set, or the default channel of the server
-                default_channel_id = servers.get('notifications', {}).get('default') or server.id
+                default_channel_id = s.get('notifications', {}).get('default') or server.id
                 # If it is has been overriden by picarto notifications setting, use this
-                channel_id = servers.get('notifications', {}).get('birthdays') or default_channel_id
+                channel_id = s.get('notifications', {}).get('birthdays') or default_channel_id
                 # Now get the channel based on that ID
                 channel = server.get_channel(int(channel_id)) or server.default_channel
                 try:
