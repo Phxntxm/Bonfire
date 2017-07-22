@@ -169,7 +169,12 @@ class Links:
                 await ctx.send("No result with that term!")
             # If the list is not empty, use the first result and print it's defintion
             else:
-                await ctx.send(data['list'][0]['definition'])
+                entries = [x['definition'] for x in data['list']]
+                try:
+                    pages = utils.Pages(self.bot, message=ctx.message, entries=entries[:5])
+                    await pages.paginate()
+                except utils.CannotPaginate as e:
+                    await ctx.send(str(e))
         # Urban dictionary has some long definitions, some might not be able to be sent
         except discord.HTTPException:
             await ctx.send('```\nError: Definition is too long for me to send```')
