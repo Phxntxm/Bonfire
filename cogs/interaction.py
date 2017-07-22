@@ -163,7 +163,7 @@ class Interaction:
         fmt = random.SystemRandom().choice(hugs)
         await ctx.send(fmt.format(user.display_name))
 
-    @commands.group(invoke_without_command=True)
+    @commands.command(aliases=['1v1'])
     @commands.guild_only()
     @commands.cooldown(1, 20, BucketType.user)
     @utils.custom_perms(send_messages=True)
