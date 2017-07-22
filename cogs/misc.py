@@ -186,7 +186,7 @@ class Miscallaneous:
             embed.set_author(name=str(self.bot.owner), icon_url=self.bot.owner.avatar_url)
 
         # Setup the process statistics
-        name = "Process stats"
+        name = "Process statistics"
         value = ""
 
         memory_usage = self.process.memory_full_info().uss / 1024 ** 2
@@ -198,7 +198,7 @@ class Miscallaneous:
         embed.add_field(name=name, value=value, inline=False)
 
         # Setup the user and guild statistics
-        name = "User/Guild stats"
+        name = "User/Guild statistics"
         value = ""
 
         value += "Channels: {}".format(len(list(self.bot.get_all_channels())))

@@ -1,12 +1,13 @@
 import discord
 import pendulum
+import asyncio
 from pendulum.parsing.exceptions import ParserError
 
 from discord.ext import commands
 from . import utils
 
-class Birthday:
 
+class Birthday:
     def __init__(self, bot):
         self.bot = bot
         self.bot.loop.create_task(self.birthday_task())
@@ -47,20 +48,21 @@ class Birthday:
         tfilter = {'birthdays_allowed': True}
         servers = await self.bot.db.actual_load('server_settings', table_filter=tfilter)
         for s in servers:
-            server = bot.get_guild(int(s['server_id']))
+            server = self.bot.get_guild(int(s['server_id']))
             if not server:
                 continue
 
             bds = self.get_birthdays_for_server(server, today=True)
             for bd in bds:
                 # Set our default to either the one set, or the default channel of the server
-                default_channel_id = servers.get('notifications', {}).get('default') or guild.id
+                default_channel_id = s.get('notifications', {}).get('default') or server.id
                 # If it is has been overriden by picarto notifications setting, use this
-                channel_id = servers.get('notifications', {}).get('birthdays') or default_channel_id
+                channel_id = s.get('notifications', {}).get('birthday') or default_channel_id
                 # Now get the channel based on that ID
                 channel = server.get_channel(int(channel_id)) or server.default_channel
                 try:
-                    await channel.send("It is {}'s birthday today! Wish them a happy birthday! \N{SHORTCAKE}".format(member.mention))
+                    await channel.send("It is {}'s birthday today! "
+                                       "Wish them a happy birthday! \N{SHORTCAKE}".format(bd['member'].mention))
                 except (discord.Forbidden, discord.HTTPException):
                     pass
 
@@ -91,7 +93,6 @@ class Birthday:
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
-
 
     @birthday.command(name='add')
     @utils.custom_perms(send_messages=True)
@@ -149,6 +150,7 @@ class Birthday:
         }
         self.bot.db.save('server_settings', entry)
         await ctx.send("All birthday notifications will now go to {}".format(channel.mention))
+
 
 def setup(bot):
     bot.add_cog(Birthday(bot))

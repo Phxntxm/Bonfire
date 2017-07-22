@@ -94,10 +94,10 @@ class Stats:
 
         await ctx.send(embed=embed)
 
-    @commands.group(pass_context=False)
+    @commands.group()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
-    async def command(self):
+    async def command(self, ctx):
         pass
 
     @command.command(name="stats")
