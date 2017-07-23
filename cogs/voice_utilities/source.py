@@ -51,7 +51,7 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
             if content_type:
                 if content_type.startswith(('application/', 'image/')):
                     if '/ogg' not in content_type:  # How does a server say `application/ogg` what the actual fuck
-                        raise ExtractionError("Invalid content type \"%s\" for url %s" % (content_type, song_url))
+                        raise ExtractionError("Invalid content type \"%s\" for url %s" % (content_type, self.url))
                 if headers.get('ice-audio-info'):
                     raise LiveStreamError("Cannot download from a livestream")
 
