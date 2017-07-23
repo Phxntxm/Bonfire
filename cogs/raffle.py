@@ -38,11 +38,9 @@ class Raffle:
             for r in raffle['raffles']:
                 title = r['title']
                 entrants = r['entrants']
-                raffle_id = r['id']
 
                 # Check to see if this cog can find the server in question
                 if server is None:
-                    await self.bot.db.query(r.table('raffles').get(raffle_id).delete())
                     continue
 
                 now = pendulum.utcnow()
