@@ -68,8 +68,7 @@ class VoiceState:
 
     def skip(self):
         self.skip_votes.clear()
-        if self.playing:
-            self.voice.stop()
+        self.voice.stop()
 
     def after(self, _=None):
         if self.user_queue:
@@ -683,7 +682,7 @@ class Music:
             if song.requester == author:
                 found = True
                 break
-            count += song.duration
+            count += song.length
 
         if not found:
             await ctx.send("You are not in the queue!")
@@ -776,7 +775,7 @@ class Music:
     async def modskip(self, ctx):
         """Forces a song skip, can only be used by a moderator"""
         state = self.voice_states.get(ctx.message.guild.id)
-        if state is None or not state.playing:
+        if state is None:
             await ctx.send('Not playing any music right now...')
             return
 
