@@ -35,13 +35,13 @@ class Raffle:
 
         for raffle in raffles:
             server = self.bot.get_guild(int(raffle['server_id']))
+
+            # Check to see if this cog can find the server in question
+            if server is None:
+                continue
             for r in raffle['raffles']:
                 title = r['title']
                 entrants = r['entrants']
-
-                # Check to see if this cog can find the server in question
-                if server is None:
-                    continue
 
                 now = pendulum.utcnow()
                 expires = pendulum.parse(r['expires'])
