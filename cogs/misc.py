@@ -315,8 +315,8 @@ class Miscallaneous:
         # Since we did not try to convert to int before, do it now after we
         # have it set
         dice = int(dice)
-        if dice > 10:
-            await ctx.send("I'm not rolling more than 10 dice, I have tiny hands")
+        if dice > 30:
+            await ctx.send("I'm not rolling more than 30 dice, I have tiny hands")
             return
         if num > 100:
             await ctx.send("What die has more than 100 sides? Please, calm down")
