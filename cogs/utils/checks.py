@@ -165,7 +165,7 @@ def custom_perms(**perms):
             return True
 
         # Get the member permissions so that we can compare
-        member_perms = ctx.message.author.permissions_in(ctx.message.channel)
+        member_perms = ctx.message.author.guild_permissions
         # Currently the library doesn't handle administrator overrides..so lets do this manually
         if member_perms.administrator:
             return True
