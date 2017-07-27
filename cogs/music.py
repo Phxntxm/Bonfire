@@ -68,7 +68,8 @@ class VoiceState:
 
     def skip(self):
         self.skip_votes.clear()
-        self.voice.stop()
+        if self.voice:
+            self.voice.stop()
 
     def after(self, _=None):
         if self.user_queue:
