@@ -61,7 +61,7 @@ class Playlist(EventEmitter):
         if not info:
             raise ExtractionError('Could not extract information from %s' % playlist_url)
 
-        if info.get('playlist') is None:
+        if info.get('playlist') is None and 'playlist' not in info.get('extractor', ''):
             raise WrongEntryTypeError('This is not a playlist!', False, playlist_url)
 
         # Once again, the generic extractor fucks things up.
