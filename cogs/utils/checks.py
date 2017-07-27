@@ -16,7 +16,7 @@ required_tables = {
     'overwatch': 'member_id',
     'picarto': 'member_id',
     'server_settings': 'server_id',
-    'raffles': 'id',
+    'raffles': 'server_id',
     'strawpolls': 'server_id',
     'osu': 'member_id',
     'tags': 'server_id',
