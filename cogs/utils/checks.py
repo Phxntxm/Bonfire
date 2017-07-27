@@ -165,9 +165,10 @@ def custom_perms(**perms):
             return True
 
         # Get the member permissions so that we can compare
-        member_perms = ctx.message.author.guild_permissions
+        guild_perms = ctx.message.author.guild_permissions
+        channel_perms = ctx.message.author.permissions_in(ctx.message.channel)
         # Currently the library doesn't handle administrator overrides..so lets do this manually
-        if member_perms.administrator:
+        if guild_perms.administrator:
             return True
         # Next, set the default permissions if one is not used, based on what was passed
         # This will be overriden later, if we have custom permissions
@@ -181,7 +182,7 @@ def custom_perms(**perms):
             required_perm = discord.Permissions(required_perm_value)
 
         # Now just check if the person running the command has these permissions
-        return member_perms >= required_perm
+        return guild_perms >= required_perm or channel_perms >= required_perm
 
     predicate.perms = perms
     return commands.check(predicate)
