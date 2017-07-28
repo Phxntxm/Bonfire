@@ -8,6 +8,7 @@ from .entry import get_header
 
 class YoutubeDLSource(discord.FFmpegPCMAudio):
     def __init__(self, playlist, url):
+        self._process = None
         self.playlist = playlist
         self.loop = playlist.loop
         self.downloader = playlist.downloader
