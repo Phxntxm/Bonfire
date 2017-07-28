@@ -170,6 +170,8 @@ class Playlist(EventEmitter):
             # Otherwise, wait a second and check again
             else:
                 await asyncio.sleep(1)
+                # "Refresh" the next entry, in case someone cleared the next song in the queue
+                entry = self.peek()
 
         # If we've reached here, we have no entries
         return None
