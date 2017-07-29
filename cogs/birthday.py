@@ -55,7 +55,7 @@ class Birthday:
                     'member': member
                 })
 
-        return sort_birthdays(_entries)
+        return self.sort_birthdays(_entries)
 
     async def birthday_task(self):
         while True:
