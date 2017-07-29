@@ -21,7 +21,7 @@ class Overwatch:
 
     @commands.group()
     @utils.check_restricted()
-    async def ow(self):
+    async def ow(self, ctx):
         """Command used to lookup information on your own user, or on another's
         When adding your battletag, it is quite picky, use the exact format user#xxxx
         Multiple names with the same username can be used, this is why the numbers are needed
