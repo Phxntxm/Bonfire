@@ -12,6 +12,25 @@ class Birthday:
         self.bot = bot
         self.bot.loop.create_task(self.birthday_task())
 
+    def sort_birthdays(self, bds):
+        # First sort the birthdays based on the comparison of the actual date
+        bds = sorted(bds, key=lambda x: x['birthday'])
+        # We want to split this into birthdays after and before todays date
+        # We can then use this to sort based on "whose is closest"
+        later_bds = []
+        previous_bds = []
+        # Loop through each birthday
+        for bd in bds:
+            # If it is after or equal to today, insert into our later list
+            if bd['birthday'].date() >= pendulum.today().date():
+                later_bds.append(bd)
+            # Otherwise, insert into our previous list
+            else:
+                previous_bds.append(bd)
+        # At this point we have 2 lists, in order, one from all of dates before today, and one after
+        # So all we need to do is put them in order all of "laters" then all of "befores"
+        return later_bds + previous_bds
+
     def get_birthdays_for_server(self, server, today=False):
         bds = self.bot.db.load('birthdays')
         # Get a list of the ID's to compare against
@@ -36,7 +55,7 @@ class Birthday:
                     'member': member
                 })
 
-        return _entries
+        return sort_birthdays(_entries)
 
     async def birthday_task(self):
         while True:
