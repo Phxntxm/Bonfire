@@ -10,74 +10,74 @@ import functools
 import asyncio
 
 battle_outcomes = \
-    ["A meteor fell on {1}, {0} is left standing and has been declared the victor!",
-     "{1} was shot through the heart, and {0} is to blame",
-     "{0} has bucked {1} into a tree, even Big Mac would be impressed at that kick!",
-     "As they were battling, {1} was struck by lightning! {0} you lucked out this time!",
-     "{1} tried to dive at {0} while fighting, somehow they missed and landed in quicksand."
-     "Try paying more attention next time {1}",
-     "{1} got a little...heated during the battle and ended up getting set on fire. {0} wins by remaining cool",
-     "Princess Celestia came in and banished {1} to the moon. Good luck getting into any battles up there",
-     "{1} took an arrow to the knee, they are no longer an adventurer. Keep on adventuring {0}",
-     "Common sense should make it obvious not to get into battle with {0}. Apparently {1} didn't get the memo",
-     "{0} had a nice cup of tea with {1} over their conflict, and mutually agreed that {0} was Best Pony",
-     "{0} and {1} had an intense staring contest. "
-     "Sadly, {1} forgot to breathe and lost much morethan the staring contest",
-     "It appears {1} is actually a pacifist, they ran away screaming and crying. "
+    ["A meteor fell on {loser}, {winner} is left standing and has been declared the victor!",
+     "{loser} was shot through the heart, and {winner} is to blame",
+     "{winner} has bucked {loser} into a tree, even Big Mac would be impressed at that kick!",
+     "As they were battling, {loser} was struck by lightning! {winner} you lucked out this time!",
+     "{loser} tried to dive at {winner} while fighting, somehow they missed and landed in quicksand."
+     "Try paying more attention next time {loser}",
+     "{loser} got a little...heated during the battle and ended up getting set on fire. {winner} wins by remaining cool",
+     "Princess Celestia came in and banished {loser} to the moon. Good luck getting into any battles up there",
+     "{loser} took an arrow to the knee, they are no longer an adventurer. Keep on adventuring {winner}",
+     "Common sense should make it obvious not to get into battle with {winner}. Apparently {loser} didn't get the memo",
+     "{winner} had a nice cup of tea with {loser} over their conflict, and mutually agreed that {winner} was Best Pony",
+     "{winner} and {loser} had an intense staring contest. "
+     "Sadly, {loser} forgot to breathe and lost much morethan the staring contest",
+     "It appears {loser} is actually a pacifist, they ran away screaming and crying. "
      "Maybe you should have thought of that before getting in a fight?",
-     "A bunch of parasprites came in and ate up the jetpack while {1} was flying with it. Those pesky critters...",
-     "{0} used their charm to seduce {1} to surrender.",
-     "{1} slipped on a banana peel and fell into a pit of spikes. That's actually impressive.",
-     "{0} realized it was high noon, {1} never even saw it coming.",
-     "{1} spontaneously combusted...lol rip",
-     "after many turns {0} summons exodia and {1} is sent to the shadow realm",
-     "{0} and {1} sit down for an intense game of chess, in the heat of the moment {0} forgot they were playing a "
+     "A bunch of parasprites came in and ate up the jetpack while {loser} was flying with it. Those pesky critters...",
+     "{winner} used their charm to seduce {loser} to surrender.",
+     "{loser} slipped on a banana peel and fell into a pit of spikes. That's actually impressive.",
+     "{winner} realized it was high noon, {loser} never even saw it coming.",
+     "{loser} spontaneously combusted...lol rip",
+     "after many turns {winner} summons exodia and {loser} is sent to the shadow realm",
+     "{winner} and {loser} sit down for an intense game of chess, in the heat of the moment {winner} forgot they were playing a "
      "game and summoned a real knight",
-     "{0} challenges {1} to rock paper scissors, unfortunately for {1}, {0} chose scissors and stabbed them",
-     "{0} goes back in time and becomes {1}'s best friend, winning without ever throwing a punch",
-     "{1} trips down some stairs on their way to the battle with {0}",
-     "{0} books {1} a one way ticket to Flugendorf prison",
-     "{1} was already dead",
-     "{1} was crushed under the weight of expectations",
-     "{1} was wearing a redshirt and it was their first day",
-     "{0} and {1} were walking along when suddenly {1} got kidnapped by a flying monkey; hope they had water with them",
-     "{0} brought an army to a fist fight, {1} never saw their opponent once",
-     "{0} used multiple simultaneous devestating defensive deep strikes to overwhelm {1}",
-     "{0} and {1} engage in a dance off; {0} wiped the floor with {1}",
-     "{1} tried to hide in the sand to catch {0} off guard, unfortunately looks like a Giant Antlion had the same "
+     "{winner} challenges {loser} to rock paper scissors, unfortunately for {loser}, {winner} chose scissors and stabbed them",
+     "{winner} goes back in time and becomes {loser}'s best friend, winning without ever throwing a punch",
+     "{loser} trips down some stairs on their way to the battle with {winner}",
+     "{winner} books {loser} a one way ticket to Flugendorf prison",
+     "{loser} was already dead",
+     "{loser} was crushed under the weight of expectations",
+     "{loser} was wearing a redshirt and it was their first day",
+     "{winner} and {loser} were walking along when suddenly {loser} got kidnapped by a flying monkey; hope they had water with them",
+     "{winner} brought an army to a fist fight, {loser} never saw their opponent once",
+     "{winner} used multiple simultaneous devestating defensive deep strikes to overwhelm {loser}",
+     "{winner} and {loser} engage in a dance off; {winner} wiped the floor with {loser}",
+     "{loser} tried to hide in the sand to catch {winner} off guard, unfortunately looks like a Giant Antlion had the same "
      "idea for him",
-     "{1} was busy playing trash videogames the night before the fight and collapsed before {0}",
-     "{0} threw a sick meme and {1} totally got PRANK'D",
-     "{0} and {1} go on a skiing trip together, turns out {1} forgot how to pizza french-fry",
-     "{0} is the cure and {1} is the disease....well {1} was the disease",
-     "{1} talked their mouth off at {0}...literally...",
-     "Looks like {1} didn't put enough points into kazoo playing, who knew they would have needed it",
-     "{1} was too scared by the illuminati and extra-dimensional talking horses to show up",
-     "{1} didn't press x enough to not die",
-     "{0} and {1} go fishing to settle their debate, {0} caught a sizeable fish and {1} caught a boot older than time",
-     "{0} did a hero landing and {1} was so surprised they gave up immediately"]
+     "{loser} was busy playing trash videogames the night before the fight and collapsed before {winner}",
+     "{winner} threw a sick meme and {loser} totally got PRANK'D",
+     "{winner} and {loser} go on a skiing trip together, turns out {loser} forgot how to pizza french-fry",
+     "{winner} is the cure and {loser} is the disease....well {loser} was the disease",
+     "{loser} talked their mouth off at {winner}...literally...",
+     "Looks like {loser} didn't put enough points into kazoo playing, who knew they would have needed it",
+     "{loser} was too scared by the illuminati and extra-dimensional talking horses to show up",
+     "{loser} didn't press x enough to not die",
+     "{winner} and {loser} go fishing to settle their debate, {winner} caught a sizeable fish and {loser} caught a boot older than time",
+     "{winner} did a hero landing and {loser} was so surprised they gave up immediately"]
 
 hugs = \
-    ["*hugs {}.*",
-     "*tackles {} for a hug.*",
-     "*drags {} into her dungeon where hugs ensue*",
-     "*pulls {} to the side for a warm hug*",
-     "*goes out to buy a big enough blanket to embrace {}*",
-     "*hard codes an electric hug to {}*",
-     "*hires mercenaries to take {} out....to a nice dinner*",
-     "*pays $10 to not touch {}*",
-     "*clones herself to create a hug pile with {}*",
-     "*orders an airstrike of hugs {}*",
-     "*glomps {}*",
-     "*hears a knock at her door, opens it, finds {} and hugs them excitedly*",
-     "*goes in for a punch but misses and ends up hugging {}*",
-     "*hugs {} from behind*",
-     "*denies a hug from {}*",
-     "*does a hug to {}*",
-     "*lets {} cuddle nonchalantly*",
-     "*cuddles {}*",
-     "*burrows underground and pops up underneath {} she hugs their legs.*",
-     "*approaches {} after having gone to the gym for several months and almost crushes them.*"]
+    ["*hugs {user}.*",
+     "*tackles {user} for a hug.*",
+     "*drags {user} into her dungeon where hugs ensue*",
+     "*pulls {user} to the side for a warm hug*",
+     "*goes out to buy a big enough blanket to embrace {user}*",
+     "*hard codes an electric hug to {user}*",
+     "*hires mercenaries to take {user} out....to a nice dinner*",
+     "*pays $10 to not touch {user}*",
+     "*clones herself to create a hug pile with {user}*",
+     "*orders an airstrike of hugs {user}*",
+     "*glomps {user}*",
+     "*hears a knock at her door, opens it, finds {user} and hugs them excitedly*",
+     "*goes in for a punch but misses and ends up hugging {user}*",
+     "*hugs {user} from behind*",
+     "*denies a hug from {user}*",
+     "*does a hug to {user}*",
+     "*lets {user} cuddle nonchalantly*",
+     "*cuddles {user}*",
+     "*burrows underground and pops up underneath {user} she hugs their legs.*",
+     "*approaches {user} after having gone to the gym for several months and almost crushes them.*"]
 
 
 class Interaction:
@@ -160,8 +160,22 @@ class Interaction:
         if user is None:
             user = ctx.message.author
 
-        fmt = random.SystemRandom().choice(hugs)
-        await ctx.send(fmt.format(user.display_name))
+        # Lets get the settings
+        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id)
+        # Get the custom messages we can use
+        custom_msgs = settings.get('hugs')
+        # if they exist, then we want to see if we want to use default as well
+        if custom_msgs:
+            if settings.get('default_hugs'):
+                msgs = custom_msgs + hugs
+            else:
+                msgs = custom_msgs
+        # Otherwise we simply just want to use the default, no matter what the default setting is
+        else:
+            msgs = hugs
+
+        fmt = random.SystemRandom().choice(msgs)
+        await ctx.send(fmt.format(user=user.display_name))
 
     @commands.command(aliases=['1v1'])
     @commands.guild_only()
@@ -223,8 +237,21 @@ class Interaction:
 
         battleP2 = ctx.message.author
 
-        # Get a random win message from our list
-        fmt = random.SystemRandom().choice(battle_outcomes)
+        # Lets get the settings
+        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id)
+        # Get the custom messages we can use
+        custom_msgs = settings.get('battles')
+        # if they exist, then we want to see if we want to use default as well
+        if custom_msgs:
+            if settings.get('default_battles'):
+                msgs = custom_msgs + battle_outcomes
+            else:
+                msgs = custom_msgs
+        # Otherwise we simply just want to use the default, no matter what the default setting is
+        else:
+            msgs = battle_outcomes
+
+        fmt = random.SystemRandom().choice(msgs)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
         self.battling_off(player2=ctx.message.author)
         await self.bot.br.update()
@@ -237,7 +264,7 @@ class Interaction:
             winner = battleP2
             loser = battleP1
 
-        msg = await ctx.send(fmt.format(winner.mention, loser.mention))
+        msg = await ctx.send(fmt.format(winner=winner.display_name, loser=loser.display_name))
         old_winner_rank, _ = self.bot.br.get_server_rank(winner)
         old_loser_rank, _ = self.bot.br.get_server_rank(loser)
 

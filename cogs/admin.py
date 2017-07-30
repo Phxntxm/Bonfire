@@ -3,7 +3,7 @@ from discord.ext import commands
 from . import utils
 
 import discord
-
+import asyncio
 import re
 
 valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
@@ -12,6 +12,228 @@ valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord
 class Administration:
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
+    async def battles(self, ctx):
+        """Used to list the server specific battles messages on this server
+
+        EXAMPLE: !battles
+        RESULT: A list of the battle messages that can be used on this server"""
+        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles')
+        if msgs:
+            try:
+                pages = utils.Pages(self.bot, message=ctx.message, entries=msgs)
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            await ctx.send("There are no server specific battles on this server!")
+
+    @battles.command(name='add')
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
+    async def add_battles(self, ctx, *, message):
+        """Used to add a battle message to the server specific battle messages
+        Use {winner} or {loser} in order to display the winner/loser's display name
+
+        EXAMPLE: !battles add {winner} has beaten {loser}
+        RESULT: Player1 has beaten Player2"""
+        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles') or []
+        msgs.append("*{}*".format(message))
+        update = {
+            'server_id': str(ctx.message.guild.id),
+            'battles': msgs
+        }
+        self.bot.db.save('server_settings', update)
+        fmt = "I have just saved your new battle message, it will appear like this: \n\n*{}*".format(message)
+        await ctx.send(fmt.format(loser=ctx.message.author.display_name, winner=ctx.message.guild.me.display_name))
+
+
+    @battles.command(name='remove', aliases=['delete'])
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
+    async def remove_battles(self, ctx):
+        """Used to remove one of the custom hugs from the server's list of hug messages
+
+        EXAMPLE: !hugs remove
+        RESULT: I'll ask which hug you want to remove"""
+        # First just send the hugs
+        await ctx.invoke(self.battles)
+        # Then let them know to respond with the number needed
+        await ctx.send("Please respond with the number matching the hug message you want to remove")
+        # The check to ensure it's in this channel...and what's provided is an int
+        def check(m):
+            if m.author == ctx.message.author and m.channel == ctx.message.channel:
+                try:
+                    return bool(int(m.content))
+                except:
+                    return False
+            else:
+                return False
+
+        # Get the message
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=60.0)
+        except asyncio.TimeoutError:
+            await ctx.send("You took too long. I'm impatient, don't make me wait")
+            return
+
+        # Get the number needed
+        num = int(msg.content) - 1
+        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles')
+        # Try to remove it, if it fails then it doesn't match
+        try:
+            msgs.pop(num)
+        except IndexError:
+            await ctx.send("That is not a valid match!")
+            return
+
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'battles': msgs
+        }
+        self.bot.db.save('server_settings', entry)
+        await ctx.send("I have just removed that battle message")
+
+
+    @battles.command(name='default')
+    @commands.guild_only()
+    @utils.custom_perms(send_Messages=True)
+    @utils.check_restricted()
+    async def default_battles(self, ctx):
+        """Used to toggle if battles should include default messages as well as server-custom messages
+
+        EXAMPLE: !hugs default
+        RESULT: No longer uses both defaults!"""
+        # Get the setting
+        setting = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='default_battles')
+        if setting is None:
+            setting = True
+        # Now reverse it
+        setting = not setting
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'default_battles': setting
+        }
+        self.bot.db.save('server_settings', entry)
+        fmt = "" if setting else "not "
+        await ctx.send("Default messages will {}be used as well as custom messages".format(fmt))
+
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
+    async def hugs(self, ctx):
+        """Used to list the server specific hug messages on this server
+
+        EXAMPLE: !hugs
+        RESULT: A list of the hug messages that can be used on this server"""
+        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs')
+        if msgs:
+            try:
+                pages = utils.Pages(self.bot, message=ctx.message, entries=msgs)
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            await ctx.send("There are no server specific hugs on this server!")
+
+    @hugs.command(name='add')
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
+    async def add_hugs(self, ctx, *, message):
+        """Used to add a hug to the server specific hug messages
+        Use {user} in order to display the user's display name
+
+        EXAMPLE: !hugs add new hug message that says I hugged {user}
+        RESULT: *new hug message that says I hugged UserName*"""
+        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs') or []
+        msgs.append("*{}*".format(message))
+        update = {
+            'server_id': str(ctx.message.guild.id),
+            'hugs': msgs
+        }
+        self.bot.db.save('server_settings', update)
+        fmt = "I have just saved your new hug message, it will appear like this: \n\n*{}*".format(message)
+        await ctx.send(fmt.format(user=ctx.message.author.display_name))
+
+
+    @hugs.command(name='remove', aliases=['delete'])
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
+    async def remove_hugs(self, ctx):
+        """Used to remove one of the custom hugs from the server's list of hug messages
+
+        EXAMPLE: !hugs remove
+        RESULT: I'll ask which hug you want to remove"""
+        # First just send the hugs
+        await ctx.invoke(self.hugs)
+        # Then let them know to respond with the number needed
+        await ctx.send("Please respond with the number matching the hug message you want to remove")
+        # The check to ensure it's in this channel...and what's provided is an int
+        def check(m):
+            if m.author == ctx.message.author and m.channel == ctx.message.channel:
+                try:
+                    return bool(int(m.content))
+                except:
+                    return False
+            else:
+                return False
+
+        # Get the message
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=60.0)
+        except asyncio.TimeoutError:
+            await ctx.send("You took too long. I'm impatient, don't make me wait")
+            return
+
+        # Get the number needed
+        num = int(msg.content) - 1
+        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs')
+        # Try to remove it, if it fails then it doesn't match
+        try:
+            msgs.pop(num)
+        except IndexError:
+            await ctx.send("That is not a valid match!")
+            return
+
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'hugs': msgs
+        }
+        self.bot.db.save('server_settings', entry)
+        await ctx.send("I have just removed that hug message")
+
+
+    @hugs.command(name='default')
+    @commands.guild_only()
+    @utils.custom_perms(send_Messages=True)
+    @utils.check_restricted()
+    async def default_hugs(self, ctx):
+        """Used to toggle if hugs should include default messages as well as server-custom messages
+
+        EXAMPLE: !hugs default
+        RESULT: No longer uses both defaults!"""
+        # Get the setting
+        setting = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='default_hugs')
+        if setting is None:
+            setting = True
+        # Now reverse it
+        setting = not setting
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'default_hugs': setting
+        }
+        self.bot.db.save('server_settings', entry)
+        fmt = "" if setting else "not "
+        await ctx.send("Default messages will {}be used as well as custom messages".format(fmt))
 
     @commands.command()
     @commands.guild_only()
