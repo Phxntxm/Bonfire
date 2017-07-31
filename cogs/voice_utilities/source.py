@@ -77,7 +77,7 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
             self.ready = True
             opts = {
                 'before_options': '-nostdin',
-                'options': '-vn -b:a 128k'
+                'options': '-vn -b:a 128k -v fatal'
             }
             super().__init__(self.downloader.ytdl.prepare_filename(self.info), **opts)
 
@@ -122,3 +122,49 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
             embed.add_field(name='Duration', value=fmt, inline=False)
         # And return the embed we created
         return embed
+
+class YoutubeDLLiveStreamSource(discord.FFmpegPCMAudio):
+    def __init__(self, bot, url):
+        self._process = None
+        self.downloader = bot.downloader
+        self.loop = bot.loop
+        self.url = url
+
+    @property
+    def title(self):
+        return self.info.get('title', 'Untitled')
+
+    @property
+    def thumbnail(self):
+        return self.info.get('thumbnail', None)
+
+    @property
+    def embed(self):
+        """A property that returns an embed that can be used to display information about this particular song"""
+        # Create the embed object we'll use
+        embed = discord.Embed()
+        # Fill in the simple things
+        embed.add_field(name='Title', value=self.title, inline=False)
+        embed.add_field(name='Requester', value=self.requester.display_name, inline=False)
+        if self.thumbnail:
+            embed.set_thumbnail(url=self.thumbnail)
+        # And return the embed we created
+        return embed
+
+    async def get_ready(self):
+        try:
+            # First attempt to gather the information
+            info = await self.downloader.extract_info(self.loop, self.url, download=False)
+        except Exception as e:
+            raise ExtractionError('Could not extract information from {}\n\n{}'.format(self.url, e))
+
+        if not info.get('is_live', False):
+            raise WrongEntryTypeError("This is not a livestream!")
+
+        # Set our info
+        self.info = info
+        opts = {
+            'before_options': '-nostdin',
+            'options': '-vn -b:a 128k -v fatal'
+        }
+        super().__init__(info.get('manifest_url'), **opts)

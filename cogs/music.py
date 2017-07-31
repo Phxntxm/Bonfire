@@ -32,6 +32,7 @@ class VoiceState:
         self.user_queue = user_queue
         self.loop = bot.loop
         self._volume = volume or .5
+        self.live = False
 
     @property
     def volume(self):
@@ -527,6 +528,11 @@ class Music:
             await ctx.send("The current queue type is the DJ queue. "
                            "Use the command {}dj to join this queue".format(ctx.prefix))
             return
+        # If the state is live, songs can't play at the same time
+        if state and state.live:
+            await ctx.send("Currently playing a live stream! The stream needs to stop before a song can be played")
+            return
+
         # Ensure the user is in the voice channel
         try:
             if ctx.message.author.voice.channel != ctx.message.guild.me.voice.channel:
@@ -798,7 +804,8 @@ class Music:
             embed = discord.Embed()
             # Fill in the simple things
             embed.add_field(name='Title', value=state.current.title, inline=False)
-            embed.add_field(name='Requester', value=state.current.requester.display_name, inline=False)
+            if state.current.requester:
+                embed.add_field(name='Requester', value=state.current.requester.display_name, inline=False)
             # Get the amount of current skips, and display how many have been skipped/how many required
             skip_count = len(state.skip_votes)
             embed.add_field(name='Skip Count', value='{}/{}'.format(skip_count, state.required_skips), inline=False)
@@ -827,9 +834,13 @@ class Music:
                 return
 
         state = self.voice_states.get(ctx.message.guild.id)
-        if not state.user_queue:
+        if state and not state.user_queue:
             await ctx.send("The current queue type is the song queue. "
                            "Use the command {}play to add a song to the queue".format(ctx.prefix))
+            return
+        # If the state is live, songs can't play at the same time
+        if state and state.live:
+            await ctx.send("Currently playing a live stream! The stream needs to stop before a song can be played")
             return
 
         if state.get_dj(ctx.message.author):
@@ -873,6 +884,43 @@ class Music:
             await ctx.send("The queue has been shuffled!")
         else:
             await ctx.send("There needs to be a queue before I can shuffle it!")
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(mute_members=True)
+    @utils.check_restricted()
+    async def stream(self, ctx, *, url):
+        """Plays a livestream
+
+        EXAMPLE: !stream live_stream_url
+        RESULT: A livestream starts playing"""
+        # If we don't have a voice state yet, create one
+        if ctx.message.guild.id not in self.voice_states:
+            if not await ctx.invoke(self.join):
+                return
+
+        state = self.voice_states.get(ctx.message.guild.id)
+
+        # If we have a state, clear the songs, dj's, then skip the current song
+        if state and state.voice:
+            state.songs.clear()
+            state.djs.clear()
+            state.skip()
+
+            # Now we can start the livestream
+            # Create the source used
+            source = YoutubeDLLiveStreamSource(self.bot, url)
+            # Download the info
+            await source.get_ready()
+            # Set the current song as the livestream
+            state.current = source
+            # Use the volume transformer
+            source = PCMVolumeTransformer(source, volume=state.volume)
+            # Then play the livestream
+            state.voice.play(source)
+            state.live = True
+        else:
+            await ctx.send("Failed to join the channel...")
 
 
 def setup(bot):
