@@ -89,7 +89,7 @@ class Administration:
         # Try to remove it, if it fails then it doesn't match
         try:
             msgs.pop(num)
-        except IndexError:
+        except (IndexError, AttributeError):
             await ctx.send("That is not a valid match!")
             return
 
@@ -200,7 +200,7 @@ class Administration:
         # Try to remove it, if it fails then it doesn't match
         try:
             msgs.pop(num)
-        except IndexError:
+        except (IndexError, AttributeError):
             await ctx.send("That is not a valid match!")
             return
 
