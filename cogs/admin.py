@@ -103,7 +103,7 @@ class Administration:
 
     @battles.command(name='default')
     @commands.guild_only()
-    @utils.custom_perms(send_Messages=True)
+    @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def default_battles(self, ctx):
         """Used to toggle if battles should include default messages as well as server-custom messages
@@ -214,7 +214,7 @@ class Administration:
 
     @hugs.command(name='default')
     @commands.guild_only()
-    @utils.custom_perms(send_Messages=True)
+    @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def default_hugs(self, ctx):
         """Used to toggle if hugs should include default messages as well as server-custom messages
