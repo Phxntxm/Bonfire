@@ -161,7 +161,7 @@ class Interaction:
             user = ctx.message.author
 
         # Lets get the settings
-        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id)
+        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
         # Get the custom messages we can use
         custom_msgs = settings.get('hugs')
         # if they exist, then we want to see if we want to use default as well
@@ -238,7 +238,7 @@ class Interaction:
         battleP2 = ctx.message.author
 
         # Lets get the settings
-        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id)
+        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
         # Get the custom messages we can use
         custom_msgs = settings.get('battles')
         # if they exist, then we want to see if we want to use default as well
