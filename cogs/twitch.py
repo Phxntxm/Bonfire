@@ -119,19 +119,16 @@ class Twitch:
                         # Get the notifications settings, get the twitch setting
                         notifications = self.bot.db.load('server_settings', key=s_id, pluck='notifications') or {}
                         # Set our default to either the one set, or the default channel of the server
-                        default_channel_id = notifications.get('default') or s_id
+                        default_channel_id = notifications.get('default')
                         # If it is has been overriden by twitch notifications setting, use this
                         channel_id = notifications.get('twitch') or default_channel_id
                         # Now get the channel
                         channel = server.get_channel(int(channel_id))
-                        # Unfortunately we need one more check, to ensure a channel hasn't been chosen, then deleted
-                        if channel is None:
-                            channel = server.default_channel
 
                         # Then just send our message
                         try:
                             await channel.send(msg.format(member=member), embed=embed)
-                        except (discord.Forbidden, discord.HTTPException):
+                        except (discord.Forbidden, discord.HTTPException, AttributeError):
                             pass
 
                 await asyncio.sleep(30)

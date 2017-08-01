@@ -63,7 +63,7 @@ class StatsUpdate:
                 # Get the notifications settings, get the welcome setting
                 notifications = self.bot.db.load('server_settings', key=guild.id, pluck='notifications') or {}
                 # Set our default to either the one set, or the default channel of the server
-                default_channel_id = notifications.get('default') or guild.id
+                default_channel_id = notifications.get('default')
                 # If it is has been overriden by picarto notifications setting, use this
                 channel_id = notifications.get('welcome') or default_channel_id
                 # Get the message if it exists
@@ -78,7 +78,7 @@ class StatsUpdate:
         channel = guild.get_channel(int(channel_id))
         try:
             await channel.send(join_message.format(server=guild.name, member=member.mention))
-        except (discord.Forbidden, discord.HTTPException):
+        except (discord.Forbidden, discord.HTTPException, AttributeError):
             pass
 
     async def on_member_remove(self, member):
@@ -91,7 +91,7 @@ class StatsUpdate:
                 # Get the notifications settings, get the welcome setting
                 notifications = self.bot.db.load('server_settings', key=guild.id, pluck='notifications') or {}
                 # Set our default to either the one set, or the default channel of the server
-                default_channel_id = notifications.get('default') or guild.id
+                default_channel_id = notifications.get('default')
                 # If it is has been overriden by picarto notifications setting, use this
                 channel_id = notifications.get('welcome') or default_channel_id
                 # Get the message if it exists
@@ -106,7 +106,7 @@ class StatsUpdate:
         channel = guild.get_channel(int(channel_id))
         try:
             await channel.send(leave_message.format(server=guild.name, member=member.name))
-        except (discord.Forbidden, discord.HTTPException):
+        except (discord.Forbidden, discord.HTTPException, AttributeError):
             pass
 
 
