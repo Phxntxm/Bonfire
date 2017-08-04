@@ -911,7 +911,22 @@ class Music:
             # Create the source used
             source = YoutubeDLLiveStreamSource(self.bot, url)
             # Download the info
-            await source.get_ready()
+            try:
+                await source.get_ready()
+            except ExtractionError as e:
+                error = e.message.split('\n')
+                if len(error) >= 3:
+                    # The first entry is the "We couldn't download" printed by the exception
+                    # The 2nd is the new line
+                    # We want youtube_dl's error message, but just the first part, the actual "error"
+                    error = error[2]
+                    # This is colour formatting for the console...it's just going to show up as text on discord
+                    error = error.replace("[0;31mERROR:[0m ", "")
+                else:
+                    # This happens when the download just returns `None`
+                    error = error[0]
+                await ctx.send(error)
+                return
             # Set the current song as the livestream
             state.current = source
             # Use the volume transformer
