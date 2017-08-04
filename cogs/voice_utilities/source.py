@@ -159,7 +159,7 @@ class YoutubeDLLiveStreamSource(discord.FFmpegPCMAudio):
             raise ExtractionError('Could not extract information from {}\n\n{}'.format(self.url, e))
 
         if not info.get('is_live', False):
-            raise WrongEntryTypeError("This is not a livestream!")
+            raise WrongEntryTypeError("This is not a livestream!", True, info.get('webpage_url', None) or info.get('url', None))
 
         # Set our info
         self.info = info
