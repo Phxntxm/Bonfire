@@ -42,8 +42,18 @@ class Administration:
 
         EXAMPLE: !battles add {winner} has beaten {loser}
         RESULT: Player1 has beaten Player2"""
+        # Try to simulate the message, to ensure they haven't provided an invalid phrase
+        try:
+            message.format(loser="player1", winner="player2")
+        except:
+            await ctx.send("That is an invalid format! The winner needs to be labeled with {winner} and the loser with {loser}")
+            return
+
+        # Now simply load the current messages
         msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles') or []
+        # Append this one
         msgs.append("*{}*".format(message))
+        # And save it
         update = {
             'server_id': str(ctx.message.guild.id),
             'battles': msgs
@@ -153,6 +163,13 @@ class Administration:
 
         EXAMPLE: !hugs add new hug message that says I hugged {user}
         RESULT: *new hug message that says I hugged UserName*"""
+        # Try to simulate the message, to ensure they haven't provided an invalid phrase
+        try:
+            message.format(loser="player1", winner="player2")
+        except:
+            await ctx.send("That is an invalid format! The user being hugged needs to be labeled with {user}")
+            return
+
         msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs') or []
         msgs.append("*{}*".format(message))
         update = {
