@@ -94,6 +94,36 @@ class Stats:
 
         await ctx.send(embed=embed)
 
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
+    async def userinfo(self, ctx, *, user: discord.Member = None):
+        """Provides information about a provided member
+
+        EXAMPLE: !userinfo
+        RESULT: Information about yourself!"""
+        if user is None:
+            user = ctx.message.author
+
+        embed = discord.Embed(colour=user.top_role.colour)
+        fmt = "{} ({})".format(str(user), user.id)
+        embed.set_author(name=fmt, icon_url=user.avatar_url)
+
+        embed.add_field(name='Joined this server', value=user.joined_at.date(), inline=False)
+        embed.add_field(name='Joined Discord', value=user.joined_at.date(), inline=False)
+
+        # Sort them based on the hierarchy, but don't include @everyone
+        roles = sorted([x for x in user.roles if not x.is_default()], reverse=True)
+        # I only want the top 5 roles for this purpose
+        roles = ", ".join("{}".format(x.name) for x in roles[:5])
+        embed.add_field(name='Top 5 roles', value=roles, inline=False)
+
+        if user.game:
+            embed.add_field(name='Playing', value=user.game, inline=False)
+
+        await ctx.send(embed)
+
     @commands.group()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
