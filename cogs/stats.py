@@ -106,12 +106,12 @@ class Stats:
         if user is None:
             user = ctx.message.author
 
-        embed = discord.Embed(colour=user.top_role.colour)
+        embed = discord.Embed(colour=user.colour)
         fmt = "{} ({})".format(str(user), user.id)
         embed.set_author(name=fmt, icon_url=user.avatar_url)
 
         embed.add_field(name='Joined this server', value=user.joined_at.date(), inline=False)
-        embed.add_field(name='Joined Discord', value=user.joined_at.date(), inline=False)
+        embed.add_field(name='Joined Discord', value=user.created_at.date(), inline=False)
 
         # Sort them based on the hierarchy, but don't include @everyone
         roles = sorted([x for x in user.roles if not x.is_default()], reverse=True)
