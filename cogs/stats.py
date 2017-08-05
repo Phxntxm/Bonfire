@@ -122,7 +122,7 @@ class Stats:
         if user.game:
             embed.add_field(name='Playing', value=user.game, inline=False)
 
-        await ctx.send(embed)
+        await ctx.send(embed=embed)
 
     @commands.group()
     @utils.custom_perms(send_messages=True)
