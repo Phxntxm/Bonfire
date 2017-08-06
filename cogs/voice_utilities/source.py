@@ -113,6 +113,7 @@ class YoutubeDLSource(discord.FFmpegPCMAudio):
         # Fill in the simple things
         embed.add_field(name='Title', value=self.title, inline=False)
         embed.add_field(name='Requester', value=self.requester.display_name, inline=False)
+        embed.add_field(name='Place in Queue', value=str(self.playlist.count))
         if self.thumbnail:
             embed.set_thumbnail(url=self.thumbnail)
         # Get the current length of the song and display this
