@@ -949,7 +949,7 @@ class Administration:
             # If a command wasn't provided, see if a user was
             converter = commands.converter.MemberConverter()
             try:
-                member = await converter.convert(ctx, cmd)
+                member = await converter.convert(ctx, command)
             # If we failed to convert, just mention that an invalid command was provided
             except commands.converter.BadArgument:
                 await ctx.send("That is not a valid command!")
