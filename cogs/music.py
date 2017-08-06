@@ -658,6 +658,21 @@ class Music:
         if voice:
             voice.stop()
             await voice.disconnect(force=True)
+        # So discord has a weird case where the connection can be interrupted, and an auto-reconnect is attempted
+        # Auto-reconnects aren't handled for bot accounts, and this causes the bot to appear to be in the channel while it's actually not
+        # Since this means there is no connection (checked by voice being None) there's nothing to disconnect from
+        # So our workaround here is try to connect (this may timeout, and force it to now be visually disconnected) then disconnect
+        else:
+            if ctx.message.guild.me.voice:
+                try:
+                    await ctx.message.guild.me.voice.channel.connect()
+                except asyncio.TimeoutError:
+                    pass
+                else:
+                    # Refresh the guild info, as want whatever the new VoiceClient is
+                    guild = bot.get_guild(ctx.message.guild.id)
+                    if guild.voice_client:
+                        await guild.voice_client.disconnect(force=True)
 
     @commands.command()
     @commands.guild_only()
