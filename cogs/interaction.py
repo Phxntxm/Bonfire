@@ -152,13 +152,24 @@ class Interaction:
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
-    async def hug(self, ctx, user: discord.Member = None):
+    async def hug(self, ctx, user = None):
         """Makes me hug a person!
 
         EXAMPLE: !hug @Someone
         RESULT: I hug the shit out of that person"""
+        if ctx.message.mention_everyone:
+            await ctx.send("Your arms aren't big enough")
+            return
         if user is None:
             user = ctx.message.author
+        else:
+            converter = commands.converter.MemberConverter()
+            try:
+                user = converter.convert(ctx, user)
+            except commands.converter.BadArgument:
+                await ctx.send("Error: Could not find user: {}".format(user))
+                return
+
 
         # Lets get the settings
         settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
@@ -182,19 +193,38 @@ class Interaction:
     @commands.cooldown(1, 20, BucketType.user)
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
-    async def battle(self, ctx, player2: discord.Member):
+    async def battle(self, ctx, player2 = None):
         """Challenges the mentioned user to a battle
 
         EXAMPLE: !battle @player2
         RESULT: A battle to the death"""
+        # First check if everyone was mentioned
+        if ctx.message.mention_everyone:
+            await ctx.send("You want to battle {} people? Good luck with that...".format(len(ctx.message.channel.members) - 1))
+            return
+        # Then check if nothing was provided
+        if player2 is None:
+            await ctx.send("Who are you trying to battle...?")
+            return
+        else:
+            # Otherwise, try to convert to an actual member
+            converter = commands.converter.MemberConverter()
+            try:
+                player2 = converter.convert(ctx, player2)
+            except commands.converter.BadArgument:
+                await ctx.send("Error: Could not find user: {}".format(player2))
+                return
+        # Then check if the person used is the author
         if ctx.message.author.id == player2.id:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("Why would you want to battle yourself? Suicide is not the answer")
             return
+        # Check if the person battled is me
         if self.bot.user.id == player2.id:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("I always win, don't even try it.")
             return
+        # Next two checks are to see if the author or person battled can be battled
         if not self.can_battle(ctx.message.author):
             ctx.command.reset_cooldown(ctx)
             await ctx.send("You are already battling someone!")
