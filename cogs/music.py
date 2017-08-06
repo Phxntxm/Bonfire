@@ -682,7 +682,7 @@ class Music:
                 pass
             else:
                 # Refresh the guild info, as want whatever the new VoiceClient is
-                guild = bot.get_guild(ctx.message.guild.id)
+                guild = self.bot.get_guild(ctx.message.guild.id)
                 if guild.voice_client:
                     await guild.voice_client.disconnect(force=True)
 
