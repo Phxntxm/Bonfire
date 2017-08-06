@@ -165,7 +165,7 @@ class Interaction:
         else:
             converter = commands.converter.MemberConverter()
             try:
-                user = converter.convert(ctx, user)
+                user = await converter.convert(ctx, user)
             except commands.converter.BadArgument:
                 await ctx.send("Error: Could not find user: {}".format(user))
                 return
@@ -210,7 +210,7 @@ class Interaction:
             # Otherwise, try to convert to an actual member
             converter = commands.converter.MemberConverter()
             try:
-                player2 = converter.convert(ctx, player2)
+                player2 = await converter.convert(ctx, player2)
             except commands.converter.BadArgument:
                 await ctx.send("Error: Could not find user: {}".format(player2))
                 return
