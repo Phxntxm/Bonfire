@@ -664,15 +664,27 @@ class Music:
         # So our workaround here is try to connect (this may timeout, and force it to now be visually disconnected) then disconnect
         else:
             if ctx.message.guild.me.voice:
-                try:
-                    await ctx.message.guild.me.voice.channel.connect()
-                except asyncio.TimeoutError:
-                    pass
+                channel = ctx.message.guild.me.voice.channel
+            else:
+                # Get a list of all channels that we can connect to
+                channels = [c for c in ctx.message.guild.voice_channels if c.permissions_for(ctx.message.guild.me).connect]
+                if len(channels) > 0:
+                    channel = channels[0]
+                # If we can't connect to any channels but we're stuck in a voice channel what is this server doing .-.
+                # Don't handle this, just return
                 else:
-                    # Refresh the guild info, as want whatever the new VoiceClient is
-                    guild = bot.get_guild(ctx.message.guild.id)
-                    if guild.voice_client:
-                        await guild.voice_client.disconnect(force=True)
+                    return
+
+            # Now simply connect then disconnect
+            try:
+                await channel.connect()
+            except asyncio.TimeoutError:
+                pass
+            else:
+                # Refresh the guild info, as want whatever the new VoiceClient is
+                guild = bot.get_guild(ctx.message.guild.id)
+                if guild.voice_client:
+                    await guild.voice_client.disconnect(force=True)
 
     @commands.command()
     @commands.guild_only()
