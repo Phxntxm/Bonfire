@@ -935,7 +935,8 @@ class Administration:
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions
 
-        EXAMPLE: !perms help RESULT: Hopefully a result saying you just need send_messages permissions; otherwise lol
+        EXAMPLE: !perms help
+        RESULT: Hopefully a result saying you just need send_messages permissions; otherwise lol
         this server's admin doesn't like me """
         if command is None:
             await ctx.send(
@@ -945,8 +946,24 @@ class Administration:
         cmd = self.bot.get_command(command)
 
         if cmd is None:
-            await ctx.send("That is not a valid command!")
-            return
+            # If a command wasn't provided, see if a user was
+            converter = commands.converter.MemberConverter()
+            try:
+                member = await converter.convert(ctx, member)
+            # If we failed to convert, just mention that an invalid command was provided
+            except commands.converter.BadArgument:
+                await ctx.send("That is not a valid command!")
+                return
+            else:
+                # Otherwise iterate through the permissions and their values, only including ones that are on
+                perms = [p for p, value in member.guild_permissions if value]
+                # Create an embed with their colour
+                embed = discord.Embed(colour=member.colour)
+                # Set the author to this user
+                embed.set_author(name=str(member), icon_url=member.avatar_url)
+                # Then add their permissions in one field
+                embed.add_field(name="Allowed permissions", value="\n".join(perms))
+                await ctx.send(embed=embed)
 
         server_perms = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='permissions') or {}
 
@@ -964,7 +981,7 @@ class Administration:
                     if "is_owner" in func.__qualname__:
                         await ctx.send("You need to own the bot to run this command")
                         return
-                await ctx.send(
+                await ctx.send(member
                     "You are required to have `manage_guild` permissions to run `{}`".format(cmd.qualified_name))
                 return
 
