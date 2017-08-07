@@ -276,7 +276,7 @@ class Interaction:
             if settings.get('default_battles'):
                 msgs = custom_msgs + battle_outcomes
             else:
-                msgs = custom_msgs
+                msgs = battle_outcomes
         # Otherwise we simply just want to use the default, no matter what the default setting is
         else:
             msgs = battle_outcomes
