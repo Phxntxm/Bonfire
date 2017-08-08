@@ -175,10 +175,11 @@ class Interaction:
         settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
         # Get the custom messages we can use
         custom_msgs = settings.get('hugs')
+        default_on = settings.get('default_hugs')
         # if they exist, then we want to see if we want to use default as well
         if custom_msgs:
-            if settings.get('default_hugs'):
-                msgs = custom_msgs + hugs
+            if default_on or default_on is None:
+                msgs = hugs + custom_msgs
             else:
                 msgs = custom_msgs
         # Otherwise we simply just want to use the default, no matter what the default setting is
@@ -271,12 +272,13 @@ class Interaction:
         settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
         # Get the custom messages we can use
         custom_msgs = settings.get('battles')
+        default_on = settings.get('default_battles')
         # if they exist, then we want to see if we want to use default as well
         if custom_msgs:
-            if settings.get('default_battles'):
-                msgs = custom_msgs + battle_outcomes
+            if default_on or default_on is None:
+                msgs = battle_outcomes + custom_msgs
             else:
-                msgs = battle_outcomes
+                msgs = custom_msgs
         # Otherwise we simply just want to use the default, no matter what the default setting is
         else:
             msgs = battle_outcomes
