@@ -75,7 +75,7 @@ class Administration:
         # First just send the hugs
         await ctx.invoke(self.battles)
         # Then let them know to respond with the number needed
-        await ctx.send("Please respond with the number matching the hug message you want to remove")
+        await ctx.send("Please respond with the number matching the battle message you want to remove")
         # The check to ensure it's in this channel...and what's provided is an int
         def check(m):
             if m.author == ctx.message.author and m.channel == ctx.message.channel:
@@ -165,7 +165,7 @@ class Administration:
         RESULT: *new hug message that says I hugged UserName*"""
         # Try to simulate the message, to ensure they haven't provided an invalid phrase
         try:
-            message.format(loser="player1", winner="player2")
+            message.format(user="user")
         except:
             await ctx.send("That is an invalid format! The user being hugged needs to be labeled with {user}")
             return
