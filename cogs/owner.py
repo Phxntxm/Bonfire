@@ -39,6 +39,8 @@ class Owner:
         return content.strip('` \n')
 
     async def on_guild_join(self, guild):
+        # I don't want this for now
+        return
         # Create our embed that we'll use for the information
         embed = discord.Embed(title="Joined guild {}".format(guild.name), description="Created on: {}".format(guild.created_at.date()))
 
@@ -64,6 +66,8 @@ class Owner:
         await self.bot.owner.send(embed=embed)
 
     async def on_guild_remove(self, guild):
+        # I don't want this for now
+        return
         # Create our embed that we'll use for the information
         embed = discord.Embed(title="Left guild {}".format(guild.name), description="Created on: {}".format(guild.created_at.date()))
 
