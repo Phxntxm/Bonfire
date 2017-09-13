@@ -107,9 +107,12 @@ class Moderation:
             await ctx.message.channel.purge(limit=limit, before=ctx.message)
             await ctx.message.delete()
         except discord.HTTPException:
-            await ctx.message.channel.send("Detected messages that are too far "
-                                           "back for me to delete; I can only bulk delete messages"
-                                           " that are under 14 days old.")
+            try:
+                await ctx.message.channel.send("Detected messages that are too far "
+                                               "back for me to delete; I can only bulk delete messages"
+                                               " that are under 14 days old.")
+            except:
+                pass
 
     @commands.command()
     @commands.guild_only()
