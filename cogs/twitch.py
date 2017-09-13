@@ -123,7 +123,10 @@ class Twitch:
                         # If it is has been overriden by twitch notifications setting, use this
                         channel_id = notifications.get('twitch') or default_channel_id
                         # Now get the channel
-                        channel = server.get_channel(int(channel_id))
+                        if channel_id:
+                            channel = server.get_channel(int(channel_id))
+                        else:
+                            continue
 
                         # Then just send our message
                         try:
