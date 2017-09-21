@@ -161,7 +161,7 @@ class Administration:
         """Used to add a hug to the server specific hug messages
         Use {user} in order to display the user's display name
 
-        EXAMPLE: !hugs add new hug message that says I hugged {user}
+        EXAMPLE: !hugs add I hugged {user}
         RESULT: *new hug message that says I hugged UserName*"""
         # Try to simulate the message, to ensure they haven't provided an invalid phrase
         try:
