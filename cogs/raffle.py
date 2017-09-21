@@ -78,7 +78,10 @@ class Raffle:
                 default_channel_id = notifications.get('default')
                 # If it is has been overriden by picarto notifications setting, use this
                 channel_id = notifications.get('raffle') or default_channel_id
-                channel = self.bot.get_channel(int(channel_id))
+                if channel_id:
+                    channel = self.bot.get_channel(int(channel_id))
+                else:
+                    continue
                 try:
                     await channel.send(fmt)
                 except (discord.Forbidden, AttributeError):
