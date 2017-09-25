@@ -75,7 +75,10 @@ class StatsUpdate:
         except (IndexError, TypeError, KeyError):
             return
 
-        channel = guild.get_channel(int(channel_id))
+        if channel_id:
+            channel = guild.get_channel(int(channel_id))
+        else:
+            return
         try:
             await channel.send(join_message.format(server=guild.name, member=member.mention))
         except (discord.Forbidden, discord.HTTPException, AttributeError):
@@ -103,7 +106,10 @@ class StatsUpdate:
         except (IndexError, TypeError, KeyError):
             return
 
-        channel = guild.get_channel(int(channel_id))
+        if channel_id:
+            channel = guild.get_channel(int(channel_id))
+        else:
+            return
         try:
             await channel.send(leave_message.format(server=guild.name, member=member.name))
         except (discord.Forbidden, discord.HTTPException, AttributeError):
