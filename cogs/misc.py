@@ -40,7 +40,10 @@ class Miscallaneous:
 
         if command is None:
             for cmd in utils.get_all_commands(self.bot):
-                if not await cmd.can_run(ctx) or not cmd.enabled:
+                try:
+                    if not await cmd.can_run(ctx) or not cmd.enabled:
+                        continue
+                except commands.errors.MissingPermissions:
                     continue
 
                 cog = cmd.cog_name
