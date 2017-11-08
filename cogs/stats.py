@@ -117,6 +117,8 @@ class Stats:
         roles = sorted([x for x in user.roles if not x.is_default()], reverse=True)
         # I only want the top 5 roles for this purpose
         roles = ", ".join("{}".format(x.name) for x in roles[:5])
+        # If there are no roles, then just say this
+        roles = roles or "No roles added"
         embed.add_field(name='Top 5 roles', value=roles, inline=False)
 
         if user.game:
