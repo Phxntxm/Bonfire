@@ -658,33 +658,37 @@ class Music:
         if voice:
             voice.stop()
             await voice.disconnect(force=True)
+
+        # Temporarily disabling what's after this
+
         # So discord has a weird case where the connection can be interrupted, and an auto-reconnect is attempted
         # Auto-reconnects aren't handled for bot accounts, and this causes the bot to appear to be in the channel while it's actually not
         # Since this means there is no connection (checked by voice being None) there's nothing to disconnect from
         # So our workaround here is try to connect (this may timeout, and force it to now be visually disconnected) then disconnect
-        else:
-            if ctx.message.guild.me.voice:
-                channel = ctx.message.guild.me.voice.channel
-            else:
-                # Get a list of all channels that we can connect to
-                channels = [c for c in ctx.message.guild.voice_channels if c.permissions_for(ctx.message.guild.me).connect]
-                if len(channels) > 0:
-                    channel = channels[0]
-                # If we can't connect to any channels but we're stuck in a voice channel what is this server doing .-.
-                # Don't handle this, just return
-                else:
-                    return
+
+        #else:
+        #    if ctx.message.guild.me.voice:
+        #        channel = ctx.message.guild.me.voice.channel
+        #    else:
+        #        # Get a list of all channels that we can connect to
+        #        channels = [c for c in ctx.message.guild.voice_channels if c.permissions_for(ctx.message.guild.me).connect]
+        #        if len(channels) > 0:
+        #            channel = channels[0]
+        #        # If we can't connect to any channels but we're stuck in a voice channel what is this server doing .-.
+        #        # Don't handle this, just return
+        #        else:
+        #            return
 
             # Now simply connect then disconnect
-            try:
-                await channel.connect()
-            except asyncio.TimeoutError:
-                pass
-            else:
-                # Refresh the guild info, as want whatever the new VoiceClient is
-                guild = self.bot.get_guild(ctx.message.guild.id)
-                if guild.voice_client:
-                    await guild.voice_client.disconnect(force=True)
+        #    try:
+        #        await channel.connect()
+        #    except asyncio.TimeoutError:
+        #        pass
+        #    else:
+        #        # Refresh the guild info, as want whatever the new VoiceClient is
+        #        guild = self.bot.get_guild(ctx.message.guild.id)
+        #        if guild.voice_client:
+        #            await guild.voice_client.disconnect(force=True)
 
     @commands.command()
     @commands.guild_only()
@@ -954,6 +958,12 @@ class Music:
                     error = error[0]
                 await ctx.send(error)
                 return
+
+            # They may have removed the bot from the channel during this time, so lets check again
+            if state.voice is None:
+                await ctx.send("Failed to join the channel...")
+                return
+
             # Set the current song as the livestream
             state.current = source
             # Use the volume transformer
