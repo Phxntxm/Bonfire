@@ -84,10 +84,16 @@ async def on_command_error(ctx, error):
                 'empty message' in str(error.original) or
                 'INTERNAL SERVER ERROR' in str(error.original) or
                 'REQUEST ENTITY TOO LARGE' in str(error.original) or
-                'Unknown Message' in str(error.original)):
+                'Unknown Message' in str(error.original) or
+                'Origin Time-out' in str(error.original) or
+                'Bad Gateway' in str(error.original) or
+                'Explicit content' in str(error.original)):
             return
         elif isinstance(error.original, aiohttp.ClientOSError):
             return
+        elif isinstance(error.original, discord.NotFound) and 'Unknown Channel' in str(error.original):
+            return
+
     except AttributeError:
         pass
 
