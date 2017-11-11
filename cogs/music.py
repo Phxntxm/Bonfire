@@ -374,7 +374,7 @@ class Music:
                 await state.voice.move_to(channel)
             # Otherwise, try connecting
             else:
-                await channel.connect()
+                await channel.connect(reconnect=False)
 
             # If we have connnected, create our voice state
             queue_type = self.bot.db.load('server_settings', key=channel.guild.id, pluck='queue_type')
