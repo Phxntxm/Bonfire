@@ -860,6 +860,12 @@ class Administration:
         if msg and re.search("{.*token.*}", msg):
             await ctx.send("Illegal content in {} message".format(parent))
         else:
+            try:
+                test_keys = msg.format(member='test', server='test')
+            except KeyError:
+                await ctx.send("Illegal keyword in {0} message. Please use `{1.prefix}help welcome message` "
+                               "for what keywords can be used".format(parent, ctx))
+                return
             entry = {
                 'server_id': str(ctx.message.guild.id),
                 parent + '_message': msg
