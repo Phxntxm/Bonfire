@@ -863,7 +863,7 @@ class Administration:
             try:
                 test_keys = msg.format(member='test', server='test')
             except KeyError:
-                await ctx.send("Illegal keyword in {0} message. Please use `{1.prefix}help welcome message` "
+                await ctx.send("Illegal keyword in {0} message. Please use `{1.prefix}help {0} message` "
                                "for what keywords can be used".format(parent, ctx))
                 return
             entry = {
