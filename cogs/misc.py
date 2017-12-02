@@ -109,6 +109,18 @@ class Miscallaneous:
 
             await ctx.send(embed=embed)
 
+    @commands.command(aliases=["coin"])
+    @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
+    async def coinflip(self, ctx):
+        """Flips a coin and responds with either heads or tails
+
+        EXAMPLE: !coinflip
+        RESULT: Heads!"""
+
+        result = "Heads!" if random.SystemRandom().randint(0, 1) else "Tails!"
+        await ctx.send(result)
+
     @commands.command()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
