@@ -146,7 +146,7 @@ class Hangman:
         try:
             msg = await ctx.message.author.send(
                 "Please respond with a phrase you would like to use for your hangman game in **{}**\n\nPlease keep "
-                "phrases less than 20 characters".format(
+                "phrases less than 31 characters".format(
                     ctx.message.guild.name))
         except discord.Forbidden:
             await ctx.send(
@@ -158,7 +158,7 @@ class Hangman:
             ctx.message.author.display_name))
 
         def check(m):
-            return m.channel == msg.channel and len(m.content) < 20
+            return m.channel == msg.channel and len(m.content) <= 30
 
         try:
             msg = await self.bot.wait_for('message', check=check, timeout=60)
