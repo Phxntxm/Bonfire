@@ -51,7 +51,7 @@ class Roles:
                 "name": name,
                 "colour": role_colour
             }
-            await ctx.guild.create_role(**opts)
+            role = await ctx.guild.create_role(**opts)
 
         # Now add the role
         await ctx.author.add_roles(role)
