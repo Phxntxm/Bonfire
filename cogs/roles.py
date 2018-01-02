@@ -15,8 +15,7 @@ class Roles:
 
     @commands.command(aliases=['color'])
     @commands.guild_only()
-    @commands.check(utils.is_owner)
-    # @utils.custom_perms(send_messages=True)
+    @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def colour(self, ctx, role_colour: discord.Colour):
         """Used to give yourself a role matching the colour given.
