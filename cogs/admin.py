@@ -277,6 +277,27 @@ class Administration:
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     @utils.check_restricted()
+    async def allowcolours(self, ctx, setting):
+        """Turns on/off the ability to use colour roles in this server
+
+        EXAMPLE: !allowcolours on
+        RESULT: Colour roles can now be used in this server"""
+        if setting.lower() in ['on', 'yes', 'true']:
+            allowed = True
+        else:
+            allowed = False
+        entry = {
+            'server_id': str(ctx.message.guild.id),
+            'colour_roles_allowed': allowed
+        }
+        self.bot.db.save('server_settings', entry)
+        fmt = "The ability to use colour roles have just been turned {}".format("on" if allowed else "off")
+        await ctx.send(fmt)
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.custom_perms(manage_guild=True)
+    @utils.check_restricted()
     async def allowplaylists(self, ctx, setting):
         """Turns on/off the ability to playlists
 
@@ -845,7 +866,7 @@ class Administration:
     @commands.guild_only()
     @utils.custom_perms(manage_guild=True)
     @utils.check_restricted()
-    async def _welcome_message(self, ctx, *, msg = None):
+    async def _welcome_message(self, ctx, *, msg):
         """A command to customize the welcome/goodbye message
         There are a couple things that can be set to customize the message
         {member} - Will mention the user joining
@@ -857,7 +878,7 @@ class Administration:
         parent = ctx.message.content.split()[0]
         parent = parent[len(ctx.prefix):]
 
-        if msg and re.search("{.*token.*}", msg):
+        if re.search("{.*token.*}", msg):
             await ctx.send("Illegal content in {} message".format(parent))
         else:
             try:

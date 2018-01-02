@@ -13,6 +13,51 @@ class Roles:
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(aliases=['color'])
+    @commands.guild_only()
+    @commands.check(utils.is_owner)
+    # @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
+    async def colour(self, ctx, role_colour: discord.Colour):
+        """Used to give yourself a role matching the colour given.
+        If the role doesn't exist, it will be created. Names such as red, blue, yellow, etc. can be used.
+        Additionally, hex codes can be used as well
+
+        EXAMPLE: !colour red
+        RESULT: A role that matches red (#e74c3c) will be given to you"""
+        if self.bot.db.load('server_settings', key=ctx.guild.id, pluck="colour_roles_allowed"):
+            await ctx.send("Colour roles not allowed on this server! "
+                           "The command `allowcolours` must be ran to enable them!")
+            return
+
+        if not ctx.me.guild_permissions.manage_roles:
+            await ctx.send("Error: I need manage_roles to be able to use this command")
+            return
+
+        # The convention we'll use for the name
+        name = "Bonfire {}".format(role_colour)
+
+        # Try to find a role that matches our convention, Name #000000 with the colour matching
+        role = discord.utils.get(ctx.guild.roles, name=name, colour=role_colour)
+
+        # The colour roles they currently have, we need to remove them if they want a new colour
+        old_roles = [r for r in ctx.author.roles if re.match(r'Bonfire #[0-9a-zA-Z]+', r.name)]
+        if old_roles:
+            await ctx.author.remove_roles([old_roles])
+
+        # If the role doesn't exist, we need to create it
+        if not role:
+            opts = {
+                "name": name,
+                "colour": role_colour
+            }
+            await ctx.guild.create_role(**opts)
+
+        # Now add the role
+        await ctx.author.add_roles(role)
+
+        await ctx.send("I have just given you your requested colour!")
+
     @commands.group(aliases=['roles'], invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
