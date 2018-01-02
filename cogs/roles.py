@@ -43,7 +43,7 @@ class Roles:
         # The colour roles they currently have, we need to remove them if they want a new colour
         old_roles = [r for r in ctx.author.roles if re.match(r'Bonfire #[0-9a-zA-Z]+', r.name)]
         if old_roles:
-            await ctx.author.remove_roles(old_roles)
+            await ctx.author.remove_roles(*old_roles)
 
         # If the role doesn't exist, we need to create it
         if not role:
