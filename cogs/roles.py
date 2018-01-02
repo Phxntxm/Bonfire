@@ -50,8 +50,11 @@ class Roles:
                 "name": name,
                 "colour": role_colour
             }
-            role = await ctx.guild.create_role(**opts)
-
+            try:
+                role = await ctx.guild.create_role(**opts)
+            except discord.HTTPException:
+                await ctx.send("{} is not a valid colour".format(role_colour))
+                return
         # Now add the role
         await ctx.author.add_roles(role)
 
