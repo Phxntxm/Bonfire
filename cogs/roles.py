@@ -25,7 +25,7 @@ class Roles:
 
         EXAMPLE: !colour red
         RESULT: A role that matches red (#e74c3c) will be given to you"""
-        if self.bot.db.load('server_settings', key=ctx.guild.id, pluck="colour_roles_allowed"):
+        if not self.bot.db.load('server_settings', key=ctx.guild.id, pluck="colour_roles_allowed"):
             await ctx.send("Colour roles not allowed on this server! "
                            "The command `allowcolours` must be ran to enable them!")
             return
@@ -43,7 +43,7 @@ class Roles:
         # The colour roles they currently have, we need to remove them if they want a new colour
         old_roles = [r for r in ctx.author.roles if re.match(r'Bonfire #[0-9a-zA-Z]+', r.name)]
         if old_roles:
-            await ctx.author.remove_roles([old_roles])
+            await ctx.author.remove_roles(old_roles)
 
         # If the role doesn't exist, we need to create it
         if not role:
