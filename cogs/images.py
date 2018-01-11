@@ -63,7 +63,7 @@ class Images:
 
         EXAMPLE: !snek
         RESULT: A beautiful picture of a snek o3o"""
-        result = await utils.requrest("http://hrsendl.com/snake")
+        result = await utils.request("http://hrsendl.com/snake")
         if result is None:
             await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
             return
@@ -85,7 +85,7 @@ class Images:
 
         EXAMPLE: !horse
         RESULT: A beautiful picture of a horse o3o"""
-        result = await utils.requrest("http://hrsendl.com/horse")
+        result = await utils.request("http://hrsendl.com/horse")
         if result is None:
             await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
             return
