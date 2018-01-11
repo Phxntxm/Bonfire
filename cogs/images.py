@@ -55,7 +55,7 @@ class Images:
         f = discord.File(image, filename=filename)
         await ctx.send(file=f)
 
-    @commands.command()
+    @commands.command(aliases=['snake'])
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def snek(self, ctx):
@@ -63,10 +63,41 @@ class Images:
 
         EXAMPLE: !snek
         RESULT: A beautiful picture of a snek o3o"""
-        # Find a random image based on how many we currently have
-        f = random.SystemRandom().choice(glob.glob('images/snek*'))
-        with open(f, 'rb') as f:
-            await ctx.send(file=discord.File(f))
+        result = await utils.requrest("http://hrsendl.com/snake")
+        if result is None:
+            await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
+            return
+        filename = result.get('image', None)
+        if filename is None:
+            await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
+            return
+
+        image = await utils.download_image(filename)
+        filename = re.search('.*/snakes/(.*)', filename).group(1)
+        f = discord.File(image, filename=filename)
+        await ctx.send(file=f)
+
+    @commands.command()
+    @utils.custom_perms(send_messages=True)
+    @utils.check_restricted()
+    async def horse(self, ctx):
+        """Use this to print a random horse image.
+
+        EXAMPLE: !horse
+        RESULT: A beautiful picture of a horse o3o"""
+        result = await utils.requrest("http://hrsendl.com/horse")
+        if result is None:
+            await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
+            return
+        filename = result.get('image', None)
+        if filename is None:
+            await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
+            return
+
+        image = await utils.download_image(filename)
+        filename = re.search('.*/horses/(.*)', filename).group(1)
+        f = discord.File(image, filename=filename)
+        await ctx.send(file=f)
 
     @commands.command()
     @commands.guild_only()
