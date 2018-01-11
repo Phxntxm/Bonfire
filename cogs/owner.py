@@ -253,12 +253,12 @@ class Owner:
     @commands.check(utils.is_owner)
     async def bash(self, ctx, *, cmd: str):
         """Runs a bash command"""
-        proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+        proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, error = proc.communicate()
         if output:
-            await ctx.send("STDOUT:\n```\n{}```".format(output.decode("utf-8", "ignore")))
+            await ctx.send("STDOUT:\n```\n{}```".format(output.decode("utf-8", "ignore").strip()))
         if error:
-            await ctx.send("STDERR:\n```\n{}```".format(error.decode("utf-8", "ignore")))
+            await ctx.send("STDERR:\n```\n{}```".format(error.decode("utf-8", "ignore").strip()))
 
     @commands.command()
     @commands.check(utils.is_owner)
