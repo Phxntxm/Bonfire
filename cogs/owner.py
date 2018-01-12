@@ -255,7 +255,9 @@ class Owner:
         """Runs a bash command"""
         output = subprocess.check_output("{}; exit 0".format(cmd), stderr=subprocess.STDOUT, shell=True)
         if output:
-            await ctx.send("\n```\n{}```".format(output.decode("utf-8", "ignore").strip()))
+            await ctx.send("```\n{}\n```".format(output.decode("utf-8", "ignore").strip()))
+        else:
+            await ctx.send("No output for `{}`".format(cmd))
 
     @commands.command()
     @commands.check(utils.is_owner)
