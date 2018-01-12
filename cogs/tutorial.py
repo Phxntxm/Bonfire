@@ -2,6 +2,8 @@ from discord.ext import commands
 
 from . import utils
 
+import discord
+
 class Tutorial:
 
     def __init__(self, bot):
