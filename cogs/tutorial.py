@@ -39,7 +39,7 @@ class Tutorial:
             await ctx.author.send(embed)
             return
             
-    async def generate_embed(self, command):
+    def generate_embed(self, command):
         # Create the embed object
         opts = {
             "title": "Here is the tutorial for the command {}:\n\n".format(command.qualified_name),
