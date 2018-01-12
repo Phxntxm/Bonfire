@@ -72,7 +72,7 @@ class Tutorial:
             params = []
             for key, value in command.clean_params.items():
                 # Get the parameter type, as well as the default value if it exists
-                param_type, has_default, default_value = value.partition("=")
+                param_type, has_default, default_value = str(value).partition("=")
                 try:
                     # We want everything after the :
                     param_type = param_type.split(":")[1]
