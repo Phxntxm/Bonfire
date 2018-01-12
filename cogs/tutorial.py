@@ -91,9 +91,9 @@ class Tutorial:
 
                 # This is the = from the partition, if it exists, then there's a default...hence the name
                 if has_default:
-                    string += "optional"
+                    string += ", optional)"
                 else:
-                    string += "required"
+                    string += ", required)"
 
                 # Now push our string to the list of params
                 params.append(string)
