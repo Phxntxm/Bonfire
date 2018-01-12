@@ -106,7 +106,7 @@ class Tutorial:
         if example and result:
             embed.add_field(
                 name="Example",
-                value="{}\n{}".format(example, result),
+                value="{}\n{}".format(example.strip(), result.strip()),
                 inline=False
             )
         try:
