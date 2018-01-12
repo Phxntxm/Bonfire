@@ -60,11 +60,12 @@ class Tutorial:
             gif = None
 
         # Add a field for the aliases
-        embed.add_field(
-            name="Aliases",
-            value="\n".join(["\t{}".format(alias) for alias in command.aliases]),
-            inline=False
-        )
+        if command.aliases:
+            embed.add_field(
+                name="Aliases",
+                value="\n".join(["\t{}".format(alias) for alias in command.aliases]),
+                inline=False
+            )
         # Add any paramaters needed
         if command.clean_params:
             required_params = [x for x in command.clean_params if "=" not in x]
