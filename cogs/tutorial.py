@@ -38,13 +38,14 @@ class Tutorial:
         # Loop through all the commands that we want to use
         for command in commands:
             embed = self.generate_embed(command)
-            await ctx.author.send(embed=embed)
+            # await ctx.author.send(embed=embed)
+            await ctx.send(embed=embed)
             return
             
     def generate_embed(self, command):
         # Create the embed object
         opts = {
-            "title": "Here is the tutorial for the command {}:\n\n".format(command.qualified_name),
+            "title": "`{}` command tutorial:\n\n".format(command.qualified_name),
             "colour": discord.Colour.green()
         }
         embed = discord.Embed(**opts)
@@ -68,17 +69,36 @@ class Tutorial:
             )
         # Add any paramaters needed
         if command.clean_params:
-            required_params = [x for x in command.clean_params if "=" not in x]
-            optional_params = [x for x in command.clean_params if "=" in x]
+            params = []
+            for key, value in command.clean_params.items():
+                # Get the parameter type, as well as the default value if it exists
+                param_type, has_default, default_value = value.partition("=")
+                try:
+                    # We want everything after the :
+                    param_type = param_type.split(":")[1]
+                    # Now we want to split based on . (for possible deep level types IE discord.member.Member) then get the last value
+                    param_type = param_type.split(".")
+                    param_type = param_type[len(param_type) - 1]
+                # This could mean something like *param was provided as the parameter
+                except IndexError:
+                    param_type = "str"
+
+                # Start the string that we'll use as the param's info
+                string = "{} (Type: {}".format(key, param_type)
+
+                if default_value:
+                    string += ", Default: {}".format(default_value)
+
+                # This is the = from the partition, if it exists, then there's a default...hence the name
+                if has_default:
+                    string += "optional"
+                else:
+                    string += "required"
+
+                # Now push our string to the list of params
+                params.append(string)
             name = "Paramaters"
-            value = ""
-            # Add the required params
-            if required_params:
-                value += "Requried:\n{}\n\n".format("\n".join(required_params))
-            # Add the optional params
-            if optional_params:
-                value += "Optional:\n{}".format("\n".join(optional_params))
-            embed.add_field(name=name, value=value, inline=False)
+            embed.add_field(name=name, value="\n".join(params), inline=False)
         # Set the description of the embed to the description
         if description:
             embed.description = description
