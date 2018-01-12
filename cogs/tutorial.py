@@ -38,7 +38,7 @@ class Tutorial:
         # Loop through all the commands that we want to use
         for command in commands:
             embed = self.generate_embed(command)
-            await ctx.author.send(embed)
+            await ctx.author.send(embed=embed)
             return
             
     def generate_embed(self, command):
