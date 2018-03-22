@@ -21,7 +21,7 @@ class Images:
 
         EXAMPLE: !cat
         RESULT: A beautiful picture of a cat o3o"""
-        result = await utils.request('http://random.cat/meow')
+        result = await utils.request('http://aws.random.cat/meow')
         if result is None:
             await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
             return
