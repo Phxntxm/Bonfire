@@ -70,8 +70,10 @@ class Roles:
 
         EXAMPLE: !role
         RESULT: A list of all your roles"""
+        # Don't include the colour roles
+        colour_role = re.compile("Bonfire #.+")
         # Simply get a list of all roles in this server and send them
-        entries = [r.name for r in ctx.guild.role_hierarchy[:-1]]
+        entries = [r.name for r in ctx.guild.role_hierarchy[:-1] if not colour_role.match(r.name)]
         if len(entries) == 0:
             await ctx.send("You do not have any roles setup on this server, other than the default role!")
             return
