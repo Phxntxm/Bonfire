@@ -268,7 +268,7 @@ class Owner:
     @commands.check(utils.is_owner)
     async def status(self, ctx, *, status: str):
         """Changes the bot's 'playing' status"""
-        await self.bot.change_presence(game=discord.Game(name=status, type=0))
+        await self.bot.change_presence(activity=discord.Game(name=status, type=0))
         await ctx.send("Just changed my status to '{}'!".format(status))
 
     @commands.command()

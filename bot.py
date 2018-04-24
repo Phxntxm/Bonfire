@@ -16,7 +16,7 @@ opts = {'command_prefix': utils.command_prefix,
         'description': utils.bot_description,
         'pm_help': None,
         'command_not_found': '',
-        'game': discord.Game(name=utils.default_status, type=0)}
+        'game': discord.Activity(name=utils.default_status, type=0)}
 
 bot = commands.AutoShardedBot(**opts)
 logging.basicConfig(level=logging.INFO, filename='bonfire.log')
