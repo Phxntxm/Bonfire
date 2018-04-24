@@ -38,10 +38,15 @@ class Spotify:
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def spotify(self, ctx, *, query):
-        """Searches Spotify for a song, giving you the link you can use to listen in"""
+        """Searches Spotify for a song, giving you the link you can use to listen in. Give the query to search for
+        and it will search by title/artist for the best match
+
+        EXAMPLE: !spotify Eminem
+        RESULT: Some Eminem song"""
+
         # Setup the headers with the token that should be here
         headers = {"Authorization": "Bearer {}".format(self._token)}
-        opts = {"q": query, "type": "track,artist"}
+        opts = {"q": query, "type": "track"}
         url = "https://api.spotify.com/v1/search"
         response = await utils.request(url, headers=headers, payload=opts)
         try:
@@ -54,6 +59,11 @@ class Spotify:
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def playlist(self, ctx, *, query):
+        """Searches Spotify for a playlist, giving you the link you can use to listen in. Give the query to search for
+        and it will search for the best match
+
+        EXAMPLE: !spotify Eminem
+        RESULT: Some Eminem song"""
         # Setup the headers with the token that should be here
         headers = {"Authorization": "Bearer {}".format(self._token)}
         opts = {"q": query, "type": "playlist"}
