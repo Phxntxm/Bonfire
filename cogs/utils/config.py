@@ -48,6 +48,9 @@ ytdl_proxy = global_config.get('youtube_dl_proxy', None)
 patreon_key = global_config.get('patreon_key', None)
 patreon_id = global_config.get('patreon_id', None)
 patreon_link = global_config.get('patreon_link', None)
+# The client ID/secret for spotify
+spotify_id = global_config.get("spotify_id", None)
+spotify_secret = global_config.get("spotify_secret", None)
 
 # The extensions to load
 extensions = [
