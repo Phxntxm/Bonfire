@@ -121,9 +121,12 @@ class Stats:
         roles = roles or "No roles added"
         embed.add_field(name='Top 5 roles', value=roles, inline=False)
 
-        if user.game:
+        # Add the activity if there is one
+        act = user.activity
+        if isinstance(act, discord.activity.Spotify):
+            embed.add_field(name="Listening to", value=user.title, inline=False)
+        elif isinstance(act, discord.activity.Game):
             embed.add_field(name='Playing', value=user.game, inline=False)
-
         await ctx.send(embed=embed)
 
     @commands.group()
