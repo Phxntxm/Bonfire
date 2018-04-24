@@ -11,6 +11,7 @@ import inspect
 import pendulum
 import textwrap
 import traceback
+import subprocess
 from contextlib import redirect_stdout
 import io
 
@@ -247,6 +248,16 @@ class Owner:
                     await ctx.send('```py\n%s%s\n```' % (value, ret))
             except discord.HTTPException:
                 await ctx.send("Content too large for me to print!")
+
+    @commands.command()
+    @commands.check(utils.is_owner)
+    async def bash(self, ctx, *, cmd: str):
+        """Runs a bash command"""
+        output = subprocess.check_output("{}; exit 0".format(cmd), stderr=subprocess.STDOUT, shell=True)
+        if output:
+            await ctx.send("```\n{}\n```".format(output.decode("utf-8", "ignore").strip()))
+        else:
+            await ctx.send("No output for `{}`".format(cmd))
 
     @commands.command()
     @commands.check(utils.is_owner)
