@@ -231,7 +231,6 @@ class Miscallaneous:
         ttt = self.bot.get_cog('TicTacToe')
         bj = self.bot.get_cog('Blackjack')
         interaction = self.bot.get_cog('Interaction')
-        music = self.bot.get_cog('Music')
 
         if hm:
             value.append("Hangman games: {}".format(len(hm.games)))
@@ -244,9 +243,6 @@ class Miscallaneous:
             for battles in self.bot.get_cog('Interaction').battles.values():
                 count_battles += len(battles)
             value.append("Battles running: {}".format(len(bj.games)))
-        if music:
-            songs = len([x for x in music.voice_states.values() if x.playing])
-            value.append("Total songs playing: {}".format(songs))
         embed.add_field(name=name, value="\n".join(value), inline=False)
 
         await ctx.send(embed=embed)
