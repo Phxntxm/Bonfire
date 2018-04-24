@@ -67,15 +67,16 @@ extensions = [
     'cogs.links',
     'cogs.roles',
     'cogs.tictactoe',
-    'cogs.hangman', 'cogs.events', 'cogs.raffle',
+    'cogs.hangman',
+    'cogs.events',
+    'cogs.raffle',
     'cogs.twitch',
     'cogs.blackjack',
     'cogs.osu',
     'cogs.tags',
     'cogs.roulette',
-    'cogs.music',
+    'cogs.spotify',
     'cogs.polls',
-    'cogs.playlist',
     'cogs.dj'
 ]
 
