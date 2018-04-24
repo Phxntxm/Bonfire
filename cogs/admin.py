@@ -1221,44 +1221,6 @@ class Administration:
         except IndexError:
             await ctx.send("That is not a valid rule number, try running the command again.")
 
-    @commands.command()
-    @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
-    async def queuetype(self, ctx, new_type=None):
-        """Switches the song queue type for music
-        Choices are `user` or `song` queue
-        The `user` queue rotates off of a wait list, where people join the waitlist and the next song in their
-        playlist is the one that is played.
-
-        The `song` queue rotates based on songs themselves, where people add a song to the server's playlist,
-        and these are rotated through.
-
-        EXAMPLE: !queuetype user
-        RESULT: !queuetype """
-        key = str(ctx.message.guild.id)
-
-        if new_type is None:
-            cur_type = self.bot.db.load('server_settings', key=key, pluck='queue_type') or 'song'
-            await ctx.send("Current queue type is {}".format(cur_type))
-            return
-
-        new_type = new_type.lower().strip()
-        if new_type not in ['user', 'song']:
-            await ctx.send("Queue choices are either `user` or `song`. "
-                           "Run `{}help queuetype` if you need more information".format(ctx.prefix))
-        else:
-            entry = {
-                'server_id': key,
-                'queue_type': new_type
-            }
-            self.bot.db.save('server_settings', entry)
-            state = self.bot.get_cog('Music').voice_states.get(ctx.message.guild.id)
-            if state:
-                if new_type == "user" and not state.user_queue or new_type == "song" and state.user_queue:
-                    state.switch_queue_type()
-            await ctx.send("Current queue type is now `{}`".format(new_type))
-
 
 def setup(bot):
     bot.add_cog(Administration(bot))
