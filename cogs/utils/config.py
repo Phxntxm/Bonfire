@@ -76,8 +76,7 @@ extensions = [
     'cogs.tags',
     'cogs.roulette',
     'cogs.spotify',
-    'cogs.polls',
-    'cogs.dj'
+    'cogs.polls'
 ]
 
 
