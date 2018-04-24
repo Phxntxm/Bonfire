@@ -35,7 +35,7 @@ class Spotify:
 
     @commands.group()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
+    @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def spotify(self, ctx, *, query):
         """Searches Spotify for a song, giving you the link you can use to listen in"""
@@ -51,7 +51,7 @@ class Spotify:
 
     @spotify.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
+    @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def playlist(self, ctx, *, query):
         # Setup the headers with the token that should be here
