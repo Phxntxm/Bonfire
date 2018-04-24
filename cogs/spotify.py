@@ -33,7 +33,7 @@ class Spotify:
 
             await asyncio.wait(data.get("expires_in"))
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
