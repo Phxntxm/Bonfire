@@ -51,7 +51,7 @@ class Spotify:
         response = await utils.request(url, headers=headers, payload=opts)
         try:
             await ctx.send(response.get("tracks").get("items")[0].get("external_urls").get("spotify"))
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError, IndexError):
             await ctx.send("Couldn't find a song for:\n{}".format(query))
 
     @spotify.command()
