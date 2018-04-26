@@ -31,7 +31,7 @@ class Spotify:
                 data = await response.json()
                 self._token = data.get("access_token")
 
-            await asyncio.wait(data.get("expires_in"))
+            await asyncio.sleep(data.get("expires_in", 2400))
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
