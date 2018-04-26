@@ -126,7 +126,7 @@ class Stats:
         if isinstance(act, discord.activity.Spotify):
             embed.add_field(name="Listening to", value=user.title, inline=False)
         elif isinstance(act, discord.activity.Game):
-            embed.add_field(name='Playing', value=user.game, inline=False)
+            embed.add_field(name='Playing', value=act.name, inline=False)
         await ctx.send(embed=embed)
 
     @commands.group()
