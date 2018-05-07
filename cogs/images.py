@@ -21,18 +21,12 @@ class Images:
 
         EXAMPLE: !cat
         RESULT: A beautiful picture of a cat o3o"""
-        result = await utils.request('http://aws.random.cat/meow')
-        if result is None:
-            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
-            return
-        filename = result.get('file', None)
-        if filename is None:
-            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
-            return
+        url = "http://thecatapi.com/api/images/get"
+        opts = {"format": "src"}
+        result = await utils.request(url, attr='url', payload=opts)
 
-        image = await utils.download_image(filename)
-        filename = re.search('.*/i/(.*)', filename).group(1)
-        f = discord.File(image, filename=filename)
+        image = await utils.download_image(result)
+        f = discord.File(image, filename=result.name)
         await ctx.send(file=f)
 
     @commands.command(aliases=['dog', 'rd'])
@@ -219,14 +213,18 @@ class Images:
         tags = tags.replace(',_', ' ')
 
         url = 'https://e621.net/post/index.json'
-        params = {'limit': 320,
-                  'tags': tags}
+        params = {
+            'limit': 5,
+            'tags': tags
+        }
 
         nsfw = await utils.channel_is_nsfw(ctx.message.channel, self.bot.db)
 
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
         params['tags'] += " rating:explicit" if nsfw else " rating:safe"
+        # Tack on a random order
+        params['tags'] += " order:random"
 
         data = await utils.request(url, payload=params)
 
@@ -239,8 +237,16 @@ class Images:
         # The response should be in a list format, so we'll end up getting a key error if the response was in json
         # i.e. it responded with a 404/504/etc.
         try:
-            rand_image = data[random.SystemRandom().randint(0, len(data) - 1)]['file_url']
-            await ctx.send(rand_image)
+            for image in data:
+                # Will support in the future
+                blacklist = []
+                tags = image["tags"]
+                # Check if any of the tags are in the blacklist
+                if any(tag in blacklist for tag in tags):
+                    continue
+                # If this image is fine, then send this and break
+                await ctx.send(image["file_url"])
+                return
         except (ValueError, KeyError):
             await ctx.send("No results with that tag {}".format(ctx.message.author.mention))
             return
