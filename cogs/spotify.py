@@ -34,7 +34,6 @@ class Spotify:
             await asyncio.sleep(data.get("expires_in", 2400))
 
     @commands.group(invoke_without_command=True)
-    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def spotify(self, ctx, *, query):
@@ -55,7 +54,6 @@ class Spotify:
             await ctx.send("Couldn't find a song for:\n{}".format(query))
 
     @spotify.command()
-    @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
     async def playlist(self, ctx, *, query):
@@ -71,7 +69,7 @@ class Spotify:
         response = await utils.request(url, headers=headers, payload=opts)
         try:
             await ctx.send(response.get("playlists").get("items")[0].get("external_urls").get("spotify"))
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError, IndexError):
             await ctx.send("Couldn't find a song for:\n{}".format(query))
 
 
