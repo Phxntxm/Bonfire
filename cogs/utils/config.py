@@ -26,10 +26,11 @@ except KeyError:
 bot_description = global_config.get("description")
 # Bot's default prefix for commands
 default_prefix = global_config.get("command_prefix", "!")
-# The key for bots.discord.pw and carbonitex
+# The key for bot sites (discord bots and discordbots are TWO DIFFERENT THINGS)
 discord_bots_key = global_config.get('discord_bots_key', "")
+discordbots_key = global_config.get('discordbots_key', "")
 carbon_key = global_config.get('carbon_key', "")
-# The client ID for twitch requsets
+# The client ID for twitch requests
 twitch_key = global_config.get('twitch_key', "")
 # The key for youtube API calls
 youtube_key = global_config.get("youtube_key", "")
