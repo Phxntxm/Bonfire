@@ -6,12 +6,13 @@ import discord
 
 log = logging.getLogger()
 
-discord_bots_url = 'https://bots.discord.pw/api'
+discord_bots_url = 'https://bots.discord.pw/api/bots/{}/stats'
+discordbots_url = "https://discordbots.org/api/bots/{}/stats"
 carbonitex_url = 'https://www.carbonitex.net/discord/data/botdata.php'
 
 
 class StatsUpdate:
-    """This is used purely to update stats information for carbonitex and botx.discord.pw"""
+    """This is used purely to update stats information for the bot sites"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -23,6 +24,7 @@ class StatsUpdate:
     async def update(self):
         server_count = len(self.bot.guilds)
 
+        # Carbonitex request
         carbon_payload = {
             'key': config.carbon_key,
             'servercount': server_count
@@ -31,6 +33,7 @@ class StatsUpdate:
         async with self.session.post(carbonitex_url, data=carbon_payload) as resp:
             log.info('Carbonitex statistics returned {} for {}'.format(resp.status, carbon_payload))
 
+        # Discord.bots.pw request
         payload = json.dumps({
             'server_count': server_count
         })
@@ -40,9 +43,21 @@ class StatsUpdate:
             'content-type': 'application/json'
         }
 
-        url = '{}/bots/{}/stats'.format(discord_bots_url, self.bot.user.id)
+        url = discord_bots_url.format(self.bot.user.id)
         async with self.session.post(url, data=payload, headers=headers) as resp:
             log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
+
+        # discordbots.com request
+        url = discordbots_url.format(self.bot.user.id)
+        payload = {
+            "server_count": server_count
+        }
+
+        headers = {
+            "Authorization": config.discordbots_key
+        }
+        async with self.session.post(url, data=payload, headers=headers) as resp:
+            log.info('discordbots.com statistics retruned {} for {}'.format(resp.status, payload))
 
     async def on_guild_join(self, _):
         self.bot.loop.create_task(self.update())
