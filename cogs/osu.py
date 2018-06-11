@@ -75,7 +75,7 @@ class Osu:
         e.add_field(name='Rank', value="{:,}".format(user.pp_rank))
         e.add_field(name='Level', value=user.level)
         e.add_field(name='Performance Points', value="{:,}".format(user.pp_raw))
-        e.add_field(name='Accuracy', value="{:.2%}".format(user.accuracy))
+        e.add_field(name='Accuracy', value="{:.2%}".format(user.accuracy / 100))
         e.add_field(name='SS Ranks', value="{:,}".format(user.count_rank_ss))
         e.add_field(name='S Ranks', value="{:,}".format(user.count_rank_s))
         e.add_field(name='A Ranks', value="{:,}".format(user.count_rank_a))
