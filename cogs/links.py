@@ -154,32 +154,35 @@ class Links:
 
         EXAMPLE: !urban a normal phrase
         RESULT: Probably something lewd; this is urban dictionary we're talking about"""
-        await ctx.message.channel.trigger_typing()
+        if utils.channel_is_nsfw(ctx.message.channel, self.bot.db):
+            await ctx.message.channel.trigger_typing()
 
-        url = "http://api.urbandictionary.com/v0/define"
-        params = {"term": msg}
-        try:
-            data = await utils.request(url, payload=params)
-            if data is None:
+            url = "http://api.urbandictionary.com/v0/define"
+            params = {"term": msg}
+            try:
+                data = await utils.request(url, payload=params)
+                if data is None:
+                    await ctx.send("Sorry but I failed to connect to urban dictionary!")
+                    return
+
+                # List is the list of definitions found, if it's empty then nothing was found
+                if len(data['list']) == 0:
+                    await ctx.send("No result with that term!")
+                # If the list is not empty, use the first result and print it's defintion
+                else:
+                    entries = [x['definition'] for x in data['list']]
+                    try:
+                        pages = utils.Pages(self.bot, message=ctx.message, entries=entries[:5], per_page=1)
+                        await pages.paginate()
+                    except utils.CannotPaginate as e:
+                        await ctx.send(str(e))
+            # Urban dictionary has some long definitions, some might not be able to be sent
+            except discord.HTTPException:
+                await ctx.send('```\nError: Definition is too long for me to send```')
+            except KeyError:
                 await ctx.send("Sorry but I failed to connect to urban dictionary!")
-                return
-
-            # List is the list of definitions found, if it's empty then nothing was found
-            if len(data['list']) == 0:
-                await ctx.send("No result with that term!")
-            # If the list is not empty, use the first result and print it's defintion
-            else:
-                entries = [x['definition'] for x in data['list']]
-                try:
-                    pages = utils.Pages(self.bot, message=ctx.message, entries=entries[:5], per_page=1)
-                    await pages.paginate()
-                except utils.CannotPaginate as e:
-                    await ctx.send(str(e))
-        # Urban dictionary has some long definitions, some might not be able to be sent
-        except discord.HTTPException:
-            await ctx.send('```\nError: Definition is too long for me to send```')
-        except KeyError:
-            await ctx.send("Sorry but I failed to connect to urban dictionary!")
+        else:
+            await ctx.send("This command is limited to nsfw channels")
 
 
 def setup(bot):
