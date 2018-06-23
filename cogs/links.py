@@ -154,7 +154,7 @@ class Links:
 
         EXAMPLE: !urban a normal phrase
         RESULT: Probably something lewd; this is urban dictionary we're talking about"""
-        if utils.channel_is_nsfw(ctx.message.channel, self.bot.db):
+        if await utils.channel_is_nsfw(ctx.message.channel, self.bot.db):
             await ctx.message.channel.trigger_typing()
 
             url = "http://api.urbandictionary.com/v0/define"
