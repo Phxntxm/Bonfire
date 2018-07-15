@@ -71,7 +71,7 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json',
     for i in range(5):
         try:
             # Create the session with our headeres
-            with aiohttp.ClientSession(headers=headers) as session:
+            async with aiohttp.ClientSession(headers=headers) as session:
                 # Make the request, based on the method, url, and paramaters given
                 async with session.request(method, url, params=payload) as response:
                     # If the request wasn't successful, re-attempt
