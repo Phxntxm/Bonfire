@@ -26,7 +26,7 @@ class Spotify:
         url = "https://accounts.spotify.com/api/token"
         opts = {"grant_type": "client_credentials"}
         while True:
-            with aiohttp.ClientSession(headers=self.headers) as session:
+            async with aiohttp.ClientSession(headers=self.headers) as session:
                 response = await session.post(url, data=opts)
                 data = await response.json()
                 self._token = data.get("access_token")
