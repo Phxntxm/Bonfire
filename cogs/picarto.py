@@ -210,13 +210,19 @@ class Picarto:
     @utils.check_restricted()
     async def remove_picarto_url(self, ctx):
         """Removes your picarto URL"""
-        entry = {
-            'picarto_url': None,
-            'member_id': str(ctx.message.author.id)
-        }
+        key = str(ctx.message.author.id)
 
-        self.bot.db.save('picarto', entry)
-        await ctx.send("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
+        result = self.bot.db.load('picarto', key=key)
+        if result:
+            entry = {
+                'picarto_url': None,
+                'member_id': str(ctx.message.author.id)
+            }
+
+            self.bot.db.save('picarto', entry)
+            await ctx.send("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
+        else:
+            await ctx.send("I cannot remove something that I don't have (you've never saved your Picarto URL)")
 
     @picarto.command(name='alerts')
     @commands.guild_only()
