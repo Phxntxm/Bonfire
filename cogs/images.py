@@ -3,7 +3,6 @@ import discord
 import random
 import re
 import math
-import glob
 from bs4 import BeautifulSoup as bs
 
 from . import utils
@@ -25,9 +24,12 @@ class Images:
         opts = {"format": "src"}
         result = await utils.request(url, attr='url', payload=opts)
 
-        image = await utils.download_image(result)
-        f = discord.File(image, filename=result.name)
-        await ctx.send(file=f)
+        try:
+            image = await utils.download_image(result)
+            f = discord.File(image, filename=result.name)
+            await ctx.send(file=f)
+        except (ValueError, AttributeError):
+            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
 
     @commands.command(aliases=['dog', 'rd'])
     @utils.custom_perms(send_messages=True)
