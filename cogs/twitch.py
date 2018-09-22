@@ -2,11 +2,9 @@ from discord.ext import commands
 
 from . import utils
 
-import aiohttp
 import asyncio
 import discord
 import re
-import rethinkdb as r
 import traceback
 import logging
 
@@ -22,6 +20,8 @@ class Twitch:
         self.bot = bot
         self.key = utils.twitch_key
         self.params = {'client_id': self.key}
+
+        self.task = bot.loop.create_task(self.check_channels())
 
     def _form_embed(self, data):
         if not data:
@@ -82,63 +82,65 @@ class Twitch:
         data = await utils.request(url, payload=self.params)
         return self._form_embed(data)
 
-    async def check_channels(self):
+    async def twitch_task(self):
         await self.bot.wait_until_ready()
-        # This is a loop that runs every 30 seconds, checking if anyone has gone online
-        try:
-            while not self.bot.is_closed():
-                twitch = await self.bot.db.actual_load('twitch', table_filter={'notifications_on': 1})
-                for data in twitch:
-                    m_id = int(data['member_id'])
-                    url = data['twitch_url']
-                    # Check if they are online by trying to get an displayed embed for this user
-                    embed = await self.online_embed(url)
-                    # If they're currently online, but saved as not then we'll let servers know they are now online
-                    if embed and data['live'] == 0:
-                        msg = "{member.display_name} has just gone live!"
-                        self.bot.db.save('twitch', {'live': 1, 'member_id': str(m_id)})
-                    # Otherwise our notification will say they've gone offline
-                    elif not embed and data['live'] == 1:
-                        msg = "{member.display_name} has just gone offline!"
-                        embed = await self.offline_embed(url)
-                        self.bot.db.save('twitch', {'live': 0, 'member_id': str(m_id)})
-                    else:
-                        continue
-
-                    # Loop through each server that they are set to notify
-                    for s_id in data['servers']:
-                        server = self.bot.get_guild(int(s_id))
-                        # If we can't find it, ignore this one
-                        if server is None:
-                            continue
-                        member = server.get_member(m_id)
-                        # If we can't find them in this server, also ignore
-                        if member is None:
-                            continue
-
-                        # Get the notifications settings, get the twitch setting
-                        notifications = self.bot.db.load('server_settings', key=s_id, pluck='notifications') or {}
-                        # Set our default to either the one set, or the default channel of the server
-                        default_channel_id = notifications.get('default')
-                        # If it is has been overriden by twitch notifications setting, use this
-                        channel_id = notifications.get('twitch') or default_channel_id
-                        # Now get the channel
-                        if channel_id:
-                            channel = server.get_channel(int(channel_id))
-                        else:
-                            continue
-
-                        # Then just send our message
-                        try:
-                            await channel.send(msg.format(member=member), embed=embed)
-                        except (discord.Forbidden, discord.HTTPException, AttributeError):
-                            pass
-
+        while not self.bot.is_closed():
+            try:
+                await self.check_channels()
+            except Exception as error:
+                with open("error_log", 'a') as f:
+                    traceback.print_tb(error.__traceback__, file=f)
+                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+            finally:
                 await asyncio.sleep(30)
-        except Exception as e:
-            tb = traceback.format_exc()
-            fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
-            log.error(fmt)
+
+    async def check_channels(self):
+        twitch = await self.bot.db.actual_load('twitch', table_filter={'notifications_on': 1})
+        for data in twitch:
+            m_id = int(data['member_id'])
+            url = data['twitch_url']
+            # Check if they are online by trying to get an displayed embed for this user
+            embed = await self.online_embed(url)
+            # If they're currently online, but saved as not then we'll let servers know they are now online
+            if embed and data['live'] == 0:
+                msg = "{member.display_name} has just gone live!"
+                self.bot.db.save('twitch', {'live': 1, 'member_id': str(m_id)})
+            # Otherwise our notification will say they've gone offline
+            elif not embed and data['live'] == 1:
+                msg = "{member.display_name} has just gone offline!"
+                embed = await self.offline_embed(url)
+                self.bot.db.save('twitch', {'live': 0, 'member_id': str(m_id)})
+            else:
+                continue
+
+            # Loop through each server that they are set to notify
+            for s_id in data['servers']:
+                server = self.bot.get_guild(int(s_id))
+                # If we can't find it, ignore this one
+                if server is None:
+                    continue
+                member = server.get_member(m_id)
+                # If we can't find them in this server, also ignore
+                if member is None:
+                    continue
+
+                # Get the notifications settings, get the twitch setting
+                notifications = self.bot.db.load('server_settings', key=s_id, pluck='notifications') or {}
+                # Set our default to either the one set, or the default channel of the server
+                default_channel_id = notifications.get('default')
+                # If it is has been overriden by twitch notifications setting, use this
+                channel_id = notifications.get('twitch') or default_channel_id
+                # Now get the channel
+                if channel_id:
+                    channel = server.get_channel(int(channel_id))
+                else:
+                    continue
+
+                # Then just send our message
+                try:
+                    await channel.send(msg.format(member=member), embed=embed)
+                except (discord.Forbidden, discord.HTTPException, AttributeError):
+                    pass
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -329,6 +331,4 @@ class Twitch:
 
 
 def setup(bot):
-    t = Twitch(bot)
-    bot.loop.create_task(t.check_channels())
     bot.add_cog(Twitch(bot))

@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+import traceback
 
 from discord.ext import commands
 from base64 import urlsafe_b64encode
@@ -20,9 +21,21 @@ class Spotify:
                 urlsafe_b64encode(self._authorization.encode()).decode()
             )
         }
-        self.bot.loop.create_task(self.api_token_task())
+        self.task = self.bot.loop.create_task(self.api_token_task())
 
     async def api_token_task(self):
+        while True:
+            try:
+                delay = await self.get_api_token()
+            except Exception as error:
+                with open("error_log", 'a') as f:
+                    traceback.print_tb(error.__traceback__, file=f)
+                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+                delay = 2400
+            finally:
+                await asyncio.sleep(delay)
+
+    async def get_api_token(self):
         url = "https://accounts.spotify.com/api/token"
         opts = {"grant_type": "client_credentials"}
         while True:
@@ -30,6 +43,7 @@ class Spotify:
                 response = await session.post(url, data=opts)
                 data = await response.json()
                 self._token = data.get("access_token")
+                return data.get("expires_in")
 
             await asyncio.sleep(data.get("expires_in", 2400))
 

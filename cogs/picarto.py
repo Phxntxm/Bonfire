@@ -2,20 +2,18 @@ import asyncio
 import discord
 import re
 import traceback
-import logging
 
 from discord.ext import commands
 
 from . import utils
 
-log = logging.getLogger()
 BASE_URL = 'https://api.picarto.tv/v1'
 
 
 class Picarto:
     def __init__(self, bot):
         self.bot = bot
-        self.bot.loop.create_task(self.check_channels())
+        self.task = self.bot.loop.create_task(self.picarto_task())
 
     # noinspection PyAttributeOutsideInit
     async def get_online_users(self):
@@ -69,64 +67,66 @@ class Picarto:
         channel = re.search("(?<=picarto.tv/)(.*)", channel).group(1)
         return channel.lower() in [stream['name'].lower() for stream in self.online_channels]
 
-    async def check_channels(self):
-        await self.bot.wait_until_ready()
-        # This is a loop that runs every 30 seconds, checking if anyone has gone online
+    async def picarto_task(self):
         try:
+            await self.bot.wait_until_ready()
             while not self.bot.is_closed():
-                await self.get_online_users()
-                picarto = await self.bot.db.actual_load('picarto', table_filter={'notifications_on': 1})
-                for data in picarto:
-                    m_id = int(data['member_id'])
-                    url = data['picarto_url']
-                    # Check if they are online
-                    online = self.channel_online(url)
-                    # If they're currently online, but saved as not then we'll let servers know they are now online
-                    if online and data['live'] == 0:
-                        msg = "{member.display_name} has just gone live!"
-                        self.bot.db.save('picarto', {'live': 1, 'member_id': str(m_id)})
-                    # Otherwise our notification will say they've gone offline
-                    elif not online and data['live'] == 1:
-                        msg = "{member.display_name} has just gone offline!"
-                        self.bot.db.save('picarto', {'live': 0, 'member_id': str(m_id)})
-                    else:
-                        continue
+                await self.check_channels()
+        except Exception as error:
+            with open("error_log", 'a') as f:
+                traceback.print_tb(error.__traceback__, file=f)
+                print('{0.__class__.__name__}: {0}'.format(error), file=f)
+        finally:
+            await asyncio.sleep(30)
 
-                    embed = await self.channel_embed(url)
-                    # Loop through each server that they are set to notify
-                    for s_id in data['servers']:
-                        server = self.bot.get_guild(int(s_id))
-                        # If we can't find it, ignore this one
-                        if server is None:
-                            continue
-                        member = server.get_member(m_id)
-                        # If we can't find them in this server, also ignore
-                        if member is None:
-                            continue
+    async def check_channels(self):
+        await self.get_online_users()
+        picarto = await self.bot.db.actual_load('picarto', table_filter={'notifications_on': 1})
+        for data in picarto:
+            m_id = int(data['member_id'])
+            url = data['picarto_url']
+            # Check if they are online
+            online = self.channel_online(url)
+            # If they're currently online, but saved as not then we'll let servers know they are now online
+            if online and data['live'] == 0:
+                msg = "{member.display_name} has just gone live!"
+                self.bot.db.save('picarto', {'live': 1, 'member_id': str(m_id)})
+            # Otherwise our notification will say they've gone offline
+            elif not online and data['live'] == 1:
+                msg = "{member.display_name} has just gone offline!"
+                self.bot.db.save('picarto', {'live': 0, 'member_id': str(m_id)})
+            else:
+                continue
 
-                        # Get the notifications settings, get the picarto setting
-                        notifications = self.bot.db.load('server_settings', key=s_id, pluck='notifications') or {}
-                        # Set our default to either the one set, or the default channel of the server
-                        default_channel_id = notifications.get('default')
-                        # If it is has been overriden by picarto notifications setting, use this
-                        channel_id = notifications.get('picarto') or default_channel_id
-                        # Now get the channel
-                        if channel_id:
-                            channel = server.get_channel(int(channel_id))
-                        else:
-                            continue
+            embed = await self.channel_embed(url)
+            # Loop through each server that they are set to notify
+            for s_id in data['servers']:
+                server = self.bot.get_guild(int(s_id))
+                # If we can't find it, ignore this one
+                if server is None:
+                    continue
+                member = server.get_member(m_id)
+                # If we can't find them in this server, also ignore
+                if member is None:
+                    continue
 
-                        # Then just send our message
-                        try:
-                            await channel.send(msg.format(member=member), embed=embed)
-                        except (discord.Forbidden, discord.HTTPException, AttributeError):
-                            pass
+                # Get the notifications settings, get the picarto setting
+                notifications = self.bot.db.load('server_settings', key=s_id, pluck='notifications') or {}
+                # Set our default to either the one set, or the default channel of the server
+                default_channel_id = notifications.get('default')
+                # If it is has been overriden by picarto notifications setting, use this
+                channel_id = notifications.get('picarto') or default_channel_id
+                # Now get the channel
+                if channel_id:
+                    channel = server.get_channel(int(channel_id))
+                else:
+                    continue
 
-                await asyncio.sleep(30)
-        except Exception as e:
-            tb = traceback.format_exc()
-            fmt = "{1}\n{0.__class__.__name__}: {0}".format(tb, e)
-            log.error(fmt)
+                # Then just send our message
+                try:
+                    await channel.send(msg.format(member=member), embed=embed)
+                except (discord.Forbidden, discord.HTTPException, AttributeError):
+                    pass
 
     @commands.group(invoke_without_command=True)
     @utils.custom_perms(send_messages=True)

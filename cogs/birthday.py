@@ -1,35 +1,45 @@
 import discord
 import pendulum
 import asyncio
+import traceback
 from pendulum.parsing.exceptions import ParserError
 
 from discord.ext import commands
 from . import utils
 
 
+tzmap = {
+    'us-central': pendulum.timezone('US/Central'),
+    'eu-central': pendulum.timezone('Europe/Paris'),
+    'hongkong': pendulum.timezone('Hongkong'),
+
+}
+
+
+def sort_birthdays(bds):
+    # First sort the birthdays based on the comparison of the actual date
+    bds = sorted(bds, key=lambda x: x['birthday'])
+    # We want to split this into birthdays after and before todays date
+    # We can then use this to sort based on "whose is closest"
+    later_bds = []
+    previous_bds = []
+    # Loop through each birthday
+    for bd in bds:
+        # If it is after or equal to today, insert into our later list
+        if bd['birthday'].date() >= pendulum.today().date():
+            later_bds.append(bd)
+        # Otherwise, insert into our previous list
+        else:
+            previous_bds.append(bd)
+    # At this point we have 2 lists, in order, one from all of dates before today, and one after
+    # So all we need to do is put them in order all of "laters" then all of "befores"
+    return later_bds + previous_bds
+
+
 class Birthday:
     def __init__(self, bot):
         self.bot = bot
-        self.bot.loop.create_task(self.birthday_task())
-
-    def sort_birthdays(self, bds):
-        # First sort the birthdays based on the comparison of the actual date
-        bds = sorted(bds, key=lambda x: x['birthday'])
-        # We want to split this into birthdays after and before todays date
-        # We can then use this to sort based on "whose is closest"
-        later_bds = []
-        previous_bds = []
-        # Loop through each birthday
-        for bd in bds:
-            # If it is after or equal to today, insert into our later list
-            if bd['birthday'].date() >= pendulum.today().date():
-                later_bds.append(bd)
-            # Otherwise, insert into our previous list
-            else:
-                previous_bds.append(bd)
-        # At this point we have 2 lists, in order, one from all of dates before today, and one after
-        # So all we need to do is put them in order all of "laters" then all of "befores"
-        return later_bds + previous_bds
+        self.task = self.bot.loop.create_task(self.birthday_task())
 
     def get_birthdays_for_server(self, server, today=False):
         bds = self.bot.db.load('birthdays')
@@ -46,6 +56,7 @@ class Birthday:
                 continue
 
             day = pendulum.parse(bd['birthday'])
+            # tz = tzmap.get(server.region)
             # Check if it's today, and we want to only get todays birthdays
             if (today and day.date() == pendulum.today().date()) or not today:
                 # If so, get the member and add them to the entry
@@ -55,13 +66,19 @@ class Birthday:
                     'member': member
                 })
 
-        return self.sort_birthdays(_entries)
+        return sort_birthdays(_entries)
 
     async def birthday_task(self):
         while True:
-            await self.notify_birthdays()
-            # Every 12 hours, this is not something that needs to happen often
-            await asyncio.sleep(60 * 60 * 12)
+            try:
+                await self.notify_birthdays()
+            except Exception as error:
+                with open("error_log", 'a') as f:
+                    traceback.print_tb(error.__traceback__, file=f)
+                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+            finally:
+                # Every 12 hours, this is not something that needs to happen often
+                await asyncio.sleep(60 * 60 * 12)
 
     async def notify_birthdays(self):
         tfilter = {'birthdays_allowed': True}

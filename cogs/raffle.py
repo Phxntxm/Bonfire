@@ -23,7 +23,8 @@ class Raffle:
                 with open("error_log", 'a') as f:
                     traceback.print_tb(error.__traceback__, file=f)
                     print('{0.__class__.__name__}: {0}'.format(error), file=f)
-            await asyncio.sleep(60)
+            finally:
+                await asyncio.sleep(60)
 
     async def check_raffles(self):
         # This is used to periodically check the current raffles, and see if they have ended yet
