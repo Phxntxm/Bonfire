@@ -107,7 +107,7 @@ class Osu:
             'osu_username': user.username
         }
 
-        self.bot.db.save('osu', entry)
+        await self.bot.db.save('osu', entry)
 
         await ctx.send("I have just saved your Osu user {}".format(author.display_name))
 

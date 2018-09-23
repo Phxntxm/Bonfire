@@ -104,12 +104,12 @@ class Twitch:
             # If they're currently online, but saved as not then we'll let servers know they are now online
             if embed and data['live'] == 0:
                 msg = "{member.display_name} has just gone live!"
-                self.bot.db.save('twitch', {'live': 1, 'member_id': str(m_id)})
+                await self.bot.db.save('twitch', {'live': 1, 'member_id': str(m_id)})
             # Otherwise our notification will say they've gone offline
             elif not embed and data['live'] == 1:
                 msg = "{member.display_name} has just gone offline!"
                 embed = await self.offline_embed(url)
-                self.bot.db.save('twitch', {'live': 0, 'member_id': str(m_id)})
+                await self.bot.db.save('twitch', {'live': 0, 'member_id': str(m_id)})
             else:
                 continue
 
@@ -214,7 +214,7 @@ class Twitch:
                 'live': 0,
                 'member_id': key
             }
-        self.bot.db.save('twitch', entry)
+        await self.bot.db.save('twitch', entry)
         await ctx.send("I have just saved your twitch url {}".format(ctx.message.author.mention))
 
     @twitch.command(name='remove', aliases=['delete'])
@@ -231,7 +231,7 @@ class Twitch:
             'member_id': str(ctx.message.author.id)
         }
 
-        self.bot.db.save('twitch', entry)
+        await self.bot.db.save('twitch', entry)
         await ctx.send("I am no longer saving your twitch URL {}".format(ctx.message.author.mention))
 
     @twitch.command(name='alerts', aliases=['notifications'])
@@ -250,7 +250,7 @@ class Twitch:
                 'twitch': str(channel.id)
             }
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("All Twitch notifications will now go to {}".format(channel.mention))
 
     @twitch.group(invoke_without_command=True)
@@ -279,7 +279,7 @@ class Twitch:
                 'member_id': key,
                 'servers': servers
             }
-            self.bot.db.save('twitch', entry)
+            await self.bot.db.save('twitch', entry)
             await ctx.send("This server will now be notified if you go live")
 
     @notify.command(name='on', aliases=['start,yes'])
@@ -298,7 +298,7 @@ class Twitch:
                 'member_id': key,
                 'notifications_on': 1
             }
-            self.bot.db.save('twitch', entry)
+            await self.bot.db.save('twitch', entry)
             await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
         else:
@@ -320,7 +320,7 @@ class Twitch:
                 'member_id': key,
                 'notifications_on': 0
             }
-            self.bot.db.save('twitch', entry)
+            await self.bot.db.save('twitch', entry)
             await ctx.send(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(

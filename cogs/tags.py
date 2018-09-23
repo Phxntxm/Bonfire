@@ -147,7 +147,7 @@ class Tags:
             'server_id': str(ctx.message.guild.id),
             'tags': tags
         }
-        self.bot.db.save('tags', entry)
+        await self.bot.db.save('tags', entry)
         await ctx.send("I have just setup a new tag for this server! You can call your tag with {}".format(trigger))
 
     @tag.command(name='edit')
@@ -186,7 +186,7 @@ class Tags:
                             'server_id': str(ctx.message.guild.id),
                             'tags': tags
                         }
-                        self.bot.db.save('tags', entry)
+                        await self.bot.db.save('tags', entry)
                         await ctx.send("Alright, the tag {} has been updated".format(tag))
                         return
                     else:
@@ -217,7 +217,7 @@ class Tags:
                             'server_id': str(ctx.message.guild.id),
                             'tags': tags
                         }
-                        self.bot.db.save('tags', entry)
+                        await self.bot.db.save('tags', entry)
                         await ctx.send("I have just removed the tag {}".format(tag))
                     else:
                         await ctx.send("You don't own that tag! You can't remove it!")

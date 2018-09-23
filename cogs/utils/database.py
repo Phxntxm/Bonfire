@@ -52,6 +52,7 @@ class Cache:
         if key is None and table_filter is None:
             return self.values
         elif key:
+            key = str(key)
             for value in self.values:
                 if value[self.key] == key:
                     if pluck:
@@ -94,11 +95,11 @@ class DB:
         await conn.close()
         return cursor
 
-    def save(self, table, content):
-        """A synchronous task to throw saving content into a task"""
-        self.loop.create_task(self._save(table, content))
+#    def save(self, table, content):
+#        """A synchronous task to throw saving content into a task"""
+#        self.loop.create_task(self._save(table, content))
 
-    async def _save(self, table, content):
+    async def save(self, table, content):
         """Saves data in the table"""
 
         index = await self.query(r.table(table).info())

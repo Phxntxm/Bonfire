@@ -184,5 +184,5 @@ async def update_records(key, db, winner, loser):
     winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating, 'member_id': str(winner.id)}
     loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating, 'member_id': str(loser.id)}
 
-    db.save(key, winner_stats)
-    db.save(key, loser_stats)
+    await db.save(key, winner_stats)
+    await db.save(key, loser_stats)

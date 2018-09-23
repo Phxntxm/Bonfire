@@ -58,10 +58,9 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'battles': msgs
         }
-        self.bot.db.save('server_settings', update)
+        await self.bot.db.save('server_settings', update)
         fmt = "I have just saved your new battle message, it will appear like this: \n\n*{}*".format(message)
         await ctx.send(fmt.format(loser=ctx.message.author.display_name, winner=ctx.message.guild.me.display_name))
-
 
     @battles.command(name='remove', aliases=['delete'])
     @commands.guild_only()
@@ -77,6 +76,7 @@ class Administration:
         # Then let them know to respond with the number needed
         await ctx.send("Please respond with the number matching the battle message you want to remove")
         # The check to ensure it's in this channel...and what's provided is an int
+
         def check(m):
             if m.author == ctx.message.author and m.channel == ctx.message.channel:
                 try:
@@ -107,9 +107,8 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'battles': msgs
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("I have just removed that battle message")
-
 
     @battles.command(name='default')
     @commands.guild_only()
@@ -130,7 +129,7 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'default_battles': setting
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         fmt = "" if setting else "not "
         await ctx.send("Default messages will {}be used as well as custom messages".format(fmt))
 
@@ -176,10 +175,9 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'hugs': msgs
         }
-        self.bot.db.save('server_settings', update)
+        await self.bot.db.save('server_settings', update)
         fmt = "I have just saved your new hug message, it will appear like this: \n\n*{}*".format(message)
         await ctx.send(fmt.format(user=ctx.message.author.display_name))
-
 
     @hugs.command(name='remove', aliases=['delete'])
     @commands.guild_only()
@@ -195,6 +193,7 @@ class Administration:
         # Then let them know to respond with the number needed
         await ctx.send("Please respond with the number matching the hug message you want to remove")
         # The check to ensure it's in this channel...and what's provided is an int
+
         def check(m):
             if m.author == ctx.message.author and m.channel == ctx.message.channel:
                 try:
@@ -225,9 +224,8 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'hugs': msgs
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("I have just removed that hug message")
-
 
     @hugs.command(name='default')
     @commands.guild_only()
@@ -248,7 +246,7 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'default_hugs': setting
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         fmt = "" if setting else "not "
         await ctx.send("Default messages will {}be used as well as custom messages".format(fmt))
 
@@ -269,7 +267,7 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'birthdays_allowed': allowed
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         fmt = "The birthday announcements have just been turned {}".format("on" if allowed else "off")
         await ctx.send(fmt)
 
@@ -290,7 +288,7 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'colour_roles_allowed': allowed
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         fmt = "The ability to use colour roles have just been turned {}".format("on" if allowed else "off")
         await ctx.send(fmt)
 
@@ -311,7 +309,7 @@ class Administration:
             'server_id': str(ctx.message.guild.id),
             'playlists_allowed': allowed
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         fmt = "The ability to use playlists has just been turned {}".format("on" if allowed else "off")
         await ctx.send(fmt)
 
@@ -557,7 +555,7 @@ class Administration:
                     'to': to
                 }
             }
-            self.bot.db.save('server_settings', update)
+            await self.bot.db.save('server_settings', update)
         elif from_entry:
             restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
             _from = restrictions.get('from', [])
@@ -569,7 +567,7 @@ class Administration:
                     'from': _from
                 }
             }
-            self.bot.db.save('server_settings', update)
+            await self.bot.db.save('server_settings', update)
         elif overwrites:
             channel = overwrites.pop('channel')
             for target, setting in overwrites.items():
@@ -644,7 +642,7 @@ class Administration:
                     'server_id': str(ctx.message.guild.id),
                     'restrictions': restrictions
                 }
-                self.bot.db.save('server_settings', entry)
+                await self.bot.db.save('server_settings', entry)
         # If this isn't a blacklist/whitelist, then we are attempting to remove an overwrite
         else:
             # Get the source and destination based on whatever order is provided
@@ -743,7 +741,7 @@ class Administration:
             'server_id': str(key)
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send(fmt)
 
     @commands.command()
@@ -792,7 +790,7 @@ class Administration:
             'server_id': str(key)
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send(fmt)
 
     @commands.command(aliases=['notifications'])
@@ -814,7 +812,7 @@ class Administration:
             }
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("I have just changed this server's default 'notifications' channel"
                        "\nAll notifications will now default to `{}`".format(channel))
 
@@ -838,7 +836,7 @@ class Administration:
             'join_leave': on_off
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         fmt = "notify" if on_off else "not notify"
         await ctx.send("This server will now {} if someone has joined or left".format(fmt))
 
@@ -858,7 +856,7 @@ class Administration:
             }
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send(
             "I have just changed this server's welcome/goodbye notifications channel to {}".format(channel.name))
 
@@ -882,7 +880,7 @@ class Administration:
             await ctx.send("Illegal content in {} message".format(parent))
         else:
             try:
-                test_keys = msg.format(member='test', server='test')
+                msg.format(member='test', server='test')
             except KeyError:
                 await ctx.send("Illegal keyword in {0} message. Please use `{1.prefix}help {0} message` "
                                "for what keywords can be used".format(parent, ctx))
@@ -891,7 +889,7 @@ class Administration:
                 'server_id': str(ctx.message.guild.id),
                 parent + '_message': msg
             }
-            self.bot.db.save('server_settings', entry)
+            await self.bot.db.save('server_settings', entry)
             await ctx.send("I have just updated your {} message".format(parent))
 
     @commands.group()
@@ -923,7 +921,7 @@ class Administration:
             'nsfw_channels': channels
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
 
         await ctx.send("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
@@ -949,7 +947,7 @@ class Administration:
                 'server_id': key,
                 'nsfw_channels': channels
             }
-            self.bot.db.save('server_settings', entry)
+            await self.bot.db.save('server_settings', entry)
             await ctx.send("This channel has just been unregistered as a nsfw channel")
         else:
             await ctx.send("This channel is not registerred as a nsfw channel!")
@@ -1086,7 +1084,7 @@ class Administration:
             'permissions': {cmd.qualified_name: perm_value}
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
 
         await ctx.send("I have just added your custom permissions; "
                        "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
@@ -1113,7 +1111,7 @@ class Administration:
             'permissions': {cmd.qualified_name: None}
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
     @commands.command()
@@ -1137,7 +1135,7 @@ class Administration:
             'prefix': prefix
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
 
         if prefix is None:
             fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
@@ -1194,7 +1192,7 @@ class Administration:
             'rules': rules
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
 
         await ctx.send("I have just saved your new rule, use the rules command to view this server's current rules")
 
@@ -1216,7 +1214,7 @@ class Administration:
                 'server_id': key,
                 'rules': rules
             }
-            self.bot.db.save('server_settings', entry)
+            await self.bot.db.save('server_settings', entry)
             await ctx.send("I have just removed that rule from your list of rules!")
         except IndexError:
             await ctx.send("That is not a valid rule number, try running the command again.")

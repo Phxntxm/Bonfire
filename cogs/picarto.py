@@ -90,11 +90,11 @@ class Picarto:
             # If they're currently online, but saved as not then we'll let servers know they are now online
             if online and data['live'] == 0:
                 msg = "{member.display_name} has just gone live!"
-                self.bot.db.save('picarto', {'live': 1, 'member_id': str(m_id)})
+                await self.bot.db.save('picarto', {'live': 1, 'member_id': str(m_id)})
             # Otherwise our notification will say they've gone offline
             elif not online and data['live'] == 1:
                 msg = "{member.display_name} has just gone offline!"
-                self.bot.db.save('picarto', {'live': 0, 'member_id': str(m_id)})
+                await self.bot.db.save('picarto', {'live': 0, 'member_id': str(m_id)})
             else:
                 continue
 
@@ -200,7 +200,7 @@ class Picarto:
                 'live': 0,
                 'member_id': key
             }
-        self.bot.db.save('picarto', entry)
+        await self.bot.db.save('picarto', entry)
         await ctx.send(
             "I have just saved your Picarto URL {}, this guild will now be notified when you go live".format(
                 ctx.message.author.mention))
@@ -219,7 +219,7 @@ class Picarto:
                 'member_id': str(ctx.message.author.id)
             }
 
-            self.bot.db.save('picarto', entry)
+            await self.bot.db.save('picarto', entry)
             await ctx.send("I am no longer saving your picarto URL {}".format(ctx.message.author.mention))
         else:
             await ctx.send("I cannot remove something that I don't have (you've never saved your Picarto URL)")
@@ -240,7 +240,7 @@ class Picarto:
                 'picarto': str(channel.id)
             }
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("All Picarto notifications will now go to {}".format(channel.mention))
 
     @picarto.group(invoke_without_command=True)
@@ -269,7 +269,7 @@ class Picarto:
                 'member_id': key,
                 'servers': servers
             }
-            self.bot.db.save('picarto', entry)
+            await self.bot.db.save('picarto', entry)
             await ctx.send("This server will now be notified if you go live")
 
     @notify.command(name='on', aliases=['start,yes'])
@@ -288,7 +288,7 @@ class Picarto:
                 'member_id': key,
                 'notifications_on': 1
             }
-            self.bot.db.save('picarto', entry)
+            await self.bot.db.save('picarto', entry)
             await ctx.send("I will notify if you go live {}, you'll get a bajillion followers I promise c:".format(
                 ctx.message.author.mention))
         else:
@@ -310,7 +310,7 @@ class Picarto:
                 'member_id': key,
                 'notifications_on': 0
             }
-            self.bot.db.save('picarto', entry)
+            await self.bot.db.save('picarto', entry)
             await ctx.send(
                 "I will not notify if you go live anymore {}, "
                 "are you going to stream some lewd stuff you don't want people to see?~".format(

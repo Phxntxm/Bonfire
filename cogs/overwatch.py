@@ -119,7 +119,7 @@ class Overwatch:
             'battletag': bt
         }
 
-        self.bot.db.save('overwatch', entry)
+        await self.bot.db.save('overwatch', entry)
         await ctx.send("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(name="delete", aliases=['remove'])
@@ -134,7 +134,7 @@ class Overwatch:
             'member_id': str(ctx.message.author.id),
             'battletag': None
         }
-        self.bot.db.save('overwatch', entry)
+        await self.bot.db.save('overwatch', entry)
         await ctx.send("I no longer have your battletag saved {}".format(ctx.message.author.mention))
 
 

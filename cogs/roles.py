@@ -452,7 +452,7 @@ class Roles:
             'self_assignable_roles': self_assignable_roles
         }
 
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
 
         if len(roles) == 1:
             fmt = "Successfully added {} as a self-assignable role".format(role[0].name)
@@ -522,7 +522,7 @@ class Roles:
             'self_assignable_roles': self_assignable_roles,
             'server_id': key
         }
-        self.bot.db.save('server_settings', update)
+        await self.bot.db.save('server_settings', update)
         await ctx.send(fmt)
 
 

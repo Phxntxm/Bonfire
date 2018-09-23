@@ -154,7 +154,7 @@ class Birthday:
                 'member_id': str(ctx.message.author.id),
                 'birthday': date
             }
-            self.bot.db.save('birthdays', entry)
+            await self.bot.db.save('birthdays', entry)
             await ctx.send("I have just saved your birthday as {}".format(date))
 
     @birthday.command(name='remove')
@@ -169,7 +169,7 @@ class Birthday:
             'member_id': str(ctx.message.author.id),
             'birthday': None
         }
-        self.bot.db.save('birthdays', entry)
+        await self.bot.db.save('birthdays', entry)
         await ctx.send("I don't know your birthday anymore :(")
 
     @birthday.command(name='alerts', aliases=['notifications'])
@@ -188,7 +188,7 @@ class Birthday:
                 'birthday': str(channel.id)
             }
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("All birthday notifications will now go to {}".format(channel.mention))
 
 

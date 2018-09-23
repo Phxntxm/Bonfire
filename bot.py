@@ -38,11 +38,6 @@ async def on_message(message):
 
 @bot.event
 async def on_command_completion(ctx):
-    # There's no reason to continue waiting for this to complete, so lets immediately launch this in a new future
-    bot.loop.create_task(process_command(ctx))
-
-
-async def process_command(ctx):
     author = ctx.message.author
     server = ctx.message.guild
     command = ctx.command
@@ -68,7 +63,7 @@ async def process_command(ctx):
         command_usage['server_usage'] = total_server_usage
 
     # Save all the changes
-    bot.db.save('command_usage', command_usage)
+    await bot.db.save('command_usage', command_usage)
 
 
 @bot.event

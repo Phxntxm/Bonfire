@@ -387,7 +387,7 @@ class Interaction:
                 str(boopee.id): amount
             }
         }
-        self.bot.db.save('boops', entry)
+        await self.bot.db.save('boops', entry)
 
         fmt = "{0.mention} has just booped {1.mention}{3}! That's {2} times now!"
         await ctx.send(fmt.format(booper, boopee, amount, message))

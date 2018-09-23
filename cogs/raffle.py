@@ -94,7 +94,7 @@ class Raffle:
                     'server_id': raffle['server_id'],
                     'raffles': raffle['raffles']
                 }
-                self.bot.db.save('raffles', entry)
+                await self.bot.db.save('raffles', entry)
 
     @commands.command()
     @commands.guild_only()
@@ -157,7 +157,7 @@ class Raffle:
                 'raffles': raffles,
                 'server_id': key
             }
-            self.bot.db.save('raffles', update)
+            await self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         # Otherwise, make sure the author gave a valid raffle_id
         elif raffle_id in range(raffle_count):
@@ -175,12 +175,13 @@ class Raffle:
                 'raffles': raffles,
                 'server_id': key
             }
-            self.bot.db.save('raffles', update)
+            await self.bot.db.save('raffles', update)
             await ctx.send("{} you have just entered the raffle!".format(author.mention))
         else:
             fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! " \
                   "There are currently `{}` raffles running, use {}raffles to view the current running raffles".format(
-                    raffle_count, ctx.prefix)
+                      raffle_count, ctx.prefix
+                  )
             await ctx.send(fmt)
 
     @raffle.command(name='create', aliases=['start', 'begin', 'add'])
@@ -275,7 +276,7 @@ class Raffle:
             'server_id': str(server.id),
             'raffles': raffles
         }
-        self.bot.db.save('raffles', update)
+        await self.bot.db.save('raffles', update)
         await ctx.send("I have just saved your new raffle!")
 
     @raffle.command(name='alerts')
@@ -294,7 +295,7 @@ class Raffle:
                 'raffle': str(channel.id)
             }
         }
-        self.bot.db.save('server_settings', entry)
+        await self.bot.db.save('server_settings', entry)
         await ctx.send("All raffle notifications will now go to {}".format(channel.mention))
 
 
