@@ -88,14 +88,18 @@ class Birthday:
             if not server:
                 continue
 
+            # Set our default to either the one set
+            default_channel_id = s.get('notifications', {}).get('default')
+            # If it is has been overriden by picarto notifications setting, use this
+            channel_id = s.get('notifications', {}).get('birthday') or default_channel_id
+            if not channel_id:
+                continue
+
+            # Now get the channel based on that ID
+            channel = server.get_channel(int(channel_id))
+
             bds = self.get_birthdays_for_server(server, today=True)
             for bd in bds:
-                # Set our default to either the one set
-                default_channel_id = s.get('notifications', {}).get('default')
-                # If it is has been overriden by picarto notifications setting, use this
-                channel_id = s.get('notifications', {}).get('birthday') or default_channel_id
-                # Now get the channel based on that ID
-                channel = server.get_channel(int(channel_id))
                 try:
                     await channel.send("It is {}'s birthday today! "
                                        "Wish them a happy birthday! \N{SHORTCAKE}".format(bd['member'].mention))
