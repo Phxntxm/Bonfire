@@ -70,7 +70,7 @@ def is_owner(ctx):
     return ctx.bot.owner.id == ctx.message.author.id
 
 
-def should_not_ignore(ctx):
+def should_ignore(ctx):
     if ctx.message.guild is None:
         return False
     ignored = ctx.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='ignored')
@@ -193,7 +193,7 @@ def can_run(**kwargs):
         if not await check_not_restricted(ctx):
             return False
         # Then if the user/channel should be ignored
-        if not should_not_ignore(ctx):
+        if should_ignore(ctx):
             return False
         # Otherwise....we're good
         return True
