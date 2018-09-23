@@ -181,8 +181,8 @@ def has_perms(ctx, **perms):
     return guild_perms >= required_perm or channel_perms >= required_perm
 
 
-async def can_run(**kwargs):
-    def predicate(ctx):
+def can_run(**kwargs):
+    async def predicate(ctx):
         # First check if the command requires ownership of the bot
         if kwargs.pop("ownership", False) and not is_owner(ctx):
             return False
