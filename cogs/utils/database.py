@@ -51,7 +51,7 @@ class Cache:
         """This simulates the database call, to make it easier to get the data"""
         value = self.values
         if key:
-            value = value.get(str(key))
+            value = value.get(str(key), {})
             if pluck:
                 value = value.get(pluck)
 
