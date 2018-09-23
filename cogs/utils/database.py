@@ -27,12 +27,12 @@ class Cache:
         self.key = key  # The name of primary key
         self.db = db  # The database class connections are made through
         self.loop = loop
-        self.values = []  # The values returned from the database
+        self.values = {}  # The values returned from the database
         self.refreshed_time = None
         self.loop.create_task(self.refresh_task())
 
     async def refresh(self):
-        self.values = await self.db.actual_load(self.table)
+        self.values = await self.db.query(r.table(self.table).group(self.key)[0])
         self.refreshed_time = datetime.now()
 
     async def refresh_task(self):
@@ -47,30 +47,15 @@ class Cache:
             if difference.total_seconds() > 300:
                 await self.refresh()
 
-    def get(self, key=None, table_filter=None, pluck=None):
+    def get(self, key=None, pluck=None):
         """This simulates the database call, to make it easier to get the data"""
-        if key is None and table_filter is None:
-            return self.values
-        elif key:
-            key = str(key)
-            for value in self.values:
-                if value[self.key] == key:
-                    if pluck:
-                        return value.get(pluck)
-                    else:
-                        return value
-        elif table_filter:
-            req_key = list(table_filter.keys())[0]
-            req_val = list(table_filter.values())[0]
-            matched_values = []
-            for value in self.values:
-                if value[req_key] == req_val:
-                    if pluck:
-                        return value.get(pluck)
-                    else:
-                        matched_values.append(value)
+        value = self.values
+        if key:
+            value = value.get(str(key))
+            if pluck:
+                value = value.get(pluck)
 
-            return matched_values
+        return value
 
 
 class DB:
@@ -121,8 +106,6 @@ class DB:
         await self.cache.get(table).refresh()
 
     def load(self, table, **kwargs):
-        if kwargs.get('key'):
-            kwargs['key'] = str(kwargs.get('key'))
         return self.cache.get(table).get(**kwargs)
 
     async def actual_load(self, table, key=None, table_filter=None, pluck=None):

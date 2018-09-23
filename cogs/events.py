@@ -60,13 +60,13 @@ class StatsUpdate:
             log.info('discordbots.com statistics retruned {} for {}'.format(resp.status, payload))
 
     async def on_guild_join(self, _):
-        self.bot.loop.create_task(self.update())
+        await self.update()
 
     async def on_guild_leave(self, _):
-        self.bot.loop.create_task(self.update())
+        await self.update()
 
     async def on_ready(self):
-        self.bot.loop.create_task(self.update())
+        await self.update()
 
     async def on_member_join(self, member):
         guild = member.guild

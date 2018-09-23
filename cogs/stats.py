@@ -193,8 +193,12 @@ class Stats:
             command_stats = self.bot.db.load('command_usage')
             # Now use a dictionary comprehension to get just the command name, and usage
             # Based on the author's usage of the command
-            stats = {data['command']: data['member_usage'].get(str(author.id)) for data in command_stats
-                     if data['member_usage'].get(str(author.id), 0) > 0}
+
+            stats = {
+                command: data["member_usage"].get(str(author.id))
+                for command, data in command_stats.items()
+                if data["member_usage"].get(str(author.id), 0) > 0
+            }
             # Now sort it by the amount of times used
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
 
@@ -213,8 +217,11 @@ class Stats:
             # This is exactly the same as above, except server usage instead of member usage
             server = ctx.message.guild
             command_stats = self.bot.db.load('command_usage')
-            stats = {data['command']: data['server_usage'].get(str(server.id)) for data in command_stats
-                     if data['server_usage'].get(str(server.id), 0) > 0}
+            stats = {
+                command: data['server_usage'].get(str(server.id))
+                for command, data in command_stats.items()
+                if data['server_usage'].get(str(server.id), 0) > 0
+            }
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
             try:
                 top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
@@ -314,7 +321,11 @@ class Stats:
         if battles is None or len(battles) == 0:
             await ctx.send("No one has battled on this server!")
 
-        battles = [battle for battle in battles if int(battle['member_id']) in server_member_ids]
+        battles = [
+            battle
+            for member_id, battle in battles.items()
+            if int(member_id) in server_member_ids
+        ]
 
         # Sort the members based on their rating
         sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)

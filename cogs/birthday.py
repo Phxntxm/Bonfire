@@ -47,7 +47,11 @@ class Birthday:
         member_ids = [str(m.id) for m in server.members]
 
         # Now create a list comparing to the server's list of member IDs
-        bds = [x for x in bds if x['member_id'] in member_ids]
+        bds = [
+            bd
+            for member_id, bd in bds.items()
+            if str(member_id) in member_ids
+        ]
 
         _entries = []
 

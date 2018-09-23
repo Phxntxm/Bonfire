@@ -34,8 +34,8 @@ class Raffle:
         if raffles is None:
             return
 
-        for raffle in raffles:
-            server = self.bot.get_guild(int(raffle['server_id']))
+        for server_id, raffle in raffles.items():
+            server = self.bot.get_guild(int(server_id))
 
             # Check to see if this cog can find the server in question
             if server is None:
