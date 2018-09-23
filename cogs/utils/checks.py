@@ -79,7 +79,7 @@ def should_ignore(ctx):
     return str(ctx.message.author.id) in ignored['members'] or str(ctx.message.channel.id) in ignored['channels']
 
 
-def check_restricted(ctx):
+async def check_restricted(ctx):
     # Return true if this is a private channel, we'll handle that in the registering of the command
     if type(ctx.message.channel) is discord.DMChannel:
         return True
@@ -155,7 +155,7 @@ def check_restricted(ctx):
     return True
 
 
-def can_run(ctx, **perms):
+def has_perms(ctx, **perms):
     # Return true if this is a private channel, we'll handle that in the registering of the command
     if type(ctx.message.channel) is discord.DMChannel:
         return True
@@ -181,16 +181,16 @@ def can_run(ctx, **perms):
     return guild_perms >= required_perm or channel_perms >= required_perm
 
 
-def can_run(**kwargs):
+async def can_run(**kwargs):
     def predicate(ctx):
         # First check if the command requires ownership of the bot
         if kwargs.pop("ownership", False) and not is_owner(ctx):
             return False
         # Next check if it requires any certain permissions
-        if kwargs and not can_run(ctx, **kwargs):
+        if kwargs and not has_perms(ctx, **kwargs):
             return False
         # Next...check custom restrictions
-        if check_restricted(ctx):
+        if await check_restricted(ctx):
             return False
         # Then if the user/channel should be ignored
         if should_ignore(ctx):
