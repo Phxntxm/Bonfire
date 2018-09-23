@@ -125,5 +125,5 @@ if __name__ == '__main__':
     for e in utils.extensions:
         bot.load_extension(e)
 
-    bot.uptime = pendulum.utcnow()
+    bot.uptime = pendulum.now(tz="UTC")
     bot.run(utils.bot_token)
