@@ -72,8 +72,7 @@ class Polls:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def poll(self, ctx, *, question):
         """Sets up a poll based on the question that you have provided.
         Provide the question on the first line and the options on the following lines

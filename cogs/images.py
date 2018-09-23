@@ -13,8 +13,7 @@ class Images:
         self.bot = bot
 
     @commands.command(aliases=['rc'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def cat(self, ctx):
         """Use this to print a random cat image.
 
@@ -32,8 +31,7 @@ class Images:
             await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
 
     @commands.command(aliases=['dog', 'rd'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
 
@@ -52,8 +50,7 @@ class Images:
         await ctx.send(file=f)
 
     @commands.command(aliases=['snake'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def snek(self, ctx):
         """Use this to print a random snek image.
 
@@ -74,8 +71,7 @@ class Images:
         await ctx.send(file=f)
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def horse(self, ctx):
         """Use this to print a random horse image.
 
@@ -97,8 +93,7 @@ class Images:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def avatar(self, ctx, member: discord.Member = None):
         """Provides an image for the provided person's avatar (yours if no other member is provided)
 
@@ -128,8 +123,7 @@ class Images:
             await ctx.send(url)
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def derpi(self, ctx, *search: str):
         """Provides a random image from the first page of derpibooru.org for the following term
 
@@ -197,8 +191,7 @@ class Images:
         await ctx.send(image_link)
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def e621(self, ctx, *, tags: str):
         """Searches for a random image from e621.net
         Format for the search terms need to be 'search term 1, search term 2, etc.'

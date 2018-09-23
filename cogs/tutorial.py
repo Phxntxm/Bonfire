@@ -10,8 +10,8 @@ class Tutorial:
         self.bot = bot
 
     @commands.command()
-    @commands.check(utils.is_owner)
-    # @utils.custom_perms(send_messages=True)
+    @utils.can_run(ownership=True)
+    # @utils.can_run(send_messages=True)
     async def tutorial(self, ctx, *, cmd_or_cog = None):
         # The message we'll use to send
         output = ""
@@ -110,8 +110,8 @@ class Tutorial:
                 inline=False
             )
         try:
-            custom_perms = [func for func in command.checks if "custom_perms" in func.__qualname__][0]
-            perms = ",".join(attribute for attribute, setting in custom_perms.perms.items() if setting)
+            can_run = [func for func in command.checks if "can_run" in func.__qualname__][0]
+            perms = ",".join(attribute for attribute, setting in can_run.perms.items() if setting)
             embed.set_footer(text="Permissions required: {}".format(perms))
         except IndexError:
             pass

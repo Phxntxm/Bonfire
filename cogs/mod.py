@@ -14,8 +14,7 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
-    @utils.check_restricted()
+    @utils.can_run(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
         """Used to kick a member from this server
 
@@ -29,8 +28,7 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(ban_members=True)
-    @utils.check_restricted()
+    @utils.can_run(ban_members=True)
     async def unban(self, ctx, member_id: int):
         """Used to unban a member from this server
         Due to the fact that I cannot find a user without being in a server with them
@@ -51,8 +49,7 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(ban_members=True)
-    @utils.check_restricted()
+    @utils.can_run(ban_members=True)
     async def ban(self, ctx, member, *, reason=None):
         """Used to ban a member
         This can be used to ban someone preemptively as well.
@@ -93,8 +90,7 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_messages=True)
     async def purge(self, ctx, limit: int = 100):
         """This command is used to a purge a number of messages from the channel
 
@@ -116,8 +112,7 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_messages=True)
     async def prune(self, ctx, *specifications):
         """This command can be used to prune messages from certain members
         Mention any user you want to prune messages from; if no members are mentioned, the messages removed will be mine

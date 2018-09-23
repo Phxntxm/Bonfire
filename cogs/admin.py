@@ -15,8 +15,7 @@ class Administration:
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def battles(self, ctx):
         """Used to list the server specific battles messages on this server
 
@@ -34,8 +33,7 @@ class Administration:
 
     @battles.command(name='add')
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def add_battles(self, ctx, *, message):
         """Used to add a battle message to the server specific battle messages
         Use {winner} or {loser} in order to display the winner/loser's display name
@@ -65,8 +63,7 @@ class Administration:
 
     @battles.command(name='remove', aliases=['delete'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def remove_battles(self, ctx):
         """Used to remove one of the custom hugs from the server's list of hug messages
 
@@ -113,8 +110,7 @@ class Administration:
 
     @battles.command(name='default')
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def default_battles(self, ctx):
         """Used to toggle if battles should include default messages as well as server-custom messages
 
@@ -136,8 +132,7 @@ class Administration:
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def hugs(self, ctx):
         """Used to list the server specific hug messages on this server
 
@@ -155,8 +150,7 @@ class Administration:
 
     @hugs.command(name='add')
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def add_hugs(self, ctx, *, message):
         """Used to add a hug to the server specific hug messages
         Use {user} in order to display the user's display name
@@ -182,8 +176,7 @@ class Administration:
 
     @hugs.command(name='remove', aliases=['delete'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def remove_hugs(self, ctx):
         """Used to remove one of the custom hugs from the server's list of hug messages
 
@@ -230,8 +223,7 @@ class Administration:
 
     @hugs.command(name='default')
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def default_hugs(self, ctx):
         """Used to toggle if hugs should include default messages as well as server-custom messages
 
@@ -253,8 +245,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def allowbirthdays(self, ctx, setting):
         """Turns on/off the birthday announcements in this server
 
@@ -274,8 +265,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def allowcolours(self, ctx, setting):
         """Turns on/off the ability to use colour roles in this server
 
@@ -295,8 +285,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def allowplaylists(self, ctx, setting):
         """Turns on/off the ability to playlists
 
@@ -316,8 +305,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
-    @utils.check_restricted()
+    @utils.can_run(kick_members=True)
     async def restrictions(self, ctx):
         """Used to list all the current restrictions set
 
@@ -354,8 +342,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def restrict(self, ctx, *options):
         """
         This is an intuitive command to restrict something to/from something
@@ -581,8 +568,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def unrestrict(self, ctx, *options):
         """
         This is an intuitive command to unrestrict something to/from something
@@ -679,8 +665,7 @@ class Administration:
 
     @commands.command(aliases=['nick'])
     @commands.guild_only()
-    @utils.custom_perms(kick_members=True)
-    @utils.check_restricted()
+    @utils.can_run(kick_members=True)
     async def nickname(self, ctx, *, name=None):
         """Used to set the nickname for Bonfire (provide no nickname and it will reset)
 
@@ -695,8 +680,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def ignore(self, ctx, member_or_channel):
         """This command can be used to have Bonfire ignore certain members/channels
 
@@ -747,8 +731,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def unignore(self, ctx, member_or_channel):
         """This command can be used to have Bonfire stop ignoring certain members/channels
 
@@ -796,8 +779,7 @@ class Administration:
 
     @commands.command(aliases=['notifications'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def alerts(self, ctx, channel: discord.TextChannel):
         """This command is used to set a channel as the server's default 'notifications' channel
         Any notifications (like someone going live on Twitch, or Picarto) will go to that channel by default
@@ -819,8 +801,7 @@ class Administration:
 
     @commands.group(invoke_without_command=True, aliases=['goodbye'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def welcome(self, ctx, on_off: str):
         """This command can be used to set whether or not you want user notificaitons to show
         Provide on, yes, or true to set it on; otherwise it will be turned off
@@ -843,8 +824,7 @@ class Administration:
 
     @welcome.command(name='alerts', aliases=['notifications'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def _welcome_alerts(self, ctx, *, channel: discord.TextChannel):
         """A command used to set the override for notifications about users joining/leaving
 
@@ -863,8 +843,7 @@ class Administration:
 
     @welcome.command(name='message')
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def _welcome_message(self, ctx, *, msg):
         """A command to customize the welcome/goodbye message
         There are a couple things that can be set to customize the message
@@ -894,15 +873,13 @@ class Administration:
             await ctx.send("I have just updated your {} message".format(parent))
 
     @commands.group()
-    @utils.check_restricted()
     async def nsfw(self, ctx):
         """Handles adding or removing a channel as a nsfw channel"""
         # This command isn't meant to do anything, so just send an error if an invalid subcommand is passed
         pass
 
     @nsfw.command(name="add")
-    @utils.custom_perms(kick_members=True)
-    @utils.check_restricted()
+    @utils.can_run(kick_members=True)
     async def nsfw_add(self, ctx):
         """Registers this channel as a 'nsfw' channel
 
@@ -927,8 +904,7 @@ class Administration:
         await ctx.send("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
 
     @nsfw.command(name="remove", aliases=["delete"])
-    @utils.custom_perms(kick_members=True)
-    @utils.check_restricted()
+    @utils.can_run(kick_members=True)
     async def nsfw_remove(self, ctx):
         """Removes this channel as a 'nsfw' channel
 
@@ -955,8 +931,7 @@ class Administration:
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def perms(self, ctx, *, command: str = None):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions
@@ -997,9 +972,9 @@ class Administration:
         perms_value = server_perms.get(cmd.qualified_name)
         if perms_value is None:
             # If we don't find custom permissions, get the required permission for a command
-            # based on what we set in utils.custom_perms, if custom_perms isn't found, we'll get an IndexError
+            # based on what we set in utils.can_run, if can_run isn't found, we'll get an IndexError
             try:
-                custom_perms = [func for func in cmd.checks if "custom_perms" in func.__qualname__][0]
+                can_run = [func for func in cmd.checks if "can_run" in func.__qualname__][0]
             except IndexError:
                 # Loop through and check if there is a check called is_owner
                 # If we loop through and don't find one, this means that the only other choice is to be
@@ -1013,8 +988,8 @@ class Administration:
                 ))
                 return
 
-            # Perms will be an attribute if custom_perms is found no matter what, so no need to check this
-            perms = "\n".join(attribute for attribute, setting in custom_perms.perms.items() if setting)
+            # Perms will be an attribute if can_run is found no matter what, so no need to check this
+            perms = "\n".join(attribute for attribute, setting in can_run.perms.items() if setting)
             await ctx.send(
                 "You are required to have `{}` permissions to run `{}`".format(perms, cmd.qualified_name))
         else:
@@ -1029,7 +1004,6 @@ class Administration:
     @perms.command(name="add", aliases=["setup,create"])
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    @utils.check_restricted()
     async def add_perms(self, ctx, *msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'
@@ -1095,7 +1069,6 @@ class Administration:
     @perms.command(name="remove", aliases=["delete"])
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    @utils.check_restricted()
     async def remove_perms(self, ctx, *, command: str):
         """Removes the custom permissions setup on the command specified
 
@@ -1119,8 +1092,7 @@ class Administration:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def prefix(self, ctx, *, prefix: str):
         """This command can be used to set a custom prefix per server
 
@@ -1149,8 +1121,7 @@ class Administration:
 
     @commands.group(aliases=['rule'], invoke_without_command=True)
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def rules(self, ctx, rule: int = None):
         """This command can be used to view the current rules on the server
 
@@ -1179,8 +1150,7 @@ class Administration:
 
     @rules.command(name='add', aliases=['create'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def rules_add(self, ctx, *, rule: str):
         """Adds a rule to this server's rules
 
@@ -1201,8 +1171,7 @@ class Administration:
 
     @rules.command(name='remove', aliases=['delete'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def rules_delete(self, ctx, rule: int):
         """Removes one of the rules from the list of this server's rules
         Provide a number to delete that rule

@@ -62,8 +62,7 @@ class Stats:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def serverinfo(self, ctx):
         """Provides information about the server
 
@@ -96,8 +95,7 @@ class Stats:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def userinfo(self, ctx, *, user: discord.Member = None):
         """Provides information about a provided member
 
@@ -130,15 +128,13 @@ class Stats:
         await ctx.send(embed=embed)
 
     @commands.group()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def command(self, ctx):
         pass
 
     @command.command(name="stats")
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def command_stats(self, ctx, *, command):
         """This command can be used to view some usage stats about a specific command
 
@@ -176,8 +172,7 @@ class Stats:
             await ctx.send(fmt)
 
     @command.command(name="leaderboard")
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def command_leaderboard(self, ctx, option="server"):
         """This command can be used to print a leaderboard of commands
         Provide 'server' to print a leaderboard for this server
@@ -236,8 +231,7 @@ class Stats:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def mostboops(self, ctx):
         """Shows the person you have 'booped' the most, as well as how many times
 
@@ -269,8 +263,7 @@ class Stats:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def listboops(self, ctx):
         """Lists all the users you have booped and the amount of times
 
@@ -306,8 +299,7 @@ class Stats:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def leaderboard(self, ctx):
         """Prints a leaderboard of everyone in the server's battling record
 
@@ -345,8 +337,7 @@ class Stats:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def battlestats(self, ctx, member: discord.Member = None):
         """Prints the battling stats for you, or the user provided
 
@@ -372,8 +363,7 @@ class Stats:
             await ctx.send('```\n{}```'.format(fmt))
 
     @commands.command(aliases=['donators'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def patrons(self, ctx):
         """Prints a list of all the patrons for Bonfire
 

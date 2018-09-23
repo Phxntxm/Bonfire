@@ -79,7 +79,7 @@ class Hangman:
     @commands.group(aliases=['hm'], invoke_without_command=True)
     @commands.guild_only()
     @commands.cooldown(1, 7, BucketType.user)
-    @checks.custom_perms(send_messages=True)
+    @checks.can_run(send_messages=True)
     @checks.check_restricted()
     async def hangman(self, ctx, *, guess):
         """Makes a guess towards the server's currently running hangman game
@@ -128,7 +128,7 @@ class Hangman:
 
     @hangman.command(name='create', aliases=['start'])
     @commands.guild_only()
-    @checks.custom_perms(send_messages=True)
+    @checks.can_run(send_messages=True)
     @checks.check_restricted()
     async def create_hangman(self, ctx):
         """This is used to create a new hangman game
@@ -180,7 +180,7 @@ class Hangman:
 
     @hangman.command(name='delete', aliases=['stop', 'remove', 'end'])
     @commands.guild_only()
-    @checks.custom_perms(kick_members=True)
+    @checks.can_run(kick_members=True)
     @checks.check_restricted()
     async def stop_game(self, ctx):
         """Force stops a game of hangman

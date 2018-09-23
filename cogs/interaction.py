@@ -156,8 +156,7 @@ class Interaction:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def hug(self, ctx, user=None):
         """Makes me hug a person!
 
@@ -197,8 +196,7 @@ class Interaction:
     @commands.command(aliases=['1v1'])
     @commands.guild_only()
     @commands.cooldown(1, 20, BucketType.user)
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def battle(self, ctx, player2=None):
         """Challenges the mentioned user to a battle
 
@@ -254,8 +252,7 @@ class Interaction:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def accept(self, ctx):
         """Accepts the battle challenge
 
@@ -335,8 +332,7 @@ class Interaction:
 
     @commands.command()
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def decline(self, ctx):
         """Declines the battle challenge
 
@@ -363,8 +359,7 @@ class Interaction:
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 10, BucketType.user)
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def boop(self, ctx, boopee: discord.Member = None, *, message=""):
         """Boops the mentioned person
 

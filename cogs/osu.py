@@ -55,8 +55,7 @@ class Osu:
                 self.osu_users[member] = user
 
     @commands.group(invoke_without_command=True)
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def osu(self, ctx, member: discord.Member = None):
         """Provides basic information about a specific user
 
@@ -88,8 +87,7 @@ class Osu:
         await ctx.send(embed=e)
 
     @osu.command(name='add', aliases=['create', 'connect'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def osu_add(self, ctx, *, username):
         """Links an osu account to your discord account
 
@@ -112,8 +110,7 @@ class Osu:
         await ctx.send("I have just saved your Osu user {}".format(author.display_name))
 
     @osu.command(name='score', aliases=['scores'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def osu_scores(self, ctx, *data):
         """Find the top x osu scores for a provided member
         Note: You can only get the top 50 songs for a user

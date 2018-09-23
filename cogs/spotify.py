@@ -45,8 +45,7 @@ class Spotify:
             return data.get("expires_in")
 
     @commands.group(invoke_without_command=True)
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def spotify(self, ctx, *, query):
         """Searches Spotify for a song, giving you the link you can use to listen in. Give the query to search for
         and it will search by title/artist for the best match
@@ -65,8 +64,7 @@ class Spotify:
             await ctx.send("Couldn't find a song for:\n{}".format(query))
 
     @spotify.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def playlist(self, ctx, *, query):
         """Searches Spotify for a playlist, giving you the link you can use to listen in. Give the query to search for
         and it will search for the best match

@@ -118,7 +118,7 @@ class Chess:
         return game
 
     @commands.group(invoke_without_command=True)
-    @checks.custom_perms(send_messages=True)
+    @checks.can_run(send_messages=True)
     async def chess(self, ctx, *, move):
         """Moves a piece based on the notation provided
         Notation for normal moves are {piece} to {position} based on the algebraic notation of the board (This is on the picture)
@@ -153,7 +153,7 @@ class Chess:
             await self.bot.upload(link)
 
     @commands.command()
-    @checks.custom_perms(send_messages=True)
+    @checks.can_run(send_messages=True)
     async def chess_start(self, ctx, player2: discord.Member):
         """Starts a chess game with another player
         You can play one game on a single guild at a time

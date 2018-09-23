@@ -23,8 +23,7 @@ class Miscallaneous:
         self.process.cpu_percent()
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def help(self, ctx, *, command=None):
         """This command is used to provide a link to the help URL.
         This can be called on a command to provide more information about that command
@@ -110,8 +109,7 @@ class Miscallaneous:
             await ctx.send(embed=embed)
 
     @commands.command(aliases=["coin"])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def coinflip(self, ctx):
         """Flips a coin and responds with either heads or tails
 
@@ -122,8 +120,7 @@ class Miscallaneous:
         await ctx.send(result)
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def say(self, ctx, *, msg: str):
         """Tells the bot to repeat what you say
 
@@ -137,8 +134,7 @@ class Miscallaneous:
             pass
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def calendar(self, ctx, month: str = None, year: int = None):
         """Provides a printout of the current month's calendar
         Provide month and year to print the calendar of that year and month
@@ -177,8 +173,7 @@ class Miscallaneous:
         await ctx.send("```\n{}```".format(cal))
 
     @commands.command(aliases=['about'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def info(self, ctx):
         """This command can be used to print out some of my information"""
         # fmt is a dictionary so we can set the key to it's output, then print both
@@ -248,8 +243,7 @@ class Miscallaneous:
         await ctx.send(embed=embed)
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def uptime(self, ctx):
         """Provides a printout of the current bot's uptime
 
@@ -261,8 +255,7 @@ class Miscallaneous:
             await ctx.send("I've just restarted and not quite ready yet...gimme time I'm not a morning pony :c")
 
     @commands.command(aliases=['invite'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def addbot(self, ctx):
         """Provides a link that you can use to add me to a server
 
@@ -287,8 +280,7 @@ class Miscallaneous:
                        .format(discord.utils.oauth_url(app_info.id, perms)))
 
     @commands.command(enabled=False)
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def joke(self, ctx):
         """Prints a random riddle
 
@@ -298,8 +290,7 @@ class Miscallaneous:
         pass
 
     @commands.command()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def roll(self, ctx, *, notation: str = "d6"):
         """Rolls a die based on the notation given
         Format should be #d#

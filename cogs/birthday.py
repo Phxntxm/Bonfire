@@ -112,8 +112,7 @@ class Birthday:
 
     @commands.group(aliases=['birthdays'], invoke_without_command=True)
     @commands.guild_only()
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def birthday(self, ctx, *, member: discord.Member = None):
         """A command used to view the birthdays on this server; or a specific member's birthday
 
@@ -139,8 +138,7 @@ class Birthday:
                 await ctx.send(str(e))
 
     @birthday.command(name='add')
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def _add_bday(self, ctx, *, date):
         """Used to link your birthday to your account
 
@@ -162,8 +160,7 @@ class Birthday:
             await ctx.send("I have just saved your birthday as {}".format(date))
 
     @birthday.command(name='remove')
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def _remove_bday(self, ctx):
         """Used to unlink your birthday to your account
 
@@ -178,8 +175,7 @@ class Birthday:
 
     @birthday.command(name='alerts', aliases=['notifications'])
     @commands.guild_only()
-    @utils.custom_perms(manage_guild=True)
-    @utils.check_restricted()
+    @utils.can_run(manage_guild=True)
     async def birthday_alerts_channel(self, ctx, channel: discord.TextChannel):
         """Sets the notifications channel for birthday notifications
 

@@ -91,7 +91,7 @@ class Owner:
         await self.bot.owner.send(embed=embed)
 
     @commands.command(hidden=True)
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def repl(self, ctx):
         msg = ctx.message
 
@@ -184,7 +184,7 @@ class Owner:
                 await ctx.send('Unexpected error: `{}`'.format(e))
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def sendtochannel(self, ctx, cid: int, *, message):
         """Sends a message to a provided channel, by ID"""
         channel = self.bot.get_channel(cid)
@@ -195,7 +195,7 @@ class Owner:
             pass
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def debug(self, ctx, *, body: str):
         env = {
             'bot': self.bot,
@@ -246,7 +246,7 @@ class Owner:
                 await ctx.send("Content too large for me to print!")
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def bash(self, ctx, *, cmd: str):
         """Runs a bash command"""
         output = subprocess.check_output("{}; exit 0".format(cmd), stderr=subprocess.STDOUT, shell=True)
@@ -256,7 +256,7 @@ class Owner:
             await ctx.send("No output for `{}`".format(cmd))
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def shutdown(self, ctx):
         """Shuts the bot down"""
         fmt = 'Shutting down, I will miss you {0.author.name}'
@@ -265,21 +265,21 @@ class Owner:
         await self.bot.close()
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def name(self, ctx, new_nick: str):
         """Changes the bot's name"""
         await self.bot.user.edit(username=new_nick)
         await ctx.send('Changed username to ' + new_nick)
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def status(self, ctx, *, status: str):
         """Changes the bot's 'playing' status"""
         await self.bot.change_presence(activity=discord.Game(name=status, type=0))
         await ctx.send("Just changed my status to '{}'!".format(status))
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def load(self, ctx, *, module: str):
         """Loads a module"""
 
@@ -297,7 +297,7 @@ class Owner:
             await ctx.send(fmt.format(type(error).__name__, error))
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def unload(self, ctx, *, module: str):
         """Unloads a module"""
 
@@ -310,7 +310,7 @@ class Owner:
         await ctx.send("I have just unloaded the {} module".format(module))
 
     @commands.command()
-    @commands.check(utils.is_owner)
+    @utils.can_run(ownership=True)
     async def reload(self, ctx, *, module: str):
         """Reloads a module"""
 

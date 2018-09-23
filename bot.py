@@ -30,20 +30,13 @@ async def on_ready():
 
 
 @bot.event
-async def on_message(message):
-    if message.author.bot or utils.should_ignore(bot, message):
-        return
-    await bot.process_commands(message)
-
-
-@bot.event
 async def on_command_completion(ctx):
     author = ctx.message.author
     server = ctx.message.guild
     command = ctx.command
 
-    command_usage = await bot.db.actual_load('command_usage', key=command.qualified_name) or \
-                    {'command': command.qualified_name}
+    command_usage = await bot.db.actual_load('command_usage', key=command.qualified_name) \
+                    or {'command': command.qualified_name}
 
     # Add one to the total usage for this command, basing it off 0 to start with (obviously)
     total_usage = command_usage.get('total_usage', 0) + 1

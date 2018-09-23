@@ -20,7 +20,6 @@ class Overwatch:
         self.bot = bot
 
     @commands.group()
-    @utils.check_restricted()
     async def ow(self, ctx):
         """Command used to lookup information on your own user, or on another's
         When adding your battletag, it is quite picky, use the exact format user#xxxx
@@ -29,8 +28,7 @@ class Overwatch:
         pass
 
     @ow.command(name="stats")
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def ow_stats(self, ctx, user: discord.Member = None, hero: str = ""):
         """Prints out a basic overview of a member's stats
         Provide a hero after the member to get stats for that specific hero
@@ -90,8 +88,7 @@ class Overwatch:
             await ctx.send("Overwatch stats for {}: ```py\n{}```".format(user.name, fmt))
 
     @ow.command(name="add")
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def add(self, ctx, bt: str):
         """Saves your battletag for looking up information
 
@@ -123,8 +120,7 @@ class Overwatch:
         await ctx.send("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(name="delete", aliases=['remove'])
-    @utils.custom_perms(send_messages=True)
-    @utils.check_restricted()
+    @utils.can_run(send_messages=True)
     async def delete(self, ctx):
         """Removes your battletag from the records
 
