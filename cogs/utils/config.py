@@ -1,7 +1,5 @@
 import ruamel.yaml as yaml
 import asyncio
-import rethinkdb as r
-import pendulum
 
 loop = asyncio.get_event_loop()
 global_config = {}

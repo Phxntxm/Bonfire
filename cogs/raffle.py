@@ -44,7 +44,7 @@ class Raffle:
                 title = r['title']
                 entrants = r['entrants']
 
-                now = pendulum.utcnow()
+                now = pendulum.now(tz="UTC")
                 expires = pendulum.parse(r['expires'])
 
                 # Now lets compare and see if this raffle has ended, if not just continue
@@ -197,7 +197,7 @@ class Raffle:
         author = ctx.message.author
         server = ctx.message.guild
         channel = ctx.message.channel
-        now = pendulum.utcnow()
+        now = pendulum.now(tz="UTC")
 
         await ctx.send(
             "Ready to start a new raffle! Please respond with the title you would like to use for this raffle!")

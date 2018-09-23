@@ -5,6 +5,7 @@ from functools import cmp_to_key
 suits = ['S', 'C', 'H', 'D']
 faces = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 
+
 class Deck:
     def __init__(self, prefill=True):
         # itertools.product creates us a tuple based on every output of our faces and suits

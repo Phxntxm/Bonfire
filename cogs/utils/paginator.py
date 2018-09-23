@@ -28,6 +28,8 @@ class Pages:
         self.maximum_pages = pages
         self.embed = discord.Embed()
         self.paginating = len(entries) > per_page
+        self.current_page = 0
+        self.match = None
         self.reaction_emojis = [
             ('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}', self.first_page),
             ('\N{BLACK LEFT-POINTING TRIANGLE}', self.previous_page),
@@ -121,8 +123,8 @@ class Pages:
 
     async def numbered_page(self):
         """lets you type a page number to go to"""
-        to_delete = []
-        to_delete.append(await self.message.channel.send('What page do you want to go to?'))
+        start_message = await self.message.channel.send('What page do you want to go to?')
+        to_delete = [start_message]
 
         def check(m):
             if m.author == self.author and m.channel == self.message.channel:
@@ -199,17 +201,18 @@ class Pages:
                 self.paginating = False
                 try:
                     await self.message.clear_reactions()
-                except:
+                except Exception:
                     pass
                 finally:
                     break
 
             try:
                 await self.message.remove_reaction(react.emoji, user)
-            except:
+            except Exception:
                 pass  # can't remove it so don't bother doing so
 
             await self.match()
+
 
 class DetailedPages(Pages):
     """A class built on the normal Paginator, except with the idea that you want one 'thing' per page

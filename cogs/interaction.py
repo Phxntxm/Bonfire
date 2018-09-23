@@ -16,7 +16,8 @@ battle_outcomes = \
      "As they were battling, {loser} was struck by lightning! {winner} you lucked out this time!",
      "{loser} tried to dive at {winner} while fighting, somehow they missed and landed in quicksand."
      "Try paying more attention next time {loser}",
-     "{loser} got a little...heated during the battle and ended up getting set on fire. {winner} wins by remaining cool",
+     "{loser} got a little...heated during the battle and ended up getting set on fire. "
+     "{winner} wins by remaining cool",
      "Princess Celestia came in and banished {loser} to the moon. Good luck getting into any battles up there",
      "{loser} took an arrow to the knee, they are no longer an adventurer. Keep on adventuring {winner}",
      "Common sense should make it obvious not to get into battle with {winner}. Apparently {loser} didn't get the memo",
@@ -31,20 +32,24 @@ battle_outcomes = \
      "{winner} realized it was high noon, {loser} never even saw it coming.",
      "{loser} spontaneously combusted...lol rip",
      "after many turns {winner} summons exodia and {loser} is sent to the shadow realm",
-     "{winner} and {loser} sit down for an intense game of chess, in the heat of the moment {winner} forgot they were playing a "
+     "{winner} and {loser} sit down for an intense game of chess, "
+     "in the heat of the moment {winner} forgot they were playing a "
      "game and summoned a real knight",
-     "{winner} challenges {loser} to rock paper scissors, unfortunately for {loser}, {winner} chose scissors and stabbed them",
+     "{winner} challenges {loser} to rock paper scissors, "
+     "unfortunately for {loser}, {winner} chose scissors and stabbed them",
      "{winner} goes back in time and becomes {loser}'s best friend, winning without ever throwing a punch",
      "{loser} trips down some stairs on their way to the battle with {winner}",
      "{winner} books {loser} a one way ticket to Flugendorf prison",
      "{loser} was already dead",
      "{loser} was crushed under the weight of expectations",
      "{loser} was wearing a redshirt and it was their first day",
-     "{winner} and {loser} were walking along when suddenly {loser} got kidnapped by a flying monkey; hope they had water with them",
+     "{winner} and {loser} were walking along when suddenly {loser} "
+     "got kidnapped by a flying monkey; hope they had water with them",
      "{winner} brought an army to a fist fight, {loser} never saw their opponent once",
      "{winner} used multiple simultaneous devestating defensive deep strikes to overwhelm {loser}",
      "{winner} and {loser} engage in a dance off; {winner} wiped the floor with {loser}",
-     "{loser} tried to hide in the sand to catch {winner} off guard, unfortunately looks like a Giant Antlion had the same "
+     "{loser} tried to hide in the sand to catch {winner} off guard, "
+     "unfortunately looks like a Giant Antlion had the same "
      "idea for him",
      "{loser} was busy playing trash videogames the night before the fight and collapsed before {winner}",
      "{winner} threw a sick meme and {loser} totally got PRANK'D",
@@ -54,7 +59,8 @@ battle_outcomes = \
      "Looks like {loser} didn't put enough points into kazoo playing, who knew they would have needed it",
      "{loser} was too scared by the illuminati and extra-dimensional talking horses to show up",
      "{loser} didn't press x enough to not die",
-     "{winner} and {loser} go fishing to settle their debate, {winner} caught a sizeable fish and {loser} caught a boot older than time",
+     "{winner} and {loser} go fishing to settle their debate, "
+     "{winner} caught a sizeable fish and {loser} caught a boot older than time",
      "{winner} did a hero landing and {loser} was so surprised they gave up immediately"]
 
 hugs = \
@@ -152,7 +158,7 @@ class Interaction:
     @commands.guild_only()
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
-    async def hug(self, ctx, user = None):
+    async def hug(self, ctx, user=None):
         """Makes me hug a person!
 
         EXAMPLE: !hug @Someone
@@ -169,7 +175,6 @@ class Interaction:
             except commands.converter.BadArgument:
                 await ctx.send("Error: Could not find user: {}".format(user))
                 return
-
 
         # Lets get the settings
         settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
@@ -194,14 +199,16 @@ class Interaction:
     @commands.cooldown(1, 20, BucketType.user)
     @utils.custom_perms(send_messages=True)
     @utils.check_restricted()
-    async def battle(self, ctx, player2 = None):
+    async def battle(self, ctx, player2=None):
         """Challenges the mentioned user to a battle
 
         EXAMPLE: !battle @player2
         RESULT: A battle to the death"""
         # First check if everyone was mentioned
         if ctx.message.mention_everyone:
-            await ctx.send("You want to battle {} people? Good luck with that...".format(len(ctx.message.channel.members) - 1))
+            await ctx.send("You want to battle {} people? Good luck with that...".format(
+                len(ctx.message.channel.members) - 1)
+            )
             return
         # Then check if nothing was provided
         if player2 is None:
@@ -311,7 +318,9 @@ class Interaction:
         new_loser_rank, _ = self.bot.br.get_server_rank(loser)
         fmt = msg.content
         if old_winner_rank:
-            fmt += "\n{} - Rank: {} ( +{} )".format(winner.display_name, new_winner_rank, old_winner_rank - new_winner_rank)
+            fmt += "\n{} - Rank: {} ( +{} )".format(
+                winner.display_name, new_winner_rank, old_winner_rank - new_winner_rank
+            )
         else:
             fmt += "\n{} - Rank: {}".format(winner.display_name, new_winner_rank)
         if old_loser_rank:
@@ -321,7 +330,7 @@ class Interaction:
 
         try:
             await msg.edit(content=fmt)
-        except:
+        except Exception:
             pass
 
     @commands.command()

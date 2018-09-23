@@ -133,7 +133,7 @@ class Miscallaneous:
         await ctx.send(fmt)
         try:
             await ctx.message.delete()
-        except:
+        except Exception:
             pass
 
     @commands.command()
@@ -209,7 +209,7 @@ class Miscallaneous:
         value += 'Memory: {:.2f} MiB'.format(memory_usage)
         value += '\nCPU: {}%'.format(cpu_usage)
         if hasattr(self.bot, 'uptime'):
-            value += "\nUptime: {}".format((pendulum.utcnow() - self.bot.uptime).in_words())
+            value += "\nUptime: {}".format((pendulum.now(tz="UTC") - self.bot.uptime).in_words())
         embed.add_field(name=name, value=value, inline=False)
 
         # Setup the user and guild statistics
@@ -256,7 +256,7 @@ class Miscallaneous:
         EXAMPLE: !uptime
         RESULT: A BAJILLION DAYS"""
         if hasattr(self.bot, 'uptime'):
-            await ctx.send("Uptime: ```\n{}```".format((pendulum.utcnow() - self.bot.uptime).in_words()))
+            await ctx.send("Uptime: ```\n{}```".format((pendulum.now(tz="UTC") - self.bot.uptime).in_words()))
         else:
             await ctx.send("I've just restarted and not quite ready yet...gimme time I'm not a morning pony :c")
 
@@ -348,7 +348,9 @@ class Miscallaneous:
         value_str = ", ".join("{}".format(x) for x in nums)
 
         if dice == 1:
-            fmt = '{0.message.author.name} has rolled a {1} sided die and got the number {2}!'.format(ctx, num, value_str)
+            fmt = '{0.message.author.name} has rolled a {1} sided die and got the number {2}!'.format(
+                ctx, num, value_str
+            )
             if add or subtract:
                 fmt += "\nTotal: {} ({}".format(total, subtotal)
                 if add:
@@ -357,7 +359,9 @@ class Miscallaneous:
                     fmt += " - {}".format(subtract)
                 fmt += ")"
         else:
-            fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'.format(ctx, dice, num, value_str)
+            fmt = '{0.message.author.name} has rolled {1}, {2} sided dice and got the numbers {3}!'.format(
+                ctx, dice, num, value_str
+            )
             if add or subtract:
                 fmt += "\nTotal: {} ({}".format(total, subtotal)
                 if add:

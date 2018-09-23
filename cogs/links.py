@@ -61,7 +61,7 @@ class Links:
             # Get the next sibling, find the span where the description is, and get the text from this
             try:
                 description = element.next_sibling.find('span', class_='st').text
-            except:
+            except Exception:
                 description = ""
 
             # Add this to our text we'll use to send

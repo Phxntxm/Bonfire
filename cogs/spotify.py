@@ -28,24 +28,21 @@ class Spotify:
             try:
                 delay = await self.get_api_token()
             except Exception as error:
+                delay = 2400
                 with open("error_log", 'a') as f:
                     traceback.print_tb(error.__traceback__, file=f)
                     print('{0.__class__.__name__}: {0}'.format(error), file=f)
-                delay = 2400
             finally:
                 await asyncio.sleep(delay)
 
     async def get_api_token(self):
         url = "https://accounts.spotify.com/api/token"
         opts = {"grant_type": "client_credentials"}
-        while True:
-            async with aiohttp.ClientSession(headers=self.headers) as session:
-                response = await session.post(url, data=opts)
-                data = await response.json()
-                self._token = data.get("access_token")
-                return data.get("expires_in")
-
-            await asyncio.sleep(data.get("expires_in", 2400))
+        async with aiohttp.ClientSession(headers=self.headers) as session:
+            response = await session.post(url, data=opts)
+            data = await response.json()
+            self._token = data.get("access_token")
+            return data.get("expires_in")
 
     @commands.group(invoke_without_command=True)
     @utils.custom_perms(send_messages=True)
@@ -85,8 +82,6 @@ class Spotify:
             await ctx.send(response.get("playlists").get("items")[0].get("external_urls").get("spotify"))
         except (KeyError, AttributeError, IndexError):
             await ctx.send("Couldn't find a song for:\n{}".format(query))
-
-
 
 
 def setup(bot):

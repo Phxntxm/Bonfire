@@ -2,18 +2,14 @@ from discord.ext import commands
 
 from . import utils
 
-import re
-import glob
 import asyncio
-import aiohttp
 import discord
 import inspect
-import pendulum
 import textwrap
 import traceback
 import subprocess
-from contextlib import redirect_stdout
 import io
+from contextlib import redirect_stdout
 
 
 def get_syntax_error(e):
@@ -30,7 +26,8 @@ class Owner:
         self._last_result = None
         self.sessions = set()
 
-    def cleanup_code(self, content):
+    @staticmethod
+    def cleanup_code(content):
         """Automatically removes code blocks from the code."""
         # remove ```py\n```
         if content.startswith('```') and content.endswith('```'):
@@ -92,7 +89,6 @@ class Owner:
         embed.add_field(name='Owner', value=guild.owner.display_name)
 
         await self.bot.owner.send(embed=embed)
-
 
     @commands.command(hidden=True)
     @commands.check(utils.is_owner)
@@ -229,14 +225,14 @@ class Owner:
         try:
             with redirect_stdout(stdout):
                 ret = await func()
-        except Exception as e:
+        except Exception:
             value = stdout.getvalue()
             await ctx.send('```py\n{}{}\n```'.format(value, traceback.format_exc()))
         else:
             value = stdout.getvalue()
             try:
                 await ctx.message.add_reaction('\u2705')
-            except:
+            except Exception:
                 pass
 
             try:

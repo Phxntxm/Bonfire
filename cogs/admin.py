@@ -45,8 +45,9 @@ class Administration:
         # Try to simulate the message, to ensure they haven't provided an invalid phrase
         try:
             message.format(loser="player1", winner="player2")
-        except:
-            await ctx.send("That is an invalid format! The winner needs to be labeled with {winner} and the loser with {loser}")
+        except Exception:
+            await ctx.send("That is an invalid format! The winner needs to be "
+                           "labeled with {winner} and the loser with {loser}")
             return
 
         # Now simply load the current messages
@@ -81,7 +82,7 @@ class Administration:
             if m.author == ctx.message.author and m.channel == ctx.message.channel:
                 try:
                     return bool(int(m.content))
-                except:
+                except Exception:
                     return False
             else:
                 return False
@@ -165,7 +166,7 @@ class Administration:
         # Try to simulate the message, to ensure they haven't provided an invalid phrase
         try:
             message.format(user="user")
-        except:
+        except Exception:
             await ctx.send("That is an invalid format! The user being hugged needs to be labeled with {user}")
             return
 
@@ -198,7 +199,7 @@ class Administration:
             if m.author == ctx.message.author and m.channel == ctx.message.channel:
                 try:
                     return bool(int(m.content))
-                except:
+                except Exception:
                     return False
             else:
                 return False
@@ -1007,7 +1008,9 @@ class Administration:
                     if "is_owner" in func.__qualname__:
                         await ctx.send("You need to own the bot to run this command")
                         return
-                await ctx.send("You are required to have `manage_guild` permissions to run `{}`".format(cmd.qualified_name))
+                await ctx.send("You are required to have `manage_guild` permissions to run `{}`".format(
+                    cmd.qualified_name
+                ))
                 return
 
             # Perms will be an attribute if custom_perms is found no matter what, so no need to check this

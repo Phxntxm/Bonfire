@@ -7,6 +7,7 @@ from discord.ext import commands
 
 from . import utils
 
+
 class Roulette:
 
     def __init__(self, bot):
@@ -59,7 +60,8 @@ class Roulette:
     @utils.check_restricted()
     async def roulette_start(self, ctx, time: int=5):
         """Starts a roulette, that will end in one of the entrants being kicked from the server
-        By default, the roulette will end in 5 minutes; provide a number (up to 30) to change how many minutes until it ends
+        By default, the roulette will end in 5 minutes; provide a number (up to 30)
+        to change how many minutes until it ends
 
         EXAMPLE: !roulette start
         RESULT: A new roulette game!"""
@@ -69,7 +71,7 @@ class Roulette:
         else:
             game = self.start_game(ctx.message.guild, time)
             if game:
-                await ctx.send("A new roulette game has just started! A random entrant will be kicked in {} minutes."\
+                await ctx.send("A new roulette game has just started! A random entrant will be kicked in {} minutes."
                                " Type {}roulette to join this roulette...good luck~".format(game.time_left, ctx.prefix))
             else:
                 await ctx.send("There is already a roulette game running on this server!")
@@ -83,10 +85,14 @@ class Roulette:
             return
 
         try:
-            fmt = "The unlucky member to be kicked is {}; hopefully someone invites them back".format(member.display_name)
+            fmt = "The unlucky member to be kicked is {}; hopefully someone invites them back :)".format(
+                member.display_name
+            )
             await member.kick()
         except discord.Forbidden:
-            fmt = "Well, the unlucky member chosen was {} but I can't kick you...so kick yourself please?".format(member.display_name)
+            fmt = "Well, the unlucky member chosen was {} but I can't kick you...so kick yourself please?".format(
+                member.display_name
+            )
 
         await ctx.send(fmt)
 
@@ -96,11 +102,11 @@ class Game:
     def __init__(self, guild, time):
         self.entrants = []
         self.server = guild
-        self.end_time = pendulum.utcnow().add(minutes=time)
+        self.end_time = pendulum.now(tz="UTC").add(minutes=time)
 
     @property
     def time_left(self):
-        return (self.end_time - pendulum.utcnow()).in_words()
+        return (self.end_time - pendulum.now(tz="UTC")).in_words()
 
     def join(self, member):
         """Adds a member to the list of entrants"""
@@ -115,6 +121,7 @@ class Game:
             return random.SystemRandom().choice(self.entrants)
         except IndexError:
             return None
+
 
 def setup(bot):
     bot.add_cog(Roulette(bot))

@@ -6,9 +6,6 @@ import asyncio
 import discord
 import re
 import traceback
-import logging
-
-log = logging.getLogger()
 
 
 class Twitch:
@@ -23,7 +20,8 @@ class Twitch:
 
         self.task = bot.loop.create_task(self.check_channels())
 
-    def _form_embed(self, data):
+    @staticmethod
+    def _form_embed(data):
         if not data:
             return None
         # I want to make the least API calls possible, however there's a few things to note here:
