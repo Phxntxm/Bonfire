@@ -80,7 +80,6 @@ class Hangman:
     @commands.guild_only()
     @commands.cooldown(1, 7, BucketType.user)
     @checks.can_run(send_messages=True)
-    @checks.check_restricted()
     async def hangman(self, ctx, *, guess):
         """Makes a guess towards the server's currently running hangman game
 
@@ -129,7 +128,6 @@ class Hangman:
     @hangman.command(name='create', aliases=['start'])
     @commands.guild_only()
     @checks.can_run(send_messages=True)
-    @checks.check_restricted()
     async def create_hangman(self, ctx):
         """This is used to create a new hangman game
         A predefined phrase will be randomly chosen as the phrase to use
@@ -181,7 +179,6 @@ class Hangman:
     @hangman.command(name='delete', aliases=['stop', 'remove', 'end'])
     @commands.guild_only()
     @checks.can_run(kick_members=True)
-    @checks.check_restricted()
     async def stop_game(self, ctx):
         """Force stops a game of hangman
         This should realistically only be used in a situation like one player leaves
