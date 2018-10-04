@@ -104,7 +104,7 @@ class Birthday:
             day = parse_string(bd['birthday'])
             # tz = tzmap.get(server.region)
             # Check if it's today, and we want to only get todays birthdays
-            if (today and day.date() == pendulum.today().date()) or not today:
+            if (today and day == pendulum.today().date()) or not today:
                 # If so, get the member and add them to the entry
                 member = server.get_member(int(bd['member_id']))
                 _entries.append({
