@@ -356,9 +356,6 @@ class HelpPaginator(Pages):
         self.description = inspect.getdoc(cog)
         self.prefix = cleanup_prefix(ctx.bot, ctx.prefix)
 
-        # no longer need the database
-        await ctx.release()
-
         return self
 
     @classmethod
@@ -379,7 +376,6 @@ class HelpPaginator(Pages):
             self.description = command.help or 'No help given.'
 
         self.prefix = cleanup_prefix(ctx.bot, ctx.prefix)
-        await ctx.release()
         return self
 
     @classmethod
@@ -410,7 +406,6 @@ class HelpPaginator(Pages):
 
         self = cls(ctx, nested_pages, per_page=1)  # this forces the pagination session
         self.prefix = cleanup_prefix(ctx.bot, ctx.prefix)
-        await ctx.release()
 
         # swap the get_page implementation with one that supports our style of pagination
         self.get_page = self.get_bot_page
