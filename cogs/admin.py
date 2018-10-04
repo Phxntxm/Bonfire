@@ -13,6 +13,28 @@ class Administration:
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command()
+    @commands.guild_only()
+    @utils.can_run(manage_guild=True)
+    async def notify(self, ctx, role: discord.Role, *, message):
+        """
+        Notify everyone in "role" with "message"
+        This sets the role to mentionable, mentions the role, then sets it back
+        """
+        if not ctx.me.guild_permissions.manage_roles:
+            await ctx.send("I do not have permissions to edit roles")
+            return
+        try:
+            await role.edit(mentionable=True)
+        except discord.Forbidden:
+            await ctx.send("I do not have permissions to edit that role. "
+                           "(I either don't have manage roles permissions, or it is higher on the hierarchy)")
+        else:
+            fmt = "{}\n{}".format(role.mention, message)
+            await ctx.send(fmt)
+            await role.edit(mentionable=False)
+            await ctx.message.delete()
+
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.can_run(send_messages=True)
