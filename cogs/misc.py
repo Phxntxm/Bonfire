@@ -16,97 +16,31 @@ class Miscallaneous:
 
     def __init__(self, bot):
         self.bot = bot
-        self.help_embeds = []
-        self.results_per_page = 10
-        self.commands = None
         self.process = psutil.Process()
         self.process.cpu_percent()
 
     @commands.command()
     @utils.can_run(send_messages=True)
-    async def help(self, ctx, *, command=None):
-        """This command is used to provide a link to the help URL.
-        This can be called on a command to provide more information about that command
-        You can also provide a page number to pull up that page instead of the first page
+    async def help(self, ctx, *, command: str = None):
+        """Shows help about a command or the bot"""
 
-        EXAMPLE: !help help
-        RESULT: This information"""
-        groups = {}
-        entries = []
-
-        if command is not None:
-            command = self.bot.get_command(command)
-
-        if command is None:
-            for cmd in utils.get_all_commands(self.bot):
-                try:
-                    if not await cmd.can_run(ctx) or not cmd.enabled:
-                        continue
-                except commands.errors.MissingPermissions:
-                    continue
-
-                cog = cmd.cog_name
-                if cog in groups:
-                    groups[cog].append(cmd)
-                else:
-                    groups[cog] = [cmd]
-
-            for cog, cmds in groups.items():
-                entry = {'title': "{} Commands".format(cog),
-                         'fields': []}
-
-                for cmd in cmds:
-                    if not cmd.help:
-                        # Assume if there's no description for a command, it's not supposed to be used
-                        # I.e. the !command command. It's just a parent
-                        continue
-
-                    description = cmd.help.partition('\n')[0]
-                    name_fmt = "{ctx.prefix}**{cmd.qualified_name}** {aliases}".format(
-                        ctx=ctx,
-                        cmd=cmd,
-                        aliases=cmd.aliases if len(cmd.aliases) > 0 else ""
-                    )
-                    entry['fields'].append({
-                        'name': name_fmt,
-                        'value': description,
-                        'inline': False
-                    })
-                entries.append(entry)
-
-            entries = sorted(entries, key=lambda x: x['title'])
-            try:
-                pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
-                pages.embed.set_thumbnail(url=self.bot.user.avatar_url)
-                await pages.paginate()
-            except utils.CannotPaginate as e:
-                await ctx.send(str(e))
-        else:
-            # Get the description for a command
-            description = command.help
-            if description is not None:
-                # Split into examples, results, and the description itself based on the string
-                description, _, rest = command.help.partition('EXAMPLE:')
-                example, _, result = rest.partition('RESULT:')
+        try:
+            if command is None:
+                p = await utils.HelpPaginator.from_bot(ctx)
             else:
-                example = None
-                result = None
-            # Also get the subcommands for this command, if they exist
-            subcommands = [x.qualified_name for x in utils.get_all_subcommands(command) if x != command]
+                entity = self.bot.get_cog(command) or self.bot.get_command(command)
 
-            # The rest is simple, create the embed, set the thumbail to me, add all fields if they exist
-            embed = discord.Embed(title=command.qualified_name)
-            embed.set_thumbnail(url=self.bot.user.avatar_url)
-            if description:
-                embed.add_field(name="Description", value=description.strip(), inline=False)
-            if example:
-                embed.add_field(name="Example", value=example.strip(), inline=False)
-            if result:
-                embed.add_field(name="Result", value=result.strip(), inline=False)
-            if subcommands:
-                embed.add_field(name='Subcommands', value="\n".join(subcommands), inline=False)
+                if entity is None:
+                    clean = command.replace('@', '@\u200b')
+                    return await ctx.send(f'Command or category "{clean}" not found.')
+                elif isinstance(entity, commands.Command):
+                    p = await utils.HelpPaginator.from_command(ctx, entity)
+                else:
+                    p = await utils.HelpPaginator.from_cog(ctx, entity)
 
-            await ctx.send(embed=embed)
+            await p.paginate()
+        except Exception as e:
+            await ctx.send(e)
 
     @commands.command(aliases=["coin"])
     @utils.can_run(send_messages=True)

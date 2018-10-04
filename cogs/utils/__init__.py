@@ -3,5 +3,5 @@ from .checks import can_run, db_check
 from .config import *
 from .utilities import *
 from .images import create_banner
-from .paginator import Pages, CannotPaginate, DetailedPages
+from .paginator import Pages, CannotPaginate, HelpPaginator
 from .database import DB
