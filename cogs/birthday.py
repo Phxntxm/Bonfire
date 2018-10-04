@@ -3,7 +3,6 @@ import pendulum
 import asyncio
 import traceback
 import re
-from pendulum.parsing.exceptions import ParserError
 
 from discord.ext import commands
 from . import utils
@@ -27,7 +26,7 @@ def sort_birthdays(bds):
     # Loop through each birthday
     for bd in bds:
         # If it is after or equal to today, insert into our later list
-        if bd['birthday'].date() >= pendulum.today().date():
+        if bd['birthday'] >= pendulum.today().date():
             later_bds.append(bd)
         # Otherwise, insert into our previous list
         else:
@@ -102,7 +101,7 @@ class Birthday:
             if not bd['birthday']:
                 continue
 
-            day = pendulum.parse(bd['birthday'])
+            day = parse_string(bd['birthday'])
             # tz = tzmap.get(server.region)
             # Check if it's today, and we want to only get todays birthdays
             if (today and day.date() == pendulum.today().date()) or not today:
@@ -171,7 +170,7 @@ class Birthday:
             # Get this server's birthdays
             bds = self.get_birthdays_for_server(ctx.message.guild)
             # Create entries based on the user's display name and their birthday
-            entries = ["{} ({})".format(bd['member'].display_name, bd['birthday'].format("%B %-d")) for bd in bds]
+            entries = ["{} ({})".format(bd['member'].display_name, bd['birthday'].strftime("%B %-d")) for bd in bds]
             # Create our pages object
             try:
                 pages = utils.Pages(self.bot, message=ctx.message, entries=entries, per_page=5)
