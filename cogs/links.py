@@ -168,7 +168,7 @@ class Links:
                 else:
                     entries = [x['definition'] for x in data['list']]
                     try:
-                        pages = utils.Pages(self.bot, message=ctx.message, entries=entries[:5], per_page=1)
+                        pages = utils.Pages(ctx, entries=entries[:5], per_page=1)
                         await pages.paginate()
                     except utils.CannotPaginate as e:
                         await ctx.send(str(e))

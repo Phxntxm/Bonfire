@@ -173,7 +173,7 @@ class Birthday:
             entries = ["{} ({})".format(bd['member'].display_name, bd['birthday'].strftime("%B %-d")) for bd in bds]
             # Create our pages object
             try:
-                pages = utils.Pages(self.bot, message=ctx.message, entries=entries, per_page=5)
+                pages = utils.Pages(ctx, entries=entries, per_page=5)
                 pages.title = "Birthdays for {}".format(ctx.message.guild.name)
                 await pages.paginate()
             except utils.CannotPaginate as e:

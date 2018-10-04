@@ -24,7 +24,7 @@ class Administration:
         msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles')
         if msgs:
             try:
-                pages = utils.Pages(self.bot, message=ctx.message, entries=msgs)
+                pages = utils.Pages(ctx, entries=msgs)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
@@ -141,7 +141,7 @@ class Administration:
         msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs')
         if msgs:
             try:
-                pages = utils.Pages(self.bot, message=ctx.message, entries=msgs)
+                pages = utils.Pages(ctx, entries=msgs)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
@@ -333,7 +333,7 @@ class Administration:
         if entries:
             # Then paginate
             try:
-                pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+                pages = utils.Pages(ctx, entries=entries)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
@@ -1135,7 +1135,7 @@ class Administration:
 
         if rule is None:
             try:
-                pages = utils.Pages(self.bot, message=ctx.message, entries=rules, per_page=5)
+                pages = utils.Pages(ctx, entries=rules, per_page=5)
                 pages.title = "Rules for {}".format(ctx.message.guild.name)
                 await pages.paginate()
             except utils.CannotPaginate as e:

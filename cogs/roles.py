@@ -77,7 +77,7 @@ class Roles:
             return
 
         try:
-            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+            pages = utils.Pages(ctx, entries=entries)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
@@ -478,7 +478,7 @@ class Roles:
             return
 
         try:
-            pages = utils.Pages(self.bot, message=ctx.message, entries=roles)
+            pages = utils.Pages(ctx, entries=roles)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))

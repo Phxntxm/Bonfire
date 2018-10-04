@@ -330,7 +330,7 @@ class Stats:
             output.append("{} (Rating: {})".format(member.display_name, rating))
 
         try:
-            pages = utils.Pages(self.bot, message=ctx.message, entries=output)
+            pages = utils.Pages(ctx, entries=output)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))
@@ -370,7 +370,7 @@ class Stats:
         EXAMPLE: !donators
         RESULT: A list of the donators"""
         try:
-            pages = utils.Pages(self.bot, message=ctx.message, entries=self.donators)
+            pages = utils.Pages(ctx, entries=self.donators)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))

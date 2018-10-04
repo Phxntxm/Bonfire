@@ -23,7 +23,7 @@ class Tags:
         tags = self.bot.db.load('tags', key=ctx.message.guild.id, pluck='tags')
         if tags:
             entries = [t['trigger'] for t in tags]
-            pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+            pages = utils.Pages(ctx, entries=entries)
             await pages.paginate()
         else:
             await ctx.send("There are no tags setup on this server!")
@@ -42,7 +42,7 @@ class Tags:
             if len(entries) == 0:
                 await ctx.send("You have no tags setup on this server!")
             else:
-                pages = utils.Pages(self.bot, message=ctx.message, entries=entries)
+                pages = utils.Pages(ctx, entries=entries)
                 await pages.paginate()
         else:
             await ctx.send("There are no tags setup on this server!")
