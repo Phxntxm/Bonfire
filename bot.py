@@ -12,11 +12,13 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from discord.ext import commands
 from cogs import utils
 
-opts = {'command_prefix': utils.command_prefix,
-        'description': utils.bot_description,
-        'pm_help': None,
-        'command_not_found': '',
-        'game': discord.Activity(name=utils.default_status, type=0)}
+opts = {
+    'command_prefix': utils.command_prefix,
+    'description': utils.bot_description,
+    'pm_help': None,
+    'command_not_found': '',
+    'activity': discord.Activity(name=utils.default_status, type=0)
+}
 
 bot = commands.AutoShardedBot(**opts)
 logging.basicConfig(level=logging.INFO, filename='bonfire.log')
