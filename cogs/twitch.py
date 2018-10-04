@@ -18,7 +18,7 @@ class Twitch:
         self.key = utils.twitch_key
         self.params = {'client_id': self.key}
 
-        self.task = bot.loop.create_task(self.check_channels())
+        self.task = bot.loop.create_task(self.twitch_task())
 
     @staticmethod
     def _form_embed(data):
