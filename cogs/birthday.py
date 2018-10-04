@@ -2,6 +2,7 @@ import discord
 import pendulum
 import asyncio
 import traceback
+import re
 from pendulum.parsing.exceptions import ParserError
 
 from discord.ext import commands
@@ -34,6 +35,48 @@ def sort_birthdays(bds):
     # At this point we have 2 lists, in order, one from all of dates before today, and one after
     # So all we need to do is put them in order all of "laters" then all of "befores"
     return later_bds + previous_bds
+
+
+def parse_string(date):
+    year = pendulum.now().year
+    month = None
+    day = None
+    month_map = {
+        "january": 1,
+        "jan": 1,
+        "february": 2,
+        "feb": 2,
+        "march": 3,
+        "mar": 3,
+        "april": 4,
+        "apr": 4,
+        "may": 5,
+        "june": 6,
+        "jun": 6,
+        "july": 7,
+        "jul": 7,
+        "august": 8,
+        "aug": 8,
+        "september": 9,
+        "sep": 9,
+        "october": 10,
+        "oct": 10,
+        "november": 11,
+        "nov": 11,
+        "december": 12,
+        "dec": 12,
+    }
+
+    num_re = re.compile("^(\d+)[a-z]*$")
+
+    for part in [x.lower() for x in date.split()]:
+        match = num_re.match(part)
+        if match:
+            day = int(match.group(1))
+        elif part in month_map:
+            month = month_map.get(part)
+    if month and day:
+        return pendulum.date(year, month, day)
 
 
 class Birthday:
@@ -144,20 +187,22 @@ class Birthday:
 
         EXAMPLE: !birthday add December 1st
         RESULT: I now know your birthday is December 1st"""
-        try:
-            # Try parsing the date from what was given
-            date = pendulum.parse(date)
-            # We'll save in a specific way so that it can be parsed how we want, so do this
-            date = date.format("%B %-d")
-        except (ValueError, ParserError):
+        if len(date.split()) != 2:
             await ctx.send("Please provide date in a valid format, such as December 1st!")
-        else:
-            entry = {
-                'member_id': str(ctx.message.author.id),
-                'birthday': date
-            }
-            await self.bot.db.save('birthdays', entry)
-            await ctx.send("I have just saved your birthday as {}".format(date))
+            return
+
+        date = parse_string(date)
+        if date is None:
+            await ctx.send("Please provide date in a valid format, such as December 1st!")
+            return
+
+        date = date.strftime("%B %-d")
+        entry = {
+            'member_id': str(ctx.message.author.id),
+            'birthday': date
+        }
+        await self.bot.db.save('birthdays', entry)
+        await ctx.send("I have just saved your birthday as {}".format(date))
 
     @birthday.command(name='remove')
     @utils.can_run(send_messages=True)
