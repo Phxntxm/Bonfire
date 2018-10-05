@@ -62,25 +62,46 @@ class Roles:
     @commands.group(aliases=['roles'], invoke_without_command=True)
     @commands.guild_only()
     @utils.can_run(send_messages=True)
-    async def role(self, ctx):
+    async def role(self, ctx, *, role: discord.Role=None):
         """This command can be used to modify the roles on the server.
         Pass no subcommands and this will print the roles currently available on this server
+        If you give a role as the argument then it will give some information about that role
 
         EXAMPLE: !role
         RESULT: A list of all your roles"""
-        # Don't include the colour roles
-        colour_role = re.compile("Bonfire #.+")
-        # Simply get a list of all roles in this server and send them
-        entries = [r.name for r in ctx.guild.roles[1:] if not colour_role.match(r.name)]
-        if len(entries) == 0:
-            await ctx.send("You do not have any roles setup on this server, other than the default role!")
-            return
 
-        try:
-            pages = utils.Pages(ctx, entries=entries)
-            await pages.paginate()
-        except utils.CannotPaginate as e:
-            await ctx.send(str(e))
+        if role:
+            # Create the embed object
+            opts = {
+                "title": role.name,
+                "colour": role.colour,
+            }
+            if role.managed:
+                opts["description"] = "This role is managed by a third party service"
+            embed = discord.Embed(**opts)
+            # Add details to it
+            embed.add_field(name="Created", value=role.created_at.date())
+            embed.add_field(name="Mentionable", value="Yes" if role.mentionable else "No")
+            total_members = len(role.members)
+            embed.add_field(name="Total members", value=str(total_members))
+            # If there are only a few members in this role, display them
+            if total_members <= 5:
+                embed.add_field(name="Members", value="\n".join(m.display_name for m in role.members))
+            await ctx.send(embed=embed)
+        else:
+            # Don't include the colour roles
+            colour_role = re.compile("Bonfire #.+")
+            # Simply get a list of all roles in this server and send them
+            entries = [r.name for r in ctx.guild.roles[1:] if not colour_role.match(r.name)]
+            if len(entries) == 0:
+                await ctx.send("You do not have any roles setup on this server, other than the default role!")
+                return
+
+            try:
+                pages = utils.Pages(ctx, entries=entries)
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
 
     @role.command(name='remove')
     @commands.guild_only()
