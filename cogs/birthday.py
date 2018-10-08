@@ -79,6 +79,8 @@ def parse_string(date):
 
 
 class Birthday:
+    """Track and announcebirthdays"""
+
     def __init__(self, bot):
         self.bot = bot
         self.task = self.bot.loop.create_task(self.birthday_task())

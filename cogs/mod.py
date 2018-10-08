@@ -7,7 +7,7 @@ import asyncio
 
 
 class Moderation:
-    """Commands that can be used by a or an admin, depending on the command"""
+    """Moderation commands, things that help control a server...but not the settings of the server"""
 
     def __init__(self, bot):
         self.bot = bot

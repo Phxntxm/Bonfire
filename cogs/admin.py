@@ -10,8 +10,74 @@ valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord
 
 
 class Administration:
+    """Handles the administration of the bot for a server; this is mainly different settings for the bot"""
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.can_run(manage_guild=True)
+    async def disable(self, ctx, *, command):
+        """Disables the use of a command on this server"""
+        if command == "disable" or command == "enable":
+            await ctx.send("You cannot disable `{}`".format(command))
+            return
+
+        cmd = self.bot.get_command(command)
+        if cmd is None:
+            await ctx.send("No command called `{}`".format(command))
+            return
+
+        from_entry = {
+            'source': cmd.qualified_name,
+            'destination': "everyone",
+        }
+
+        restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+        _from = restrictions.get('from', [])
+        if from_entry not in _from:
+            _from.append(from_entry)
+            update = {
+                'server_id': str(ctx.message.guild.id),
+                'restrictions': {
+                    'from': _from
+                }
+            }
+            await self.bot.db.save('server_settings', update)
+            await ctx.send("I have disabled `{}`".format(cmd.qualified_name))
+        else:
+            await ctx.send("That command is already disabled")
+
+    @commands.command()
+    @commands.guild_only()
+    @utils.can_run(manage_guild=True)
+    async def enable(self, ctx, *, command):
+        """Enables the use of a command on this server"""
+        cmd = self.bot.get_command(command)
+        if cmd is None:
+            await ctx.send("No command called `{}`".format(command))
+            return
+
+        from_entry = {
+            'source': cmd.qualified_name,
+            'destination': "everyone",
+        }
+
+        restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+        _from = restrictions.get('from', [])
+        try:
+            _from.remove(from_entry)
+        except ValueError:
+            await ctx.send("That command is not disabled")
+        else:
+            update = {
+                'server_id': str(ctx.message.guild.id),
+                'restrictions': {
+                    'from': _from
+                }
+            }
+            await self.bot.db.save('server_settings', update)
+            await ctx.send("I have enabled `{}`".format(cmd.qualified_name))
 
     @commands.command()
     @commands.guild_only()

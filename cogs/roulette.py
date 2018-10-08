@@ -9,6 +9,7 @@ from . import utils
 
 
 class Roulette:
+    """A fun game that ends in someone getting kicked!"""
 
     def __init__(self, bot):
         self.bot = bot

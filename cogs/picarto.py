@@ -11,6 +11,8 @@ BASE_URL = 'https://api.picarto.tv/v1'
 
 
 class Picarto:
+    """Pretty self-explanatory"""
+
     def __init__(self, bot):
         self.bot = bot
         self.task = self.bot.loop.create_task(self.picarto_task())

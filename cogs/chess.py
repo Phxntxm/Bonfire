@@ -8,6 +8,8 @@ from enum import Enum
 
 
 class Chess:
+    """Pretty self-explanatory"""
+
     def __init__(self, bot):
         self.bot = bot
         # Our format for games is going to be a little different, because we do want to allow multiple games per guild

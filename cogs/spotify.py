@@ -9,6 +9,8 @@ from . import utils
 
 
 class Spotify:
+    """Pretty self-explanatory"""
+
     def __init__(self, bot):
         self.bot = bot
         self._token = None

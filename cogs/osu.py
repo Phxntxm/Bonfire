@@ -11,6 +11,8 @@ MAX_RETRIES = 5
 
 
 class Osu:
+    """View OSU stats"""
+
     def __init__(self, bot):
         self.bot = bot
         self.api = OsuApi(utils.osu_key, connector=AHConnector())

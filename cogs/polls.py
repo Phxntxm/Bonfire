@@ -36,6 +36,8 @@ class Poll:
 
 
 class Polls:
+    """Create custom polls that can be tracked through reactions"""
+
     def __init__(self, bot):
         self.bot = bot
         self.polls = []

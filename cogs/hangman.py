@@ -65,6 +65,8 @@ class Game:
 
 
 class Hangman:
+    """Pretty self-explanatory"""
+
     def __init__(self, bot):
         self.bot = bot
         self.games = {}

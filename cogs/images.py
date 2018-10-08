@@ -9,6 +9,8 @@ from . import utils
 
 
 class Images:
+    """Commands that post images, or look up images"""
+
     def __init__(self, bot):
         self.bot = bot
 

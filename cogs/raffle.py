@@ -11,6 +11,8 @@ import traceback
 
 
 class Raffle:
+    """Used to hold custom raffles"""
+
     def __init__(self, bot):
         self.bot = bot
         self.bot.loop.create_task(self.raffle_task())
