@@ -19,28 +19,89 @@ class Miscallaneous:
         self.process = psutil.Process()
         self.process.cpu_percent()
 
+    def _command_signature(self, cmd):
+        result = [cmd.qualified_name]
+        if cmd.usage:
+            result.append(cmd.usage)
+            return ' '.join(result)
+
+        params = cmd.clean_params
+        if not params:
+            return ' '.join(result)
+
+        for name, param in params.items():
+            if param.default is not param.empty:
+                # We don't want None or '' to trigger the [name=value] case and instead it should
+                # do [name] since [name=None] or [name=] are not exactly useful for the user.
+                should_print = param.default if isinstance(param.default, str) else param.default is not None
+                if should_print:
+                    result.append(f'[{name}={param.default!r}]')
+                else:
+                    result.append(f'[{name}]')
+            elif param.kind == param.VAR_POSITIONAL:
+                result.append(f'[{name}...]')
+            else:
+                result.append(f'<{name}>')
+
+        return ' '.join(result)
+
     @commands.command()
     @utils.can_run(send_messages=True)
-    async def help(self, ctx, *, command: str = None):
-        """Shows help about a command or the bot"""
+    async def help(self, ctx, *, entity: str = None):
+        chunks = []
+
+        if entity:
+            entity = self.bot.get_cog(entity) or self.bot.get_command(entity)
+        if entity is None:
+            fmt = "Hello! Here is a list of the sections of commands that I have (there are a lot of commands so just start with the sections...I know, I'm pretty great)\n"
+            if utils.dev_server:
+                fmt += "If I'm having issues, then please visit the dev server and ask for help. {}\n".format(utils.dev_server)
+            fmt += "To use a command's paramaters, you need to know the notation for them:\n"
+            fmt += "\t<argument> This means the argument is __**required**__.\n"
+            fmt += "\t[argument] This means the argument is __**optional**__.\n"
+            fmt += "\t[A|B] This means the it can be __**either A or B**__.\n"
+            fmt += "\t[argument...] This means you can have multiple arguments.\n"
+            fmt += "\n**Type `{}help section` to get help on a specific section**\n".format(ctx.prefix)
+            fmt += "**CASE MATTERS** Sections are in `Title Case` and commands are in `lower case`\n\n"
+
+            chunks.append(fmt)
+
+            cogs = sorted(self.bot.cogs.values(), key=lambda c: c.__class__.__name__)
+            for cog in cogs:
+                tmp = "**{}**\n".format(cog.__class__.__name__)
+                if cog.__doc__:
+                    tmp += "\t{}\n".format(cog.__doc__)
+                if len(chunks[len(chunks) - 1] + tmp) > 2000:
+                    chunks.append(tmp)
+                else:
+                    chunks[len(chunks) - 1] += tmp
+        elif isinstance(entity, (commands.core.Command, commands.core.Group)):
+            tmp = "**{}**".format(self._command_signature(entity))
+            tmp += "\n{}".format(entity.help.ljust(4))
+            chunks.append(tmp)
+        else:
+            cmds = sorted(ctx.bot.get_cog_commands(entity.__class__.__name__), key=lambda c: c.name)
+            fmt = "Here are a list of commands under the section {}\n".format(entity.__class__.__name__)
+            fmt += "Type `{}help command` to get more help on a specific command\n\n".format(ctx.prefix)
+
+            chunks.append(fmt)
+
+            for command in cmds:
+                for subcommand in utils.get_all_subcommands(command):
+                    tmp = "**{}**\n\t{}\n".format(subcommand.qualified_name, subcommand.short_doc)
+                    if len(chunks[len(chunks) - 1] + tmp) > 2000:
+                        chunks.append(tmp)
+                    else:
+                        chunks[len(chunks) - 1] += tmp
 
         try:
-            if command is None:
-                p = await utils.HelpPaginator.from_bot(ctx)
-            else:
-                entity = self.bot.get_cog(command) or self.bot.get_command(command)
-
-                if entity is None:
-                    clean = command.replace('@', '@\u200b')
-                    return await ctx.send(f'Command or category "{clean}" not found.')
-                elif isinstance(entity, commands.Command):
-                    p = await utils.HelpPaginator.from_command(ctx, entity)
-                else:
-                    p = await utils.HelpPaginator.from_cog(ctx, entity)
-
-            await p.paginate()
-        except Exception as e:
-            await ctx.send(e)
+            for chunk in chunks:
+                await ctx.author.send(chunk)
+        except (discord.Forbidden, discord.HTTPException):
+            await ctx.send("I cannot DM you, please allow DM's from this server to run this command")
+        else:
+            if ctx.guild:
+                await ctx.send("I have just DM'd you some information about me!")
 
     @commands.command(aliases=["coin"])
     @utils.can_run(send_messages=True)
