@@ -75,7 +75,7 @@ class Miscallaneous:
                     chunks[len(chunks) - 1] += tmp
         elif isinstance(entity, (commands.core.Command, commands.core.Group)):
             tmp = "**{}**".format(self._command_signature(entity))
-            tmp += "\n{}".format(entity.help.ljust(4))
+            tmp += "\n{}".format(entity.help)
             chunks.append(tmp)
         else:
             cmds = sorted(ctx.bot.get_cog_commands(entity.__class__.__name__), key=lambda c: c.name)
