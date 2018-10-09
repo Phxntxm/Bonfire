@@ -54,8 +54,6 @@ class Miscallaneous:
             entity = self.bot.get_cog(entity) or self.bot.get_command(entity)
         if entity is None:
             fmt = "Hello! Here is a list of the sections of commands that I have (there are a lot of commands so just start with the sections...I know, I'm pretty great)\n"
-            if utils.dev_server:
-                fmt += "If I'm having issues, then please visit the dev server and ask for help. {}\n".format(utils.dev_server)
             fmt += "To use a command's paramaters, you need to know the notation for them:\n"
             fmt += "\t<argument> This means the argument is __**required**__.\n"
             fmt += "\t[argument] This means the argument is __**optional**__.\n"
@@ -93,6 +91,13 @@ class Miscallaneous:
                         chunks.append(tmp)
                     else:
                         chunks[len(chunks) - 1] += tmp
+
+        if utils.dev_server:
+            tmp = "\n\nIf I'm having issues, then please visit the dev server and ask for help. {}".format(utils.dev_server)
+            if len(chunks[len(chunks) - 1] + tmp) > 2000:
+                chunks.append(tmp)
+            else:
+                chunks[len(chunks) - 1] += tmp
 
         try:
             for chunk in chunks:
