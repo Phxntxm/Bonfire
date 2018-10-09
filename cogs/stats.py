@@ -215,7 +215,7 @@ class Stats:
             stats = {
                 command: data['server_usage'].get(str(server.id))
                 for command, data in command_stats.items()
-                if data['server_usage'].get(str(server.id), 0) > 0
+                if data.get("server_usage", {}).get(str(server.id), 0) > 0
             }
             sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
             try:
@@ -272,7 +272,7 @@ class Stats:
         await ctx.message.channel.trigger_typing()
 
         boops = self.bot.db.load('boops', key=ctx.message.author.id)
-        if boops is None:
+        if not boops:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
 
