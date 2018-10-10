@@ -108,6 +108,15 @@ class Miscallaneous:
             if ctx.guild:
                 await ctx.send("I have just DM'd you some information about me!")
 
+    @commands.command()
+    @utils.can_run(send_messages=True)
+    async def ping(self, ctx):
+        """Returns the latency between the server websocket, and between reading messages"""
+        msg_latency = datetime.datetime.utcnow() - ctx.message.created_at
+        fmt = "Message latency {0:.2f} seconds".format(msg_latency.seconds + msg_latency.microseconds / 1000000)
+        fmt += "\nWebsocket latency {0:.2f} seconds".format(self.bot.latency)
+        await ctx.send(fmt)
+
     @commands.command(aliases=["coin"])
     @utils.can_run(send_messages=True)
     async def coinflip(self, ctx):
