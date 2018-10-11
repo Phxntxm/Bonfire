@@ -99,13 +99,18 @@ class Miscallaneous:
             else:
                 chunks[len(chunks) - 1] += tmp
 
+        if len(chunks) == 1 and len(chunks[0]) < 1000:
+            destination = ctx.channel
+        else:
+            destination = ctx.author
+
         try:
             for chunk in chunks:
-                await ctx.author.send(chunk)
+                await destination.send(chunk)
         except (discord.Forbidden, discord.HTTPException):
             await ctx.send("I cannot DM you, please allow DM's from this server to run this command")
         else:
-            if ctx.guild:
+            if ctx.guild and destination == ctx.channel:
                 await ctx.send("I have just DM'd you some information about me!")
 
     @commands.command()
