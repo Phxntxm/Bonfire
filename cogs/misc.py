@@ -110,7 +110,7 @@ class Miscallaneous:
         except (discord.Forbidden, discord.HTTPException):
             await ctx.send("I cannot DM you, please allow DM's from this server to run this command")
         else:
-            if ctx.guild and destination == ctx.channel:
+            if ctx.guild and destination == ctx.author:
                 await ctx.send("I have just DM'd you some information about me!")
 
     @commands.command()
