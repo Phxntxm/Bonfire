@@ -4,7 +4,6 @@ from discord.ext import commands
 from . import utils
 
 import re
-import asyncio
 
 
 class Stats:
@@ -12,53 +11,6 @@ class Stats:
 
     def __init__(self, bot):
         self.bot = bot
-        self.donators = []
-        self.bot.loop.create_task(self.donator_task())
-
-    async def donator_task(self):
-        while True:
-            await self.get_donators()
-            await asyncio.sleep(60)
-
-    async def get_donators(self):
-        # Set our base URL for the pagination task
-        url = "https://api.patreon.com/oauth2/api/campaigns/{}/pledges".format(utils.patreon_id)
-        # Set our headers with our bearer token
-        headers = {'Authorization': 'Bearer {}'.format(utils.patreon_key)}
-        # We need the names of all of them, and the names are embeded a bit so lets append while looping
-        names = []
-        # We need to page through, so lets create a loop and break when we find out we're done
-        while True:
-            # Simply get data based on the URL
-            data = await utils.request(url, headers=headers, force_content_type_json=True)
-            # First check if the data failed to retrieve, if so just return
-            if data is None:
-                return
-
-            # Loop through the includes, as that's all we need
-            for include in data['included']:
-                # We only carry about the user's
-                if include['type'] != 'user':
-                    continue
-                # This check checks the user's connected campaign (should only exist for *our* user) and checks if it
-                #  matches
-                if include.get('relationshipos', {}).get('campaign', {}).get('data', {}).get('id', {}) == str(
-                        utils.patreon_id):
-                    continue
-
-                # Otherwise the only way this user was included, was if they are a patron, so include them
-                name = include['attributes']['full_name']
-                if name:
-                    names.append(name)
-
-            # Now, lets get our "next" link and request that
-            url = data['links'].get('next')
-            # If there is no None, that means there should only be a "first" and our pagination is done
-            if url is None:
-                break
-
-        # Now just set the names
-        self.donators = names
 
     @commands.command()
     @commands.guild_only()
@@ -361,19 +313,6 @@ class Stats:
             fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}\n\tOverall Rank: {}\n\tRating: {}'
             fmt = fmt.format(member.display_name, record, server_rank, overall_rank, rating)
             await ctx.send('```\n{}```'.format(fmt))
-
-    @commands.command(aliases=['donators'])
-    @utils.can_run(send_messages=True)
-    async def patrons(self, ctx):
-        """Prints a list of all the patrons for Bonfire
-
-        EXAMPLE: !donators
-        RESULT: A list of the donators"""
-        try:
-            pages = utils.Pages(ctx, entries=self.donators)
-            await pages.paginate()
-        except utils.CannotPaginate as e:
-            await ctx.send(str(e))
 
 
 def setup(bot):
