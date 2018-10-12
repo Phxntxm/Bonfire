@@ -46,6 +46,7 @@ class Miscallaneous:
         return ' '.join(result)
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.cooldown.BucketType.user)
     @utils.can_run(send_messages=True)
     async def help(self, ctx, *, entity: str = None):
         chunks = []

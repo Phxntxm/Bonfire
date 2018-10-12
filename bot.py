@@ -98,7 +98,7 @@ async def on_command_error(ctx, error):
             m, s = divmod(error.retry_after, 60)
             fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
                 .format(round(m), round(s))
-            await ctx.message.channel.send(fmt)
+            # await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.NoPrivateMessage):
             fmt = "This command cannot be used in a private message"
             await ctx.message.channel.send(fmt)
