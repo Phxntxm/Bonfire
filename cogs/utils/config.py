@@ -69,7 +69,6 @@ extensions = [
     'cogs.hangman',
     'cogs.events',
     'cogs.raffle',
-    'cogs.twitch',
     'cogs.blackjack',
     'cogs.osu',
     'cogs.tags',
