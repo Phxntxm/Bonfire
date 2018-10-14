@@ -77,6 +77,7 @@ async def on_command_error(ctx, error):
                 'Unknown Message' in str(error.original) or
                 'Origin Time-out' in str(error.original) or
                 'Bad Gateway' in str(error.original) or
+                'Gateway Time-out' in str(error.original) or
                 'Explicit content' in str(error.original)):
             return
         elif isinstance(error.original, aiohttp.ClientOSError):
