@@ -206,7 +206,11 @@ class Stats:
         sorted_boops = [x for x in sorted_boops if x[0] in server_member_ids]
 
         # Since this is sorted, we just need to get the following information on the first user in the list
-        most_id, most_boops = sorted_boops[0]
+        try:
+            most_id, most_boops = sorted_boops[0]
+        except IndexError:
+            await ctx.send("You have not booped anyone in this server {}".format(ctx.message.author.mention))
+            return
 
         member = ctx.message.guild.get_member(int(most_id))
 
