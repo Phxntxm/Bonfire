@@ -48,7 +48,28 @@ class Miscallaneous:
     @commands.command()
     @commands.cooldown(1, 3, commands.cooldowns.BucketType.user)
     @utils.can_run(send_messages=True)
-    async def help(self, ctx, *, entity: str = None):
+    async def help(self, ctx, *, command: str = None):
+        """Shows help about a command or the bot"""
+
+        try:
+            if command is None:
+                p = await utils.HelpPaginator.from_bot(ctx)
+            else:
+                entity = self.bot.get_cog(command) or self.bot.get_command(command)
+
+                if entity is None:
+                    clean = command.replace('@', '@\u200b')
+                    return await ctx.send(f'Command or category "{clean}" not found.')
+                elif isinstance(entity, commands.Command):
+                    p = await utils.HelpPaginator.from_command(ctx, entity)
+                else:
+                    p = await utils.HelpPaginator.from_cog(ctx, entity)
+
+            await p.paginate()
+        except Exception as e:
+            await ctx.send(e)
+
+    async def _help(self, ctx, *, entity: str = None):
         chunks = []
 
         if entity:
