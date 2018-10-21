@@ -190,7 +190,7 @@ class Stats:
         EXAMPLE: !mostboops
         RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
         boops = self.bot.db.load('boops', key=ctx.message.author.id)
-        if boops is None:
+        if boops is None or "boops" not in boops:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
 
