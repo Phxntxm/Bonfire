@@ -93,7 +93,7 @@ async def check_not_restricted(ctx):
         source = from_restriction.get('source')
         destination = from_restriction.get('destination')
         # Special check for what the "disable" command produces
-        if destination == "everyone":
+        if destination == "everyone" and ctx.command.qualified_name == source:
             return False
         # Convert destination to the object we want
         destination = await utilities.convert(ctx, destination)
