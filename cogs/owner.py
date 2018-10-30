@@ -1,7 +1,5 @@
 from discord.ext import commands
 
-from . import utils
-
 import asyncio
 import discord
 import inspect
@@ -26,6 +24,9 @@ class Owner:
         self._last_result = None
         self.sessions = set()
 
+    async def __local_check(self, ctx):
+        return await self.bot.is_owner(ctx.author)
+
     @staticmethod
     def cleanup_code(content):
         """Automatically removes code blocks from the code."""
@@ -36,62 +37,7 @@ class Owner:
         # remove `foo`
         return content.strip('` \n')
 
-    async def on_guild_join(self, guild):
-        # I don't want this for now
-        return
-        # Create our embed that we'll use for the information
-        embed = discord.Embed(title="Joined guild {}".format(guild.name), description="Created on: {}".format(guild.created_at.date()))
-
-        # Make sure we only set the icon url if it has been set
-        if guild.icon_url != "":
-            embed.set_thumbnail(url=guild.icon_url)
-
-        # Add our fields, these are self-explanatory
-        embed.add_field(name='Region', value=str(guild.region))
-        embed.add_field(name='Total Emojis', value=len(guild.emojis))
-
-        # Get the amount of online members
-        online_members = [m for m in guild.members if str(m.status) == 'online']
-        embed.add_field(name='Total members', value='{}/{}'.format(len(online_members), guild.member_count))
-        embed.add_field(name='Roles', value=len(guild.roles))
-
-        # Split channels into voice and text channels
-        voice_channels = [c for c in guild.channels if type(c) is discord.VoiceChannel]
-        text_channels = [c for c in guild.channels if type(c) is discord.TextChannel]
-        embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
-        embed.add_field(name='Owner', value=guild.owner.display_name)
-
-        await self.bot.owner.send(embed=embed)
-
-    async def on_guild_remove(self, guild):
-        # I don't want this for now
-        return
-        # Create our embed that we'll use for the information
-        embed = discord.Embed(title="Left guild {}".format(guild.name), description="Created on: {}".format(guild.created_at.date()))
-
-        # Make sure we only set the icon url if it has been set
-        if guild.icon_url != "":
-            embed.set_thumbnail(url=guild.icon_url)
-
-        # Add our fields, these are self-explanatory
-        embed.add_field(name='Region', value=str(guild.region))
-        embed.add_field(name='Total Emojis', value=len(guild.emojis))
-
-        # Get the amount of online members
-        online_members = [m for m in guild.members if str(m.status) == 'online']
-        embed.add_field(name='Total members', value='{}/{}'.format(len(online_members), guild.member_count))
-        embed.add_field(name='Roles', value=len(guild.roles))
-
-        # Split channels into voice and text channels
-        voice_channels = [c for c in guild.channels if type(c) is discord.VoiceChannel]
-        text_channels = [c for c in guild.channels if type(c) is discord.TextChannel]
-        embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
-        embed.add_field(name='Owner', value=guild.owner.display_name)
-
-        await self.bot.owner.send(embed=embed)
-
     @commands.command(hidden=True)
-    @utils.can_run(ownership=True)
     async def repl(self, ctx):
         msg = ctx.message
 
@@ -118,6 +64,8 @@ class Owner:
             return m.author.id == msg.author.id and \
                    m.channel.id == msg.channel.id and \
                    m.content.startswith('`')
+
+        code = None
 
         while True:
             try:
@@ -161,7 +109,7 @@ class Owner:
                     result = executor(code, variables)
                     if inspect.isawaitable(result):
                         result = await result
-            except Exception as e:
+            except Exception:
                 value = stdout.getvalue()
                 fmt = '```py\n{}{}\n```'.format(value, traceback.format_exc())
             else:
@@ -184,7 +132,6 @@ class Owner:
                 await ctx.send('Unexpected error: `{}`'.format(e))
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def sendtochannel(self, ctx, cid: int, *, message):
         """Sends a message to a provided channel, by ID"""
         channel = self.bot.get_channel(cid)
@@ -195,7 +142,6 @@ class Owner:
             pass
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def debug(self, ctx, *, body: str):
         env = {
             'bot': self.bot,
@@ -246,7 +192,6 @@ class Owner:
                 await ctx.send("Content too large for me to print!")
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def bash(self, ctx, *, cmd: str):
         """Runs a bash command"""
         output = subprocess.check_output("{}; exit 0".format(cmd), stderr=subprocess.STDOUT, shell=True)
@@ -256,7 +201,6 @@ class Owner:
             await ctx.send("No output for `{}`".format(cmd))
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def shutdown(self, ctx):
         """Shuts the bot down"""
         fmt = 'Shutting down, I will miss you {0.author.name}'
@@ -265,21 +209,18 @@ class Owner:
         await self.bot.close()
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def name(self, ctx, new_nick: str):
         """Changes the bot's name"""
         await self.bot.user.edit(username=new_nick)
         await ctx.send('Changed username to ' + new_nick)
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def status(self, ctx, *, status: str):
         """Changes the bot's 'playing' status"""
         await self.bot.change_presence(activity=discord.Game(name=status, type=0))
         await ctx.send("Just changed my status to '{}'!".format(status))
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def load(self, ctx, *, module: str):
         """Loads a module"""
 
@@ -297,7 +238,6 @@ class Owner:
             await ctx.send(fmt.format(type(error).__name__, error))
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def unload(self, ctx, *, module: str):
         """Unloads a module"""
 
@@ -310,7 +250,6 @@ class Owner:
         await ctx.send("I have just unloaded the {} module".format(module))
 
     @commands.command()
-    @utils.can_run(ownership=True)
     async def reload(self, ctx, *, module: str):
         """Reloads a module"""
 

@@ -2,7 +2,7 @@ from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 import discord
 
-from .utils import checks
+from utils import checks
 
 import re
 import asyncio

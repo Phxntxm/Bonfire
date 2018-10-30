@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from . import utils
+import utils
 
 import random
 import re
@@ -115,7 +115,8 @@ class Miscallaneous:
                         chunks[len(chunks) - 1] += tmp
 
         if utils.dev_server:
-            tmp = "\n\nIf I'm having issues, then please visit the dev server and ask for help. {}".format(utils.dev_server)
+            tmp = "\n\nIf I'm having issues, then please visit the dev server and ask for help. {}".format(
+                utils.dev_server)
             if len(chunks[len(chunks) - 1] + tmp) > 2000:
                 chunks.append(tmp)
             else:

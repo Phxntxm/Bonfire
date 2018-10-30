@@ -10,7 +10,7 @@ import aiohttp
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 from discord.ext import commands
-from cogs import utils
+import utils
 
 opts = {
     'command_prefix': utils.command_prefix,
@@ -25,20 +25,14 @@ logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 
 @bot.event
-async def on_ready():
-    if not hasattr(bot, 'owner'):
-        appinfo = await bot.application_info()
-        bot.owner = appinfo.owner
-
-
-@bot.event
 async def on_command_completion(ctx):
     author = ctx.message.author
     server = ctx.message.guild
     command = ctx.command
 
-    command_usage = await bot.db.actual_load('command_usage', key=command.qualified_name) \
-                    or {'command': command.qualified_name}
+    command_usage = await bot.db.actual_load(
+        'command_usage', key=command.qualified_name
+    ) or {'command': command.qualified_name}
 
     # Add one to the total usage for this command, basing it off 0 to start with (obviously)
     total_usage = command_usage.get('total_usage', 0) + 1
@@ -59,6 +53,15 @@ async def on_command_completion(ctx):
 
     # Save all the changes
     await bot.db.save('command_usage', command_usage)
+
+    # Now add credits to a users amount
+    # user_credits = bot.db.load('credits', key=ctx.author.id, pluck='credits') or 1000
+    # user_credits = int(user_credits) + 5
+    # update = {
+    #    'member_id': str(ctx.author.id),
+    #    'credits': user_credits
+    # }
+    # await bot.db.save('credits', update)
 
 
 @bot.event
@@ -113,7 +116,7 @@ async def on_command_error(ctx, error):
                 try:
                     traceback.print_tb(error.original.__traceback__, file=f)
                     print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
-                except:
+                except Exception:
                     traceback.print_tb(error.__traceback__, file=f)
                     print('{0.__class__.__name__}: {0}'.format(error), file=f)
     except discord.HTTPException:

@@ -5,8 +5,7 @@ import traceback
 import re
 
 from discord.ext import commands
-from . import utils
-
+import utils
 
 tzmap = {
     'us-central': pendulum.timezone('US/Central'),

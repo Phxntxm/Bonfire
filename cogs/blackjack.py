@@ -1,23 +1,9 @@
-from . import utils
+import utils
 
 from discord.ext import commands
 
 import asyncio
 import math
-
-face_map = {
-    'S': 'spades',
-    'D': 'diamonds',
-    'C': 'clubs',
-    'H': 'hearts'
-}
-
-card_map = {
-    'A': 'Ace',
-    'K': 'King',
-    'Q': 'Queen',
-    'J': 'Jack'
-}
 
 
 class Blackjack:
@@ -151,16 +137,17 @@ class Player:
 
         for card in self.hand:
             # Order is suit, face...so we want the second value
-            face = card[1]
+            value = card.value.value
+            face = card.value.name
 
-            if face in ['Q', 'K', 'J']:
+            if face in ['queen', 'king', 'jack']:
                 for index, t in enumerate(total):
                     total[index] += 10
-            elif face == 'A':
+            elif face == 'ace':
                 total = FOIL(total, [1, 11])
             else:
                 for index, t in enumerate(total):
-                    total[index] += int(face)
+                    total[index] += int(value)
 
         # If we have more than one possible total (there is at least one ace) then we do not care about one if it is
         # over 21
@@ -182,12 +169,7 @@ class Player:
     def __str__(self):
         # We only care about our hand, for printing wise
         fmt = "Hand:\n"
-        fmt += "\n".join(
-            "{} of {}".format(
-                card_map.get(card[1], card[1]),
-                face_map.get(card[0], card[0]))
-            for card in self.hand
-        )
+        fmt += "\n".join(str(card) for card in self.hand)
         fmt += "\n(Total: {})".format(self.count)
         return fmt
 

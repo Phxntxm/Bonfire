@@ -1,19 +1,14 @@
 bot_token: 'token'
-owner_id: ['12345']
-description: 'Bot Description Here'
-command_prefix: '!'
-default_status: '!help for a list of commands'
-discord_bots_key: 'key'
-carbon_key: 'key'
-twitch_key: 'key'
-youtube_key: 'key'
-osu_key: 'key'
-dev_server: 'https://discord.gg/123456'
+description: Description
+command_prefix: ['?', '!']
+default_status: 'Status'
+dev_server: 'https://discord.gg/f6uzJEj'
+user_agent: 'Bonfire/4.0.3 (https://github.com/Phxntxm/Bonfire)'
 
-user_agent: 'User-Agent/1.0.0 (Comment like link to site)'
-
-db_host: 'localhost'
-db_name: 'Bot_Name'
-db_port: 28015
-db_user: 'admin'
-db_pass: 'password'
+youtube_key: 'AIzaSyDZKkVdgvCspswxJS5eK7bYtoSDME_dB_Y'
+osu_key: '0e3301a760a3f834dc9421e97177f9c38ad46169'
+patreon_key: 'npI5yo6eSKbyeC_F3xZ8NRkASzql73q9hEucqorJhHw'
+patreon_id: '102085'
+patreon_link: 'https://www.patreon.com/Phxntxm'
+spotify_id: 646c8cd8c4f54aa0980dafb819983d40
+spotify_secret: 271dc32d794e4b40bd52bfe635183aba

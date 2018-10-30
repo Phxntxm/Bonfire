@@ -5,7 +5,7 @@ import traceback
 from discord.ext import commands
 from base64 import urlsafe_b64encode
 
-from . import utils
+import utils
 
 
 class Spotify:

@@ -2,7 +2,7 @@ import rethinkdb as r
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
 
-from . import utils
+import utils
 
 import discord
 import random

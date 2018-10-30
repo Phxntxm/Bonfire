@@ -1,9 +1,8 @@
-aiohttp
 Pillow==4.2.0
 rethinkdb
-ruamel.yaml
+pyyaml
 psutil
 pendulum
 beautifulsoup4
--e git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py[voice]
--e git+https://github.com/khazhyk/osuapi.git#egg=osuapi
+osuapi
+-e git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py

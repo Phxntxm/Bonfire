@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from . import utils
+import utils
 
 from bs4 import BeautifulSoup as bs
 

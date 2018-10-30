@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from . import utils
+import utils
 
 import discord
 
@@ -10,7 +10,6 @@ class Tutorial:
         self.bot = bot
 
     @commands.command()
-    @utils.can_run(ownership=True)
     # @utils.can_run(send_messages=True)
     async def tutorial(self, ctx, *, cmd_or_cog = None):
         # The message we'll use to send

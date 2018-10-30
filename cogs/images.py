@@ -3,9 +3,8 @@ import discord
 import random
 import re
 import math
-from bs4 import BeautifulSoup as bs
 
-from . import utils
+import utils
 
 
 class Images:
@@ -39,15 +38,15 @@ class Images:
 
         EXAMPLE: !doggo
         RESULT: A beautiful picture of a dog o3o"""
-        result = await utils.request('http://random.dog', attr='text')
+        result = await utils.request('https://random.dog/woof.json')
         try:
-            soup = bs(result, 'html.parser')
-            filename = soup.img.get('src')
-        except (TypeError, AttributeError):
+            url = result.get("url")
+            filename = re.match("https:\/\/random.dog\/(.*)", url).group(1)
+        except AttributeError:
             await ctx.send("I couldn't connect! Sorry no dogs right now ;w;")
             return
 
-        image = await utils.download_image("http://random.dog/{}".format(filename))
+        image = await utils.download_image(url)
         f = discord.File(image, filename=filename)
         await ctx.send(file=f)
 

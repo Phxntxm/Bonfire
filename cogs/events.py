@@ -1,4 +1,4 @@
-from .utils import config
+from utils import config
 import aiohttp
 import logging
 import json

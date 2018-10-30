@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from . import utils
+import utils
 
 import re
 
@@ -108,20 +108,12 @@ class Stats:
         member_usage = command_stats['member_usage'].get(str(ctx.message.author.id), 0)
         server_usage = command_stats['server_usage'].get(str(ctx.message.guild.id), 0)
 
-        try:
-            data = [("Command Name", cmd.qualified_name),
-                    ("Total Usage", total_usage),
-                    ("Your Usage", member_usage),
-                    ("This Server's Usage", server_usage)]
-            banner = await utils.create_banner(ctx.message.author, "Command Stats", data)
-            await ctx.send(file=discord.File(banner, filename='banner.png'))
-        except (FileNotFoundError, discord.Forbidden):
-            fmt = "The command {} has been used a total of {} times\n" \
-                  "{} times on this server\n" \
-                  "It has been ran by you, {}, {} times".format(cmd.qualified_name, total_usage, server_usage,
-                                                                ctx.message.author.display_name, member_usage)
+        embed = discord.Embed(title="Usage stats for {}".format(cmd.qualified_name))
+        embed.add_field(name="Total usage", value=total_usage, inline=False)
+        embed.add_field(name="Your usage", value=member_usage, inline=False)
+        embed.add_field(name="This server's usage", value=server_usage, inline=False)
 
-            await ctx.send(fmt)
+        await ctx.send(embed=embed)
 
     @command.command(name="leaderboard")
     @utils.can_run(send_messages=True)
@@ -135,49 +127,44 @@ class Stats:
         await ctx.message.channel.trigger_typing()
 
         if re.search('(author|me)', option):
-            author = ctx.message.author
+            mid = str(ctx.message.author.id)
             # First lets get all the command usage
             command_stats = self.bot.db.load('command_usage')
             # Now use a dictionary comprehension to get just the command name, and usage
             # Based on the author's usage of the command
 
             stats = {
-                command: data["member_usage"].get(str(author.id))
+                command: data["member_usage"].get(mid)
                 for command, data in command_stats.items()
-                if data["member_usage"].get(str(author.id), 0) > 0
+                if data["member_usage"].get(mid, 0) > 0
             }
             # Now sort it by the amount of times used
-            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
+            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)[:5]
+            embed = discord.Embed(title="Your top 5 commands", colour=ctx.author.colour)
+            embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
 
-            # Create a string, each command on it's own line, based on the top 5 used commands
-            # I'm letting it use the length of the sorted_stats[:5]
-            # As this can include, for example, all 3 if there are only 3 entries
-            try:
-                top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
-                banner = await utils.create_banner(ctx.message.author, "Your command usage", top_5)
-                await ctx.send(file=discord.File(banner, filename='banner.png'))
-            except (FileNotFoundError, discord.Forbidden):
-                top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
-                await ctx.send(
-                    "Your top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
+            for cmd, amount in sorted_stats:
+                embed.add_field(name=cmd, value=amount, inline=False)
+
+            await ctx.send(embed=embed)
         elif re.search('server', option):
             # This is exactly the same as above, except server usage instead of member usage
-            server = ctx.message.guild
+            sid = str(ctx.message.guild.id)
             command_stats = self.bot.db.load('command_usage')
             stats = {
-                command: data['server_usage'].get(str(server.id))
+                command: data['server_usage'].get(sid)
                 for command, data in command_stats.items()
-                if data.get("server_usage", {}).get(str(server.id), 0) > 0
+                if data.get("server_usage", {}).get(sid, 0) > 0
             }
-            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)
-            try:
-                top_5 = [(data[0], data[1]) for data in sorted_stats[:5]]
-                banner = await utils.create_banner(ctx.message.author, "Server command usage", top_5)
-                await ctx.send(file=discord.File(banner, filename='banner.png'))
-            except (FileNotFoundError, discord.Forbidden):
-                top_5 = "\n".join("{}: {}".format(data[0], data[1]) for data in sorted_stats[:5])
-                await ctx.send(
-                    "This server's top {} most used commands are:\n```\n{}```".format(len(sorted_stats[:5]), top_5))
+            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)[:5]
+            embed = discord.Embed(title="The server's top 5 commands")
+            embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+
+            for cmd, amount in sorted_stats:
+                embed.add_field(name=cmd, value=amount, inline=False)
+
+            await ctx.send(embed=embed)
+
         else:
             await ctx.send("That is not a valid option, valid options are: `server` or `me`")
 
@@ -197,25 +184,23 @@ class Stats:
         # Just to make this easier, just pay attention to the boops data, now that we have the right entry
         boops = boops['boops']
 
-        # First get a list of the ID's of all members in this server, for use in list comprehension
-        server_member_ids = [str(member.id) for member in ctx.message.guild.members]
-        # Then get a sorted list, based on the amount of times they've booped the member
-        # Reverse needs to be true, as we want it to go from highest to lowest
-        sorted_boops = sorted(boops.items(), key=lambda x: x[1], reverse=True)
-        # Then override the same list, checking if the member they've booped is in this server
-        sorted_boops = [x for x in sorted_boops if x[0] in server_member_ids]
+        sorted_boops = sorted(
+            ((ctx.guild.get_member(int(member_id)), amount)
+             for member_id, amount in boops.items()
+             if ctx.guild.get_member(int(member_id))),
+            reverse=True,
+            key=lambda k: k[1]
+        )
 
         # Since this is sorted, we just need to get the following information on the first user in the list
         try:
-            most_id, most_boops = sorted_boops[0]
+            member, most_boops = sorted_boops[0]
         except IndexError:
             await ctx.send("You have not booped anyone in this server {}".format(ctx.message.author.mention))
             return
-
-        member = ctx.message.guild.get_member(int(most_id))
-
-        await ctx.send("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
-            ctx.message.author.mention, member.display_name, most_boops))
+        else:
+            await ctx.send("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
+                ctx.message.author.mention, member.display_name, most_boops))
 
     @commands.command()
     @commands.guild_only()
@@ -235,23 +220,21 @@ class Stats:
         # Just to make this easier, just pay attention to the boops data, now that we have the right entry
         boops = boops['boops']
 
-        # Same concept as the mostboops method
-        server_member_ids = [member.id for member in ctx.message.guild.members]
-        booped_members = {int(m_id): amt for m_id, amt in boops.items() if int(m_id) in server_member_ids}
-        sorted_booped_members = sorted(booped_members.items(), key=lambda k: k[1], reverse=True)
-        # Now we only want the first 10 members, so splice this list
-        sorted_booped_members = sorted_booped_members[:10]
-
-        try:
-            output = [("{0.display_name}".format(ctx.message.guild.get_member(m_id)), amt)
-                      for m_id, amt in sorted_booped_members]
-            banner = await utils.create_banner(ctx.message.author, "Your booped victims", output)
-            await ctx.send(file=discord.File(banner, filename='banner.png'))
-        except (FileNotFoundError, discord.Forbidden):
-            output = "\n".join(
-                "{0.display_name}: {1} times".format(ctx.message.guild.get_member(m_id), amt) for
-                m_id, amt in sorted_booped_members)
-            await ctx.send("You have booped:```\n{}```".format(output))
+        sorted_boops = sorted(
+            ((ctx.guild.get_member(int(member_id)), amount)
+             for member_id, amount in boops.items()
+             if ctx.guild.get_member(int(member_id))),
+            reverse=True,
+            key=lambda k: k[1]
+        )
+        if sorted_boops:
+            embed = discord.Embed(title="Your booped victims", colour=ctx.author.colour)
+            embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
+            for member, amount in sorted_boops:
+                embed.add_field(name=member.display_name, value=amount)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send("You haven't booped anyone in this server!")
 
     @commands.command()
     @commands.guild_only()
@@ -307,16 +290,15 @@ class Stats:
         overall_rank = "{}/{}".format(*self.bot.br.get_rank(member))
         rating = self.bot.br.get_rating(member)
         record = self.bot.br.get_record(member)
-        try:
-            # Create our banner
-            title = 'Stats for {}'.format(member.display_name)
-            fmt = [('Record', record), ('Server Rank', server_rank), ('Overall Rank', overall_rank), ('Rating', rating)]
-            banner = await utils.create_banner(member, title, fmt)
-            await ctx.send(file=discord.File(banner, filename='banner.png'))
-        except (FileNotFoundError, discord.Forbidden):
-            fmt = 'Stats for {}:\n\tRecord: {}\n\tServer Rank: {}\n\tOverall Rank: {}\n\tRating: {}'
-            fmt = fmt.format(member.display_name, record, server_rank, overall_rank, rating)
-            await ctx.send('```\n{}```'.format(fmt))
+
+        embed = discord.Embed(title="Battling stats for {}".format(ctx.author.display_name), colour=ctx.author.colour)
+        embed.set_author(name=str(member), icon_url=member.avatar_url)
+        embed.add_field(name="Record", value=record, inline=False)
+        embed.add_field(name="Server Rank", value=server_rank, inline=False)
+        embed.add_field(name="Overall Rank", value=overall_rank, inline=False)
+        embed.add_field(name="Rating", value=rating, inline=False)
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

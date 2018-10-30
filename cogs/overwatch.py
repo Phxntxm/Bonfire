@@ -1,7 +1,8 @@
-from . import utils
+import utils
 
 from discord.ext import commands
 import discord
+import logging
 
 BASE_URL = "https://api.owapi.net/api/v3/u/"
 # This is a list of the possible things that we may want to retrieve from the stats
@@ -11,6 +12,8 @@ BASE_URL = "https://api.owapi.net/api/v3/u/"
 check_g_stats = ["eliminations", "deaths", 'kpd', 'wins', 'losses', 'time_played',
                  'cards', 'damage_done', 'healing_done', 'multikills']
 check_o_stats = ['wins']
+
+log = logging.getLogger()
 
 
 class Overwatch:
@@ -51,6 +54,8 @@ class Overwatch:
             if data is None:
                 await ctx.send("I couldn't connect to overwatch at the moment!")
                 return
+
+            log.info(data)
 
             region = [x for x in data.keys() if data[x] is not None and x in ['us', 'any', 'kr', 'eu']][0]
             stats = data[region]['stats']['quickplay']

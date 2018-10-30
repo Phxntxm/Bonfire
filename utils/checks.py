@@ -64,12 +64,6 @@ async def db_check():
         print("Done checking tables!")
 
 
-def is_owner(ctx):
-    if not hasattr(ctx.bot, "owner"):
-        return False
-    return ctx.bot.owner.id == ctx.message.author.id
-
-
 def should_ignore(ctx):
     if ctx.message.guild is None:
         return False
@@ -162,8 +156,6 @@ def has_perms(ctx, **perms):
     # Return true if this is a private channel, we'll handle that in the registering of the command
     if type(ctx.message.channel) is discord.DMChannel:
         return True
-    # Just get rid of this if it exists
-    perms.pop("ownership", None)
 
     # Get the member permissions so that we can compare
     guild_perms = ctx.message.author.guild_permissions
@@ -188,9 +180,6 @@ def has_perms(ctx, **perms):
 
 def can_run(**kwargs):
     async def predicate(ctx):
-        # First check if the command requires ownership of the bot
-        if kwargs.get("ownership", False) and not is_owner(ctx):
-            return False
         # Next check if it requires any certain permissions
         if kwargs and not has_perms(ctx, **kwargs):
             return False

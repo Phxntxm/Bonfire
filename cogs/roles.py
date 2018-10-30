@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 
-from . import utils
+import utils
 
 import re
 import asyncio

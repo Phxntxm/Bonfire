@@ -1,5 +1,5 @@
 from discord.ext import commands
-from . import utils
+import utils
 
 
 def to_keycap(c):

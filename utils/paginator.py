@@ -307,7 +307,6 @@ async def _can_run(cmd, ctx):
 
 def _command_signature(cmd):
     # this is modified from discord.py source
-    # which I wrote myself lmao
 
     result = [cmd.qualified_name]
     if cmd.usage:

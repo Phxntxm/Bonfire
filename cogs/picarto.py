@@ -5,7 +5,7 @@ import traceback
 
 from discord.ext import commands
 
-from . import utils
+import utils
 
 BASE_URL = 'https://api.picarto.tv/v1'
 
