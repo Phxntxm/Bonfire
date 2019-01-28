@@ -1,42 +1,17 @@
 import discord
-import pendulum
+import datetime
 import asyncio
 import traceback
 import re
+import calendar
 
 from discord.ext import commands
+from asyncpg import UniqueViolationError
 import utils
-
-tzmap = {
-    'us-central': pendulum.timezone('US/Central'),
-    'eu-central': pendulum.timezone('Europe/Paris'),
-    'hongkong': pendulum.timezone('Hongkong'),
-
-}
-
-
-def sort_birthdays(bds):
-    # First sort the birthdays based on the comparison of the actual date
-    bds = sorted(bds, key=lambda x: x['birthday'])
-    # We want to split this into birthdays after and before todays date
-    # We can then use this to sort based on "whose is closest"
-    later_bds = []
-    previous_bds = []
-    # Loop through each birthday
-    for bd in bds:
-        # If it is after or equal to today, insert into our later list
-        if bd['birthday'] >= pendulum.today().date():
-            later_bds.append(bd)
-        # Otherwise, insert into our previous list
-        else:
-            previous_bds.append(bd)
-    # At this point we have 2 lists, in order, one from all of dates before today, and one after
-    # So all we need to do is put them in order all of "laters" then all of "befores"
-    return later_bds + previous_bds
 
 
 def parse_string(date):
-    year = pendulum.now().year
+    today = datetime.date.today()
     month = None
     day = None
     month_map = {
@@ -74,84 +49,104 @@ def parse_string(date):
         elif part in month_map:
             month = month_map.get(part)
     if month and day:
-        return pendulum.date(year, month, day)
+        year = today.year
+        if month < today.month:
+            year += 1
+        elif month == today.month and day <= today.day:
+            year += 1
+        return datetime.date(year, month, day)
 
 
 class Birthday:
-    """Track and announcebirthdays"""
+    """Track and announce birthdays"""
 
     def __init__(self, bot):
         self.bot = bot
         self.task = self.bot.loop.create_task(self.birthday_task())
 
-    def get_birthdays_for_server(self, server, today=False):
-        bds = self.bot.db.load('birthdays')
-        # Get a list of the ID's to compare against
-        member_ids = [str(m.id) for m in server.members]
+    async def get_birthdays_for_server(self, server, today=False):
+        members = ", ".join(f"{m.id}" for m in server.members)
+        query = f"""
+SELECT
+    id, birthday
+FROM 
+    users
+WHERE
+    id IN ({members})
+"""
+        if today:
+            query += """
+AND
+    birthday = CURRENT_DATE
+"""
+        query += """
+ORDER BY
+    birthday
+"""
 
-        # Now create a list comparing to the server's list of member IDs
-        bds = [
-            bd
-            for member_id, bd in bds.items()
-            if str(member_id) in member_ids
-        ]
-
-        _entries = []
-
-        for bd in bds:
-            if not bd['birthday']:
-                continue
-
-            day = parse_string(bd['birthday'])
-            # tz = tzmap.get(server.region)
-            # Check if it's today, and we want to only get todays birthdays
-            if (today and day == pendulum.today().date()) or not today:
-                # If so, get the member and add them to the entry
-                member = server.get_member(int(bd['member_id']))
-                _entries.append({
-                    'birthday': day,
-                    'member': member
-                })
-
-        return sort_birthdays(_entries)
+        return await self.bot.db.fetch(query)
 
     async def birthday_task(self):
-        while True:
+        await self.bot.wait_until_ready()
+
+        while not self.bot.is_closed():
             try:
                 await self.notify_birthdays()
             except Exception as error:
                 with open("error_log", 'a') as f:
                     traceback.print_tb(error.__traceback__, file=f)
-                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+                    print(f"{error.__class__.__name__}: {error}", file=f)
             finally:
-                # Every 12 hours, this is not something that needs to happen often
-                await asyncio.sleep(60 * 60 * 12)
+                # Every day
+                await asyncio.sleep(60 * 60 * 24)
 
     async def notify_birthdays(self):
-        tfilter = {'birthdays_allowed': True}
-        servers = await self.bot.db.actual_load('server_settings', table_filter=tfilter)
+        query = """
+SELECT
+    id, COALESCE(birthday_alerts, default_alerts) AS channel
+FROM 
+    guilds
+WHERE 
+    birthday_notifications=True
+AND
+    COALESCE(birthday_alerts, default_alerts) IS NOT NULL
+"""
+        servers = await self.bot.db.fetch(query)
+        update_bds = []
+        if not servers:
+            return
+
         for s in servers:
-            server = self.bot.get_guild(int(s['server_id']))
-            if not server:
+            # Get the channel based on the birthday alerts, or default alerts channel
+            channel = self.bot.get_channel(s['channel'])
+            if not channel:
                 continue
 
-            # Set our default to either the one set
-            default_channel_id = s.get('notifications', {}).get('default')
-            # If it is has been overriden by picarto notifications setting, use this
-            channel_id = s.get('notifications', {}).get('birthday') or default_channel_id
-            if not channel_id:
-                continue
+            bds = await self.get_birthdays_for_server(channel.guild, today=True)
 
-            # Now get the channel based on that ID
-            channel = server.get_channel(int(channel_id))
-
-            bds = self.get_birthdays_for_server(server, today=True)
+            # A list of the id's that will get updated
             for bd in bds:
                 try:
-                    await channel.send("It is {}'s birthday today! "
-                                       "Wish them a happy birthday! \N{SHORTCAKE}".format(bd['member'].mention))
-                except (discord.Forbidden, discord.HTTPException, AttributeError):
+                    await channel.send(f"It is {bd['member'].mention}'s birthday today! "
+                                       "Wish them a happy birthday! \N{SHORTCAKE}")
+                except (discord.Forbidden, discord.HTTPException):
                     pass
+                finally:
+                    update_bds.append(bd['id'])
+
+        if not update_bds:
+            return
+
+        query = f"""
+UPDATE
+    users
+SET
+    birthday = birthday + interval '1 year'
+WHERE
+    id IN ({", ".join(f"'{bd}'" for bd in update_bds)})
+"""
+        print(query)
+        await self.bot.db.execute(query)
 
     @commands.group(aliases=['birthdays'], invoke_without_command=True)
     @commands.guild_only()
@@ -162,20 +157,29 @@ class Birthday:
         EXAMPLE: !birthdays
         RESULT: A printout of the birthdays from everyone on this server"""
         if member:
-            date = self.bot.db.load('birthdays', key=member.id, pluck='birthday')
+            date = await self.bot.db.fetchrow("SELECT birthday FROM users WHERE id=$1", member.id)
+            date = date['birthday']
             if date:
-                await ctx.send("{}'s birthday is {}".format(member.display_name, date))
+                await ctx.send(f"{member.display_name}'s birthday is {calendar.month_name[date.month]} {date.day}")
             else:
-                await ctx.send("I do not have {}'s birthday saved!".format(member.display_name))
+                await ctx.send(f"I do not have {member.display_name}'s birthday saved!")
         else:
             # Get this server's birthdays
-            bds = self.get_birthdays_for_server(ctx.message.guild)
+            bds = await self.get_birthdays_for_server(ctx.guild)
             # Create entries based on the user's display name and their birthday
-            entries = ["{} ({})".format(bd['member'].display_name, bd['birthday'].strftime("%B %-d")) for bd in bds]
+            entries = [
+                f"{ctx.guild.get_member(bd['id']).display_name} ({bd['birthday'].strftime('%B %-d')})"
+                for bd in bds
+                if bd['birthday']
+            ]
+            if not entries:
+                await ctx.send("I don't know anyone's birthday in this server!")
+                return
+
             # Create our pages object
             try:
                 pages = utils.Pages(ctx, entries=entries, per_page=5)
-                pages.title = "Birthdays for {}".format(ctx.message.guild.name)
+                pages.title = f"Birthdays for {ctx.guild.name}"
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
@@ -196,13 +200,11 @@ class Birthday:
             await ctx.send("Please provide date in a valid format, such as December 1st!")
             return
 
-        date = date.strftime("%B %-d")
-        entry = {
-            'member_id': str(ctx.message.author.id),
-            'birthday': date
-        }
-        await self.bot.db.save('birthdays', entry)
-        await ctx.send("I have just saved your birthday as {}".format(date))
+        await ctx.send(f"I have just saved your birthday as {date}")
+        try:
+            await self.bot.db.execute("INSERT INTO users (id, birthday) VALUES ($1, $2)", ctx.author.id, date)
+        except UniqueViolationError:
+            await self.bot.db.execute("UPDATE users SET birthday = $1 WHERE id = $2", date, ctx.author.id)
 
     @birthday.command(name='remove')
     @utils.can_run(send_messages=True)
@@ -211,30 +213,8 @@ class Birthday:
 
         EXAMPLE: !birthday remove
         RESULT: I have magically forgotten your birthday"""
-        entry = {
-            'member_id': str(ctx.message.author.id),
-            'birthday': None
-        }
-        await self.bot.db.save('birthdays', entry)
         await ctx.send("I don't know your birthday anymore :(")
-
-    @birthday.command(name='alerts', aliases=['notifications'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def birthday_alerts_channel(self, ctx, channel: discord.TextChannel):
-        """Sets the notifications channel for birthday notifications
-
-        EXAMPLE: !birthday alerts #birthday
-        RESULT: birthday notifications will go to this channel
-        """
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'notifications': {
-                'birthday': str(channel.id)
-            }
-        }
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send("All birthday notifications will now go to {}".format(channel.mention))
+        await self.bot.db.execute("UPDATE users SET birthday=NULL WHERE id=$1", ctx.author.id)
 
 
 def setup(bot):

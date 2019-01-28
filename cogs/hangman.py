@@ -70,6 +70,7 @@ class Hangman:
     def __init__(self, bot):
         self.bot = bot
         self.games = {}
+        self.pending_games = []
 
     def create(self, word, ctx):
         # Create a new game, then save it as the server's game
@@ -101,7 +102,7 @@ class Hangman:
         # We're creating a fmt variable, so that we can  add a message for if a guess was correct or not
         # And also add a message for a loss/win
         if len(guess) == 1:
-            if guess in game.guessed_letters:
+            if guess.lower() in game.guessed_letters:
                 ctx.command.reset_cooldown(ctx)
                 await ctx.send("That letter has already been guessed!")
                 # Return here as we don't want to count this as a failure
@@ -142,6 +143,9 @@ class Hangman:
         if self.games.get(ctx.message.guild.id) is not None:
             await ctx.send("Sorry but only one Hangman game can be running per server!")
             return
+        if ctx.guild.id in self.pending_games:
+            await ctx.send("Someone has already started one, and I'm now waiting for them...")
+            return
 
         try:
             msg = await ctx.message.author.send(
@@ -160,12 +164,16 @@ class Hangman:
         def check(m):
             return m.channel == msg.channel and len(m.content) <= 30
 
+        self.pending_games.append(ctx.guild.id)
         try:
             msg = await self.bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
+            self.pending_games.remove(ctx.guild.id)
             await ctx.send(
                 "You took too long! Please look at your DM's as that's where I'm asking for the phrase you want to use")
             return
+        else:
+            self.pending_games.remove(ctx.guild.id)
 
         forbidden_phrases = ['stop', 'delete', 'remove', 'end', 'create', 'start']
         if msg.content in forbidden_phrases:

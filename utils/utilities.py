@@ -5,47 +5,10 @@ import discord
 from discord.ext import commands
 
 from . import config
-from PIL import Image
 
 
-def convert_to_jpeg(pfile):
-    # Open the file given
-    img = Image.open(pfile)
-    # Create the BytesIO object we'll use as our new "file"
-    new_file = BytesIO()
-    # Save to this file as jpeg
-    img.save(new_file, format='JPEG')
-    # In order to use the file, we need to seek back to the 0th position
-    new_file.seek(0)
-    return new_file
-
-
-def get_all_commands(bot):
-    """Returns a list of all command names for the bot"""
-    # First lets create a set of all the parent names
-    for cmd in bot.commands:
-        yield from get_all_subcommands(cmd)
-
-
-def get_all_subcommands(command):
-    yield command
-    if type(command) is discord.ext.commands.core.Group:
-        for subcmd in command.commands:
-            yield from get_all_subcommands(subcmd)
-
-
-async def channel_is_nsfw(channel, db):
-    if type(channel) is discord.DMChannel:
-        server = 'DMs'
-    elif channel.is_nsfw():
-        return True
-    else:
-        server = str(channel.guild.id)
-
-    channel = str(channel.id)
-
-    channels = db.load('server_settings', key=server, pluck='nsfw_channels') or []
-    return channel in channels
+def channel_is_nsfw(channel):
+    return isinstance(channel, discord.DMChannel) or channel.is_nsfw()
 
 
 async def download_image(url):
@@ -103,8 +66,11 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json',
         except:
             continue
 
+
 async def convert(ctx, option):
     """Tries to convert a string to an object of useful representiation"""
+    # Due to id's being ints, it's very possible that an int is passed
+    option = str(option)
     cmd = ctx.bot.get_command(option)
     if cmd:
         return cmd
@@ -132,25 +98,52 @@ async def convert(ctx, option):
         return role
 
 
+def update_rating(winner_rating, loser_rating):
+    # The scale is based off of increments of 25, increasing the change by 1 for each increment
+    # That is all this loop does, increment the "change" for every increment of 25
+    # The change caps off at 300 however, so break once we are over that limit
+    difference = abs(winner_rating - loser_rating)
+    rating_change = 0
+    count = 25
+    while count <= difference:
+        if count > 300:
+            break
+        rating_change += 1
+        count += 25
+
+    # 16 is the base change, increased or decreased based on whoever has the higher current rating
+    if winner_rating > loser_rating:
+        winner_rating += 16 - rating_change
+        loser_rating -= 16 - rating_change
+    else:
+        winner_rating += 16 + rating_change
+        loser_rating -= 16 + rating_change
+
+    return winner_rating, loser_rating
+
+
 async def update_records(key, db, winner, loser):
     # We're using the Harkness scale to rate
     # http://opnetchessclub.wikidot.com/harkness-rating-system
-    r_filter = lambda row: (row['member_id'] == str(winner.id)) | (row['member_id'] == str(loser.id))
-    matches = await db.actual_load(key, table_filter=r_filter)
+    wins = f"{key}_wins"
+    losses = f"{key}_losses"
+    key = f"{key}_rating"
+    query = """
+SELECT
+    id, $1, $2, $3
+FROM
+    users
+WHERE
+    id = any($4::bigint[])
+"""
+    results = await db.fetch(key, wins, losses, [winner.id, loser.id])
 
-    winner_stats = {}
-    loser_stats = {}
-    try:
-        for stat in matches:
-            if stat.get('member_id') == str(winner.id):
-                winner_stats = stat
-            elif stat.get('member_id') == str(loser.id):
-                loser_stats = stat
-    except TypeError:
-        pass
-
-    winner_rating = winner_stats.get('rating') or 1000
-    loser_rating = loser_stats.get('rating') or 1000
+    winner_rating = loser_rating = 1000
+    for result in results:
+        if result['id'] == winner.id:
+            winner_rating = result[key]
+        else:
+            loser_rating = result[key]
 
     # The scale is based off of increments of 25, increasing the change by 1 for each increment
     # That is all this loop does, increment the "change" for every increment of 25

@@ -11,6 +11,33 @@ import datetime
 import psutil
 
 
+def _command_signature(cmd):
+    result = [cmd.qualified_name]
+    if cmd.usage:
+        result.append(cmd.usage)
+        return ' '.join(result)
+
+    params = cmd.clean_params
+    if not params:
+        return ' '.join(result)
+
+    for name, param in params.items():
+        if param.default is not param.empty:
+            # We don't want None or '' to trigger the [name=value] case and instead it should
+            # do [name] since [name=None] or [name=] are not exactly useful for the user.
+            should_print = param.default if isinstance(param.default, str) else param.default is not None
+            if should_print:
+                result.append(f'[{name}={param.default!r}]')
+            else:
+                result.append(f'[{name}]')
+        elif param.kind == param.VAR_POSITIONAL:
+            result.append(f'[{name}...]')
+        else:
+            result.append(f'<{name}>')
+
+    return ' '.join(result)
+
+
 class Miscallaneous:
     """Core commands, these are the miscallaneous commands that don't fit into other categories'"""
 
@@ -18,32 +45,6 @@ class Miscallaneous:
         self.bot = bot
         self.process = psutil.Process()
         self.process.cpu_percent()
-
-    def _command_signature(self, cmd):
-        result = [cmd.qualified_name]
-        if cmd.usage:
-            result.append(cmd.usage)
-            return ' '.join(result)
-
-        params = cmd.clean_params
-        if not params:
-            return ' '.join(result)
-
-        for name, param in params.items():
-            if param.default is not param.empty:
-                # We don't want None or '' to trigger the [name=value] case and instead it should
-                # do [name] since [name=None] or [name=] are not exactly useful for the user.
-                should_print = param.default if isinstance(param.default, str) else param.default is not None
-                if should_print:
-                    result.append(f'[{name}={param.default!r}]')
-                else:
-                    result.append(f'[{name}]')
-            elif param.kind == param.VAR_POSITIONAL:
-                result.append(f'[{name}...]')
-            else:
-                result.append(f'<{name}>')
-
-        return ' '.join(result)
 
     @commands.command()
     @commands.cooldown(1, 3, commands.cooldowns.BucketType.user)
@@ -75,7 +76,8 @@ class Miscallaneous:
         if entity:
             entity = self.bot.get_cog(entity) or self.bot.get_command(entity)
         if entity is None:
-            fmt = "Hello! Here is a list of the sections of commands that I have (there are a lot of commands so just start with the sections...I know, I'm pretty great)\n"
+            fmt = "Hello! Here is a list of the sections of commands that I have " \
+                  "(there are a lot of commands so just start with the sections...I know, I'm pretty great)\n"
             fmt += "To use a command's paramaters, you need to know the notation for them:\n"
             fmt += "\t<argument> This means the argument is __**required**__.\n"
             fmt += "\t[argument] This means the argument is __**optional**__.\n"
@@ -96,7 +98,7 @@ class Miscallaneous:
                 else:
                     chunks[len(chunks) - 1] += tmp
         elif isinstance(entity, (commands.core.Command, commands.core.Group)):
-            tmp = "**{}**".format(self._command_signature(entity))
+            tmp = "**{}**".format(_command_signature(entity))
             tmp += "\n{}".format(entity.help)
             chunks.append(tmp)
         else:

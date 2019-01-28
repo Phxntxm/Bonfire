@@ -1,18 +1,14 @@
-from discord.ext import commands
-
+import discord
 import utils
 
-import discord
-import asyncio
-import re
+from asyncpg import UniqueViolationError
+from discord.ext import commands
 
 valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
 
 
-class Administration:
-    """Handles the administration of the bot for a server; this is mainly different settings for the bot"""
-    def __init__(self, bot):
-        self.bot = bot
+class Admin:
+    """These are commands that allow more intuitive configuration, that don't fit into the config command"""
 
     @commands.command()
     @commands.guild_only()
@@ -23,61 +19,41 @@ class Administration:
             await ctx.send("You cannot disable `{}`".format(command))
             return
 
-        cmd = self.bot.get_command(command)
+        cmd = ctx.bot.get_command(command)
         if cmd is None:
             await ctx.send("No command called `{}`".format(command))
             return
 
-        from_entry = {
-            'source': cmd.qualified_name,
-            'destination': "everyone",
-        }
-
-        restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
-        _from = restrictions.get('from', [])
-        if from_entry not in _from:
-            _from.append(from_entry)
-            update = {
-                'server_id': str(ctx.message.guild.id),
-                'restrictions': {
-                    'from': _from
-                }
-            }
-            await self.bot.db.save('server_settings', update)
-            await ctx.send("I have disabled `{}`".format(cmd.qualified_name))
+        try:
+            await ctx.bot.db.execute(
+                "INSERT INTO restrictions (source, destination, from_to, guild) VALUES ($1, 'everyone', 'from', $2)",
+                cmd.qualified_name,
+                ctx.guild.id
+            )
+        except UniqueViolationError:
+            await ctx.send(f"{cmd.qualified_name} is already disabled")
         else:
-            await ctx.send("That command is already disabled")
+            await ctx.send(f"{cmd.qualified_name} is now disabled")
 
     @commands.command()
     @commands.guild_only()
     @utils.can_run(manage_guild=True)
     async def enable(self, ctx, *, command):
         """Enables the use of a command on this server"""
-        cmd = self.bot.get_command(command)
+        cmd = ctx.bot.get_command(command)
         if cmd is None:
             await ctx.send("No command called `{}`".format(command))
             return
 
-        from_entry = {
-            'source': cmd.qualified_name,
-            'destination': "everyone",
-        }
-
-        restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
-        _from = restrictions.get('from', [])
-        try:
-            _from.remove(from_entry)
-        except ValueError:
-            await ctx.send("That command is not disabled")
-        else:
-            update = {
-                'server_id': str(ctx.message.guild.id),
-                'restrictions': {
-                    'from': _from
-                }
-            }
-            await self.bot.db.save('server_settings', update)
-            await ctx.send("I have enabled `{}`".format(cmd.qualified_name))
+        query = f"""
+DELETE FROM restrictions WHERE
+source=$1 AND
+from_to='from' AND
+destination='everyone' AND
+guild=$2
+"""
+        await ctx.bot.db.execute(query, cmd.qualified_name, ctx.guild.id)
+        await ctx.send(f"{cmd.qualified_name} is no longer disabled")
 
     @commands.command()
     @commands.guild_only()
@@ -88,7 +64,7 @@ class Administration:
         This sets the role to mentionable, mentions the role, then sets it back
         """
         if not ctx.me.guild_permissions.manage_roles:
-            await ctx.send("I do not have permissions to edit roles")
+            await ctx.send("I do not have permissions to edit roles (this is required to complete this command)")
             return
         try:
             await role.edit(mentionable=True)
@@ -96,300 +72,10 @@ class Administration:
             await ctx.send("I do not have permissions to edit that role. "
                            "(I either don't have manage roles permissions, or it is higher on the hierarchy)")
         else:
-            fmt = "{}\n{}".format(role.mention, message)
+            fmt = f"{role.mention}\n{message}"
             await ctx.send(fmt)
             await role.edit(mentionable=False)
             await ctx.message.delete()
-
-    @commands.group(invoke_without_command=True)
-    @commands.guild_only()
-    @utils.can_run(send_messages=True)
-    async def battles(self, ctx):
-        """Used to list the server specific battles messages on this server
-
-        EXAMPLE: !battles
-        RESULT: A list of the battle messages that can be used on this server"""
-        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles')
-        if msgs:
-            try:
-                pages = utils.Pages(ctx, entries=msgs)
-                await pages.paginate()
-            except utils.CannotPaginate as e:
-                await ctx.send(str(e))
-        else:
-            await ctx.send("There are no server specific battles on this server!")
-
-    @battles.command(name='add')
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def add_battles(self, ctx, *, message):
-        """Used to add a battle message to the server specific battle messages
-        Use {winner} or {loser} in order to display the winner/loser's display name
-
-        EXAMPLE: !battles add {winner} has beaten {loser}
-        RESULT: Player1 has beaten Player2"""
-        # Try to simulate the message, to ensure they haven't provided an invalid phrase
-        try:
-            message.format(loser="player1", winner="player2")
-        except Exception:
-            await ctx.send("That is an invalid format! The winner needs to be "
-                           "labeled with {winner} and the loser with {loser}")
-            return
-
-        # Now simply load the current messages
-        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles') or []
-        # Append this one
-        msgs.append("*{}*".format(message))
-        # And save it
-        update = {
-            'server_id': str(ctx.message.guild.id),
-            'battles': msgs
-        }
-        await self.bot.db.save('server_settings', update)
-        fmt = "I have just saved your new battle message, it will appear like this: \n\n*{}*".format(message)
-        await ctx.send(fmt.format(loser=ctx.message.author.display_name, winner=ctx.message.guild.me.display_name))
-
-    @battles.command(name='remove', aliases=['delete'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def remove_battles(self, ctx):
-        """Used to remove one of the custom hugs from the server's list of hug messages
-
-        EXAMPLE: !hugs remove
-        RESULT: I'll ask which hug you want to remove"""
-        # First just send the hugs
-        await ctx.invoke(self.battles)
-        # Then let them know to respond with the number needed
-        await ctx.send("Please respond with the number matching the battle message you want to remove")
-        # The check to ensure it's in this channel...and what's provided is an int
-
-        def check(m):
-            if m.author == ctx.message.author and m.channel == ctx.message.channel:
-                try:
-                    return bool(int(m.content))
-                except Exception:
-                    return False
-            else:
-                return False
-
-        # Get the message
-        try:
-            msg = await self.bot.wait_for('message', check=check, timeout=60.0)
-        except asyncio.TimeoutError:
-            await ctx.send("You took too long. I'm impatient, don't make me wait")
-            return
-
-        # Get the number needed
-        num = int(msg.content) - 1
-        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='battles')
-        # Try to remove it, if it fails then it doesn't match
-        try:
-            msgs.pop(num)
-        except (IndexError, AttributeError):
-            await ctx.send("That is not a valid match!")
-            return
-
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'battles': msgs
-        }
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send("I have just removed that battle message")
-
-    @battles.command(name='default')
-    @commands.guild_only()
-    @utils.can_run(send_messages=True)
-    async def default_battles(self, ctx):
-        """Used to toggle if battles should include default messages as well as server-custom messages
-
-        EXAMPLE: !hugs default
-        RESULT: No longer uses both defaults!"""
-        # Get the setting
-        setting = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='default_battles')
-        if setting is None:
-            setting = True
-        # Now reverse it
-        setting = not setting
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'default_battles': setting
-        }
-        await self.bot.db.save('server_settings', entry)
-        fmt = "" if setting else "not "
-        await ctx.send("Default messages will {}be used as well as custom messages".format(fmt))
-
-    @commands.group(invoke_without_command=True)
-    @commands.guild_only()
-    @utils.can_run(send_messages=True)
-    async def hugs(self, ctx):
-        """Used to list the server specific hug messages on this server
-
-        EXAMPLE: !hugs
-        RESULT: A list of the hug messages that can be used on this server"""
-        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs')
-        if msgs:
-            try:
-                pages = utils.Pages(ctx, entries=msgs)
-                await pages.paginate()
-            except utils.CannotPaginate as e:
-                await ctx.send(str(e))
-        else:
-            await ctx.send("There are no server specific hugs on this server!")
-
-    @hugs.command(name='add')
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def add_hugs(self, ctx, *, message):
-        """Used to add a hug to the server specific hug messages
-        Use {user} in order to display the user's display name
-
-        EXAMPLE: !hugs add I hugged {user}
-        RESULT: *new hug message that says I hugged UserName*"""
-        # Try to simulate the message, to ensure they haven't provided an invalid phrase
-        try:
-            message.format(user="user")
-        except Exception:
-            await ctx.send("That is an invalid format! The user being hugged needs to be labeled with {user}")
-            return
-
-        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs') or []
-        msgs.append("*{}*".format(message))
-        update = {
-            'server_id': str(ctx.message.guild.id),
-            'hugs': msgs
-        }
-        await self.bot.db.save('server_settings', update)
-        fmt = "I have just saved your new hug message, it will appear like this: \n\n*{}*".format(message)
-        await ctx.send(fmt.format(user=ctx.message.author.display_name))
-
-    @hugs.command(name='remove', aliases=['delete'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def remove_hugs(self, ctx):
-        """Used to remove one of the custom hugs from the server's list of hug messages
-
-        EXAMPLE: !hugs remove
-        RESULT: I'll ask which hug you want to remove"""
-        # First just send the hugs
-        await ctx.invoke(self.hugs)
-        # Then let them know to respond with the number needed
-        await ctx.send("Please respond with the number matching the hug message you want to remove")
-        # The check to ensure it's in this channel...and what's provided is an int
-
-        def check(m):
-            if m.author == ctx.message.author and m.channel == ctx.message.channel:
-                try:
-                    return bool(int(m.content))
-                except Exception:
-                    return False
-            else:
-                return False
-
-        # Get the message
-        try:
-            msg = await self.bot.wait_for('message', check=check, timeout=60.0)
-        except asyncio.TimeoutError:
-            await ctx.send("You took too long. I'm impatient, don't make me wait")
-            return
-
-        # Get the number needed
-        num = int(msg.content) - 1
-        msgs = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='hugs')
-        # Try to remove it, if it fails then it doesn't match
-        try:
-            msgs.pop(num)
-        except (IndexError, AttributeError):
-            await ctx.send("That is not a valid match!")
-            return
-
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'hugs': msgs
-        }
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send("I have just removed that hug message")
-
-    @hugs.command(name='default')
-    @commands.guild_only()
-    @utils.can_run(send_messages=True)
-    async def default_hugs(self, ctx):
-        """Used to toggle if hugs should include default messages as well as server-custom messages
-
-        EXAMPLE: !hugs default
-        RESULT: No longer uses both defaults!"""
-        # Get the setting
-        setting = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='default_hugs')
-        if setting is None:
-            setting = True
-        # Now reverse it
-        setting = not setting
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'default_hugs': setting
-        }
-        await self.bot.db.save('server_settings', entry)
-        fmt = "" if setting else "not "
-        await ctx.send("Default messages will {}be used as well as custom messages".format(fmt))
-
-    @commands.command()
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def allowbirthdays(self, ctx, setting):
-        """Turns on/off the birthday announcements in this server
-
-        EXAMPLE: !allowbirthdays on
-        RESULT: Birthdays will now be announced"""
-        if setting.lower() in ['on', 'yes', 'true']:
-            allowed = True
-        else:
-            allowed = False
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'birthdays_allowed': allowed
-        }
-        await self.bot.db.save('server_settings', entry)
-        fmt = "The birthday announcements have just been turned {}".format("on" if allowed else "off")
-        await ctx.send(fmt)
-
-    @commands.command()
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def allowcolours(self, ctx, setting):
-        """Turns on/off the ability to use colour roles in this server
-
-        EXAMPLE: !allowcolours on
-        RESULT: Colour roles can now be used in this server"""
-        if setting.lower() in ['on', 'yes', 'true']:
-            allowed = True
-        else:
-            allowed = False
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'colour_roles_allowed': allowed
-        }
-        await self.bot.db.save('server_settings', entry)
-        fmt = "The ability to use colour roles have just been turned {}".format("on" if allowed else "off")
-        await ctx.send(fmt)
-
-    @commands.command()
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def allowplaylists(self, ctx, setting):
-        """Turns on/off the ability to playlists
-
-        EXAMPLE: !allowplaylists on
-        RESULT: Playlists can now be used"""
-        if setting.lower() in ['on', 'yes', 'true']:
-            allowed = True
-        else:
-            allowed = False
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'playlists_allowed': allowed
-        }
-        await self.bot.db.save('server_settings', entry)
-        fmt = "The ability to use playlists has just been turned {}".format("on" if allowed else "off")
-        await ctx.send(fmt)
 
     @commands.command()
     @commands.guild_only()
@@ -399,24 +85,20 @@ class Administration:
 
         EXAMPLE: !restrictions
         RESULT: All the current restrictions"""
-        # Get the restrictions
-        restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+        restrictions = await ctx.bot.db.fetch(
+            "SELECT source, destination, from_to FROM restrictions WHERE guild=$1",
+            ctx.guild.id
+        )
+
         entries = []
-        # Loop through all the from restrictions
-        for _from in restrictions.get('from', []):
-            source = _from.get('source')
-            # Resolve our destination based on the ID
-            dest = await utils.convert(ctx, _from.get('destination'))
-            # Don't add it if it doesn't exist
+        for restriction in restrictions:
+            # Check whether it's from or to to change what the format looks like
+            dest = restriction["destination"]
+            if dest != "everyone":
+                dest = await utils.convert(ctx, restriction["destination"])
+            # If it doesn't exist, don't add it
             if dest:
-                entries.append("{} from {}".format(source, dest))
-        for _to in restrictions.get('to', []):
-            source = _to.get('source')
-            # Resolve our destination based on the ID
-            dest = await utils.convert(ctx, _to.get('destination'))
-            # Don't add it if it doesn't exist
-            if dest:
-                entries.append("{} to {}".format(source, dest))
+                entries.append(f"{restriction['source']} {'from' if restriction['from_to'] == 'from' else 'to'} {dest}")
 
         if entries:
             # Then paginate
@@ -448,8 +130,7 @@ class Administration:
             await ctx.send("You need to provide 3 options! Such as `command from @User`")
             return
         elif ctx.message.mention_everyone:
-            arg1, arg2, arg3 = options
-            await ctx.send("Please do not restrict something {} everyone".format(arg2))
+            await ctx.send("Please do not use this command to 'disable from everyone'. Use the `disable` command")
             return
         else:
             # Get the three arguments from this list, then make sure the 2nd is either from or to
@@ -467,8 +148,9 @@ class Administration:
                     await ctx.send("Sorry, but I don't know how to restrict {} {} {}".format(arg1, arg2, arg3))
                     return
 
-        from_entry = None
-        to_entry = None
+        from_to = arg2
+        source = None
+        destination = None
         overwrites = None
 
         # The possible options:
@@ -484,19 +166,15 @@ class Administration:
             # Roles - Command can't be ran by anyone in this role (least likely, but still possible uses)
             if arg2 == "from":
                 if isinstance(option2, (discord.Member, discord.Role, discord.TextChannel)):
-                    from_entry = {
-                        'source': option1.qualified_name,
-                        'destination': str(option2.id)
-                    }
+                    source = option1.qualified_name
+                    destination = str(option2.id)
             # To:
             # Channels - Command can only be run in this channel
             # Roles - This role is required in order to run this command
             else:
                 if isinstance(option2, (discord.Role, discord.TextChannel)):
-                    to_entry = {
-                        'source': option1.qualified_name,
-                        'destination': str(option2.id)
-                    }
+                    source = option1.qualified_name
+                    destination = str(option2.id)
         elif isinstance(option1, discord.Member):
             # From:
             # Channels - Setup an overwrite for this channel so that they cannot read it
@@ -514,10 +192,8 @@ class Administration:
                         option1: ov
                     }
                 elif isinstance(option2, (commands.core.Command, commands.core.Group)):
-                    from_entry = {
-                        'source': option2.qualified_name,
-                        'destination': str(option1.id)
-                    }
+                    source = option2.qualified_name
+                    destination = str(option1.id)
         elif isinstance(option1, (discord.TextChannel, discord.VoiceChannel)):
             # From:
             # Command - Command cannot be used in this channel
@@ -537,20 +213,16 @@ class Administration:
                     }
                 elif isinstance(option2, (commands.core.Command, commands.core.Group)) \
                         and isinstance(option1, discord.TextChannel):
-                    from_entry = {
-                        'source': option2.qualified_name,
-                        'destination': str(option1.id)
-                    }
+                    source = option2.qualified_name
+                    destination = str(option1.id)
             # To:
             # Command - Command can only be used in this channel
             # Role - Setup an overwrite so only this role can read this channel
             else:
                 if isinstance(option2, (commands.core.Command, commands.core.Group)) \
                         and isinstance(option1, discord.TextChannel):
-                    to_entry = {
-                        'source': option2.qualified_name,
-                        'destination': str(option1.id)
-                    }
+                    source = option2.qualified_name
+                    destination = str(option1.id)
                 elif isinstance(option2, (discord.Member, discord.Role)):
                     ov = discord.utils.find(lambda t: t[0] == option2, option1.overwrites)
                     if ov:
@@ -576,10 +248,8 @@ class Administration:
             # Channel - Setup an overwrite for this channel so that this Role cannot read it
             if arg2 == "from":
                 if isinstance(option2, (commands.core.Command, commands.core.Group)):
-                    from_entry = {
-                        'source': option2.qualified_name,
-                        'destination': str(option1.id)
-                    }
+                    source = option2.qualified_name
+                    destination = option1.id
                 elif isinstance(option2, (discord.TextChannel, discord.VoiceChannel)):
                     ov = discord.utils.find(lambda t: t[0] == option1, option2.overwrites)
                     if ov:
@@ -615,35 +285,22 @@ class Administration:
                         ctx.message.guild.default_role: ov2
                     }
                 elif isinstance(option2, (commands.core.Command, commands.core.Group)):
-                    to_entry = {
-                        'source': option2.qualified_name,
-                        'destination': str(option1.id)
-                    }
+                    source = option2.qualified_name
+                    destination = str(option1.id)
 
-        if to_entry:
-            restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
-            to = restrictions.get('to', [])
-            if to_entry not in to:
-                to.append(to_entry)
-            update = {
-                'server_id': str(ctx.message.guild.id),
-                'restrictions': {
-                    'to': to
-                }
-            }
-            await self.bot.db.save('server_settings', update)
-        elif from_entry:
-            restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
-            _from = restrictions.get('from', [])
-            if from_entry not in _from:
-                _from.append(from_entry)
-            update = {
-                'server_id': str(ctx.message.guild.id),
-                'restrictions': {
-                    'from': _from
-                }
-            }
-            await self.bot.db.save('server_settings', update)
+        if source is not None and destination is not None:
+            try:
+                await ctx.bot.db.execute(
+                    "INSERT INTO restrictions (guild, source, destination, from_to) VALUES ($1, $2, $3, $4)",
+                    ctx.guild.id,
+                    source,
+                    destination,
+                    from_to
+                )
+            except UniqueViolationError:
+                # If it's already inserted, then nothing needs to be updated
+                # It just meansthis particular restriction is already set
+                pass
         elif overwrites:
             channel = overwrites.pop('channel')
             for target, setting in overwrites.items():
@@ -692,32 +349,22 @@ class Administration:
             # The source should always be the command, so just set this based on which order is given (either is
             # allowed)
             if isinstance(option1, (commands.core.Command, commands.core.Group)):
-                restriction = {
-                    'source': option1.qualified_name,
-                    'destination': str(option2.id)
-                }
+                source = option1.qualified_name
+                destination = str(option2.id)
             else:
-                restriction = {
-                    'source': option2.qualified_name,
-                    'destination': str(option1.id)
-                }
+                source = option2.qualified_name
+                destination = str(option1.id)
 
-            # Load restrictions
-            restrictions = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
-            # Attempt to remove the restriction provided
-            try:
-                restrictions.get(arg2, []).remove(restriction)
-            # If it doesn't exist, nothing is needed to be done
-            except ValueError:
-                await ctx.send("The restriction {} {} {} does not exist!".format(arg1, arg2, arg3))
-                return
-            # If it was removed succesfully, save the change and let the author know this has been done
-            else:
-                entry = {
-                    'server_id': str(ctx.message.guild.id),
-                    'restrictions': restrictions
-                }
-                await self.bot.db.save('server_settings', entry)
+            # Now just try to remove it
+            await ctx.bot.db.execute("""
+DELETE FROM
+    restrictions
+WHERE
+    source=$1 AND 
+    destination=$2 AND 
+    from_to=$3 AND 
+    guild=$4""", source, destination, arg2, ctx.guild.id)
+
         # If this isn't a blacklist/whitelist, then we are attempting to remove an overwrite
         else:
             # Get the source and destination based on whatever order is provided
@@ -751,288 +398,17 @@ class Administration:
 
         await ctx.send("I have just unrestricted {} {} {}".format(arg1, arg2, arg3))
 
-    @commands.command(aliases=['nick'])
-    @commands.guild_only()
-    @utils.can_run(kick_members=True)
-    async def nickname(self, ctx, *, name=None):
-        """Used to set the nickname for Bonfire (provide no nickname and it will reset)
-
-        EXAMPLE: !nick Music Bot
-        RESULT: My nickname is now Music Bot"""
-        try:
-            await ctx.message.guild.me.edit(nick=name)
-        except discord.HTTPException:
-            await ctx.send("Sorry but I can't change my nickname to {}".format(name))
-        else:
-            await ctx.send("\N{OK HAND SIGN}")
-
-    @commands.command()
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def ignore(self, ctx, member_or_channel):
-        """This command can be used to have Bonfire ignore certain members/channels
-
-        EXAMPLE: !ignore #general
-        RESULT: Bonfire will ignore commands sent in the general channel"""
-        key = ctx.message.guild.id
-
-        converter = commands.converter.MemberConverter()
-        member = None
-        channel = None
-        try:
-            member = await converter.convert(ctx, member_or_channel)
-        except commands.converter.BadArgument:
-            converter = commands.converter.TextChannelConverter()
-            try:
-                channel = await converter.convert(ctx, member_or_channel)
-            except commands.converter.BadArgument:
-                await ctx.send("{} does not appear to be a member or channel!".format(member_or_channel))
-                return
-
-        settings = self.bot.db.load('server_settings', key=key, pluck='ignored') or {}
-        ignored = settings.get('ignored', {'members': [], 'channels': []})
-        if member:
-            if str(member.id) in ignored['members']:
-                await ctx.send("I am already ignoring {}!".format(member.display_name))
-                return
-            elif member.guild_permissions >= ctx.message.author.guild_permissions:
-                await ctx.send("You cannot make me ignore someone at equal or higher rank than you!")
-                return
-            else:
-                ignored['members'].append(str(member.id))
-                fmt = "Ignoring {}".format(member.display_name)
-        else:
-            if str(channel.id) in ignored['channels']:
-                await ctx.send("I am already ignoring {}!".format(channel.mention))
-                return
-            else:
-                ignored['channels'].append(str(channel.id))
-                fmt = "Ignoring {}".format(channel.mention)
-
-        entry = {
-            'ignored': ignored,
-            'server_id': str(key)
-        }
-
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send(fmt)
-
-    @commands.command()
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def unignore(self, ctx, member_or_channel):
-        """This command can be used to have Bonfire stop ignoring certain members/channels
-
-        EXAMPLE: !unignore #general
-        RESULT: Bonfire will no longer ignore commands sent in the general channel"""
-        key = str(ctx.message.guild.id)
-
-        converter = commands.converter.MemberConverter()
-        member = None
-        channel = None
-        try:
-            member = await converter.convert(ctx, member_or_channel)
-        except commands.converter.BadArgument:
-            converter = commands.converter.TextChannelConverter()
-            try:
-                channel = await converter.convert(ctx, member_or_channel)
-            except commands.converter.BadArgument:
-                await ctx.send("{} does not appear to be a member or channel!".format(member_or_channel))
-                return
-
-        settings = self.bot.db.load('server_settings', key=key) or {}
-        ignored = settings.get('ignored', {'members': [], 'channels': []})
-        if member:
-            if str(member.id) not in ignored['members']:
-                await ctx.send("I'm not even ignoring {}!".format(member.display_name))
-                return
-
-            ignored['members'].remove(str(member.id))
-            fmt = "I am no longer ignoring {}".format(member.display_name)
-        else:
-            if str(channel.id) not in ignored['channels']:
-                await ctx.send("I'm not even ignoring {}!".format(channel.mention))
-                return
-
-            ignored['channels'].remove(str(channel.id))
-            fmt = "I am no longer ignoring {}".format(channel.mention)
-
-        entry = {
-            'ignored': ignored,
-            'server_id': str(key)
-        }
-
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send(fmt)
-
-    @commands.command(aliases=['notifications'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def alerts(self, ctx, channel: discord.TextChannel):
-        """This command is used to set a channel as the server's default 'notifications' channel
-        Any notifications (like someone going live on Twitch, or Picarto) will go to that channel by default
-        This can be overridden with specific alerts command, such as `!picarto alerts #channel`
-        This command is just the default; the one used if there is no other one set.
-
-        EXAMPLE: !alerts #alerts
-        RESULT: No more alerts spammed in #general!"""
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'notifications': {
-                'default': str(channel.id)
-            }
-        }
-
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send("I have just changed this server's default 'notifications' channel"
-                       "\nAll notifications will now default to `{}`".format(channel))
-
-    @commands.group(invoke_without_command=True, aliases=['goodbye'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def welcome(self, ctx, on_off: str):
-        """This command can be used to set whether or not you want user notificaitons to show
-        Provide on, yes, or true to set it on; otherwise it will be turned off
-
-        EXAMPLE: !welcome on
-        RESULT: Annoying join/leave notifications! Yay!"""
-        # Join/Leave notifications can be kept separate from normal alerts
-        # So we base this channel on it's own and not from alerts
-        # When mod logging becomes available, that will be kept to it's own channel if wanted as well
-        on_off = True if re.search("(on|yes|true)", on_off.lower()) else False
-
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'join_leave': on_off
-        }
-
-        await self.bot.db.save('server_settings', entry)
-        fmt = "notify" if on_off else "not notify"
-        await ctx.send("This server will now {} if someone has joined or left".format(fmt))
-
-    @welcome.command(name='alerts', aliases=['notifications'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def _welcome_alerts(self, ctx, *, channel: discord.TextChannel):
-        """A command used to set the override for notifications about users joining/leaving
-
-        EXAMPLE: !welcome alerts #notifications
-        RESULT: All user joins/leaves will be sent to the #notificatoins channel"""
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'notifications': {
-                'welcome': str(channel.id)
-            }
-        }
-
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send(
-            "I have just changed this server's welcome/goodbye notifications channel to {}".format(channel.name))
-
-    @welcome.command(name='message')
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def _welcome_message(self, ctx, *, msg):
-        """A command to customize the welcome/goodbye message
-        There are a couple things that can be set to customize the message
-        {member} - Will mention the user joining
-        {server} - Will display the server's name
-
-        Give no message and it will be set to the default
-        EXAMPLE: !welcome message {member} to {server}
-        RESULT: Welcome Member#1234 to ServerName"""
-        parent = ctx.message.content.split()[0]
-        parent = parent[len(ctx.prefix):]
-
-        if re.search("{.*token.*}", msg):
-            await ctx.send("Illegal content in {} message".format(parent))
-        else:
-            try:
-                msg.format(member='test', server='test')
-            except KeyError:
-                await ctx.send("Illegal keyword in {0} message. Please use `{1.prefix}help {0} message` "
-                               "for what keywords can be used".format(parent, ctx))
-                return
-            entry = {
-                'server_id': str(ctx.message.guild.id),
-                parent + '_message': msg
-            }
-            await self.bot.db.save('server_settings', entry)
-            await ctx.send("I have just updated your {} message".format(parent))
-
-    @commands.group()
-    async def nsfw(self, ctx):
-        """Handles adding or removing a channel as a nsfw channel"""
-        # This command isn't meant to do anything, so just send an error if an invalid subcommand is passed
-        pass
-
-    @nsfw.command(name="add")
-    @utils.can_run(kick_members=True)
-    async def nsfw_add(self, ctx):
-        """Registers this channel as a 'nsfw' channel
-
-        EXAMPLE: !nsfw add
-        RESULT: ;)"""
-
-        if type(ctx.message.channel) is discord.DMChannel:
-            key = 'DMs'
-        else:
-            key = str(ctx.message.guild.id)
-
-        channels = self.bot.db.load('server_settings', key=key, pluck='nsfw_channels') or []
-        channels.append(str(ctx.message.channel.id))
-
-        entry = {
-            'server_id': key,
-            'nsfw_channels': channels
-        }
-
-        await self.bot.db.save('server_settings', entry)
-
-        await ctx.send("This channel has just been registered as 'nsfw'! Have fun you naughties ;)")
-
-    @nsfw.command(name="remove", aliases=["delete"])
-    @utils.can_run(kick_members=True)
-    async def nsfw_remove(self, ctx):
-        """Removes this channel as a 'nsfw' channel
-
-        EXAMPLE: !nsfw remove
-        RESULT: ;("""
-        channel = str(ctx.message.channel.id)
-        if type(ctx.message.channel) is discord.DMChannel:
-            key = 'DMs'
-        else:
-            key = str(ctx.message.guild.id)
-
-        channels = self.bot.db.load('server_settings', key=key, pluck='nsfw_channels') or []
-        if channel in channels:
-            channels.remove(channel)
-
-            entry = {
-                'server_id': key,
-                'nsfw_channels': channels
-            }
-            await self.bot.db.save('server_settings', entry)
-            await ctx.send("This channel has just been unregistered as a nsfw channel")
-        else:
-            await ctx.send("This channel is not registerred as a nsfw channel!")
-
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.can_run(send_messages=True)
-    async def perms(self, ctx, *, command: str = None):
+    async def perms(self, ctx, *, command: str):
         """This command can be used to print the current allowed permissions on a specific command
         This supports groups as well as subcommands; pass no argument to print a list of available permissions
 
         EXAMPLE: !perms help
         RESULT: Hopefully a result saying you just need send_messages permissions; otherwise lol
         this server's admin doesn't like me """
-        if command is None:
-            await ctx.send(
-                "Valid permissions are: ```\n{}```".format("\n".join("{}".format(i) for i in valid_perms)))
-            return
-
-        cmd = self.bot.get_command(command)
+        cmd = ctx.bot.get_command(command)
 
         if cmd is None:
             # If a command wasn't provided, see if a user was
@@ -1054,10 +430,13 @@ class Administration:
                 embed.add_field(name="Allowed permissions", value="\n".join(perms))
                 await ctx.send(embed=embed)
                 return
+        result = await ctx.bot.db.fetchrow(
+            "SELECT permission FROM custom_permissions WHERE guild = $1 AND command = $2",
+            ctx.guild.id,
+            command
+        )
+        perms_value = result["permission"] if result else None
 
-        server_perms = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='permissions') or {}
-
-        perms_value = server_perms.get(cmd.qualified_name)
         if perms_value is None:
             # If we don't find custom permissions, get the required permission for a command
             # based on what we set in utils.can_run, if can_run isn't found, we'll get an IndexError
@@ -1092,7 +471,7 @@ class Administration:
     @perms.command(name="add", aliases=["setup,create"])
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    async def add_perms(self, ctx, *msg: str):
+    async def add_perms(self, ctx, *, msg: str):
         """Sets up custom permissions on the provided command
         Format must be 'perms add <command> <permission>'
         If you want to open the command to everyone, provide 'none' as the permission
@@ -1101,19 +480,13 @@ class Administration:
         RESULT: No more random people voting to skip a song"""
 
         # Since subcommands exist, base the last word in the list as the permission, and the rest of it as the command
-        command = " ".join(msg[0:len(msg) - 1])
+        command, _, permission = msg.rpartition(" ")
         if command == "":
             await ctx.send("Please provide the permissions you want to setup, the format for this must be in:\n"
                            "`perms add <command> <permission>`")
             return
-        try:
-            permissions = msg[len(msg) - 1]
-        except IndexError:
-            await ctx.send("Please provide the permissions you want to setup, the format for this must be in:\n"
-                           "`perms add <command> <permission>`")
-            return
 
-        cmd = self.bot.get_command(command)
+        cmd = ctx.bot.get_command(command)
 
         if cmd is None:
             await ctx.send(
@@ -1121,17 +494,17 @@ class Administration:
             return
 
         # If a user can run a command, they have to have send_messages permissions; so use this as the base
-        if permissions.lower() == "none":
-            permissions = "send_messages"
+        if permission.lower() == "none":
+            permission = "send_messages"
 
         # Convert the string to an int value of the permissions object, based on the required permission
         # If we hit an attribute error, that means the permission given was not correct
         perm_obj = discord.Permissions.none()
         try:
-            setattr(perm_obj, permissions, True)
+            setattr(perm_obj, permission, True)
         except AttributeError:
             await ctx.send("{} does not appear to be a valid permission! Valid permissions are: ```\n{}```"
-                           .format(permissions, "\n".join(valid_perms)))
+                           .format(permission, "\n".join(valid_perms)))
             return
         perm_value = perm_obj.value
 
@@ -1144,15 +517,15 @@ class Administration:
                 await ctx.send("This command cannot have custom permissions setup!")
                 return
 
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'permissions': {cmd.qualified_name: perm_value}
-        }
-
-        await self.bot.db.save('server_settings', entry)
+        await ctx.bot.db.execute(
+            "INSERT INTO custom_permissions (guild, command, permission) VALUES ($1, $2, $3)",
+            ctx.guild.id,
+            cmd.qualified_name,
+            perm_value
+        )
 
         await ctx.send("I have just added your custom permissions; "
-                       "you now need to have `{}` permissions to use the command `{}`".format(permissions, command))
+                       "you now need to have `{}` permissions to use the command `{}`".format(permission, command))
 
     @perms.command(name="remove", aliases=["delete"])
     @commands.guild_only()
@@ -1163,122 +536,34 @@ class Administration:
         EXAMPLE: !perms remove play
         RESULT: Freedom!"""
 
-        cmd = self.bot.get_command(command)
+        cmd = ctx.bot.get_command(command)
 
         if cmd is None:
             await ctx.send(
                 "That command does not exist! You can't have custom permissions on a non-existant command....")
             return
 
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'permissions': {cmd.qualified_name: None}
-        }
+        await ctx.bot.db.execute(
+            "DELETE FROM custom_permissions WHERE guild=$1 AND command=$2", ctx.guild.id, cmd.qualified_name
+        )
 
-        await self.bot.db.save('server_settings', entry)
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
-    @commands.command()
+    @commands.command(aliases=['nick'])
     @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def prefix(self, ctx, *, prefix: str):
-        """This command can be used to set a custom prefix per server
+    @utils.can_run(kick_members=True)
+    async def nickname(self, ctx, *, name=None):
+        """Used to set the nickname for Bonfire (provide no nickname and it will reset)
 
-        EXAMPLE: !prefix $
-        RESULT: You now need to call commands like: $help"""
-        key = str(ctx.message.guild.id)
-        if len(prefix.strip()) > 20:
-            await ctx.send("Please keep prefixes under 20 characters")
-            return
-        if prefix.lower().strip() == "none":
-            prefix = None
-
-        entry = {
-            'server_id': key,
-            'prefix': prefix
-        }
-
-        await self.bot.db.save('server_settings', entry)
-
-        if prefix is None:
-            fmt = "I have just cleared your custom prefix, the default prefix will have to be used now"
-        else:
-            fmt = "I have just updated the prefix for this server; you now need to call commands with `{0}`. " \
-                  "For example, you can call this command again with {0}prefix".format(prefix)
-        await ctx.send(fmt)
-
-    @commands.group(aliases=['rule'], invoke_without_command=True)
-    @commands.guild_only()
-    @utils.can_run(send_messages=True)
-    async def rules(self, ctx, rule: int = None):
-        """This command can be used to view the current rules on the server
-
-        EXAMPLE: !rules 5
-        RESULT: Rule 5 is printed"""
-        rules = self.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='rules')
-
-        if rules is None:
-            await ctx.send("This server currently has no rules on it! I see you like to live dangerously...")
-            return
-
-        if rule is None:
-            try:
-                pages = utils.Pages(ctx, entries=rules, per_page=5)
-                pages.title = "Rules for {}".format(ctx.message.guild.name)
-                await pages.paginate()
-            except utils.CannotPaginate as e:
-                await ctx.send(str(e))
-        else:
-            try:
-                fmt = rules[rule - 1]
-            except IndexError:
-                await ctx.send("That rules does not exist.")
-                return
-            await ctx.send("Rule {}: \"{}\"".format(rule, fmt))
-
-    @rules.command(name='add', aliases=['create'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def rules_add(self, ctx, *, rule: str):
-        """Adds a rule to this server's rules
-
-        EXAMPLE: !rules add No fun allowed in this server >:c
-        RESULT: No more fun...unless they break the rules!"""
-        key = str(ctx.message.guild.id)
-        rules = self.bot.db.load('server_settings', key=key, pluck='rules') or []
-        rules.append(rule)
-
-        entry = {
-            'server_id': key,
-            'rules': rules
-        }
-
-        await self.bot.db.save('server_settings', entry)
-
-        await ctx.send("I have just saved your new rule, use the rules command to view this server's current rules")
-
-    @rules.command(name='remove', aliases=['delete'])
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def rules_delete(self, ctx, rule: int):
-        """Removes one of the rules from the list of this server's rules
-        Provide a number to delete that rule
-
-        EXAMPLE: !rules delete 5
-        RESULT: Freedom from opression!"""
-        key = str(ctx.message.guild.id)
-        rules = self.bot.db.load('server_settings', key=key, pluck='rules') or []
+        EXAMPLE: !nick Music Bot
+        RESULT: My nickname is now Music Bot"""
         try:
-            rules.pop(rule - 1)
-            entry = {
-                'server_id': key,
-                'rules': rules
-            }
-            await self.bot.db.save('server_settings', entry)
-            await ctx.send("I have just removed that rule from your list of rules!")
-        except IndexError:
-            await ctx.send("That is not a valid rule number, try running the command again.")
+            await ctx.message.guild.me.edit(nick=name)
+        except discord.HTTPException:
+            await ctx.send("Sorry but I can't change my nickname to {}".format(name))
+        else:
+            await ctx.send("\N{OK HAND SIGN}")
 
 
 def setup(bot):
-    bot.add_cog(Administration(bot))
+    bot.add_cog(Admin())

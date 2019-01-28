@@ -27,10 +27,10 @@ class Spotify:
 
     async def api_token_task(self):
         while True:
+            delay = 2400
             try:
                 delay = await self.get_api_token()
             except Exception as error:
-                delay = 2400
                 with open("error_log", 'a') as f:
                     traceback.print_tb(error.__traceback__, file=f)
                     print('{0.__class__.__name__}: {0}'.format(error), file=f)

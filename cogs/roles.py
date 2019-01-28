@@ -85,7 +85,7 @@ class Roles:
             total_members = len(role.members)
             embed.add_field(name="Total members", value=str(total_members))
             # If there are only a few members in this role, display them
-            if total_members <= 5 and total_members > 0:
+            if 5 >= total_members > 0:
                 embed.add_field(name="Members", value="\n".join(m.display_name for m in role.members))
             await ctx.send(embed=embed)
         else:

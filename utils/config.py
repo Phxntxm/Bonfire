@@ -57,6 +57,7 @@ extensions = [
     'cogs.misc',
     'cogs.mod',
     'cogs.admin',
+    'cogs.config',
     'cogs.images',
     'cogs.birthday',
     'cogs.owner',
@@ -80,25 +81,21 @@ extensions = [
 
 # The default status the bot will use
 default_status = global_config.get("default_status", None)
-# The rethinkdb hostname
-db_host = global_config.get('db_host', 'localhost')
-# The rethinkdb database name
-db_name = global_config.get('db_name', 'Discord_Bot')
-# The rethinkdb certification
-db_cert = global_config.get('db_cert', '')
-# The rethinkdb port
-db_port = global_config.get('db_port', 28015)
+# The database hostname
+db_host = global_config.get('db_host', None)
+# The database name
+db_name = global_config.get('db_name', 'bonfire')
+# The database port
+db_port = global_config.get('db_port', None)
 # The user and password assigned
-db_user = global_config.get('db_user', 'admin')
-db_pass = global_config.get('db_pass', '')
+db_user = global_config.get('db_user', None)
+db_pass = global_config.get('db_pass', None)
 # We've set all the options we need to be able to connect
 # so create a dictionary that we can use to unload to connect
-# db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'ssl':
-# {'ca_certs': db_cert}, 'user': db_user, 'password': db_pass}
-db_opts = {'host': db_host, 'db': db_name, 'port': db_port, 'user': db_user, 'password': db_pass}
+db_opts = {'host': db_host, 'database': db_name, 'port': db_port, 'user': db_user, 'password': db_pass}
 
 
 def command_prefix(bot, message):
     if not message.guild:
         return default_prefix
-    return bot.db.load('server_settings', key=message.guild.id, pluck='prefix') or default_prefix
+    return bot.cache.prefixes.get(message.guild.id, default_prefix)

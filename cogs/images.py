@@ -41,7 +41,7 @@ class Images:
         result = await utils.request('https://random.dog/woof.json')
         try:
             url = result.get("url")
-            filename = re.match("https:\/\/random.dog\/(.*)", url).group(1)
+            filename = re.match("https://random.dog/(.*)", url).group(1)
         except AttributeError:
             await ctx.send("I couldn't connect! Sorry no dogs right now ;w;")
             return
@@ -130,7 +130,6 @@ class Images:
 
         EXAMPLE: !derpi Rainbow Dash
         RESULT: A picture of Rainbow Dash!"""
-        await ctx.message.channel.trigger_typing()
 
         if len(search) > 0:
             url = 'https://derpibooru.org/search.json'
@@ -139,7 +138,7 @@ class Images:
             query = ' '.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
             params = {'q': query}
 
-            nsfw = await utils.channel_is_nsfw(ctx.message.channel, self.bot.db)
+            nsfw = utils.channel_is_nsfw(ctx.message.channel)
             # If this is a nsfw channel, we just need to tack on 'explicit' to the terms
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
@@ -200,7 +199,6 @@ class Images:
 
         EXAMPLE: !e621 dragon
         RESULT: A picture of a dragon (hopefully, screw your tagging system e621)"""
-        await ctx.message.channel.trigger_typing()
 
         # This changes the formatting for queries, so we don't
         # Have to use e621's stupid formatting when using the command
@@ -214,7 +212,7 @@ class Images:
             'tags': tags
         }
 
-        nsfw = await utils.channel_is_nsfw(ctx.message.channel, self.bot.db)
+        nsfw = utils.channel_is_nsfw(ctx.message.channel)
 
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not

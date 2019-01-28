@@ -92,8 +92,6 @@ class Stats:
 
         EXAMPLE: !command stats play
         RESULT: The realization that this is the only reason people use me ;-;"""
-        await ctx.message.channel.trigger_typing()
-
         cmd = self.bot.get_command(command)
         if cmd is None:
             await ctx.send("`{}` is not a valid command".format(command))
@@ -124,8 +122,6 @@ class Stats:
 
         EXAMPLE: !command leaderboard me
         RESULT: The realization of how little of a life you have"""
-        await ctx.message.channel.trigger_typing()
-
         if re.search('(author|me)', option):
             mid = str(ctx.message.author.id)
             # First lets get all the command usage
@@ -176,31 +172,35 @@ class Stats:
 
         EXAMPLE: !mostboops
         RESULT: You've booped @OtherPerson 351253897120935712093572193057310298 times!"""
+        query = """
+SELECT
+    boopee, amount
+FROM
+    boops
+WHERE
+    booper=$1
+AND
+    boopee IN ($2)
+ORDER BY
+    amount DESC
+LIMIT 1
+"""
+        members = ", ".join(f"{m.id}" for m in ctx.guild.members)
+        most = await self.bot.db.fetchrow(query, ctx.author.id, members)
+
         boops = self.bot.db.load('boops', key=ctx.message.author.id)
         if boops is None or "boops" not in boops:
             await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
             return
 
-        # Just to make this easier, just pay attention to the boops data, now that we have the right entry
-        boops = boops['boops']
-
-        sorted_boops = sorted(
-            ((ctx.guild.get_member(int(member_id)), amount)
-             for member_id, amount in boops.items()
-             if ctx.guild.get_member(int(member_id))),
-            reverse=True,
-            key=lambda k: k[1]
-        )
-
-        # Since this is sorted, we just need to get the following information on the first user in the list
-        try:
-            member, most_boops = sorted_boops[0]
-        except IndexError:
-            await ctx.send("You have not booped anyone in this server {}".format(ctx.message.author.mention))
-            return
+        if len(most) == 0:
+            await ctx.send(f"You have not booped anyone in this server {ctx.author.mention}")
         else:
-            await ctx.send("{0} you have booped {1} the most amount of times, coming in at {2} times".format(
-                ctx.message.author.mention, member.display_name, most_boops))
+            member = ctx.guild.get_member(most['boopee'])
+            await ctx.send(
+                f"{ctx.author.mention} you have booped {member.display_name} the most amount of times, "
+                f"coming in at {most['amount']} times"
+            )
 
     @commands.command()
     @commands.guild_only()
@@ -210,28 +210,30 @@ class Stats:
 
         EXAMPLE: !listboops
         RESULT: The list of your booped members!"""
-        await ctx.message.channel.trigger_typing()
 
-        boops = self.bot.db.load('boops', key=ctx.message.author.id)
-        if not boops:
-            await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
-            return
+        query = """
+SELECT
+    boopee, amount
+FROM
+    boops
+WHERE
+    booper=$1
+AND
+    boopee IN ($2)
+ORDER BY
+    amount DESC
+LIMIT 10
+        """
 
-        # Just to make this easier, just pay attention to the boops data, now that we have the right entry
-        boops = boops['boops']
+        members = ", ".join(f"{m.id}" for m in ctx.guild.members)
+        most = await self.bot.db.fetch(query, ctx.author.id, members)
 
-        sorted_boops = sorted(
-            ((ctx.guild.get_member(int(member_id)), amount)
-             for member_id, amount in boops.items()
-             if ctx.guild.get_member(int(member_id))),
-            reverse=True,
-            key=lambda k: k[1]
-        )
-        if sorted_boops:
+        if len(most) != 0:
             embed = discord.Embed(title="Your booped victims", colour=ctx.author.colour)
             embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
-            for member, amount in sorted_boops:
-                embed.add_field(name=member.display_name, value=amount)
+            for row in most:
+                member = ctx.guild.get_member(row['boopee'])
+                embed.add_field(name=member.display_name, value=row['amount'])
             await ctx.send(embed=embed)
         else:
             await ctx.send("You haven't booped anyone in this server!")
@@ -244,35 +246,34 @@ class Stats:
 
         EXAMPLE: !leaderboard
         RESULT: A leaderboard of this server's battle records"""
-        await ctx.message.channel.trigger_typing()
 
-        # Create a list of the ID's of all members in this server, for comparison to the records saved
-        server_member_ids = [member.id for member in ctx.message.guild.members]
-        battles = self.bot.db.load('battle_records')
-        if battles is None or len(battles) == 0:
+        query = """
+SELECT
+    id, battle_rating
+FROM
+    users
+WHERE
+    id = any($1::bigint[])
+ORDER BY
+    battle_rating DESC
+"""
+
+        results = await self.bot.db.fetch(query, [m.id for m in ctx.guild.members])
+
+        if len(results) == 0:
             await ctx.send("No one has battled on this server!")
+        else:
 
-        battles = [
-            battle
-            for member_id, battle in battles.items()
-            if int(member_id) in server_member_ids
-        ]
+            output = []
+            for row in results:
+                member = ctx.guild.get_member(row['id'])
+                output.append(f"{member.display_name} (Rating: {row['battle_rating']})")
 
-        # Sort the members based on their rating
-        sorted_members = sorted(battles, key=lambda k: k['rating'], reverse=True)
-
-        output = []
-        for x in sorted_members:
-            member_id = int(x['member_id'])
-            rating = x['rating']
-            member = ctx.message.guild.get_member(member_id)
-            output.append("{} (Rating: {})".format(member.display_name, rating))
-
-        try:
-            pages = utils.Pages(ctx, entries=output)
-            await pages.paginate()
-        except utils.CannotPaginate as e:
-            await ctx.send(str(e))
+            try:
+                pages = utils.Pages(ctx, entries=output)
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
 
     @commands.command()
     @commands.guild_only()
@@ -282,8 +283,6 @@ class Stats:
 
         EXAMPLE: !stats @OtherPerson
         RESULT: How good they are at winning a completely luck based game"""
-        await ctx.message.channel.trigger_typing()
-
         member = member or ctx.message.author
         # Get the different data that we'll display
         server_rank = "{}/{}".format(*self.bot.br.get_server_rank(member))

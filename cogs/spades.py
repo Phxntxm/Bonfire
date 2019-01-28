@@ -299,7 +299,7 @@ class Game:
             await p.show_table()
             await p.get_bid()
 
-            self.order_turns(self.get_highest_bidder())
+        self.order_turns(self.get_highest_bidder())
 
         # Bids are complete, time to start the game
         await self.clean_messages()
@@ -319,13 +319,14 @@ class Game:
                 await self.update_table()
             # Get the winner after the round, increase their tricks
             winner = self.get_round_winner()
+            winning_card = winner.played_card
             winner.tricks += 1
             # Order players based off the winner
             self.order_turns(winner)
 
             # Reset the round
             await self.reset_round()
-            fmt = "{} won with a {}".format(winner.discord_member.display_name, winner.played_card)
+            fmt = "{} won with a {}".format(winner.discord_member.display_name, winning_card)
             for p in self.players:
                 await p.send_message(content=fmt)
 
@@ -352,8 +353,11 @@ class Game:
         highest_bid = -1
         highest_player = None
         for player in self.players:
+            print(player.bid_num, player.discord_member.display_name)
             if player.bid_num > highest_bid:
                 highest_player = player
+
+        print(highest_player.discord_member.display_name)
 
         return highest_player
 
@@ -432,7 +436,7 @@ class Spades:
             # If so add the player to it
             self.pending_game.join(author)
             # If we've hit 4 players, we want to start the game, add it to our list of games, and wipe our pending game
-            if len(self.pending_game.players) == 4:
+            if len(self.pending_game.players) == 2:
                 task = self.bot.loop.create_task(self.pending_game.start())
                 self.games.append((self.pending_game, task))
                 self.pending_game = None

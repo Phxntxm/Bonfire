@@ -1,13 +1,12 @@
 from discord.ext import commands
-import discord
+from collections import defaultdict
 
 import utils
 
-import random
-import pendulum
+import discord
 import re
 import asyncio
-import traceback
+import random
 
 
 class Raffle:
@@ -15,174 +14,57 @@ class Raffle:
 
     def __init__(self, bot):
         self.bot = bot
-        self.bot.loop.create_task(self.raffle_task())
+        self.raffles = defaultdict(list)
 
-    async def raffle_task(self):
-        while True:
-            try:
-                await self.check_raffles()
-            except Exception as error:
-                with open("error_log", 'a') as f:
-                    traceback.print_tb(error.__traceback__, file=f)
-                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
-            finally:
-                await asyncio.sleep(60)
+    def create_raffle(self, ctx, title, num):
+        raffle = GuildRaffle(ctx, title, num)
+        self.raffles[ctx.guild.id].append(raffle)
+        raffle.start()
 
-    async def check_raffles(self):
-        # This is used to periodically check the current raffles, and see if they have ended yet
-        # If the raffle has ended, we'll pick a winner from the entrants
-        raffles = self.bot.db.load('raffles')
-
-        if raffles is None:
-            return
-
-        for server_id, raffle in raffles.items():
-            server = self.bot.get_guild(int(server_id))
-
-            # Check to see if this cog can find the server in question
-            if server is None:
-                continue
-            for r in raffle['raffles']:
-                title = r['title']
-                entrants = r['entrants']
-
-                now = pendulum.now(tz="UTC")
-                expires = pendulum.parse(r['expires'])
-
-                # Now lets compare and see if this raffle has ended, if not just continue
-                if expires > now:
-                    continue
-
-                # Make sure there are actually entrants
-                if len(entrants) == 0:
-                    fmt = 'Sorry, but there were no entrants for the raffle `{}`!'.format(title)
-                else:
-                    winner = None
-                    count = 0
-                    while winner is None:
-                        winner = server.get_member(int(random.SystemRandom().choice(entrants)))
-
-                        # Lets make sure we don't get caught in an infinite loop
-                        # Realistically having more than 50 random entrants found that aren't in the server anymore
-                        # Isn't something that should be an issue, but better safe than sorry
-                        count += 1
-                        if count >= 50:
-                            break
-
-                    if winner is None:
-                        fmt = 'I couldn\'t find an entrant that is still in this server, for the raffle `{}`!'.format(
-                            title)
-                    else:
-                        fmt = 'The raffle `{}` has just ended! The winner is {}!'.format(title, winner.display_name)
-
-                # Get the notifications settings, get the raffle setting
-                notifications = self.bot.db.load('server_settings', key=server.id, pluck='notifications') or {}
-                # Set our default to either the one set
-                default_channel_id = notifications.get('default')
-                # If it is has been overriden by picarto notifications setting, use this
-                channel_id = notifications.get('raffle') or default_channel_id
-                if channel_id:
-                    channel = self.bot.get_channel(int(channel_id))
-                else:
-                    continue
-                try:
-                    await channel.send(fmt)
-                except (discord.Forbidden, AttributeError):
-                    pass
-
-                # No matter which one of these matches were met, the raffle has ended and we want to remove it
-                raffle['raffles'].remove(r)
-                entry = {
-                    'server_id': raffle['server_id'],
-                    'raffles': raffle['raffles']
-                }
-                await self.bot.db.save('raffles', entry)
-
-    @commands.command()
+    @commands.command(name="raffles")
     @commands.guild_only()
     @utils.can_run(send_messages=True)
-    async def raffles(self, ctx):
+    async def _raffles(self, ctx):
         """Used to print the current running raffles on the server
 
         EXAMPLE: !raffles
         RESULT: A list of the raffles setup on this server"""
-        raffles = self.bot.db.load('raffles', key=ctx.message.guild.id, pluck='raffles')
-        if not raffles:
+        raffles = self.raffles[ctx.guild.id]
+        if len(raffles) == 0:
             await ctx.send("There are currently no raffles setup on this server!")
             return
 
-        # For EVERY OTHER COG, when we get one result, it is nice to have it return that exact object
-        # This is the only cog where that is different, so just to make this easier lets throw it
-        # back in a one-indexed list, for easier parsing
-        if isinstance(raffles, dict):
-            raffles = [raffles]
-        fmt = "\n\n".join("**Raffle:** {}\n**Title:** {}\n**Total Entrants:** {}\n**Ends:** {} UTC".format(
-            num + 1,
-            raffle['title'],
-            len(raffle['entrants']),
-            raffle['expires']) for num, raffle in enumerate(raffles))
-        await ctx.send(fmt)
+        embed = discord.Embed(title=f"Raffles in {ctx.guild.name}")
+
+        for num, raffle in enumerate(raffles):
+            embed.add_field(
+                name=f"Raffle {num + 1}",
+                value=f"Title: {raffle.title}\n"
+                      f"Total Entrants: {len(raffle.entrants)}\n"
+                      f"Ends in {raffle.remaining}",
+                inline=False
+            )
+        await ctx.send(embed=embed)
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.can_run(send_messages=True)
-    async def raffle(self, ctx, raffle_id: int = 0):
+    async def raffle(self, ctx, raffle_id: int):
         """Used to enter a raffle running on this server
         If there is more than one raffle running, provide an ID of the raffle you want to enter
 
         EXAMPLE: !raffle 1
         RESULT: You've entered the first raffle!"""
-        # Lets let people use 1 - (length of raffles) and handle 0 base ourselves
-        raffle_id -= 1
-        author = ctx.message.author
-        key = str(ctx.message.guild.id)
-
-        raffles = self.bot.db.load('raffles', key=key, pluck='raffles')
-        if raffles is None:
-            await ctx.send("There are currently no raffles setup on this server!")
-            return
-
-        raffle_count = len(raffles)
-
-        # There is only one raffle, so use the first's info
-        if raffle_count == 1:
-            entrants = raffles[0]['entrants']
-            # Lets make sure that the user hasn't already entered the raffle
-            if str(author.id) in entrants:
-                await ctx.send("You have already entered this raffle!")
-                return
-            entrants.append(str(author.id))
-
-            update = {
-                'raffles': raffles,
-                'server_id': key
-            }
-            await self.bot.db.save('raffles', update)
-            await ctx.send("{} you have just entered the raffle!".format(author.mention))
-        # Otherwise, make sure the author gave a valid raffle_id
-        elif raffle_id in range(raffle_count):
-            entrants = raffles[raffle_id]['entrants']
-
-            # Lets make sure that the user hasn't already entered the raffle
-            if str(author.id) in entrants:
-                await ctx.send("You have already entered this raffle!")
-                return
-            entrants.append(str(author.id))
-
-            # Since we have no good thing to filter things off of, lets use the internal rethinkdb id
-
-            update = {
-                'raffles': raffles,
-                'server_id': key
-            }
-            await self.bot.db.save('raffles', update)
-            await ctx.send("{} you have just entered the raffle!".format(author.mention))
+        try:
+            raffle = self.raffles[ctx.guild.id][raffle_id - 1]
+        except IndexError:
+            await ctx.send(f"I could not find a raffle for ID {raffle_id}")
+            await self._raffles.invoke(ctx)
         else:
-            fmt = "Please provide a valid raffle ID, as there are more than one setup on the server! " \
-                  "There are currently `{}` raffles running, use {}raffles to view the current running raffles".format(
-                      raffle_count, ctx.prefix
-                  )
-            await ctx.send(fmt)
+            if raffle.enter(ctx.author):
+                await ctx.send(f"You have just joined the raffle {raffle['title']}")
+            else:
+                await ctx.send("You have already entered this raffle!")
 
     @raffle.command(name='create', aliases=['start', 'begin', 'add'])
     @commands.guild_only()
@@ -193,10 +75,8 @@ class Raffle:
         EXAMPLE: !raffle create
         RESULT: A follow-along for setting up a new raffle"""
 
-        author = ctx.message.author
-        server = ctx.message.guild
-        channel = ctx.message.channel
-        now = pendulum.now(tz="UTC")
+        author = ctx.author
+        channel = ctx.channel
 
         await ctx.send(
             "Ready to start a new raffle! Please respond with the title you would like to use for this raffle!")
@@ -212,13 +92,13 @@ class Raffle:
 
         fmt = "Alright, your new raffle will be titled:\n\n{}\n\nHow long would you like this raffle to run for? " \
               "The format should be [number] [length] for example, `2 days` or `1 hour` or `30 minutes` etc. " \
-              "The minimum for this is 10 minutes, and the maximum is 3 months"
+              "The minimum for this is 10 minutes, and the maximum is 3 days"
         await ctx.send(fmt.format(title))
 
         # Our check to ensure that a proper length of time was passed
         def check(m):
             if m.author == author and m.channel == channel:
-                return re.search("\d+ (minutes?|hours?|days?|weeks?|months?)", m.content.lower()) is not None
+                return re.search("\d+ (minutes?|hours?|days?)", m.content.lower()) is not None
             else:
                 return False
 
@@ -229,73 +109,86 @@ class Raffle:
             return
 
         # Lets get the length provided, based on the number and type passed
-        num, term = re.search("\d+ (minutes?|hours?|days?|weeks?|months?)", msg.content.lower()).group(0).split(' ')
+        num, term = re.search("(\d+) (minutes?|hours?|days?)", msg.content.lower()).groups()
         # This should be safe to convert, we already made sure with our check earlier this would match
         num = int(num)
 
         # Now lets ensure this meets our min/max
-        if "minute" in term and (num < 10 or num > 129600):
+        if "minute" in term:
+            num = num * 60
+        elif "hour" in term:
+            num = num * 60 * 60
+        elif "day" in term:
+            num = num * 24 * 60 * 60
+
+        if 60 < num < 259200:
             await ctx.send(
-                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
-            return
-        elif "hour" in term and num > 2160:
-            await ctx.send(
-                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
-            return
-        elif "day" in term and num > 90:
-            await ctx.send(
-                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
-            return
-        elif "week" in term and num > 12:
-            await ctx.send(
-                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
-            return
-        elif "month" in term and num > 3:
-            await ctx.send(
-                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 months")
+                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 days")
             return
 
-        # Pendulum only accepts the plural version of terms, lets make sure this is added
-        term = term if term.endswith('s') else term + 's'
-        # If we're in the range, lets just pack this in a dictionary we can pass to set the time we want, then set that
-        payload = {term: num}
-        expires = now.add(**payload)
-
-        # Now we're ready to add this as a new raffle
-        entry = {
-            'title': title,
-            'expires': expires.to_datetime_string(),
-            'entrants': [],
-            'author': str(author.id),
-        }
-
-        raffles = self.bot.db.load('raffles', key=server.id, pluck='raffles') or []
-        raffles.append(entry)
-        update = {
-            'server_id': str(server.id),
-            'raffles': raffles
-        }
-        await self.bot.db.save('raffles', update)
+        self.create_raffle(ctx, title, num)
         await ctx.send("I have just saved your new raffle!")
-
-    @raffle.command(name='alerts')
-    @commands.guild_only()
-    @utils.can_run(manage_guild=True)
-    async def raffle_alerts_channel(self, ctx, channel: discord.TextChannel):
-        """Sets the notifications channel for raffle notifications
-
-        EXAMPLE: !raffle alerts #raffle
-        RESULT: raffle notifications will go to this channel
-        """
-        entry = {
-            'server_id': str(ctx.message.guild.id),
-            'notifications': {
-                'raffle': str(channel.id)
-            }
-        }
-        await self.bot.db.save('server_settings', entry)
-        await ctx.send("All raffle notifications will now go to {}".format(channel.mention))
 
 
 def setup(bot):
     bot.add_cog(Raffle(bot))
+
+
+class GuildRaffle:
+
+    def __init__(self, ctx, title, expires):
+        self._ctx = ctx
+        self.title = title
+        self.expires = expires
+        self.entrants = set()
+        self.task = None
+
+    @property
+    def guild(self):
+        return self._ctx.guild
+
+    @property
+    def db(self):
+        return self._ctx.bot.db
+
+    def start(self):
+        self.task = self._ctx.bot.loop.call_later(self.expires, self.end_raffle())
+
+    @property
+    def remaining(self):
+        minutes, seconds = divmod(self.task.when(), 60)
+        hours, minutes = divmod(minutes, 60)
+        days, hours = divmod(hours, 24)
+        return f"{days} days, {hours} hours, {minutes} minutes, {seconds} seconds"
+
+    def enter(self, entrant):
+        self.entrants.add(entrant)
+
+    async def end_raffle(self):
+        entrants = {e for e in self.entrants if self.guild.get_member(e.id)}
+
+        query = """
+SELECT
+    COALESCE(raffle_alerts, default_alerts) AS channel,
+FROM
+    guilds
+WHERE
+    id = $1
+AND
+    COALESCE(raffle_alerts, default_alerts) IS NOT NULL
+        """
+        channel = None
+        result = await self.db.fetch(query, self.guild.id)
+
+        if result:
+            channel = self.guild.get_channel(result['channel'])
+        if channel is None:
+            return
+
+        if entrants:
+            winner = random.SystemRandom().choice(self.entrants)
+            await channel.send(f"The winner of the raffle `{self.title}` is {winner.mention}! Congratulations!")
+        else:
+            await channel.send(
+                f"There were no entrants to the raffle `{self.title}`, who are in this server currently!"
+            )

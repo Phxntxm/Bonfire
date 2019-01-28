@@ -38,8 +38,6 @@ class Overwatch:
 
         EXAMPLE: !ow stats @OtherPerson Junkrat
         RESULT: Whether or not you should unfriend this person because they're a dirty rat"""
-        await ctx.message.channel.trigger_typing()
-
         user = user or ctx.message.author
         bt = self.bot.db.load('overwatch', key=str(user.id), pluck='battletag')
 
@@ -99,7 +97,7 @@ class Overwatch:
 
         EXAMPLE: !ow add Username#1234
         RESULT: Your battletag is now saved"""
-        await ctx.message.channel.trigger_typing()
+
 
         # Battletags are normally provided like name#id
         # However the API needs this to be a -, so repliace # with - if it exists

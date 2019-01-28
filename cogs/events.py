@@ -69,64 +69,46 @@ class StatsUpdate:
         await self.update()
 
     async def on_member_join(self, member):
-        guild = member.guild
-        server_settings = self.bot.db.load('server_settings', key=str(guild.id))
-
+        query = """
+SELECT
+    COALESCE(welcome_alerts, default_alerts) AS channel,
+    welcome_msg AS msg
+FROM
+    guilds
+WHERE
+    welcome_notifications = True
+AND
+    id = $1
+AND
+    COALESCE(welcome_alerts, default_alerts) IS NOT NULL
+"""
+        settings = await self.bot.db.fetchrow(query, member.guild.id)
+        message = settings['msg'] or "Welcome to the '{server}' server {member}!"
+        channel = member.guild.get_channel(settings['channel'])
         try:
-            join_leave_on = server_settings['join_leave']
-            if join_leave_on:
-                # Get the notifications settings, get the welcome setting
-                notifications = self.bot.db.load('server_settings', key=guild.id, pluck='notifications') or {}
-                # Set our default to either the one set, or the default channel of the server
-                default_channel_id = notifications.get('default')
-                # If it is has been overriden by picarto notifications setting, use this
-                channel_id = notifications.get('welcome') or default_channel_id
-                # Get the message if it exists
-                join_message = self.bot.db.load('server_settings', key=guild.id, pluck='welcome_message')
-                if not join_message:
-                    join_message = "Welcome to the '{server}' server {member}!"
-            else:
-                return
-        except (IndexError, TypeError, KeyError):
-            return
-
-        if channel_id:
-            channel = guild.get_channel(int(channel_id))
-        else:
-            return
-        try:
-            await channel.send(join_message.format(server=guild.name, member=member.mention))
+            await channel.send(message.format(server=member.guild.name, member=member.mention))
         except (discord.Forbidden, discord.HTTPException, AttributeError):
             pass
 
     async def on_member_remove(self, member):
-        guild = member.guild
-        server_settings = self.bot.db.load('server_settings', key=str(guild.id))
-
+        query = """
+SELECT
+    COALESCE(goodbye_alerts, default_alerts) AS channel,
+    goodbye_msg AS msg
+FROM
+    guilds
+WHERE
+    welcome_notifications = True
+AND
+    id = $1
+AND
+    COALESCE(goodbye_alerts, default_alerts) IS NOT NULL
+"""
+        settings = await self.bot.db.fetchrow(query, member.guild.id)
+        message = settings['msg'] or "{member} has left the server, I hope it wasn't because of something I said :c"
+        channel = member.guild.get_channel(settings['channel'])
         try:
-            join_leave_on = server_settings['join_leave']
-            if join_leave_on:
-                # Get the notifications settings, get the welcome setting
-                notifications = self.bot.db.load('server_settings', key=guild.id, pluck='notifications') or {}
-                # Set our default to either the one set, or the default channel of the server
-                default_channel_id = notifications.get('default')
-                # If it is has been overriden by picarto notifications setting, use this
-                channel_id = notifications.get('welcome') or default_channel_id
-                # Get the message if it exists
-                leave_message = self.bot.db.load('server_settings', key=guild.id, pluck='goodbye_message')
-                if not leave_message:
-                    leave_message = "{member} has left the server, I hope it wasn't because of something I said :c"
-            else:
-                return
-        except (IndexError, TypeError, KeyError):
-            return
-
-        if channel_id:
-            channel = guild.get_channel(int(channel_id))
-        else:
-            return
-        try:
-            await channel.send(leave_message.format(server=guild.name, member=member.name))
+            await channel.send(message.format(server=member.guild.name, member=member.mention))
         except (discord.Forbidden, discord.HTTPException, AttributeError):
             pass
 

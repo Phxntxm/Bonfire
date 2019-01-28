@@ -1,8 +1,8 @@
-Pillow==4.2.0
 rethinkdb
 pyyaml
 psutil
 pendulum
 beautifulsoup4
 osuapi
+asyncpg
 -e git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py

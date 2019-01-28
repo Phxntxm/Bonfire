@@ -46,15 +46,13 @@ class Osu:
 
     async def get_users(self):
         """A task used to 'cache' all member's and their Osu profile's"""
-        data = await self.bot.db.actual_load('osu')
-        if data is None:
-            return
+        query = "SELECT id, osu FROM users WHERE osu IS NOT NULL;"
+        rows = await self.bot.db.fetch(query)
 
-        for result in data:
-            member = int(result['member_id'])
-            user = await self.get_user_from_api(result['osu_username'])
+        for row in rows:
+            user = await self.get_user_from_api(row['osu'])
             if user:
-                self.osu_users[member] = user
+                self.osu_users[row['id']] = user
 
     @commands.group(invoke_without_command=True)
     @utils.can_run(send_messages=True)
@@ -63,7 +61,7 @@ class Osu:
 
         EXAMPLE: !osu @Person
         RESULT: Informationa bout that person's osu account"""
-        await ctx.message.channel.trigger_typing()
+
         if member is None:
             member = ctx.message.author
 
@@ -95,21 +93,19 @@ class Osu:
 
         EXAMPLE: !osu add username
         RESULT: Links your username to your account, and allows stats to be pulled from it"""
-        await ctx.message.channel.trigger_typing()
+
         author = ctx.message.author
         user = await self.get_user(author, username)
         if user is None:
             await ctx.send("I couldn't find an osu user that matches {}".format(username))
             return
 
-        entry = {
-            'member_id': str(author.id),
-            'osu_username': user.username
-        }
-
-        await self.bot.db.save('osu', entry)
-
         await ctx.send("I have just saved your Osu user {}".format(author.display_name))
+        update = {
+            "id": author.id,
+            "osu": user.username
+        }
+        await self.bot.db.upsert("users", update)
 
     @osu.command(name='score', aliases=['scores'])
     @utils.can_run(send_messages=True)
@@ -119,7 +115,7 @@ class Osu:
 
         EXAMPLE: !osu scores @Person 5
         RESULT: The top 5 maps for the user @Person"""
-        await ctx.message.channel.trigger_typing()
+
         # Set the defaults before we go through our passed data to figure out what we want
         limit = 5
         member = ctx.message.author
@@ -135,7 +131,7 @@ class Osu:
                     limit = 50
                 elif limit < 1:
                     limit = 5
-            except:
+            except Exception:
                 converter = commands.converter.MemberConverter()
                 try:
                     member = await converter.convert(ctx, piece)

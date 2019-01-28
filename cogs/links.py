@@ -22,12 +22,10 @@ class Links:
 
         EXAMPLE: !g Random cat pictures!
         RESULT: Links to sites with random cat pictures!"""
-        await ctx.message.channel.trigger_typing()
-
         url = "https://www.google.com/search"
 
         # Turn safe filter on or off, based on whether or not this is a nsfw channel
-        nsfw = await utils.channel_is_nsfw(ctx.message.channel, self.bot.db)
+        nsfw = utils.channel_is_nsfw(ctx.message.channel)
         safe = 'off' if nsfw else 'on'
 
         params = {'q': query,
@@ -76,8 +74,6 @@ class Links:
 
         EXAMPLE: !youtube Cat videos!
         RESULT: Cat videos!"""
-        await ctx.message.channel.trigger_typing()
-
         key = utils.youtube_key
         url = "https://www.googleapis.com/youtube/v3/search"
         params = {'key': key,
@@ -111,8 +107,6 @@ class Links:
 
         EXAMPLE: !wiki Test
         RESULT: A link to the wikipedia article for the word test"""
-        await ctx.message.channel.trigger_typing()
-
         # All we need to do is search for the term provided, so the action, list, and format never need to change
         base_url = "https://en.wikipedia.org/w/api.php"
         params = {"action": "query",
@@ -150,9 +144,7 @@ class Links:
 
         EXAMPLE: !urban a normal phrase
         RESULT: Probably something lewd; this is urban dictionary we're talking about"""
-        if await utils.channel_is_nsfw(ctx.message.channel, self.bot.db):
-            await ctx.message.channel.trigger_typing()
-
+        if utils.channel_is_nsfw(ctx.message.channel):
             url = "http://api.urbandictionary.com/v0/define"
             params = {"term": msg}
             try:

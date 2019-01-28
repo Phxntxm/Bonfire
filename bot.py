@@ -1,4 +1,3 @@
-#!/usr/local/bin/python3.5
 import discord
 import traceback
 import logging
@@ -24,35 +23,23 @@ bot = commands.AutoShardedBot(**opts)
 logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 
+@bot.before_invoke
+async def start_typing(ctx):
+    await ctx.trigger_typing()
+
+
 @bot.event
 async def on_command_completion(ctx):
-    author = ctx.message.author
-    server = ctx.message.guild
-    command = ctx.command
+    author = ctx.author.id
+    guild = ctx.guild.id if ctx.guild else None
+    command = ctx.command.qualified_name
 
-    command_usage = await bot.db.actual_load(
-        'command_usage', key=command.qualified_name
-    ) or {'command': command.qualified_name}
-
-    # Add one to the total usage for this command, basing it off 0 to start with (obviously)
-    total_usage = command_usage.get('total_usage', 0) + 1
-    command_usage['total_usage'] = total_usage
-
-    # Add one to the author's usage for this command
-    total_member_usage = command_usage.get('member_usage', {})
-    member_usage = total_member_usage.get(str(author.id), 0) + 1
-    total_member_usage[str(author.id)] = member_usage
-    command_usage['member_usage'] = total_member_usage
-
-    # Add one to the server's usage for this command
-    if ctx.message.guild is not None:
-        total_server_usage = command_usage.get('server_usage', {})
-        server_usage = total_server_usage.get(str(server.id), 0) + 1
-        total_server_usage[str(server.id)] = server_usage
-        command_usage['server_usage'] = total_server_usage
-
-    # Save all the changes
-    await bot.db.save('command_usage', command_usage)
+    await bot.db.execute(
+        "INSERT INTO command_usage(command, guild, author) VALUES ($1, $2, $3)",
+        command,
+        guild,
+        author
+    )
 
     # Now add credits to a users amount
     # user_credits = bot.db.load('credits', key=ctx.author.id, pluck='credits') or 1000
@@ -66,43 +53,35 @@ async def on_command_completion(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        return
-    if isinstance(error, commands.DisabledCommand):
-        return
-    try:
-        if isinstance(error.original, discord.Forbidden):
-            return
-        elif isinstance(error.original, discord.HTTPException) and (
-                'empty message' in str(error.original) or
-                'INTERNAL SERVER ERROR' in str(error.original) or
-                'REQUEST ENTITY TOO LARGE' in str(error.original) or
-                'Unknown Message' in str(error.original) or
-                'Origin Time-out' in str(error.original) or
-                'Bad Gateway' in str(error.original) or
-                'Gateway Time-out' in str(error.original) or
-                'Explicit content' in str(error.original)):
-            return
-        elif isinstance(error.original, aiohttp.ClientOSError):
-            return
-        elif isinstance(error.original, discord.NotFound) and 'Unknown Channel' in str(error.original):
-            return
+    error = error.original if hasattr(error, "original") else error
+    ignored_errors = (
+        commands.CommandNotFound,
+        commands.DisabledCommand,
+        discord.Forbidden,
+        aiohttp.ClientOSError,
+        commands.CheckFailure,
+        commands.CommandOnCooldown,
+    )
 
-    except AttributeError:
-        pass
+    if isinstance(error, ignored_errors):
+        return
+    elif isinstance(error, discord.HTTPException) and (
+            'empty message' in str(error) or
+            'INTERNAL SERVER ERROR' in str(error) or
+            'REQUEST ENTITY TOO LARGE' in str(error) or
+            'Unknown Message' in str(error) or
+            'Origin Time-out' in str(error) or
+            'Bad Gateway' in str(error) or
+            'Gateway Time-out' in str(error) or
+            'Explicit content' in str(error)):
+        return
+    elif isinstance(error, discord.NotFound) and 'Unknown Channel' in str(error):
+        return
 
     try:
         if isinstance(error, commands.BadArgument):
             fmt = "Please provide a valid argument to pass to the command: {}".format(error)
             await ctx.message.channel.send(fmt)
-        elif isinstance(error, commands.CheckFailure):
-            fmt = "You can't tell me what to do!"
-            # await ctx.message.channel.send(fmt)
-        elif isinstance(error, commands.CommandOnCooldown):
-            m, s = divmod(error.retry_after, 60)
-            fmt = "This command is on cooldown! Hold your horses! >:c\nTry again in {} minutes and {} seconds" \
-                .format(round(m), round(s))
-            # await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.NoPrivateMessage):
             fmt = "This command cannot be used in a private message"
             await ctx.message.channel.send(fmt)
@@ -113,21 +92,20 @@ async def on_command_error(ctx, error):
             with open("error_log", 'a') as f:
                 print("In server '{0.message.guild}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
                       file=f)
-                try:
-                    traceback.print_tb(error.original.__traceback__, file=f)
-                    print('{0.__class__.__name__}: {0}'.format(error.original), file=f)
-                except Exception:
-                    traceback.print_tb(error.__traceback__, file=f)
-                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+                traceback.print_tb(error.__traceback__, file=f)
+                print('{0.__class__.__name__}: {0}'.format(error), file=f)
     except discord.HTTPException:
         pass
 
 
 if __name__ == '__main__':
-    bot.loop.create_task(utils.db_check())
     bot.remove_command('help')
+    # Setup our bot vars, db and cache
     bot.db = utils.DB()
-
+    bot.cache = utils.Cache(bot.db)
+    # Start our startup tasks
+    bot.loop.create_task(bot.db.setup())
+    bot.loop.create_task(bot.cache.setup())
     for e in utils.extensions:
         bot.load_extension(e)
 

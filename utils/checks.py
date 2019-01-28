@@ -8,69 +8,14 @@ from . import utilities
 
 loop = asyncio.get_event_loop()
 
-# The tables needed for the database, as well as their primary keys
-required_tables = {
-    'battle_records': 'member_id',
-    'boops': 'member_id',
-    'command_usage': 'command',
-    'overwatch': 'member_id',
-    'picarto': 'member_id',
-    'server_settings': 'server_id',
-    'raffles': 'server_id',
-    'strawpolls': 'server_id',
-    'osu': 'member_id',
-    'tags': 'server_id',
-    'tictactoe': 'member_id',
-    'twitch': 'member_id',
-    'user_playlists': 'member_id',
-    'birthdays': 'member_id'
-}
-
-
-async def db_check():
-    """Used to check if the required database/tables are setup"""
-    db_opts = config.db_opts
-
-    r.set_loop_type('asyncio')
-    # First try to connect, and see if the correct information was provided
-    try:
-        conn = await r.connect(**db_opts)
-    except r.errors.ReqlDriverError:
-        print("Cannot connect to the RethinkDB instance with the following information: {}".format(db_opts))
-
-        print("The RethinkDB instance you have setup may be down, otherwise please ensure you setup a"
-              " RethinkDB instance, and you have provided the correct database information in config.yml")
-        quit()
-        return
-
-    # Get the current databases and check if the one we need is there
-    dbs = await r.db_list().run(conn)
-    if db_opts['db'] not in dbs:
-        # If not, we want to create it
-        print('Couldn\'t find database {}...creating now'.format(db_opts['db']))
-        await r.db_create(db_opts['db']).run(conn)
-        # Then add all the tables
-        for table, key in required_tables.items():
-            print("Creating table {}...".format(table))
-            await r.table_create(table, primary_key=key).run(conn)
-        print("Done!")
-    else:
-        # Otherwise, if the database is setup, make sure all the required tables are there
-        tables = await r.table_list().run(conn)
-        for table, key in required_tables.items():
-            if table not in tables:
-                print("Creating table {}...".format(table))
-                await r.table_create(table, primary_key=key).run(conn)
-        print("Done checking tables!")
-
 
 def should_ignore(ctx):
     if ctx.message.guild is None:
         return False
-    ignored = ctx.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='ignored')
+    ignored = ctx.bot.cache.ignored[ctx.guild.id]
     if not ignored:
         return False
-    return str(ctx.message.author.id) in ignored['members'] or str(ctx.message.channel.id) in ignored['channels']
+    return ctx.message.author.id in ignored['members'] or ctx.message.channel.id in ignored['channels']
 
 
 async def check_not_restricted(ctx):
@@ -79,7 +24,7 @@ async def check_not_restricted(ctx):
         return True
 
     # First get all the restrictions
-    restrictions = ctx.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='restrictions') or {}
+    restrictions = ctx.bot.cache.restrictions[ctx.guild.id]
     # Now lets check the "from" restrictions
     for from_restriction in restrictions.get('from', []):
         # Get the source and destination
@@ -169,8 +114,7 @@ def has_perms(ctx, **perms):
     for perm, setting in perms.items():
         setattr(required_perm, perm, setting)
 
-    required_perm_value = ctx.bot.db.load('server_settings', key=ctx.message.guild.id, pluck='permissions') or {}
-    required_perm_value = required_perm_value.get(ctx.command.qualified_name)
+    required_perm_value = ctx.bot.cache.custom_permissions[ctx.guild.id].get(ctx.command.qualified_name)
     if required_perm_value:
         required_perm = discord.Permissions(required_perm_value)
 

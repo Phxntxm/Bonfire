@@ -1,13 +1,12 @@
-import rethinkdb as r
 from discord.ext import commands
 from discord.ext.commands.cooldowns import BucketType
+from collections import defaultdict
 
 import utils
 
 import discord
 import random
 import functools
-import asyncio
 
 battle_outcomes = \
     ["A meteor fell on {loser}, {winner} is left standing and has been declared the victor!",
@@ -91,68 +90,36 @@ class Interaction:
 
     def __init__(self, bot):
         self.bot = bot
-        self.battles = {}
-        self.bot.br = BattleRankings(self.bot)
-        self.bot.br.update_start()
+        self.battles = defaultdict(list)
 
-    def get_battle(self, player):
-        battles = self.battles.get(player.guild.id)
-
-        if battles is None:
-            return None
-
-        for battle in battles:
-            if battle['p2'] == player.id:
+    def get_receivers_battle(self, receiver):
+        for battle in self.battles.get(receiver.guild.id, []):
+            if battle.is_receiver(receiver):
                 return battle
 
-    def can_battle(self, player):
-        battles = self.battles.get(player.guild.id)
-
-        if battles is None:
-            return True
-
-        for x in battles:
-            if x['p1'] == player.id:
+    def can_initiate_battle(self, player):
+        for battle in self.battles.get(player.guild.id, []):
+            if battle.is_initiator(player):
                 return False
         return True
 
-    def can_be_battled(self, player):
-        battles = self.battles.get(player.guild.id)
-
-        if battles is None:
-            return True
-
-        for x in battles:
-            if x['p2'] == player.id:
+    def can_receive_battle(self, player):
+        for battle in self.battles.get(player.guild.id, []):
+            if battle.is_receiver(player):
                 return False
         return True
 
-    def start_battle(self, player1, player2):
-        battles = self.battles.get(player1.guild.id, [])
-        entry = {
-            'p1': player1.id,
-            'p2': player2.id
-        }
-        battles.append(entry)
-        self.battles[player1.guild.id] = battles
+    def start_battle(self, initiator, receiver):
+        battle = Battle(initiator, receiver)
+        self.battles[initiator.guild.id].append(battle)
+        return battle
 
     # Handles removing the author from the dictionary of battles
-    def battling_off(self, player1=None, player2=None):
-        if player1:
-            guild = player1.guild.id
-        else:
-            guild = player2.guild.id
-        battles = self.battles.get(guild, [])
-        # Create a new list, exactly the way the last one was setup
-        # But don't include the one start with player's ID
-        new_battles = []
-        for b in battles:
-            if player1 and b['p1'] == player1.id:
-                continue
-            if player2 and b['p2'] == player2.id:
-                continue
-            new_battles.append(b)
-        self.battles[guild] = new_battles
+    def battling_off(self, battle):
+        for guild, battles in self.battles.items():
+            if battle in battles:
+                battles.remove(battle)
+                return
 
     @commands.command()
     @commands.guild_only()
@@ -166,7 +133,7 @@ class Interaction:
             await ctx.send("Your arms aren't big enough")
             return
         if user is None:
-            user = ctx.message.author
+            user = ctx.author
         else:
             converter = commands.converter.MemberConverter()
             try:
@@ -175,12 +142,12 @@ class Interaction:
                 await ctx.send("Error: Could not find user: {}".format(user))
                 return
 
-        # Lets get the settings
-        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
-        # Get the custom messages we can use
-        custom_msgs = settings.get('hugs')
-        default_on = settings.get('default_hugs')
-        # if they exist, then we want to see if we want to use default as well
+        settings = await self.bot.db.fetchrow(
+            "SELECT custom_hugs, include_default_hugs FROM guilds WHERE id = $1",
+            ctx.guild.id
+        )
+        custom_msgs = settings["custom_hugs"]
+        default_on = settings["include_default_hugs"]
         if custom_msgs:
             if default_on or default_on is None:
                 msgs = hugs + custom_msgs
@@ -205,7 +172,7 @@ class Interaction:
         # First check if everyone was mentioned
         if ctx.message.mention_everyone:
             await ctx.send("You want to battle {} people? Good luck with that...".format(
-                len(ctx.message.channel.members) - 1)
+                len(ctx.channel.members) - 1)
             )
             return
         # Then check if nothing was provided
@@ -221,7 +188,7 @@ class Interaction:
                 await ctx.send("Error: Could not find user: {}".format(player2))
                 return
         # Then check if the person used is the author
-        if ctx.message.author.id == player2.id:
+        if ctx.author.id == player2.id:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("Why would you want to battle yourself? Suicide is not the answer")
             return
@@ -231,24 +198,24 @@ class Interaction:
             await ctx.send("I always win, don't even try it.")
             return
         # Next two checks are to see if the author or person battled can be battled
-        if not self.can_battle(ctx.message.author):
+        if not self.can_initiate_battle(ctx.author):
             ctx.command.reset_cooldown(ctx)
             await ctx.send("You are already battling someone!")
             return
-        if not self.can_be_battled(player2):
+        if not self.can_receive_battle(player2):
             ctx.command.reset_cooldown(ctx)
             await ctx.send("{} is already being challenged to a battle!".format(player2))
             return
 
         # Add the author and player provided in a new battle
-        self.start_battle(ctx.message.author, player2)
+        battle = self.start_battle(ctx.author, player2)
 
-        fmt = "{0.message.author.mention} has challenged you to a battle {1.mention}\n" \
-              "{0.prefix}accept or {0.prefix}decline"
+        fmt = f"{ctx.author.mention} has challenged you to a battle {player2.mention}\n" \
+              f"{ctx.prefix}accept or {ctx.prefix}decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
-        part = functools.partial(self.battling_off, player1=ctx.message.author)
+        part = functools.partial(self.battling_off, battle)
         self.bot.loop.call_later(180, part)
-        await ctx.send(fmt.format(ctx, player2))
+        await ctx.send(fmt)
 
     @commands.command()
     @commands.guild_only()
@@ -260,23 +227,23 @@ class Interaction:
         RESULT: Hopefully the other person's death"""
         # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle
-        battle = self.get_battle(ctx.message.author)
+        battle = self.get_receivers_battle(ctx.author)
         if battle is None:
             await ctx.send("You are not currently being challenged to a battle!")
             return
 
-        battleP1 = discord.utils.find(lambda m: m.id == battle['p1'], ctx.message.guild.members)
-        if battleP1 is None:
+        if ctx.guild.get_member(battle.initiator.id) is None:
             await ctx.send("The person who challenged you to a battle has apparently left the server....why?")
+            self.battling_off(battle)
             return
 
-        battleP2 = ctx.message.author
-
         # Lets get the settings
-        settings = self.bot.db.load('server_settings', key=ctx.message.guild.id) or {}
-        # Get the custom messages we can use
-        custom_msgs = settings.get('battles')
-        default_on = settings.get('default_battles')
+        settings = await self.bot.db.fetchrow(
+            "SELECT custom_battles, include_default_battles FROM guilds WHERE id = $1",
+            ctx.guild.id
+        )
+        custom_msgs = settings["custom_battles"]
+        default_on = settings["include_default_battles"]
         # if they exist, then we want to see if we want to use default as well
         if custom_msgs:
             if default_on or default_on is None:
@@ -289,46 +256,106 @@ class Interaction:
 
         fmt = random.SystemRandom().choice(msgs)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
-        self.battling_off(player2=ctx.message.author)
-        await self.bot.br.update()
+        self.battling_off(battle)
 
         # Randomize the order of who is printed/sent to the update system
-        if random.SystemRandom().randint(0, 1):
-            winner = battleP1
-            loser = battleP2
+        winner, loser = battle.choose()
+
+        member_list = [m.id for m in ctx.guild.members]
+        query = """
+SELECT id, rank, battle_rating, battle_wins, battle_losses
+FROM
+    (SELECT
+        id,
+        ROW_NUMBER () OVER (ORDER BY battle_rating DESC) as "rank",
+        battle_rating,
+        battle_wins,
+        battle_losses
+    FROM
+        users
+    WHERE
+        id = any($1::bigint[]) AND
+        battle_rating IS NOT NULL
+    ) AS sub
+WHERE id = any($2)
+        """
+        results = await self.bot.db.fetch(query, member_list, [winner.id, loser.id])
+
+        old_winner = old_loser = None
+        for result in results:
+            if result['id'] == loser.id:
+                old_loser = result
+            else:
+                old_winner = result
+
+        winner_rating, loser_rating, = utils.update_rating(
+            old_winner["battle_rating"] if old_winner else 1000,
+            old_loser["battle_rating"] if old_loser else 1000,
+        )
+        print(old_winner, old_loser)
+
+        update_query = """
+UPDATE
+    users
+SET
+    battle_rating = $1,
+    battle_wins = $2,
+    battle_losses = $3
+WHERE
+    id=$4
+"""
+        insert_query = """
+INSERT INTO
+    users (id, battle_rating,  battle_wins, battle_losses)
+VALUES
+    ($1, $2, $3, $4)
+"""
+        if old_loser:
+            await self.bot.db.execute(
+                update_query,
+                loser_rating,
+                old_loser['battle_wins'],
+                old_loser['battle_losses'] + 1,
+                loser.id
+            )
         else:
-            winner = battleP2
-            loser = battleP1
+            await self.bot.db.execute(insert_query, loser.id, loser_rating, 0, 1)
+        if old_winner:
+            await self.bot.db.execute(
+                update_query,
+                winner_rating,
+                old_winner['battle_wins'] + 1,
+                old_winner['battle_losses'] ,
+                winner.id
+            )
+        else:
+            await self.bot.db.execute(insert_query, winner.id, winner_rating, 1, 0)
 
-        msg = await ctx.send(fmt.format(winner=winner.display_name, loser=loser.display_name))
-        old_winner_rank, _ = self.bot.br.get_server_rank(winner)
-        old_loser_rank, _ = self.bot.br.get_server_rank(loser)
+        results = await self.bot.db.fetch(query, member_list, [winner.id, loser.id])
+        print(results)
 
-        # Update our records; this will update our cache
-        await utils.update_records('battle_records', self.bot.db, winner, loser)
-        # Now wait a couple seconds to ensure cache is updated
-        await asyncio.sleep(2)
-        await self.bot.br.update()
+        new_winner_rank = new_loser_rank = None
+        for result in results:
+            if result['id'] == loser.id:
+                new_loser_rank = result['rank']
+            else:
+                new_winner_rank = result['rank']
 
-        # Now get the new ranks after this stuff has been updated
-        new_winner_rank, _ = self.bot.br.get_server_rank(winner)
-        new_loser_rank, _ = self.bot.br.get_server_rank(loser)
-        fmt = msg.content
-        if old_winner_rank:
+        fmt = fmt.format(winner=winner.display_name, loser=loser.display_name)
+        if old_winner:
             fmt += "\n{} - Rank: {} ( +{} )".format(
-                winner.display_name, new_winner_rank, old_winner_rank - new_winner_rank
+                winner.display_name, new_winner_rank, old_winner["rank"] - new_winner_rank
             )
         else:
             fmt += "\n{} - Rank: {}".format(winner.display_name, new_winner_rank)
-        if old_loser_rank:
-            fmt += "\n{} - Rank: {} ( -{} )".format(loser.display_name, new_loser_rank, new_loser_rank - old_loser_rank)
+        if old_winner:
+            fmt += "\n{} - Rank: {} ( -{} )".format(
+                loser.display_name, new_loser_rank, new_loser_rank - old_winner["rank"]
+            )
         else:
             fmt += "\n{} - Rank: {}".format(loser.display_name, new_loser_rank)
 
-        try:
-            await msg.edit(content=fmt)
-        except Exception:
-            pass
+        await ctx.send(fmt)
 
     @commands.command()
     @commands.guild_only()
@@ -340,21 +367,13 @@ class Interaction:
         RESULT: You chicken out"""
         # This is a check to make sure that the author is the one being BATTLED
         # And not the one that started the battle
-        battle = self.get_battle(ctx.message.author)
+        battle = self.get_receivers_battle(ctx.author)
         if battle is None:
             await ctx.send("You are not currently being challenged to a battle!")
             return
 
-        battleP1 = discord.utils.find(lambda m: m.id == battle['p1'], ctx.message.guild.members)
-        if battleP1 is None:
-            await ctx.send("The person who challenged you to a battle has apparently left the server....why?")
-            return
-
-        battleP2 = ctx.message.author
-
-        # There's no need to update the stats for the members if they declined the battle
-        self.battling_off(player2=battleP2)
-        await ctx.send("{} has chickened out! What a loser~".format(battleP2.mention))
+        self.battling_off(battle)
+        await ctx.send("{} has chickened out! What a loser~".format(ctx.author.mention))
 
     @commands.command()
     @commands.guild_only()
@@ -365,7 +384,7 @@ class Interaction:
 
         EXAMPLE: !boop @OtherPerson
         RESULT: You do a boop o3o"""
-        booper = ctx.message.author
+        booper = ctx.author
         if boopee is None:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("You try to boop the air, the air boops back. Be afraid....")
@@ -382,64 +401,40 @@ class Interaction:
             await ctx.send("Why the heck are you booping me? Get away from me >:c")
             return
 
-        key = str(booper.id)
-        boops = self.bot.db.load('boops', key=key, pluck='boops') or {}
-        amount = boops.get(str(boopee.id), 0) + 1
-        entry = {
-            'member_id': str(booper.id),
-            'boops': {
-                str(boopee.id): amount
-            }
-        }
-        await self.bot.db.save('boops', entry)
+        query = "SELECT amount FROM boops WHERE booper = $1 AND boopee = $2"
+        amount = await self.bot.db.fetchrow(query, booper.id, boopee.id)
+        if amount is None:
+            amount = 1
+            replacement_query = "INSERT INTO boops (booper, boopee, amount) VALUES($1, $2, $3)"
+        else:
+            replacement_query = "UPDATE boops SET amount=$3 WHERE booper=$1 AND boopee=$2"
+            amount = amount['amount'] + 1
 
-        fmt = "{0.mention} has just booped {1.mention}{3}! That's {2} times now!"
-        await ctx.send(fmt.format(booper, boopee, amount, message))
+        await ctx.send(f"{booper.mention} has just booped {boopee.mention}{message}! That's {amount} times now!")
+        await self.bot.db.execute(replacement_query, booper.id, boopee.id, amount)
 
 
-# noinspection PyMethodMayBeStatic
-class BattleRankings:
-    def __init__(self, bot):
-        self.db = bot.db
-        self.loop = bot.loop
-        self.ratings = None
+class Battle:
 
-    def build_dict(self, seq, key):
-        return dict((d[key], dict(d, rank=index + 1)) for (index, d) in enumerate(seq[::-1]))
+    def __init__(self, initiator, receiver):
+        self.initiator = initiator
+        self.receiver = receiver
+        self.rand = random.SystemRandom()
 
-    def update_start(self):
-        self.loop.create_task(self.update())
+    def is_initiator(self, player):
+        return player.id == self.initiator.id and player.guild.id == self.initiator.guild.id
 
-    async def update(self):
-        ratings = await self.db.query(r.table('battle_records').order_by('rating'))
+    def is_receiver(self, player):
+        return player.id == self.receiver.id and player.guild.id == self.receiver.guild.id
 
-        # Create a dictionary so that we have something to "get" from easily
-        self.ratings = self.build_dict(ratings, 'member_id')
+    def is_battling(self, player):
+        return self.is_initiator(player) or self.is_receiver(player)
 
-    def get_record(self, member):
-        data = self.ratings.get(str(member.id), {})
-        fmt = "{} - {}".format(data.get('wins'), data.get('losses'))
-        return fmt
-
-    def get_rating(self, member):
-        data = self.ratings.get(str(member.id), {})
-        return data.get('rating')
-
-    def get_rank(self, member):
-        data = self.ratings.get(str(member.id), {})
-        return data.get('rank'), len(self.ratings)
-
-    def get_server_rank(self, member):
-        # Get the id's of all the members to compare to
-        server_ids = [str(m.id) for m in member.guild.members]
-        # Get all the ratings for members in this server
-        ratings = [x for x in self.ratings.values() if x['member_id'] in server_ids]
-        # Since we went from a dictionary to a list, we're no longer sorted, sort this
-        ratings = sorted(ratings, key=lambda x: x['rating'])
-        # Build our dictionary to get correct rankings
-        server_ratings = self.build_dict(ratings, 'member_id')
-        # Return the rank
-        return server_ratings.get(str(member.id), {}).get('rank'), len(server_ratings)
+    def choose(self):
+        """Returns the two users in the order winner, loser"""
+        choices = [self.initiator, self.receiver]
+        self.rand.shuffle(choices)
+        return choices
 
 
 def setup(bot):

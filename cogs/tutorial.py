@@ -26,13 +26,17 @@ class Tutorial:
                     await ctx.send("Could not find a command or a cog for {}".format(cmd_or_cog))
                     return
 
-                commands = [c for c in utils.get_all_commands(self.bot) if c.cog_name == cmd_or_cog.title()]
+                commands = set([
+                    c
+                    for c in self.bot.walk_commands()
+                    if c.cog_name == cmd_or_cog.title()
+                ])
             # Specific command
             else:
                 commands = [cmd]
         # Use all commands
         else:
-            commands = list(utils.get_all_commands(self.bot))
+            commands = set(self.bot.walk_commands())
 
         # Loop through all the commands that we want to use
         for command in commands:
