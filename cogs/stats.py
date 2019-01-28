@@ -188,11 +188,6 @@ LIMIT 1
         members = [m.id for m in ctx.guild.members]
         most = await self.bot.db.fetchrow(query, ctx.author.id, members)
 
-        boops = self.bot.db.load('boops', key=ctx.message.author.id)
-        if boops is None or "boops" not in boops:
-            await ctx.send("You have not booped anyone {} Why the heck not...?".format(ctx.message.author.mention))
-            return
-
         if len(most) == 0:
             await ctx.send(f"You have not booped anyone in this server {ctx.author.mention}")
         else:
