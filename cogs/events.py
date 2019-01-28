@@ -83,12 +83,13 @@ AND
     COALESCE(welcome_alerts, default_alerts) IS NOT NULL
 """
         settings = await self.bot.db.fetchrow(query, member.guild.id)
-        message = settings['msg'] or "Welcome to the '{server}' server {member}!"
-        channel = member.guild.get_channel(settings['channel'])
-        try:
-            await channel.send(message.format(server=member.guild.name, member=member.mention))
-        except (discord.Forbidden, discord.HTTPException, AttributeError):
-            pass
+        if settings:
+            message = settings['msg'] or "Welcome to the '{server}' server {member}!"
+            channel = member.guild.get_channel(settings['channel'])
+            try:
+                await channel.send(message.format(server=member.guild.name, member=member.mention))
+            except (discord.Forbidden, discord.HTTPException, AttributeError):
+                pass
 
     async def on_member_remove(self, member):
         query = """
@@ -105,12 +106,13 @@ AND
     COALESCE(goodbye_alerts, default_alerts) IS NOT NULL
 """
         settings = await self.bot.db.fetchrow(query, member.guild.id)
-        message = settings['msg'] or "{member} has left the server, I hope it wasn't because of something I said :c"
-        channel = member.guild.get_channel(settings['channel'])
-        try:
-            await channel.send(message.format(server=member.guild.name, member=member.mention))
-        except (discord.Forbidden, discord.HTTPException, AttributeError):
-            pass
+        if settings:
+            message = settings['msg'] or "{member} has left the server, I hope it wasn't because of something I said :c"
+            channel = member.guild.get_channel(settings['channel'])
+            try:
+                await channel.send(message.format(server=member.guild.name, member=member.mention))
+            except (discord.Forbidden, discord.HTTPException, AttributeError):
+                pass
 
 
 def setup(bot):
