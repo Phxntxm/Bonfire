@@ -63,7 +63,6 @@ extensions = [
     'cogs.owner',
     'cogs.stats',
     'cogs.picarto',
-    'cogs.overwatch',
     'cogs.links',
     'cogs.roles',
     'cogs.tictactoe',
