@@ -180,7 +180,7 @@ FROM
 WHERE
     booper=$1
 AND
-    boopee IN ($2)
+    boopee = ANY($2)
 ORDER BY
     amount DESC
 LIMIT 1
@@ -219,13 +219,13 @@ FROM
 WHERE
     booper=$1
 AND
-    boopee IN ($2)
+    boopee = ANY($2)
 ORDER BY
     amount DESC
 LIMIT 10
         """
 
-        members = ", ".join(f"{m.id}" for m in ctx.guild.members)
+        members = [m.id for m in ctx.guild.members]
         most = await self.bot.db.fetch(query, ctx.author.id, members)
 
         if len(most) != 0:
