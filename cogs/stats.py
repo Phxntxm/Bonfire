@@ -185,7 +185,7 @@ ORDER BY
     amount DESC
 LIMIT 1
 """
-        members = ", ".join(f"{m.id}" for m in ctx.guild.members)
+        members = [m.id for m in ctx.guild.members]
         most = await self.bot.db.fetchrow(query, ctx.author.id, members)
 
         boops = self.bot.db.load('boops', key=ctx.message.author.id)
