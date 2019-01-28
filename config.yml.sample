@@ -12,3 +12,6 @@ patreon_id: 'id'
 patreon_link: 'link'
 spotify_id: 'id'
 spotify_secret: 'secret'
+
+db_name: 'bonfire'
+db_user: 'bonfire'
