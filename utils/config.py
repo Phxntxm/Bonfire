@@ -97,4 +97,4 @@ db_opts = {'host': db_host, 'database': db_name, 'port': db_port, 'user': db_use
 def command_prefix(bot, message):
     if not message.guild:
         return default_prefix
-    return bot.cache.prefixes.get(message.guild.id, default_prefix)
+    return bot.cache.prefixes.get(message.guild.id) or default_prefix
