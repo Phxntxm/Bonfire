@@ -42,6 +42,8 @@ class GuildConfiguration:
         return await converter.convert(ctx, setting)
 
     async def _set_db_guild_opt(self, opt, setting, ctx):
+        if opt == "prefix":
+            ctx.bot.cache.update_prefix(ctx.guild, setting)
         try:
             return await ctx.bot.db.execute(f"INSERT INTO guilds (id, {opt}) VALUES ($1, $2)", ctx.guild.id, setting)
         except UniqueViolationError:
@@ -157,6 +159,7 @@ WHERE
     id=$2 AND
     NOT $1 = ANY(ignored_channels);
 """
+        ctx.bot.loop.create_task(ctx.cache.load_ignored())
         return await ctx.bot.db.execute(query, channel.id, ctx.guild.id)
 
     async def _handle_set_ignored_members(self, ctx, setting):
@@ -176,6 +179,7 @@ WHERE
     id=$2 AND
     NOT $1 = ANY(ignored_members);
 """
+        ctx.bot.loop.create_task(ctx.cache.load_ignored())
         return await ctx.bot.db.execute(query, setting, ctx.guild.id)
 
     async def _handle_set_rules(self, ctx, setting):

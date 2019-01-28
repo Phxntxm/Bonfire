@@ -146,16 +146,16 @@ class Interaction:
             "SELECT custom_hugs, include_default_hugs FROM guilds WHERE id = $1",
             ctx.guild.id
         )
-        custom_msgs = settings["custom_hugs"]
-        default_on = settings["include_default_hugs"]
-        if custom_msgs:
-            if default_on or default_on is None:
-                msgs = hugs + custom_msgs
-            else:
-                msgs = custom_msgs
+        msgs = hugs
+        if settings:
+            custom_msgs = settings["custom_hugs"]
+            default_on = settings["include_default_hugs"]
+            if custom_msgs:
+                if default_on or default_on is None:
+                    msgs += custom_msgs
+                else:
+                    msgs = custom_msgs
         # Otherwise we simply just want to use the default, no matter what the default setting is
-        else:
-            msgs = hugs
 
         fmt = random.SystemRandom().choice(msgs)
         await ctx.send(fmt.format(user=user.display_name))

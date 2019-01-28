@@ -25,7 +25,10 @@ logging.basicConfig(level=logging.INFO, filename='bonfire.log')
 
 @bot.before_invoke
 async def start_typing(ctx):
-    await ctx.trigger_typing()
+    try:
+        await ctx.trigger_typing()
+    except (discord.Forbidden, discord.HTTPException):
+        pass
 
 
 @bot.event
