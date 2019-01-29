@@ -24,7 +24,7 @@ class Roles:
         EXAMPLE: !colour red
         RESULT: A role that matches red (#e74c3c) will be given to you"""
         result = await ctx.bot.db.fetchrow("SELECT colour_roles FROM guilds WHERE id = $1", ctx.guild.id)
-        if result and result["colour_roles"]:
+        if result and not result["colour_roles"]:
             await ctx.send("Colour roles not allowed on this server! "
                            "The command `allowcolours` must be ran to enable them!")
             return
