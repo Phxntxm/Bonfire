@@ -100,7 +100,7 @@ WHERE
             gone_online = [
                 self.channel_info.get(name)
                 for name in result["followed_picarto_channels"]
-                if self.channel_info.get(name) == "on"
+                if self.channel_info.get(name)["status"] == "on"
             ]
             # If they've gone online, produce the embed for them and send it
             if gone_online:
