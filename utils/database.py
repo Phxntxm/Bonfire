@@ -17,6 +17,9 @@ class Cache:
         self.restrictions = defaultdict(dict)
 
     async def setup(self):
+        # Make sure db is setup first
+        await self.db.setup()
+
         await self.load_prefixes()
         await self.load_custom_permissions()
         await self.load_restrictions()
@@ -34,8 +37,8 @@ WHERE
 """
         rows = await self.db.fetch(query)
         for row in rows:
-            self.ignored[row['guild']]['members'] = row['ignored_members']
-            self.ignored[row['guild']]['channels'] = row['ignored_channels']
+            self.ignored[row['id']]['members'] = row['ignored_members']
+            self.ignored[row['id']]['channels'] = row['ignored_channels']
 
     async def load_prefixes(self):
         query = """
