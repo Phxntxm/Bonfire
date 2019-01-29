@@ -75,11 +75,11 @@ class Picarto:
             await self.bot.wait_until_ready()
             while not self.bot.is_closed():
                 await self.check_channels()
+                await asyncio.sleep(30)
         except Exception as error:
             with open("error_log", 'a') as f:
                 traceback.print_tb(error.__traceback__, file=f)
                 print('{0.__class__.__name__}: {0}'.format(error), file=f)
-        finally:
             await asyncio.sleep(30)
 
     async def check_channels(self):
