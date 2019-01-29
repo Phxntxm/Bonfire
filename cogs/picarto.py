@@ -39,7 +39,7 @@ class Picarto:
         }
         channel_info = {}
         channels = await utils.request(url, payload=payload)
-        if channels:
+        if channels and isinstance(channels, (list, set, tuple)) and len(channels) > 0:
             for channel in channels:
                 name = channel["name"]
                 previous = self.channel_info.get(name)
@@ -57,22 +57,15 @@ class Picarto:
             # After loop has finished successfully, we want to override the statuses of the channels
             self.channel_info = channel_info
 
-    def produce_embed(self, *channels):
-        description = ""
-        # Loop through each channel and produce the information that will go in the description
-        for channel in channels:
-            url = f"https://picarto.tv/{channel.get('name')}"
-            description = f"""{description}\n\n**Title:** [{channel.get("title")}]({url})
-**Channel:** [{channel.get("name")}]({url})
-**Adult:** {"Yes" if channel.get("adult") else "No"}
-**Gaming:** {"Yes" if channel.get("gaming") else "No"}
-**Commissions:** {"Yes" if channel.get("commissions") else "No"}"""
-
-        return discord.Embed(title="Channels that have gone online!", description=description.strip())
-
     async def picarto_task(self):
+        # The first time we setup this task, if we leave an empty dict as channel_info....it will announce anything
+        # So what we want to do here, is get everyone who is online now before starting the actual check
+        # Also wait a little before starting
+        await self.bot.wait_until_ready()
+        await self.get_online_users()
+        await asyncio.sleep(30)
+        # Now that we've done the initial setup, start the actual loop we'll use
         try:
-            await self.bot.wait_until_ready()
             while not self.bot.is_closed():
                 await self.check_channels()
                 await asyncio.sleep(30)
