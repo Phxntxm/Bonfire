@@ -23,7 +23,8 @@ class Roles:
 
         EXAMPLE: !colour red
         RESULT: A role that matches red (#e74c3c) will be given to you"""
-        if not self.bot.db.load('server_settings', key=ctx.guild.id, pluck="colour_roles_allowed"):
+        result = await ctx.bot.db.fetchrow("SELECT colour_roles FROM guilds WHERE id = $1", ctx.guild.id)
+        if result and result["colour_roles"]:
             await ctx.send("Colour roles not allowed on this server! "
                            "The command `allowcolours` must be ran to enable them!")
             return
@@ -392,8 +393,12 @@ class Roles:
             return
 
         author = ctx.message.author
-        key = str(ctx.message.guild.id)
-        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
+        result = await ctx.bot.db.fetchrow("SELECT assignable_roles FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result is None:
+            await ctx.send("There are no self-assignable roles on this server")
+            return
+        self_assignable_roles = result["assignable_roles"]
 
         if len(self_assignable_roles) == 0:
             await ctx.send("There are no self-assignable roles on this server")
@@ -425,8 +430,12 @@ class Roles:
             return
 
         author = ctx.message.author
-        key = str(ctx.message.guild.id)
-        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
+        result = await ctx.bot.db.fetchrow("SELECT assignable_roles FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result is None:
+            await ctx.send("There are no self-assignable roles on this server")
+            return
+        self_assignable_roles = result["assignable_roles"]
 
         if len(self_assignable_roles) == 0:
             await ctx.send("There are no self-assignable roles on this server")
@@ -444,96 +453,6 @@ class Roles:
             await ctx.send(fmt)
         except discord.HTTPException:
             await ctx.send("I cannot remove roles from you {}".format(author.mention))
-
-    @assign.command(name='add')
-    @commands.guild_only()
-    @utils.can_run(manage_roles=True)
-    async def _add_assigns(self, ctx, *role: discord.Role):
-        """Adds the provided role(s) to the list of available self-assignable roles
-
-        EXAMPLE: !assigns Member NSFW
-        RESULT: Allows users to self-assign the roles Member, and NSFW"""
-        roles = [str(r.id) for r in role]
-        key = str(ctx.message.guild.id)
-
-        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
-        self_assignable_roles.extend(roles)
-        self_assignable_roles = list(set(self_assignable_roles))
-        entry = {
-            'server_id': key,
-            'self_assignable_roles': self_assignable_roles
-        }
-
-        await self.bot.db.save('server_settings', entry)
-
-        if len(roles) == 1:
-            fmt = "Successfully added {} as a self-assignable role".format(role[0].name)
-        else:
-            fmt = "Succesfully added the following roles as self-assignable:\n{}".format(
-                "\n".join(["**{}**".format(r.name) for r in role])
-            )
-        await ctx.send(fmt)
-
-    @assign.command(name='list')
-    @commands.guild_only()
-    @utils.can_run(send_messages=True)
-    async def _list_assigns(self, ctx):
-        """Lists the roles that can be self-assigned
-
-        EXAMPLE: !assigns list
-        RESUL: A list of all the self-assignable roles"""
-        key = str(ctx.message.guild.id)
-        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
-        if len(self_assignable_roles) == 0:
-            await ctx.send("There are no self-assignable roles on this server")
-            return
-
-        roles = []
-        for role_id in self_assignable_roles:
-            role = discord.utils.get(ctx.message.guild.roles, id=int(role_id))
-            if role:
-                roles.append(role.name)
-
-        if len(roles) == 0:
-            await ctx.send("There are no self-assignable roles on this server")
-            return
-
-        try:
-            pages = utils.Pages(ctx, entries=roles)
-            await pages.paginate()
-        except utils.CannotPaginate as e:
-            await ctx.send(str(e))
-
-    @assign.command(name='remove', aliases=['delete'])
-    @commands.guild_only()
-    @utils.can_run(manage_roles=True)
-    async def _delete_assigns(self, ctx, *role: discord.Role):
-        """Removes the provided role(s) from the list of available self-assignable roles
-
-        EXAMPLE: !assigns remove Member NSFW
-        RESULT: Removes the ability for users to self-assign the roles Member, and NSFW"""
-        key = str(ctx.message.guild.id)
-        self_assignable_roles = self.bot.db.load('server_settings', key=key, pluck='self_assignable_roles') or []
-        if len(self_assignable_roles) == 0:
-            await ctx.send("There are no self-assignable roles on this server")
-            return
-
-        fmt = ""
-        for r in role:
-            rid = str(r.id)
-            try:
-                self_assignable_roles.remove(rid)
-            except ValueError:
-                fmt += "\n{} is not a self-assignable role".format(r.name)
-            else:
-                fmt += "\n{} is no longer a self-assignable role".format(r.name)
-
-        update = {
-            'self_assignable_roles': self_assignable_roles,
-            'server_id': key
-        }
-        await self.bot.db.save('server_settings', update)
-        await ctx.send(fmt)
 
 
 def setup(bot):
