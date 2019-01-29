@@ -124,5 +124,4 @@ class DB:
             keys += k
             values += f"${num}"
         query = f"INSERT INTO {table} ({keys}) VALUES ({values}) ON CONFLICT DO UPDATE"
-        print(query)
         return await self.execute(query, *data.values())

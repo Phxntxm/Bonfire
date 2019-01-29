@@ -146,7 +146,6 @@ SET
 WHERE
     id IN ({", ".join(f"'{bd}'" for bd in update_bds)})
 """
-        print(query)
         await self.bot.db.execute(query)
 
     @commands.group(aliases=['birthdays'], invoke_without_command=True)

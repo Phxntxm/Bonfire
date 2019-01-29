@@ -291,7 +291,6 @@ WHERE id = any($2)
             old_winner["battle_rating"] if old_winner else 1000,
             old_loser["battle_rating"] if old_loser else 1000,
         )
-        print(old_winner, old_loser)
 
         update_query = """
 UPDATE
@@ -331,7 +330,6 @@ VALUES
             await self.bot.db.execute(insert_query, winner.id, winner_rating, 1, 0)
 
         results = await self.bot.db.fetch(query, member_list, [winner.id, loser.id])
-        print(results)
 
         new_winner_rank = new_loser_rank = None
         for result in results:
