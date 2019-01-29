@@ -242,17 +242,16 @@ class Interaction:
             "SELECT custom_battles, include_default_battles FROM guilds WHERE id = $1",
             ctx.guild.id
         )
-        custom_msgs = settings["custom_battles"]
-        default_on = settings["include_default_battles"]
-        # if they exist, then we want to see if we want to use default as well
-        if custom_msgs:
-            if default_on or default_on is None:
-                msgs = battle_outcomes + custom_msgs
-            else:
-                msgs = custom_msgs
-        # Otherwise we simply just want to use the default, no matter what the default setting is
-        else:
-            msgs = battle_outcomes
+        msgs = battle_outcomes
+        if settings:
+            custom_msgs = settings["custom_battles"]
+            default_on = settings["include_default_battles"]
+            # if they exist, then we want to see if we want to use default as well
+            if custom_msgs:
+                if default_on or default_on is None:
+                    msgs += custom_msgs
+                else:
+                    msgs = custom_msgs
 
         fmt = random.SystemRandom().choice(msgs)
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
