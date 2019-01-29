@@ -158,11 +158,11 @@ WHERE
         RESULT: A printout of the birthdays from everyone on this server"""
         if member:
             date = await self.bot.db.fetchrow("SELECT birthday FROM users WHERE id=$1", member.id)
-            date = date['birthday']
-            if date:
-                await ctx.send(f"{member.display_name}'s birthday is {calendar.month_name[date.month]} {date.day}")
-            else:
+            if date is None or date["birthday"] is None:
                 await ctx.send(f"I do not have {member.display_name}'s birthday saved!")
+            else:
+                date = date['birthday']
+                await ctx.send(f"{member.display_name}'s birthday is {calendar.month_name[date.month]} {date.day}")
         else:
             # Get this server's birthdays
             bds = await self.get_birthdays_for_server(ctx.guild)
