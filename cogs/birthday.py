@@ -127,7 +127,8 @@ AND
             # A list of the id's that will get updated
             for bd in bds:
                 try:
-                    await channel.send(f"It is {bd['member'].mention}'s birthday today! "
+                    member = channel.get.get_member(bd["id"])
+                    await channel.send(f"It is {member.mention}'s birthday today! "
                                        "Wish them a happy birthday! \N{SHORTCAKE}")
                 except (discord.Forbidden, discord.HTTPException):
                     pass
