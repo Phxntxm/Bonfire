@@ -405,9 +405,9 @@ class Roles:
             return
 
         fmt = ""
-        roles = [r for r in role if str(r.id) in self_assignable_roles]
+        roles = [r for r in role if r.id in self_assignable_roles]
         fmt += "\n".join(["Successfully added {}".format(r.name)
-                          if str(r.id) in self_assignable_roles else
+                          if r.id in self_assignable_roles else
                           "{} is not available to be self-assigned".format(r.name)
                           for r in role])
 
