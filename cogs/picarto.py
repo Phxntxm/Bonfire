@@ -42,7 +42,7 @@ class Picarto:
         if channels:
             for channel in channels:
                 name = channel["name"]
-                previous = self.channel_info.get("name")
+                previous = self.channel_info.get(name)
                 # There are three statuses, on, remained, and off
                 # On means they were off previously, but are now online
                 # Remained means they were on previous, and are still on
