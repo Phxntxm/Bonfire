@@ -327,6 +327,8 @@ WHERE
             converter = commands.converter.MemberConverter()
             member = await converter.convert(ctx, setting)
             setting = member.id
+        else:
+            setting = int(setting)
 
         query = """
 UPDATE
@@ -359,6 +361,8 @@ WHERE
             converter = commands.converter.RoleConverter()
             role = await converter.convert(ctx, setting)
             setting = role.id
+        else:
+            setting = int(setting)
 
         query = """
 UPDATE
