@@ -1,9 +1,7 @@
 import asyncio
-import rethinkdb as r
 
 from discord.ext import commands
 import discord
-from . import config
 from . import utilities
 
 loop = asyncio.get_event_loop()
