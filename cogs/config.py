@@ -384,7 +384,7 @@ WHERE
 UPDATE
     guilds
 SET
-    custom_battles = array_remove(custom_battles, rules[$1])
+    custom_battles = array_remove(custom_battles, custom_battles[$1])
 WHERE
     id=$2
 """
@@ -400,7 +400,7 @@ WHERE
 UPDATE
     guilds
 SET
-    custom_hugs = array_remove(custom_hugs, rules[$1])
+    custom_hugs = array_remove(custom_hugs, custom_hugs[$1])
 WHERE
     id=$2
 """
