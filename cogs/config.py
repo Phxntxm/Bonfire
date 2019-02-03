@@ -25,6 +25,7 @@ class MessageFormatError(ConfigException):
         self.keys = keys
 
 
+# noinspection PyMethodMayBeStatic,PyUnusedLocal
 class GuildConfiguration:
     """Handles configuring the different settings that can be used on the bot"""
 
@@ -49,7 +50,150 @@ class GuildConfiguration:
         except UniqueViolationError:
             return await ctx.bot.db.execute(f"UPDATE guilds SET {opt} = $1 WHERE id = $2", setting, ctx.guild.id)
 
+    async def _show_bool_options(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id = $1", ctx.guild.id)
+        return f"`{opt}` are currently {'enabled' if result[opt] else 'disabled'}"
+
+    async def _show_channel_options(self, ctx, opt):
+        """For showing options that rely on a certain channel"""
+        result = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id = $1", ctx.guild.id)
+
+        channel_id = result[opt]
+        if channel_id:
+            channel = ctx.guild.get_channel(channel_id)
+            if channel:
+                return f"Your {opt} alerts channel is currently set to {channel.mention}"
+            else:
+                return "It looks like you used to have a channel set for this," \
+                       "however the channel has since been deleted"
+        else:
+            return f"You do not have a channel set for {opt}"
+
     # These are handles for each setting type
+    # Just the bool ones, they're all handled the exact same way
+    _handle_show_birthday_notifications = _show_bool_options
+    _handle_show_welcome_notifications = _show_bool_options
+    _handle_show_goodbye_notifications = _show_bool_options
+    _handle_show_colour_roles = _show_bool_options
+    _handle_show_include_default_battles = _show_bool_options
+    _handle_show_include_default_hugs = _show_bool_options
+    # The channel ones
+    _handle_show_default_alerts = _show_channel_options
+    _handle_show_welcome_alerts = _show_channel_options
+    _handle_show_goodbye_alerts = _show_channel_options
+    _handle_show_picarto_alerts = _show_channel_options
+    _handle_show_birthday_alerts = _show_channel_options
+    _handle_show_raffle_alerts = _show_channel_options
+
+    async def _handle_show_welcome_msg(self, ctx, setting):
+        result = await ctx.bot.db.fetchrow("SELECT welcome_msg FROM guilds WHERE id = $1", ctx.guild.id)
+        try:
+            msg = result["welcome_msg"].format(server=ctx.guild.name, member=ctx.author.mention)
+            return f"Your current welcome message will appear like this:\n\n"
+        except AttributeError:
+            return "You currently have no welcome message setup"
+
+    async def _handle_show_goodbye_msg(self, ctx, setting):
+        result = await ctx.bot.db.fetchrow("SELECT goodbye_msg FROM guilds WHERE id = $1", ctx.guild.id)
+        try:
+            msg = result["goodbye_msg"].format(server=ctx.guild.name, member=ctx.author.mention)
+            return f"Your current goodbye message will appear like this:\n\n"
+        except AttributeError:
+            return "You currently have no goodbye message setup"
+
+    async def _handle_show_prefix(self, ctx, setting):
+        result = await ctx.bot.db.fetchrow("SELECT prefix FROM guilds WHERE id = $1", ctx.guild.id)
+
+        prefix = result["prefix"]
+        if prefix is not None:
+            return f"Your current prefix is `{prefix}`"
+        else:
+            return "You do not have a custom prefix set, you are using the default prefix"
+
+    async def _handle_show_followed_picarto_channels(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT followed_picarto_channels FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result["followed_picarto_channels"]:
+            try:
+                pages = utils.Pages(ctx, entries=result["followed_picarto_channels"])
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            return "This server is not following any picarto channels"
+
+    async def _handle_show_ignored_channels(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT ignored_channels FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result["ignored_channels"]:
+            try:
+                pages = utils.Pages(ctx, entries=[ch.mention for ch in result["ignored_channels"]])
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            return "This server is not ignoring any channels"
+
+    async def _handle_show_ignored_members(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT ignored_members FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result["ignored_members"]:
+            try:
+                pages = utils.Pages(ctx, entries=[m.display_name for m in result["ignored_members"]])
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            return "This server is not ignoring any members"
+
+    async def _handle_show_rules(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT rules FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result["rules"]:
+            try:
+                pages = utils.Pages(ctx, entries=result["rules"])
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            return "This server has no rules"
+
+    async def _handle_show_assignable_roles(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT assignable_roles FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result["assignable_roles"]:
+            try:
+                pages = utils.Pages(ctx, entries=[m.name for m in result["assignable_roles"]])
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            return "This server has no assignable roles"
+
+    async def _handle_show_custom_battles(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT custom_battles FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result["custom_battles"]:
+            try:
+                pages = utils.Pages(ctx, entries=result["custom_battles"])
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            return "This server has no custom battles"
+
+    async def _handle_show_custom_hugs(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT custom_hugs FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result["custom_hugs"]:
+            try:
+                pages = utils.Pages(ctx, entries=result["custom_hugs"])
+                await pages.paginate()
+            except utils.CannotPaginate as e:
+                await ctx.send(str(e))
+        else:
+            return "This server has no custom hugs"
+
     async def _handle_set_birthday_notifications(self, ctx, setting):
         opt = "birthday_notifications"
         setting = self._str_to_bool(opt, setting)
@@ -416,12 +560,19 @@ WHERE
     async def config(self, ctx, *, opt=None):
         """Handles the configuration of the bot for this server"""
         if opt:
-            setting = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id=$1", ctx.guild.id)
-            if setting and opt in setting:
-                setting = await utils.convert(ctx, str(setting[opt])) or setting[opt]
-
-                await ctx.send(f"{opt} is set to:\n{setting}")
-                return
+            try:
+                coro = getattr(self, f"_handle_show_{opt}")
+            except AttributeError:
+                await ctx.send(f"{opt} is not a valid config option. Use {ctx.prefix}config to list all config options")
+            else:
+                try:
+                    msg = await coro(ctx, opt)
+                except WrongSettingType as exc:
+                    await ctx.send(exc.message)
+                except commands.BadArgument:
+                    pass
+                else:
+                    return await ctx.send(msg)
 
         settings = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id=$1", ctx.guild.id)
 
@@ -542,7 +693,7 @@ Extraneous args provided: {', '.join(k for k in exc.original.args)}
             except commands.BadArgument:
                 pass
             else:
-                await ctx.send(f"{option} has succesfully been set to {setting}")
+                await ctx.invoke(ctx.bot.get_command("config"), opt=option)
 
     @config.command(name="unset", aliases=["remove"])
     @commands.guild_only()
@@ -561,7 +712,7 @@ Extraneous args provided: {', '.join(k for k in exc.original.args)}
             except commands.BadArgument:
                 pass
             else:
-                await ctx.send(f"{option} has succesfully been unset")
+                await ctx.invoke(ctx.bot.get_command("config"), opt=option)
 
 
 def setup(bot):
