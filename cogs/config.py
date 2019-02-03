@@ -377,6 +377,8 @@ WHERE
     async def _handle_remove_custom_battles(self, ctx, setting=None):
         if setting is None or not setting.isdigit():
             raise WrongSettingType("Please provide the number of the custom battle you want to remove")
+        else:
+            setting = int(setting)
 
         query = """
 UPDATE
@@ -391,6 +393,8 @@ WHERE
     async def _handle_remove_custom_hugs(self, ctx, setting=None):
         if setting is None or not setting.isdigit():
             raise WrongSettingType("Please provide the number of the custom hug you want to remove")
+        else:
+            setting = int(setting)
 
         query = """
 UPDATE
