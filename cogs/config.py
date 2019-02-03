@@ -127,7 +127,12 @@ class GuildConfiguration:
 
         if result["ignored_channels"]:
             try:
-                pages = utils.Pages(ctx, entries=[ch.mention for ch in result["ignored_channels"]])
+                entries = [
+                    ctx.guild.get_channel(ch).mention
+                    for ch in result["ignored_members"]
+                    if ctx.guild.get_channel(ch) is not None
+                ]
+                pages = utils.Pages(ctx, entries=entries)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
@@ -139,7 +144,12 @@ class GuildConfiguration:
 
         if result["ignored_members"]:
             try:
-                pages = utils.Pages(ctx, entries=[m.display_name for m in result["ignored_members"]])
+                entries = [
+                    ctx.guild.get_member(m).display_name
+                    for m in result["ignored_members"]
+                    if ctx.guild.get_member(m) is not None
+                ]
+                pages = utils.Pages(ctx, entries=entries)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
@@ -163,7 +173,12 @@ class GuildConfiguration:
 
         if result["assignable_roles"]:
             try:
-                pages = utils.Pages(ctx, entries=[m.name for m in result["assignable_roles"]])
+                entries = [
+                    ctx.guild.get_role(r).name
+                    for r in result["assignable_roles"]
+                    if ctx.guild.get_role(r) is not None
+                ]
+                pages = utils.Pages(ctx, entries=entries)
                 await pages.paginate()
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
