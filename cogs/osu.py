@@ -46,6 +46,8 @@ class Osu:
 
     async def get_users(self):
         """A task used to 'cache' all member's and their Osu profile's"""
+        await self.bot.wait_until_ready()
+
         query = "SELECT id, osu FROM users WHERE osu IS NOT NULL;"
         rows = await self.bot.db.fetch(query)
 
