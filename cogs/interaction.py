@@ -146,7 +146,7 @@ class Interaction:
             "SELECT custom_hugs, include_default_hugs FROM guilds WHERE id = $1",
             ctx.guild.id
         )
-        msgs = hugs
+        msgs = hugs.copy()
         if settings:
             custom_msgs = settings["custom_hugs"]
             default_on = settings["include_default_hugs"]
