@@ -173,7 +173,7 @@ class Owner:
                 ret = await func()
         except Exception:
             value = stdout.getvalue()
-            await ctx.send('```py\n{}{}\n```'.format(value, traceback.format_exc()))
+            await ctx.send(f"```py\n{value}{traceback.format_exc()}\n```"[:2000])
         else:
             value = stdout.getvalue()
             try:
@@ -181,15 +181,12 @@ class Owner:
             except Exception:
                 pass
 
-            try:
-                if ret is None:
-                    if value:
-                        await ctx.send('```py\n%s\n```' % value)
-                else:
-                    self._last_result = ret
-                    await ctx.send('```py\n%s%s\n```' % (value, ret))
-            except discord.HTTPException:
-                await ctx.send("Content too large for me to print!")
+            if ret is None:
+                if value:
+                    await ctx.send(f"```py\n{value}\n```"[:2000])
+            else:
+                self._last_result = ret
+                await ctx.send(f"```py\n{value}{ret}\n```"[:2000])
 
     @commands.command()
     async def bash(self, ctx, *, cmd: str):
