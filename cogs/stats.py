@@ -37,8 +37,10 @@ LIMIT 5
         value = "\n".join(f"{command} ({uses} uses)" for command, uses in results or "No Commands")
         embed.add_field(name='Top Commands', value=value)
 
+        return embed
+
     async def _get_member_usage(self, member):
-        embed = discord.Embed(title=f"{member.display_name} command usage")
+        embed = discord.Embed(title=f"{member.display_name}'s command usage")
         count = await self.bot.db.fetchrow(
             "SELECT COUNT(*), MIN(executed) FROM command_usage WHERE author=$1",
             member.id
