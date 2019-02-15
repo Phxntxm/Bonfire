@@ -323,7 +323,7 @@ VALUES
                 update_query,
                 winner_rating,
                 old_winner['battle_wins'] + 1,
-                old_winner['battle_losses'] ,
+                old_winner['battle_losses'],
                 winner.id
             )
         else:
