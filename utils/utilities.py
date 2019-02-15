@@ -128,22 +128,26 @@ async def update_records(key, db, winner, loser):
     wins = f"{key}_wins"
     losses = f"{key}_losses"
     key = f"{key}_rating"
-    query = """
-SELECT
-    id, $1, $2, $3
-FROM
-    users
-WHERE
-    id = any($4::bigint[])
-"""
-    results = await db.fetch(key, wins, losses, [winner.id, loser.id])
+    winner_found = False
+    loser_found = False
+    query = f"SELECT id, {key}, {wins}, {losses} FROM users WHERE id = any($1::bigint[])"
+    results = await db.fetch(query, [winner.id, loser.id])
 
+    # Set our defaults for the stats
     winner_rating = loser_rating = 1000
+    winner_wins = loser_wins = 0
+    winner_losses = loser_losses = 0
     for result in results:
         if result['id'] == winner.id:
+            winner_found = True
             winner_rating = result[key]
+            winner_wins = result[wins]
+            winner_losses = result[losses]
         else:
+            loser_found = True
             loser_rating = result[key]
+            loser_wins = result[wins]
+            loser_losses = result[losses]
 
     # The scale is based off of increments of 25, increasing the change by 1 for each increment
     # That is all this loop does, increment the "change" for every increment of 25
@@ -165,17 +169,19 @@ WHERE
         winner_rating += 16 + rating_change
         loser_rating -= 16 + rating_change
 
-    # Just increase wins/losses for each person, making sure it's at least 0
-    winner_wins = winner_stats.get('wins', 0)
-    winner_losses = winner_stats.get('losses', 0)
-    loser_wins = loser_stats.get('wins', 0)
-    loser_losses = loser_stats.get('losses', 0)
+    # Just increase wins/losses for each person
     winner_wins += 1
     loser_losses += 1
 
-    # Now save the new wins, losses, and ratings
-    winner_stats = {'wins': winner_wins, 'losses': winner_losses, 'rating': winner_rating, 'member_id': str(winner.id)}
-    loser_stats = {'wins': loser_wins, 'losses': loser_losses, 'rating': loser_rating, 'member_id': str(loser.id)}
+    update_query = f"UPDATE users SET {key}=$1, {wins}=$2, {losses}=$3 WHERE id = $4"
+    create_query = f"INSERT INTO users ({key}, {wins}, {losses}, id) VALUES ($1, $2, $3, $4)"
+    if winner_found:
+        await db.execute(update_query, winner_rating, winner_wins, winner_losses, winner.id)
+    else:
+        await db.execute(create_query, winner_rating, winner_wins, winner_losses, winner.id)
+    if loser_found:
+        await db.execute(update_query, loser_rating, loser_wins, loser_losses, loser.id)
+    else:
+        await db.execute(create_query, loser_rating, loser_wins, loser_losses, loser.id)
 
-    await db.save(key, winner_stats)
-    await db.save(key, loser_stats)
+

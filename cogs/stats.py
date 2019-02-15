@@ -1,9 +1,9 @@
-import discord
-from discord.ext import commands
-
-import utils
-
 import re
+import utils
+import discord
+import datetime
+
+from discord.ext import commands
 
 
 class Stats:
@@ -11,6 +11,61 @@ class Stats:
 
     def __init__(self, bot):
         self.bot = bot
+
+    async def _get_guild_usage(self, guild):
+        embed = discord.Embed(title="Server Command Usage")
+        count = await self.bot.db.fetchrow("SELECT COUNT(*), MIN(executed) FROM command_usage WHERE guild=$1", guild.id)
+
+        embed.description = f"{count[0]} total commands used"
+        embed.set_footer(text='Tracking command usage since').timestamp = count[1] or datetime.datetime.utcnow()
+
+        query = """
+SELECT
+    command, COUNT(*) as uses
+FROM
+    command_usage
+WHERE
+    guild = $1
+GROUP BY
+    command
+ORDER BY
+    "uses" DESC
+LIMIT 5
+        """
+
+        results = await self.bot.db.fetch(query, guild.id)
+        value = "\n".join(f"{command} ({uses} uses)" for command, uses in results or "No Commands")
+        embed.add_field(name='Top Commands', value=value)
+
+    async def _get_member_usage(self, member):
+        embed = discord.Embed(title=f"{member.display_name} command usage")
+        count = await self.bot.db.fetchrow(
+            "SELECT COUNT(*), MIN(executed) FROM command_usage WHERE author=$1",
+            member.id
+        )
+
+        embed.description = f"{count[0]} total commands used"
+        embed.set_footer(text='Tracking command usage since').timestamp = count[1] or datetime.datetime.utcnow()
+
+        query = """
+SELECT
+    command, COUNT(*) as uses
+FROM
+    command_usage
+WHERE
+    author = $1
+GROUP BY
+    command
+ORDER BY
+    "uses" DESC
+LIMIT 5
+        """
+
+        results = await self.bot.db.fetch(query, member.id)
+        value = "\n".join(f"{command} ({uses} uses)" for command, uses in results or "No Commands")
+        embed.add_field(name='Top Commands', value=value)
+
+        return embed
 
     @commands.command()
     @commands.guild_only()
@@ -87,82 +142,16 @@ class Stats:
     @command.command(name="stats")
     @commands.guild_only()
     @utils.can_run(send_messages=True)
-    async def command_stats(self, ctx, *, command):
-        """This command can be used to view some usage stats about a specific command
+    async def command_stats(self, ctx, *, member: discord.Member = None):
+        """This command can be used to view some usage stats about commands from either a user, or the server. Provide
+        a member if you want to view their usage, provide no one and the server's usage will be looked up"""
 
-        EXAMPLE: !command stats play
-        RESULT: The realization that this is the only reason people use me ;-;"""
-        cmd = self.bot.get_command(command)
-        if cmd is None:
-            await ctx.send("`{}` is not a valid command".format(command))
-            return
-
-        command_stats = self.bot.db.load('command_usage', key=cmd.qualified_name)
-        if command_stats is None:
-            await ctx.send("That command has never been used! You know I worked hard on that! :c")
-            return
-
-        total_usage = command_stats['total_usage']
-        member_usage = command_stats['member_usage'].get(str(ctx.message.author.id), 0)
-        server_usage = command_stats['server_usage'].get(str(ctx.message.guild.id), 0)
-
-        embed = discord.Embed(title="Usage stats for {}".format(cmd.qualified_name))
-        embed.add_field(name="Total usage", value=total_usage, inline=False)
-        embed.add_field(name="Your usage", value=member_usage, inline=False)
-        embed.add_field(name="This server's usage", value=server_usage, inline=False)
+        if member is None:
+            embed = await self._get_guild_usage(ctx.guild)
+        else:
+            embed = await self._get_member_usage(member)
 
         await ctx.send(embed=embed)
-
-    @command.command(name="leaderboard")
-    @utils.can_run(send_messages=True)
-    async def command_leaderboard(self, ctx, option="server"):
-        """This command can be used to print a leaderboard of commands
-        Provide 'server' to print a leaderboard for this server
-        Provide 'me' to print a leaderboard for your own usage
-
-        EXAMPLE: !command leaderboard me
-        RESULT: The realization of how little of a life you have"""
-        if re.search('(author|me)', option):
-            mid = str(ctx.message.author.id)
-            # First lets get all the command usage
-            command_stats = self.bot.db.load('command_usage')
-            # Now use a dictionary comprehension to get just the command name, and usage
-            # Based on the author's usage of the command
-
-            stats = {
-                command: data["member_usage"].get(mid)
-                for command, data in command_stats.items()
-                if data["member_usage"].get(mid, 0) > 0
-            }
-            # Now sort it by the amount of times used
-            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)[:5]
-            embed = discord.Embed(title="Your top 5 commands", colour=ctx.author.colour)
-            embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
-
-            for cmd, amount in sorted_stats:
-                embed.add_field(name=cmd, value=amount, inline=False)
-
-            await ctx.send(embed=embed)
-        elif re.search('server', option):
-            # This is exactly the same as above, except server usage instead of member usage
-            sid = str(ctx.message.guild.id)
-            command_stats = self.bot.db.load('command_usage')
-            stats = {
-                command: data['server_usage'].get(sid)
-                for command, data in command_stats.items()
-                if data.get("server_usage", {}).get(sid, 0) > 0
-            }
-            sorted_stats = sorted(stats.items(), key=lambda x: x[1], reverse=True)[:5]
-            embed = discord.Embed(title="The server's top 5 commands")
-            embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
-
-            for cmd, amount in sorted_stats:
-                embed.add_field(name=cmd, value=amount, inline=False)
-
-            await ctx.send(embed=embed)
-
-        else:
-            await ctx.send("That is not a valid option, valid options are: `server` or `me`")
 
     @commands.command()
     @commands.guild_only()
@@ -188,7 +177,7 @@ LIMIT 1
         members = [m.id for m in ctx.guild.members]
         most = await self.bot.db.fetchrow(query, ctx.author.id, members)
 
-        if len(most) == 0:
+        if most is None or len(most) == 0:
             await ctx.send(f"You have not booped anyone in this server {ctx.author.mention}")
         else:
             member = ctx.guild.get_member(most['boopee'])
@@ -280,16 +269,35 @@ ORDER BY
         RESULT: How good they are at winning a completely luck based game"""
         member = member or ctx.message.author
         # Get the different data that we'll display
-        server_rank = "{}/{}".format(*self.bot.br.get_server_rank(member))
-        overall_rank = "{}/{}".format(*self.bot.br.get_rank(member))
-        rating = self.bot.br.get_rating(member)
-        record = self.bot.br.get_record(member)
+        query = """
+SELECT id, rank, battle_rating, battle_wins, battle_losses
+FROM
+    (SELECT
+        id,
+        ROW_NUMBER () OVER (ORDER BY battle_rating DESC) as "rank",
+        battle_rating,
+        battle_wins,
+        battle_losses
+    FROM
+        users
+    WHERE
+        id = any($1::bigint[]) AND
+        battle_rating IS NOT NULL
+    ) AS sub
+WHERE id = $2
+        """
+        member_list = [m.id for m in ctx.guild.members]
+        result = await ctx.bot.db.fetch(query, member_list, member.id)
+        server_rank = result["rank"]
+        # overall_rank = "{}/{}".format(*self.bot.br.get_rank(member))
+        rating = result["battle_rating"]
+        record = f"{result['battle_wins']} - {result['battle_losses']}"
 
         embed = discord.Embed(title="Battling stats for {}".format(ctx.author.display_name), colour=ctx.author.colour)
         embed.set_author(name=str(member), icon_url=member.avatar_url)
         embed.add_field(name="Record", value=record, inline=False)
         embed.add_field(name="Server Rank", value=server_rank, inline=False)
-        embed.add_field(name="Overall Rank", value=overall_rank, inline=False)
+        # embed.add_field(name="Overall Rank", value=overall_rank, inline=False)
         embed.add_field(name="Rating", value=rating, inline=False)
 
         await ctx.send(embed=embed)
