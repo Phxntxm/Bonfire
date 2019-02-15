@@ -195,7 +195,12 @@ WHERE
             await ctx.send("Please provide date in a valid format, such as December 1st!")
             return
 
-        date = parse_string(date)
+        try:
+            date = parse_string(date)
+        except ValueError:
+            await ctx.send("Please provide date in a valid format, such as December 1st!")
+            return
+
         if date is None:
             await ctx.send("Please provide date in a valid format, such as December 1st!")
             return
