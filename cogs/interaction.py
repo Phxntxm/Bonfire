@@ -257,7 +257,7 @@ class Interaction:
         # Due to our previous checks, the ID should only be in the dictionary once, in the current battle we're checking
         self.battling_off(battle)
 
-        # Randomize the order of who is printed/sent to the update system
+        # Randomize the winner/loser
         winner, loser = battle.choose()
 
         member_list = [m.id for m in ctx.guild.members]
@@ -347,7 +347,7 @@ VALUES
             fmt += "\n{} - Rank: {}".format(winner.display_name, new_winner_rank)
         if old_winner:
             fmt += "\n{} - Rank: {} ( -{} )".format(
-                loser.display_name, new_loser_rank, new_loser_rank - old_winner["rank"]
+                loser.display_name, new_loser_rank, new_loser_rank - old_loser["rank"]
             )
         else:
             fmt += "\n{} - Rank: {}".format(loser.display_name, new_loser_rank)
