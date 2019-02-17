@@ -219,6 +219,8 @@ class GuildConfiguration:
                 return "You had a role set, but I can't find it...it's most likely been deleted afterwords!"
             else:
                 return f"When people join I will give them the role {role.name}"
+        else:
+            return "You have no join_role setting for when people join this server"
 
     async def _handle_set_birthday_notifications(self, ctx, setting):
         opt = "birthday_notifications"
