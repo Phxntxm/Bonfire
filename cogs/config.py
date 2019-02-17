@@ -52,12 +52,13 @@ class GuildConfiguration:
 
     async def _show_bool_options(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id = $1", ctx.guild.id)
-        return f"`{opt}` are currently {'enabled' if result[opt] else 'disabled'}"
+        return f"`{opt}` are currently {'enabled' if result is not None and result[opt] else 'disabled'}"
 
     async def _show_channel_options(self, ctx, opt):
         """For showing options that rely on a certain channel"""
         result = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id = $1", ctx.guild.id)
-
+        if result is None:
+            return f"You do not have a channel set for {opt}"
         channel_id = result[opt]
         if channel_id:
             channel = ctx.guild.get_channel(channel_id)
@@ -90,7 +91,7 @@ class GuildConfiguration:
         try:
             msg = result["welcome_msg"].format(server=ctx.guild.name, member=ctx.author.mention)
             return f"Your current welcome message will appear like this:\n\n"
-        except AttributeError:
+        except (AttributeError, TypeError):
             return "You currently have no welcome message setup"
 
     async def _handle_show_goodbye_msg(self, ctx, setting):
@@ -98,14 +99,14 @@ class GuildConfiguration:
         try:
             msg = result["goodbye_msg"].format(server=ctx.guild.name, member=ctx.author.mention)
             return f"Your current goodbye message will appear like this:\n\n"
-        except AttributeError:
+        except (AttributeError, TypeError):
             return "You currently have no goodbye message setup"
 
     async def _handle_show_prefix(self, ctx, setting):
         result = await ctx.bot.db.fetchrow("SELECT prefix FROM guilds WHERE id = $1", ctx.guild.id)
 
         prefix = result["prefix"]
-        if prefix is not None:
+        if result and prefix is not None:
             return f"Your current prefix is `{prefix}`"
         else:
             return "You do not have a custom prefix set, you are using the default prefix"
@@ -113,7 +114,7 @@ class GuildConfiguration:
     async def _handle_show_followed_picarto_channels(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT followed_picarto_channels FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result["followed_picarto_channels"]:
+        if result and result["followed_picarto_channels"]:
             try:
                 pages = utils.Pages(ctx, entries=result["followed_picarto_channels"])
                 await pages.paginate()
@@ -125,7 +126,7 @@ class GuildConfiguration:
     async def _handle_show_ignored_channels(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT ignored_channels FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result["ignored_channels"]:
+        if result and result["ignored_channels"]:
             try:
                 entries = [
                     ctx.guild.get_channel(ch).mention
@@ -142,7 +143,7 @@ class GuildConfiguration:
     async def _handle_show_ignored_members(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT ignored_members FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result["ignored_members"]:
+        if result and result["ignored_members"]:
             try:
                 entries = [
                     ctx.guild.get_member(m).display_name
@@ -159,7 +160,7 @@ class GuildConfiguration:
     async def _handle_show_rules(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT rules FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result["rules"]:
+        if result and result["rules"]:
             try:
                 pages = utils.Pages(ctx, entries=result["rules"])
                 await pages.paginate()
@@ -171,7 +172,7 @@ class GuildConfiguration:
     async def _handle_show_assignable_roles(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT assignable_roles FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result["assignable_roles"]:
+        if result and result["assignable_roles"]:
             try:
                 entries = [
                     ctx.guild.get_role(r).name
@@ -188,7 +189,7 @@ class GuildConfiguration:
     async def _handle_show_custom_battles(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT custom_battles FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result["custom_battles"]:
+        if result and result["custom_battles"]:
             try:
                 pages = utils.Pages(ctx, entries=result["custom_battles"])
                 await pages.paginate()
@@ -200,7 +201,7 @@ class GuildConfiguration:
     async def _handle_show_custom_hugs(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT custom_hugs FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result["custom_hugs"]:
+        if result and result["custom_hugs"]:
             try:
                 pages = utils.Pages(ctx, entries=result["custom_hugs"])
                 await pages.paginate()
@@ -212,7 +213,7 @@ class GuildConfiguration:
     async def _handle_show_join_role(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT join_role FROM guilds WHERE id = $1", ctx.guild.id)
 
-        if result['join_role']:
+        if result and result['join_role']:
             role = ctx.bot.get_role(result['join_role'])
             if role is None:
                 return "You had a role set, but I can't find it...it's most likely been deleted afterwords!"
