@@ -211,7 +211,7 @@ class Tags:
         """Shows some information a bout the tag given"""
 
         tag = await self.bot.db.fetchrow(
-            "SELECT creator, uses, trigger FROM tags WHERE guild=$1 AND trigger=$3",
+            "SELECT creator, uses, trigger FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
             trigger
         )
@@ -224,7 +224,6 @@ class Tags:
         embed.add_field(name="Owner", value=creator.mention)
 
         await ctx.send(embed=embed)
-
 
 
 def setup(bot):
