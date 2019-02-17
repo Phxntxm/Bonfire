@@ -727,7 +727,10 @@ WHERE
             await ctx.send(f"{option} is not a valid config option. Use {ctx.prefix}config to list all config options")
         else:
             # First make sure there's an entry for this guild before doing anything
-            await ctx.bot.db.execute("INSERT INTO guilds(id) VALUES ($1)", ctx.guild.id)
+            try:
+                await ctx.bot.db.execute("INSERT INTO guilds(id) VALUES ($1)", ctx.guild.id)
+            except UniqueViolationError:
+                pass
 
             try:
                 await coro(ctx, setting=setting)
