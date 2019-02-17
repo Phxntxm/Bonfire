@@ -209,6 +209,16 @@ class GuildConfiguration:
         else:
             return "This server has no custom hugs"
 
+    async def _handle_show_join_role(self, ctx, opt):
+        result = await ctx.bot.db.fetchrow("SELECT join_role FROM guilds WHERE id = $1", ctx.guild.id)
+
+        if result['join_role']:
+            role = ctx.bot.get_role(result['join_role'])
+            if role is None:
+                return "You had a role set, but I can't find it...it's most likely been deleted afterwords!"
+            else:
+                return f"When people join I will give them the role {role.name}"
+
     async def _handle_set_birthday_notifications(self, ctx, setting):
         opt = "birthday_notifications"
         setting = self._str_to_bool(opt, setting)
@@ -402,6 +412,21 @@ WHERE
 """
         return await ctx.bot.db.execute(query, setting, ctx.guild.id)
 
+    async def _handle_set_join_role(self, ctx, setting):
+        converter = commands.converter.RoleConverter()
+        role = await converter.convert(ctx, setting)
+
+        query = """
+UPDATE
+    guilds
+SET
+    join_role = $1
+where
+    ID=$2
+"""
+
+        return await ctx.bot.db.execute(query, role.id, ctx.guild.id)
+
     async def _handle_remove_birthday_notifications(self, ctx, setting=None):
         return await self._set_db_guild_opt("birthday_notifications", False, ctx)
 
@@ -446,6 +471,9 @@ WHERE
 
     async def _handle_remove_raffle_alerts(self, ctx, setting=None):
         return await self._set_db_guild_opt("raffle_alerts", None, ctx)
+
+    async def _handle_remove_join_role(self, ctx, setting=None):
+        return await self._set_db_guild_opt("join_role", None, ctx)
 
     async def _handle_remove_followed_picarto_channels(self, ctx, setting=None):
         if setting is None:
