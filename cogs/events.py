@@ -73,25 +73,25 @@ class StatsUpdate:
 SELECT
     COALESCE(welcome_alerts, default_alerts) AS channel,
     welcome_msg AS msg,
-    join_role as role
+    join_role as role,
+    welcome_notifications as notify
 FROM
     guilds
 WHERE
-    welcome_notifications = True
-AND
     id = $1
 """
         settings = await self.bot.db.fetchrow(query, member.guild.id)
         if settings:
             message = settings['msg'] or "Welcome to the '{server}' server {member}!"
-            try:
-                channel = member.guild.get_channel(settings['channel'])
-                await channel.send(message.format(server=member.guild.name, member=member.mention))
-                # Forbidden for if the channel has send messages perms off
-                # HTTP Exception to catch any weird happenings
-                # Attribute Error catches when a channel is set, but that channel doesn't exist any more
-            except (discord.Forbidden, discord.HTTPException, AttributeError):
-                pass
+            if settings["notify"]:
+                try:
+                    channel = member.guild.get_channel(settings['channel'])
+                    await channel.send(message.format(server=member.guild.name, member=member.mention))
+                    # Forbidden for if the channel has send messages perms off
+                    # HTTP Exception to catch any weird happenings
+                    # Attribute Error catches when a channel is set, but that channel doesn't exist any more
+                except (discord.Forbidden, discord.HTTPException, AttributeError):
+                    pass
 
             try:
                 role = member.guild.get_role(settings['role'])
@@ -107,7 +107,7 @@ SELECT
 FROM
     guilds
 WHERE
-    welcome_notifications = True
+    goodbye_notifications = True
 AND
     id = $1
 AND
