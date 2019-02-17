@@ -216,14 +216,17 @@ class Tags:
             trigger
         )
 
-        embed = discord.Embed(title=tag['trigger'])
-        creator = ctx.guild.get_member(tag['creator'])
-        if creator:
-            embed.set_author(name=creator.display_name, url=creator.avatar_url)
-        embed.add_field(name="Uses", value=tag['uses'])
-        embed.add_field(name="Owner", value=creator.mention)
+        if tag is not None:
+            embed = discord.Embed(title=tag['trigger'])
+            creator = ctx.guild.get_member(tag['creator'])
+            if creator:
+                embed.set_author(name=creator.display_name, url=creator.avatar_url)
+            embed.add_field(name="Uses", value=tag['uses'])
+            embed.add_field(name="Owner", value=creator.mention)
 
-        await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(f"I cannot find a tag named '{trigger}'")
 
 
 def setup(bot):
