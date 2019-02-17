@@ -214,7 +214,7 @@ class GuildConfiguration:
         result = await ctx.bot.db.fetchrow("SELECT join_role FROM guilds WHERE id = $1", ctx.guild.id)
 
         if result and result['join_role']:
-            role = ctx.bot.get_role(result['join_role'])
+            role = ctx.guild.get_role(result['join_role'])
             if role is None:
                 return "You had a role set, but I can't find it...it's most likely been deleted afterwords!"
             else:
