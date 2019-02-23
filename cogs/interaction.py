@@ -85,12 +85,10 @@ hugs = \
      "*approaches {user} after having gone to the gym for several months and almost crushes them.*"]
 
 
-class Interaction:
+class Interaction(commands.Cog):
     """Commands that interact with another user"""
 
-    def __init__(self, bot):
-        self.bot = bot
-        self.battles = defaultdict(list)
+    battles = defaultdict(list)
 
     def get_receivers_battle(self, receiver):
         for battle in self.battles.get(receiver.guild.id, []):
@@ -142,7 +140,7 @@ class Interaction:
                 await ctx.send("Error: Could not find user: {}".format(user))
                 return
 
-        settings = await self.bot.db.fetchrow(
+        settings = await ctx.bot.db.fetchrow(
             "SELECT custom_hugs, include_default_hugs FROM guilds WHERE id = $1",
             ctx.guild.id
         )
@@ -193,7 +191,7 @@ class Interaction:
             await ctx.send("Why would you want to battle yourself? Suicide is not the answer")
             return
         # Check if the person battled is me
-        if self.bot.user.id == player2.id:
+        if ctx.bot.user.id == player2.id:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("I always win, don't even try it.")
             return
@@ -214,7 +212,7 @@ class Interaction:
               f"{ctx.prefix}accept or {ctx.prefix}decline"
         # Add a call to turn off battling, if the battle is not accepted/declined in 3 minutes
         part = functools.partial(self.battling_off, battle)
-        self.bot.loop.call_later(180, part)
+        ctx.bot.loop.call_later(180, part)
         await ctx.send(fmt)
 
     @commands.command()
@@ -238,7 +236,7 @@ class Interaction:
             return
 
         # Lets get the settings
-        settings = await self.bot.db.fetchrow(
+        settings = await ctx.bot.db.fetchrow(
             "SELECT custom_battles, include_default_battles FROM guilds WHERE id = $1",
             ctx.guild.id
         )
@@ -278,7 +276,7 @@ FROM
     ) AS sub
 WHERE id = any($2)
         """
-        results = await self.bot.db.fetch(query, member_list, [winner.id, loser.id])
+        results = await ctx.bot.db.fetch(query, member_list, [winner.id, loser.id])
 
         old_winner = old_loser = None
         for result in results:
@@ -309,7 +307,7 @@ VALUES
     ($1, $2, $3, $4)
 """
         if old_loser:
-            await self.bot.db.execute(
+            await ctx.bot.db.execute(
                 update_query,
                 loser_rating,
                 old_loser['battle_wins'],
@@ -317,9 +315,9 @@ VALUES
                 loser.id
             )
         else:
-            await self.bot.db.execute(insert_query, loser.id, loser_rating, 0, 1)
+            await ctx.bot.db.execute(insert_query, loser.id, loser_rating, 0, 1)
         if old_winner:
-            await self.bot.db.execute(
+            await ctx.bot.db.execute(
                 update_query,
                 winner_rating,
                 old_winner['battle_wins'] + 1,
@@ -327,9 +325,9 @@ VALUES
                 winner.id
             )
         else:
-            await self.bot.db.execute(insert_query, winner.id, winner_rating, 1, 0)
+            await ctx.bot.db.execute(insert_query, winner.id, winner_rating, 1, 0)
 
-        results = await self.bot.db.fetch(query, member_list, [winner.id, loser.id])
+        results = await ctx.bot.db.fetch(query, member_list, [winner.id, loser.id])
 
         new_winner_rank = new_loser_rank = None
         for result in results:
@@ -393,13 +391,13 @@ VALUES
             ctx.command.reset_cooldown(ctx)
             await ctx.send("You can't boop yourself! Silly...")
             return
-        if boopee.id == self.bot.user.id:
+        if boopee.id == ctx.bot.user.id:
             ctx.command.reset_cooldown(ctx)
             await ctx.send("Why the heck are you booping me? Get away from me >:c")
             return
 
         query = "SELECT amount FROM boops WHERE booper = $1 AND boopee = $2"
-        amount = await self.bot.db.fetchrow(query, booper.id, boopee.id)
+        amount = await ctx.bot.db.fetchrow(query, booper.id, boopee.id)
         if amount is None:
             amount = 1
             replacement_query = "INSERT INTO boops (booper, boopee, amount) VALUES($1, $2, $3)"
@@ -408,7 +406,7 @@ VALUES
             amount = amount['amount'] + 1
 
         await ctx.send(f"{booper.mention} has just booped {boopee.mention}{message}! That's {amount} times now!")
-        await self.bot.db.execute(replacement_query, booper.id, boopee.id, amount)
+        await ctx.bot.db.execute(replacement_query, booper.id, boopee.id, amount)
 
 
 class Battle:

@@ -10,7 +10,7 @@ BASE_URL = 'https://osu.ppy.sh/api/'
 MAX_RETRIES = 5
 
 
-class Osu:
+class Osu(commands.Cog):
     """View OSU stats"""
 
     def __init__(self, bot):
@@ -107,7 +107,7 @@ class Osu:
             "id": author.id,
             "osu": user.username
         }
-        await self.bot.db.upsert("users", update)
+        await ctx.bot.db.upsert("users", update)
 
     @osu.command(name='score', aliases=['scores'])
     @utils.can_run(send_messages=True)
@@ -180,7 +180,7 @@ class Osu:
 
             entries.append(entry)
         try:
-            pages = utils.DetailedPages(self.bot, message=ctx.message, entries=entries)
+            pages = utils.DetailedPages(ctx.bot, message=ctx.message, entries=entries)
             await pages.paginate()
         except utils.CannotPaginate as e:
             await ctx.send(str(e))

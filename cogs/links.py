@@ -8,12 +8,9 @@ import discord
 import re
 
 
-class Links:
+class Links(commands.Cog):
     """This class contains all the commands that make HTTP requests
     In other words, all commands here rely on other URL's to complete their requests"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     @commands.command(aliases=['g'])
     @utils.can_run(send_messages=True)

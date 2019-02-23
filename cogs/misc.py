@@ -38,13 +38,10 @@ def _command_signature(cmd):
     return ' '.join(result)
 
 
-class Miscallaneous:
+class Miscallaneous(commands.Cog):
     """Core commands, these are the miscallaneous commands that don't fit into other categories'"""
-
-    def __init__(self, bot):
-        self.bot = bot
-        self.process = psutil.Process()
-        self.process.cpu_percent()
+    process = psutil.Process()
+    process.cpu_percent()
 
     @commands.command()
     @commands.cooldown(1, 3, commands.cooldowns.BucketType.user)
@@ -56,7 +53,7 @@ class Miscallaneous:
             if command is None:
                 p = await utils.HelpPaginator.from_bot(ctx)
             else:
-                entity = self.bot.get_cog(command) or self.bot.get_command(command)
+                entity = ctx.bot.get_cog(command) or ctx.bot.get_command(command)
 
                 if entity is None:
                     clean = command.replace('@', '@\u200b')
@@ -74,7 +71,7 @@ class Miscallaneous:
         chunks = []
 
         if entity:
-            entity = self.bot.get_cog(entity) or self.bot.get_command(entity)
+            entity = ctx.bot.get_cog(entity) or ctx.bot.get_command(entity)
         if entity is None:
             fmt = "Hello! Here is a list of the sections of commands that I have " \
                   "(there are a lot of commands so just start with the sections...I know, I'm pretty great)\n"
@@ -88,7 +85,7 @@ class Miscallaneous:
 
             chunks.append(fmt)
 
-            cogs = sorted(self.bot.cogs.values(), key=lambda c: c.__class__.__name__)
+            cogs = sorted(ctx.bot.cogs.values(), key=lambda c: c.__class__.__name__)
             for cog in cogs:
                 tmp = "**{}**\n".format(cog.__class__.__name__)
                 if cog.__doc__:
@@ -102,14 +99,14 @@ class Miscallaneous:
             tmp += "\n{}".format(entity.help)
             chunks.append(tmp)
         else:
-            cmds = sorted(ctx.bot.get_cog_commands(entity.__class__.__name__), key=lambda c: c.name)
+            cmds = sorted(entity.get_commands(), key=lambda c: c.name)
             fmt = "Here are a list of commands under the section {}\n".format(entity.__class__.__name__)
             fmt += "Type `{}help command` to get more help on a specific command\n\n".format(ctx.prefix)
 
             chunks.append(fmt)
 
             for command in cmds:
-                for subcommand in utils.get_all_subcommands(command):
+                for subcommand in command.walk_commands():
                     tmp = "**{}**\n\t{}\n".format(subcommand.qualified_name, subcommand.short_doc)
                     if len(chunks[len(chunks) - 1] + tmp) > 2000:
                         chunks.append(tmp)
@@ -144,7 +141,7 @@ class Miscallaneous:
         """Returns the latency between the server websocket, and between reading messages"""
         msg_latency = datetime.datetime.utcnow() - ctx.message.created_at
         fmt = "Message latency {0:.2f} seconds".format(msg_latency.seconds + msg_latency.microseconds / 1000000)
-        fmt += "\nWebsocket latency {0:.2f} seconds".format(self.bot.latency)
+        fmt += "\nWebsocket latency {0:.2f} seconds".format(ctx.bot.latency)
         await ctx.send(fmt)
 
     @commands.command(aliases=["coin"])
@@ -231,8 +228,8 @@ class Miscallaneous:
 
         # Set the owner
         embed = discord.Embed(**opts)
-        if hasattr(self.bot, 'owner'):
-            embed.set_author(name=str(self.bot.owner), icon_url=self.bot.owner.avatar_url)
+        if hasattr(ctx.bot, 'owner'):
+            embed.set_author(name=str(ctx.bot.owner), icon_url=ctx.bot.owner.avatar_url)
 
         # Setup the process statistics
         name = "Process statistics"
@@ -242,17 +239,17 @@ class Miscallaneous:
         cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
         value += 'Memory: {:.2f} MiB'.format(memory_usage)
         value += '\nCPU: {}%'.format(cpu_usage)
-        if hasattr(self.bot, 'uptime'):
-            value += "\nUptime: {}".format((pendulum.now(tz="UTC") - self.bot.uptime).in_words())
+        if hasattr(ctx.bot, 'uptime'):
+            value += "\nUptime: {}".format((pendulum.now(tz="UTC") - ctx.bot.uptime).in_words())
         embed.add_field(name=name, value=value, inline=False)
 
         # Setup the user and guild statistics
         name = "User/Guild statistics"
         value = ""
 
-        value += "Channels: {}".format(len(list(self.bot.get_all_channels())))
-        value += "\nUsers: {}".format(len(self.bot.users))
-        value += "\nServers: {}".format(len(self.bot.guilds))
+        value += "Channels: {}".format(len(list(ctx.bot.get_all_channels())))
+        value += "\nUsers: {}".format(len(ctx.bot.users))
+        value += "\nServers: {}".format(len(ctx.bot.guilds))
         embed.add_field(name=name, value=value, inline=False)
 
         # The game statistics
@@ -261,10 +258,10 @@ class Miscallaneous:
         # Lets make this one a list and join it at the end
         value = []
 
-        hm = self.bot.get_cog('Hangman')
-        ttt = self.bot.get_cog('TicTacToe')
-        bj = self.bot.get_cog('Blackjack')
-        interaction = self.bot.get_cog('Interaction')
+        hm = ctx.bot.get_cog('Hangman')
+        ttt = ctx.bot.get_cog('TicTacToe')
+        bj = ctx.bot.get_cog('Blackjack')
+        interaction = ctx.bot.get_cog('Interaction')
 
         if hm:
             value.append("Hangman games: {}".format(len(hm.games)))
@@ -274,7 +271,7 @@ class Miscallaneous:
             value.append("Blackjack games: {}".format(len(bj.games)))
         if interaction:
             count_battles = 0
-            for battles in self.bot.get_cog('Interaction').battles.values():
+            for battles in ctx.bot.get_cog('Interaction').battles.values():
                 count_battles += len(battles)
             value.append("Battles running: {}".format(len(bj.games)))
         embed.add_field(name=name, value="\n".join(value), inline=False)
@@ -288,8 +285,8 @@ class Miscallaneous:
 
         EXAMPLE: !uptime
         RESULT: A BAJILLION DAYS"""
-        if hasattr(self.bot, 'uptime'):
-            await ctx.send("Uptime: ```\n{}```".format((pendulum.now(tz="UTC") - self.bot.uptime).in_words()))
+        if hasattr(ctx.bot, 'uptime'):
+            await ctx.send("Uptime: ```\n{}```".format((pendulum.now(tz="UTC") - ctx.bot.uptime).in_words()))
         else:
             await ctx.send("I've just restarted and not quite ready yet...gimme time I'm not a morning pony :c")
 
@@ -314,7 +311,7 @@ class Miscallaneous:
         perms.connect = True
         perms.attach_files = True
         perms.add_reactions = True
-        app_info = await self.bot.application_info()
+        app_info = await ctx.bot.application_info()
         await ctx.send("Use this URL to add me to a server that you'd like!\n<{}>"
                        .format(discord.utils.oauth_url(app_info.id, perms)))
 

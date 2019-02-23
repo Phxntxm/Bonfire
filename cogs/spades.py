@@ -413,7 +413,7 @@ class Game:
         self.players.append(p)
 
 
-class Spades:
+class Spades(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.pending_game = None
@@ -446,7 +446,7 @@ class Spades:
             g.join(author)
             self.pending_game = g
 
-    def __unload(self):
+    def cog_unload(self):
         # Simply cancel every task
         for _, task in self.games:
             task.cancel()

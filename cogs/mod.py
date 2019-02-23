@@ -6,11 +6,8 @@ import discord
 import asyncio
 
 
-class Moderation:
+class Moderation(commands.Cog):
     """Moderation commands, things that help control a server...but not the settings of the server"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     @commands.command()
     @commands.guild_only()
@@ -40,7 +37,7 @@ class Moderation:
         # Lets only accept an int for this method, in order to ensure only an ID is provided
         # Due to that though, we need to ensure a string is passed as the member's ID
         try:
-            await self.bot.http.unban(member_id, ctx.guild.id)
+            await ctx.bot.http.unban(member_id, ctx.guild.id)
             await ctx.send("\N{OK HAND SIGN}")
         except discord.Forbidden:
             await ctx.send("But I can't, muh permissions >:c")
@@ -61,7 +58,7 @@ class Moderation:
         # Lets first check if a user ID was provided, as that will be the easiest case to ban
         if member.isdigit():
             try:
-                await self.bot.http.ban(member, ctx.guild.id, reason=reason)
+                await ctx.bot.http.ban(member, ctx.guild.id, reason=reason)
                 await ctx.send("\N{OK HAND SIGN}")
             except discord.Forbidden:
                 await ctx.send("But I can't, muh permissions >:c")

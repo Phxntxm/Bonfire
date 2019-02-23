@@ -1,4 +1,5 @@
 from discord.ext import commands
+
 import utils
 
 
@@ -35,7 +36,7 @@ class Poll:
                 await self.message.remove_reaction(r, member)
 
 
-class Polls:
+class Polls(commands.Cog):
     """Create custom polls that can be tracked through reactions"""
 
     def __init__(self, bot):
@@ -65,6 +66,7 @@ class Polls:
             if p.message.id == message.id:
                 return p
 
+    @commands.Cog.listener
     async def on_reaction_add(self, reaction, user):
         if user.id == self.bot.user.id:
             return

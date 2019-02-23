@@ -6,11 +6,8 @@ import utils
 import asyncio
 
 
-class Tags:
+class Tags(commands.Cog):
     """This class contains all the commands for custom tags"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     @commands.command()
     @commands.guild_only()
@@ -20,7 +17,7 @@ class Tags:
 
         EXAMPLE: !tags
         RESULT: All tags setup on this server"""
-        tags = await self.bot.db.fetch("SELECT trigger FROM tags WHERE guild=$1", ctx.guild.id)
+        tags = await ctx.bot.db.fetch("SELECT trigger FROM tags WHERE guild=$1", ctx.guild.id)
 
         if len(tags) > 0:
             entries = [t['trigger'] for t in tags]
@@ -37,7 +34,7 @@ class Tags:
 
         EXAMPLE: !mytags
         RESULT: All your tags setup on this server"""
-        tags = await self.bot.db.fetch(
+        tags = await ctx.bot.db.fetch(
             "SELECT trigger FROM tags WHERE guild=$1 AND creator=$2",
             ctx.guild.id,
             ctx.author.id
@@ -59,7 +56,7 @@ class Tags:
 
         EXAMPLE: !tag butts
         RESULT: Whatever you setup for the butts tag!!"""
-        tag = await self.bot.db.fetchrow(
+        tag = await ctx.bot.db.fetchrow(
             "SELECT id, result FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
             tag.lower().strip()
@@ -67,7 +64,7 @@ class Tags:
 
         if tag:
             await ctx.send("\u200B{}".format(tag['result']))
-            await self.bot.db.execute("UPDATE tags SET uses = uses + 1 WHERE id = $1", tag['id'])
+            await ctx.bot.db.execute("UPDATE tags SET uses = uses + 1 WHERE id = $1", tag['id'])
         else:
             await ctx.send("There is no tag called {}".format(tag))
 
@@ -86,7 +83,7 @@ class Tags:
         my_msg = await ctx.send("Ready to setup a new tag! What do you want the trigger for the tag to be?")
 
         try:
-            msg = await self.bot.wait_for("message", check=check, timeout=60)
+            msg = await ctx.bot.wait_for("message", check=check, timeout=60)
         except asyncio.TimeoutError:
             await ctx.send("You took too long!")
             return
@@ -102,7 +99,7 @@ class Tags:
                 "Current forbidden tag triggers are: \n{}".format("\n".join(forbidden_tags)))
             return
 
-        tag = await self.bot.db.fetchrow(
+        tag = await ctx.bot.db.fetchrow(
             "SELECT result FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
             trigger.lower().strip()
@@ -122,7 +119,7 @@ class Tags:
                 trigger))
 
         try:
-            msg = await self.bot.wait_for("message", check=check, timeout=60)
+            msg = await ctx.bot.wait_for("message", check=check, timeout=60)
         except asyncio.TimeoutError:
             await ctx.send("You took too long!")
             return
@@ -135,7 +132,7 @@ class Tags:
             pass
 
         await ctx.send("I have just setup a new tag for this server! You can call your tag with {}".format(trigger))
-        await self.bot.db.execute(
+        await ctx.bot.db.execute(
             "INSERT INTO tags(guild, creator, trigger, result) VALUES ($1, $2, $3, $4)",
             ctx.guild.id,
             ctx.author.id,
@@ -153,7 +150,7 @@ class Tags:
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author and len(m.content) > 0
 
-        tag = await self.bot.db.fetchrow(
+        tag = await ctx.bot.db.fetchrow(
             "SELECT id, trigger FROM tags WHERE guild=$1 AND creator=$2 AND trigger=$3",
             ctx.guild.id,
             ctx.author.id,
@@ -163,7 +160,7 @@ class Tags:
         if tag:
             my_msg = await ctx.send(f"Alright, what do you want the new result for the tag {tag} to be")
             try:
-                msg = await self.bot.wait_for("message", check=check, timeout=60)
+                msg = await ctx.bot.wait_for("message", check=check, timeout=60)
             except asyncio.TimeoutError:
                 await ctx.send("You took too long!")
                 return
@@ -177,7 +174,7 @@ class Tags:
                 pass
 
             await ctx.send(f"Alright, the tag {trigger} has been updated")
-            await self.bot.db.execute("UPDATE tags SET result=$1 WHERE id=$2", new_result, tag['id'])
+            await ctx.bot.db.execute("UPDATE tags SET result=$1 WHERE id=$2", new_result, tag['id'])
         else:
             await ctx.send(f"You do not have a tag called {trigger} on this server!")
 
@@ -191,7 +188,7 @@ class Tags:
         EXAMPLE: !tag delete stupid_tag
         RESULT: Deletes that stupid tag"""
 
-        tag = await self.bot.db.fetchrow(
+        tag = await ctx.bot.db.fetchrow(
             "SELECT id FROM tags WHERE guild=$1 AND creator=$2 AND trigger=$3",
             ctx.guild.id,
             ctx.author.id,
@@ -200,7 +197,7 @@ class Tags:
 
         if tag:
             await ctx.send(f"I have just deleted the tag {trigger}")
-            await self.bot.db.execute("DELETE FROM tags WHERE id=$1", tag['id'])
+            await ctx.bot.db.execute("DELETE FROM tags WHERE id=$1", tag['id'])
         else:
             await ctx.send(f"You do not own a tag called {trigger} on this server!")
 
@@ -210,7 +207,7 @@ class Tags:
     async def info_tag(self, ctx, *, trigger: str):
         """Shows some information a bout the tag given"""
 
-        tag = await self.bot.db.fetchrow(
+        tag = await ctx.bot.db.fetchrow(
             "SELECT creator, uses, trigger FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
             trigger

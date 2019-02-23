@@ -4,11 +4,8 @@ import utils
 
 import discord
 
-class Tutorial:
 
-    def __init__(self, bot):
-        self.bot = bot
-
+class Tutorial(commands.Cog):
     @commands.command()
     # @utils.can_run(send_messages=True)
     async def tutorial(self, ctx, *, cmd_or_cog = None):
@@ -18,17 +15,17 @@ class Tutorial:
         # The list of commands we need to run through
         commands = []
         if cmd_or_cog:
-            cmd = self.bot.get_command(cmd_or_cog.lower())
+            cmd = ctx.bot.get_command(cmd_or_cog.lower())
             # This should be a cog
             if cmd is None:
-                cog = self.bot.get_cog(cmd_or_cog.title())
+                cog = ctx.bot.get_cog(cmd_or_cog.title())
                 if cog is None:
                     await ctx.send("Could not find a command or a cog for {}".format(cmd_or_cog))
                     return
 
                 commands = set([
                     c
-                    for c in self.bot.walk_commands()
+                    for c in ctx.bot.walk_commands()
                     if c.cog_name == cmd_or_cog.title()
                 ])
             # Specific command
@@ -36,7 +33,7 @@ class Tutorial:
                 commands = [cmd]
         # Use all commands
         else:
-            commands = set(self.bot.walk_commands())
+            commands = set(ctx.bot.walk_commands())
 
         # Loop through all the commands that we want to use
         for command in commands:

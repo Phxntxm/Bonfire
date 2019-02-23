@@ -64,13 +64,11 @@ class Game:
         return fmt
 
 
-class Hangman:
+class Hangman(commands.Cog):
     """Pretty self-explanatory"""
 
-    def __init__(self, bot):
-        self.bot = bot
-        self.games = {}
-        self.pending_games = []
+    games = {}
+    pending_games = []
 
     def create(self, word, ctx):
         # Create a new game, then save it as the server's game
@@ -166,7 +164,7 @@ class Hangman:
 
         self.pending_games.append(ctx.guild.id)
         try:
-            msg = await self.bot.wait_for('message', check=check, timeout=60)
+            msg = await ctx.bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
             self.pending_games.remove(ctx.guild.id)
             await ctx.send(

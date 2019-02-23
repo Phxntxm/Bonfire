@@ -57,7 +57,7 @@ def parse_string(date):
         return datetime.date(year, month, day)
 
 
-class Birthday:
+class Birthday(commands.Cog):
     """Track and announce birthdays"""
 
     def __init__(self, bot):
@@ -157,7 +157,7 @@ WHERE
         EXAMPLE: !birthdays
         RESULT: A printout of the birthdays from everyone on this server"""
         if member:
-            date = await self.bot.db.fetchrow("SELECT birthday FROM users WHERE id=$1", member.id)
+            date = await ctx.bot.db.fetchrow("SELECT birthday FROM users WHERE id=$1", member.id)
             if date is None or date["birthday"] is None:
                 await ctx.send(f"I do not have {member.display_name}'s birthday saved!")
             else:
@@ -207,9 +207,9 @@ WHERE
 
         await ctx.send(f"I have just saved your birthday as {date}")
         try:
-            await self.bot.db.execute("INSERT INTO users (id, birthday) VALUES ($1, $2)", ctx.author.id, date)
+            await ctx.bot.db.execute("INSERT INTO users (id, birthday) VALUES ($1, $2)", ctx.author.id, date)
         except UniqueViolationError:
-            await self.bot.db.execute("UPDATE users SET birthday = $1 WHERE id = $2", date, ctx.author.id)
+            await ctx.bot.db.execute("UPDATE users SET birthday = $1 WHERE id = $2", date, ctx.author.id)
 
     @birthday.command(name='remove')
     @utils.can_run(send_messages=True)
@@ -219,7 +219,7 @@ WHERE
         EXAMPLE: !birthday remove
         RESULT: I have magically forgotten your birthday"""
         await ctx.send("I don't know your birthday anymore :(")
-        await self.bot.db.execute("UPDATE users SET birthday=NULL WHERE id=$1", ctx.author.id)
+        await ctx.bot.db.execute("UPDATE users SET birthday=NULL WHERE id=$1", ctx.author.id)
 
 
 def setup(bot):

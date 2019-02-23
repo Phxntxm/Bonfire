@@ -1,8 +1,9 @@
 import asyncio
 import discord
 import traceback
-
 import utils
+
+from discord.ext import commands
 
 BASE_URL = 'https://api.picarto.tv/v1'
 
@@ -21,7 +22,7 @@ def produce_embed(*channels):
     return discord.Embed(title="Channels that have gone online!", description=description.strip())
 
 
-class Picarto:
+class Picarto(commands.Cog):
     """Pretty self-explanatory"""
 
     def __init__(self, bot):

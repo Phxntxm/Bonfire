@@ -16,11 +16,8 @@ check_o_stats = ['wins']
 log = logging.getLogger()
 
 
-class Overwatch:
+class Overwatch(commands.Cog):
     """Class for viewing Overwatch stats"""
-
-    def __init__(self, bot):
-        self.bot = bot
 
     @commands.group()
     async def ow(self, ctx):
@@ -39,7 +36,7 @@ class Overwatch:
         EXAMPLE: !ow stats @OtherPerson Junkrat
         RESULT: Whether or not you should unfriend this person because they're a dirty rat"""
         user = user or ctx.message.author
-        bt = self.bot.db.load('overwatch', key=str(user.id), pluck='battletag')
+        bt = ctx.bot.db.load('overwatch', key=str(user.id), pluck='battletag')
 
         if bt is None:
             await ctx.send("I do not have this user's battletag saved!")
@@ -119,7 +116,7 @@ class Overwatch:
             'battletag': bt
         }
 
-        await self.bot.db.save('overwatch', entry)
+        await ctx.bot.db.save('overwatch', entry)
         await ctx.send("I have just saved your battletag {}".format(ctx.message.author.mention))
 
     @ow.command(name="delete", aliases=['remove'])
@@ -133,7 +130,7 @@ class Overwatch:
             'member_id': str(ctx.message.author.id),
             'battletag': None
         }
-        await self.bot.db.save('overwatch', entry)
+        await ctx.bot.db.save('overwatch', entry)
         await ctx.send("I no longer have your battletag saved {}".format(ctx.message.author.mention))
 
 

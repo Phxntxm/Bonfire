@@ -6,14 +6,14 @@ import asyncio
 import math
 
 
-class Blackjack:
+class Blackjack(commands.Cog):
     """Pretty self-explanatory"""
 
     def __init__(self, bot):
         self.bot = bot
         self.games = {}
 
-    def __unload(self):
+    def cog_unload(self):
         # Simply cancel every task
         for game in self.games.values():
             game.task.cancel()

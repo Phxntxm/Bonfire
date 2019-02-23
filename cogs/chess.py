@@ -7,14 +7,12 @@ import re
 from enum import Enum
 
 
-class Chess:
+class Chess(commands.Cog):
     """Pretty self-explanatory"""
 
-    def __init__(self, bot):
-        self.bot = bot
-        # Our format for games is going to be a little different, because we do want to allow multiple games per guild
-        # Format should be {'server_id': [Game, Game, Game]}
-        self.games = {}
+    # Our format for games is going to be a little different, because we do want to allow multiple games per guild
+    # Format should be {'server_id': [Game, Game, Game]}
+    games = {}
 
     def play(self, player, notation):
         """Our task to handle a player making their actual move"""
@@ -152,7 +150,7 @@ class Chess:
         elif result is MoveStatus.valid:
             game = self.get_game(ctx.message.author)
             link = game.draw_board()
-            await self.bot.upload(link)
+            await ctx.bot.upload(link)
 
     @commands.command()
     @checks.can_run(send_messages=True)

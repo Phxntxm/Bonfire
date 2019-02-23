@@ -1,8 +1,10 @@
-from utils import config
 import aiohttp
 import logging
 import json
 import discord
+
+from utils import config
+from discord.ext import commands
 
 log = logging.getLogger()
 
@@ -11,14 +13,14 @@ discordbots_url = "https://discordbots.org/api/bots/{}/stats"
 carbonitex_url = 'https://www.carbonitex.net/discord/data/botdata.php'
 
 
-class StatsUpdate:
+class StatsUpdate(commands.Cog):
     """This is used purely to update stats information for the bot sites"""
 
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
 
-    def __unload(self):
+    def cog_unload(self):
         self.bot.loop.create_task(self.session.close())
 
     async def update(self):
@@ -59,15 +61,19 @@ class StatsUpdate:
         async with self.session.post(url, data=payload, headers=headers) as resp:
             log.info('discordbots.com statistics retruned {} for {}'.format(resp.status, payload))
 
+    @commands.Cog.listener
     async def on_guild_join(self, _):
         await self.update()
 
+    @commands.Cog.listener
     async def on_guild_leave(self, _):
         await self.update()
 
+    @commands.Cog.listener
     async def on_ready(self):
         await self.update()
 
+    @commands.Cog.listener
     async def on_member_join(self, member):
         query = """
 SELECT
@@ -99,6 +105,7 @@ WHERE
             except (discord.Forbidden, discord.HTTPException, AttributeError):
                 pass
 
+    @commands.Cog.listener
     async def on_member_remove(self, member):
         query = """
 SELECT

@@ -16,16 +16,13 @@ def get_syntax_error(e):
     return '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
 
 
-class Owner:
+class Owner(commands.Cog):
     """Commands that can only be used by the owner of the bot, bot management commands"""
+    _last_result = None
+    sessions = set()
 
-    def __init__(self, bot):
-        self.bot = bot
-        self._last_result = None
-        self.sessions = set()
-
-    async def __local_check(self, ctx):
-        return await self.bot.is_owner(ctx.author)
+    async def cog_check(self, ctx):
+        return await ctx.bot.is_owner(ctx.author)
 
     @staticmethod
     def cleanup_code(content):
@@ -43,7 +40,7 @@ class Owner:
 
         variables = {
             'ctx': ctx,
-            'bot': self.bot,
+            'bot': ctx.bot,
             'message': msg,
             'guild': msg.guild,
             'server': msg.guild,
@@ -69,7 +66,7 @@ class Owner:
 
         while True:
             try:
-                response = await self.bot.wait_for('message', check=check, timeout=10.0 * 60.0)
+                response = await ctx.bot.wait_for('message', check=check, timeout=10.0 * 60.0)
             except asyncio.TimeoutError:
                 await ctx.send('Exiting REPL session.')
                 self.sessions.remove(msg.channel.id)
@@ -134,7 +131,7 @@ class Owner:
     @commands.command()
     async def sendtochannel(self, ctx, cid: int, *, message):
         """Sends a message to a provided channel, by ID"""
-        channel = self.bot.get_channel(cid)
+        channel = ctx.bot.get_channel(cid)
         await channel.send(message)
         try:
             await ctx.message.delete()
@@ -144,7 +141,7 @@ class Owner:
     @commands.command()
     async def debug(self, ctx, *, body: str):
         env = {
-            'bot': self.bot,
+            'bot': ctx.bot,
             'ctx': ctx,
             'channel': ctx.message.channel,
             'author': ctx.message.author,
@@ -202,19 +199,19 @@ class Owner:
         """Shuts the bot down"""
         fmt = 'Shutting down, I will miss you {0.author.name}'
         await ctx.send(fmt.format(ctx.message))
-        await self.bot.logout()
-        await self.bot.close()
+        await ctx.bot.logout()
+        await ctx.bot.close()
 
     @commands.command()
     async def name(self, ctx, new_nick: str):
         """Changes the bot's name"""
-        await self.bot.user.edit(username=new_nick)
+        await ctx.bot.user.edit(username=new_nick)
         await ctx.send('Changed username to ' + new_nick)
 
     @commands.command()
     async def status(self, ctx, *, status: str):
         """Changes the bot's 'playing' status"""
-        await self.bot.change_presence(activity=discord.Game(name=status, type=0))
+        await ctx.bot.change_presence(activity=discord.Game(name=status, type=0))
         await ctx.send("Just changed my status to '{}'!".format(status))
 
     @commands.command()
@@ -228,7 +225,7 @@ class Owner:
 
         # This try catch will catch errors such as syntax errors in the module we are loading
         try:
-            self.bot.load_extension(module)
+            ctx.bot.load_extension(module)
             await ctx.send("I have just loaded the {} module".format(module))
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'
@@ -243,7 +240,7 @@ class Owner:
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
 
-        self.bot.unload_extension(module)
+        ctx.bot.unload_extension(module)
         await ctx.send("I have just unloaded the {} module".format(module))
 
     @commands.command()
@@ -254,11 +251,11 @@ class Owner:
         module = module.lower()
         if not module.startswith("cogs"):
             module = "cogs.{}".format(module)
-        self.bot.unload_extension(module)
+        ctx.bot.unload_extension(module)
 
         # This try block will catch errors such as syntax errors in the module we are loading
         try:
-            self.bot.load_extension(module)
+            ctx.bot.load_extension(module)
             await ctx.send("I have just reloaded the {} module".format(module))
         except Exception as error:
             fmt = 'An error occurred while processing this request: ```py\n{}: {}\n```'

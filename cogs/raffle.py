@@ -9,12 +9,9 @@ import asyncio
 import random
 
 
-class Raffle:
+class Raffle(commands.Cog):
     """Used to hold custom raffles"""
-
-    def __init__(self, bot):
-        self.bot = bot
-        self.raffles = defaultdict(list)
+    raffles = defaultdict(list)
 
     def create_raffle(self, ctx, title, num):
         raffle = GuildRaffle(ctx, title, num)
@@ -83,7 +80,7 @@ class Raffle:
 
         check = lambda m: m.author == author and m.channel == channel
         try:
-            msg = await self.bot.wait_for('message', check=check, timeout=120)
+            msg = await ctx.bot.wait_for('message', check=check, timeout=120)
         except asyncio.TimeoutError:
             await ctx.send("You took too long! >:c")
             return
@@ -103,7 +100,7 @@ class Raffle:
                 return False
 
         try:
-            msg = await self.bot.wait_for('message', timeout=120, check=check)
+            msg = await ctx.bot.wait_for('message', timeout=120, check=check)
         except asyncio.TimeoutError:
             await ctx.send("You took too long! >:c")
             return

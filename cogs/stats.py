@@ -6,7 +6,7 @@ import datetime
 from discord.ext import commands
 
 
-class Stats:
+class Stats(commands.Cog):
     """Leaderboard/stats related commands"""
 
     def __init__(self, bot):
@@ -177,7 +177,7 @@ ORDER BY
 LIMIT 1
 """
         members = [m.id for m in ctx.guild.members]
-        most = await self.bot.db.fetchrow(query, ctx.author.id, members)
+        most = await ctx.bot.db.fetchrow(query, ctx.author.id, members)
 
         if most is None or len(most) == 0:
             await ctx.send(f"You have not booped anyone in this server {ctx.author.mention}")
@@ -212,7 +212,7 @@ LIMIT 10
         """
 
         members = [m.id for m in ctx.guild.members]
-        most = await self.bot.db.fetch(query, ctx.author.id, members)
+        most = await ctx.bot.db.fetch(query, ctx.author.id, members)
 
         if len(most) != 0:
             embed = discord.Embed(title="Your booped victims", colour=ctx.author.colour)
@@ -244,7 +244,7 @@ ORDER BY
     battle_rating DESC
 """
 
-        results = await self.bot.db.fetch(query, [m.id for m in ctx.guild.members])
+        results = await ctx.bot.db.fetch(query, [m.id for m in ctx.guild.members])
 
         if len(results) == 0:
             await ctx.send("No one has battled on this server!")
@@ -291,7 +291,7 @@ WHERE id = $2
         member_list = [m.id for m in ctx.guild.members]
         result = await ctx.bot.db.fetch(query, member_list, member.id)
         server_rank = result["rank"]
-        # overall_rank = "{}/{}".format(*self.bot.br.get_rank(member))
+        # overall_rank = "{}/{}".format(*ctx.bot.br.get_rank(member))
         rating = result["battle_rating"]
         record = f"{result['battle_wins']} - {result['battle_losses']}"
 

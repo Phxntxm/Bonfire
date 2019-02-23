@@ -8,7 +8,7 @@ from base64 import urlsafe_b64encode
 import utils
 
 
-class Spotify:
+class Spotify(commands.Cog):
     """Pretty self-explanatory"""
 
     def __init__(self, bot):

@@ -26,8 +26,12 @@ class MessageFormatError(ConfigException):
 
 
 # noinspection PyMethodMayBeStatic,PyUnusedLocal
-class GuildConfiguration:
+class GuildConfiguration(commands.Cog):
     """Handles configuring the different settings that can be used on the bot"""
+
+    keys = {
+        
+    }
 
     def _str_to_bool(self, opt, setting):
         setting = setting.title()
@@ -596,7 +600,7 @@ WHERE
 """
         return await ctx.bot.db.execute(query, setting, ctx.guild.id)
 
-    async def __after_invoke(self, ctx):
+    async def cog_after_invoke(self, ctx):
         """Here we will facilitate cleaning up settings, will remove channels/roles that no longer exist, etc."""
         pass
 

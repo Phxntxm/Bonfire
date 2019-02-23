@@ -8,12 +8,9 @@ from discord.ext import commands
 import utils
 
 
-class Roulette:
+class Roulette(commands.Cog):
     """A fun game that ends in someone getting kicked!"""
-
-    def __init__(self, bot):
-        self.bot = bot
-        self.roulettes = []
+    roulettes = []
 
     def get_game(self, server):
         for x in self.roulettes:

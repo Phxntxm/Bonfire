@@ -7,7 +7,7 @@ from discord.ext import commands
 valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
 
 
-class Admin:
+class Admin(commands.Cog):
     """These are commands that allow more intuitive configuration, that don't fit into the config command"""
 
     @commands.command()
