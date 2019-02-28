@@ -66,7 +66,7 @@ class Polls(commands.Cog):
             if p.message.id == message.id:
                 return p
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if user.id == self.bot.user.id:
             return

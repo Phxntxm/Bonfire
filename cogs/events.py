@@ -61,19 +61,19 @@ class StatsUpdate(commands.Cog):
         async with self.session.post(url, data=payload, headers=headers) as resp:
             log.info('discordbots.com statistics retruned {} for {}'.format(resp.status, payload))
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_guild_join(self, _):
         await self.update()
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_guild_leave(self, _):
         await self.update()
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_ready(self):
         await self.update()
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         query = """
 SELECT
@@ -105,7 +105,7 @@ WHERE
             except (discord.Forbidden, discord.HTTPException, AttributeError):
                 pass
 
-    @commands.Cog.listener
+    @commands.Cog.listener()
     async def on_member_remove(self, member):
         query = """
 SELECT
