@@ -289,7 +289,7 @@ FROM
 WHERE id = $2
         """
         member_list = [m.id for m in ctx.guild.members]
-        result = await ctx.bot.db.fetch(query, member_list, member.id)
+        result = await ctx.bot.db.fetchrow(query, member_list, member.id)
         server_rank = result["rank"]
         # overall_rank = "{}/{}".format(*ctx.bot.br.get_rank(member))
         rating = result["battle_rating"]
