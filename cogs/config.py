@@ -109,11 +109,12 @@ class GuildConfiguration(commands.Cog):
     async def _handle_show_prefix(self, ctx, setting):
         result = await ctx.bot.db.fetchrow("SELECT prefix FROM guilds WHERE id = $1", ctx.guild.id)
 
-        prefix = result["prefix"]
-        if result and prefix is not None:
-            return f"Your current prefix is `{prefix}`"
-        else:
-            return "You do not have a custom prefix set, you are using the default prefix"
+        if result is not None:
+            prefix = result["prefix"]
+            if prefix is not None:
+                return f"Your current prefix is `{prefix}`"
+
+        return "You do not have a custom prefix set, you are using the default prefix"
 
     async def _handle_show_followed_picarto_channels(self, ctx, opt):
         result = await ctx.bot.db.fetchrow("SELECT followed_picarto_channels FROM guilds WHERE id = $1", ctx.guild.id)
@@ -746,8 +747,8 @@ Failed to parse the format string provided, possible keys are: {', '.join(k for 
 Extraneous args provided: {', '.join(k for k in exc.original.args)}
 """
                 await ctx.send(fmt)
-            except commands.BadArgument:
-                pass
+            except commands.BadArgument as exc:
+                await ctx.send(exc)
             else:
                 await ctx.invoke(ctx.bot.get_command("config"), opt=option)
 
