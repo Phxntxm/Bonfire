@@ -343,7 +343,7 @@ VALUES
             )
         else:
             fmt += "\n{} - Rank: {}".format(winner.display_name, new_winner_rank)
-        if old_winner:
+        if old_loser:
             fmt += "\n{} - Rank: {} ( -{} )".format(
                 loser.display_name, new_loser_rank, new_loser_rank - old_loser["rank"]
             )
