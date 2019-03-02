@@ -50,7 +50,7 @@ class GuildConfiguration(commands.Cog):
         if opt == "prefix":
             ctx.bot.cache.update_prefix(ctx.guild, setting)
         try:
-            return await ctx.bot.db.execute(f"INSERT INTO guilds (id, {opt}) VALUES ($1, $2)", ctx.guild.id, setting)
+            return await ctx.bot.db.execute(f"INSERT INTO guilds (id, {opt!r}) VALUES ($1, $2)", ctx.guild.id, setting)
         except UniqueViolationError:
             return await ctx.bot.db.execute(f"UPDATE guilds SET {opt} = $1 WHERE id = $2", setting, ctx.guild.id)
 
