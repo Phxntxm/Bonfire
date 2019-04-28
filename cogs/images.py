@@ -101,9 +101,9 @@ class Images(commands.Cog):
         if member is None:
             member = ctx.message.author
 
-        url = member.avatar_url
+        url = str(member.avatar_url)
         if '.gif' not in url:
-            url = member.avatar_url_as(format='png')
+            url = str(member.avatar_url_as(format='png'))
             filename = 'avatar.png'
         else:
             filename = 'avatar.gif'

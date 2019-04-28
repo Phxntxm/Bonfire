@@ -389,7 +389,7 @@ WHERE
     async def _handle_set_custom_battles(self, ctx, setting):
         try:
             setting.format(loser="player1", winner="player2")
-        except KeyError as e:
+        except (KeyError, ValueError) as e:
             raise MessageFormatError(e, ["loser", "winner"])
         else:
             query = """
@@ -406,7 +406,7 @@ WHERE
     async def _handle_set_custom_hugs(self, ctx, setting):
         try:
             setting.format(user="user")
-        except KeyError as e:
+        except (KeyError, ValueError)as e:
             raise MessageFormatError(e, ["user"])
         else:
             query = """
@@ -547,7 +547,7 @@ SET
 WHERE
     id=$2
 """
-        return await ctx.bot.db.execute(query, setting, ctx.guild.id)
+        return await ctx.bot.db.execute(query, int(setting), ctx.guild.id)
 
     async def _handle_remove_assignable_roles(self, ctx, setting=None):
         if setting is None:
@@ -583,7 +583,7 @@ SET
 WHERE
     id=$2
 """
-        return await ctx.bot.db.execute(query, setting, ctx.guild.id)
+        return await ctx.bot.db.execute(query, int(setting), ctx.guild.id)
 
     async def _handle_remove_custom_hugs(self, ctx, setting=None):
         if setting is None or not setting.isdigit():
@@ -599,7 +599,7 @@ SET
 WHERE
     id=$2
 """
-        return await ctx.bot.db.execute(query, setting, ctx.guild.id)
+        return await ctx.bot.db.execute(query, int(setting), ctx.guild.id)
 
     async def cog_after_invoke(self, ctx):
         """Here we will facilitate cleaning up settings, will remove channels/roles that no longer exist, etc."""

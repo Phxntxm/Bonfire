@@ -82,7 +82,7 @@ LIMIT 5
         embed = discord.Embed(title=server.name, description="Created on: {}".format(server.created_at.date()))
 
         # Make sure we only set the icon url if it has been set
-        if server.icon_url != "":
+        if server.icon_url:
             embed.set_thumbnail(url=server.icon_url)
 
         # Add our fields, these are self-explanatory
@@ -246,7 +246,7 @@ ORDER BY
 
         results = await ctx.bot.db.fetch(query, [m.id for m in ctx.guild.members])
 
-        if len(results) == 0:
+        if results is None or len(results) == 0:
             await ctx.send("No one has battled on this server!")
         else:
 
@@ -290,6 +290,8 @@ WHERE id = $2
         """
         member_list = [m.id for m in ctx.guild.members]
         result = await ctx.bot.db.fetchrow(query, member_list, member.id)
+        if result is None:
+            return await ctx.send("You have not battled!")
         server_rank = result["rank"]
         # overall_rank = "{}/{}".format(*ctx.bot.br.get_rank(member))
         rating = result["battle_rating"]

@@ -34,7 +34,7 @@ async def create_banner(member, image_title, data):
     offset = 125
 
     # Download the avatar
-    avatar = await utilities.download_image(member.avatar_url)
+    avatar = await utilities.download_image(str(member.avatar_url))
 
     # Parse the data we need to create our image
     username = (member.display_name[:23] + '...') if len(member.display_name) > 23 else member.display_name
