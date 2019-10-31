@@ -65,7 +65,7 @@ class Images(commands.Cog):
             return
 
         image = await utils.download_image(filename)
-        filename = re.search('.*/snakes/(.*)', filename).group(1)
+        filename = re.search('.*/optimized/large/(.*)', filename).group(1)
         f = discord.File(image, filename=filename)
         await ctx.send(file=f)
 
@@ -87,7 +87,7 @@ class Images(commands.Cog):
             return
 
         image = await utils.download_image(filename)
-        filename = re.search('.*/horses/(.*)', filename).group(1)
+        filename = re.search('.*/optimized/large/(.*)', filename).group(1)
         f = discord.File(image, filename=filename)
         await ctx.send(file=f)
 
