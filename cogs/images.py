@@ -54,11 +54,12 @@ class Images(commands.Cog):
 
         EXAMPLE: !snek
         RESULT: A beautiful picture of a snek o3o"""
-        result = await utils.request("http://hrsendl.com/snake")
+        data = await utils.request("http://hrsendl.com/api/snake")
+        result = data['data']
         if result is None:
             await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
             return
-        filename = result.get('image', None)
+        filename = result.get('file_url_size_large', None)
         if filename is None:
             await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
             return
@@ -75,11 +76,12 @@ class Images(commands.Cog):
 
         EXAMPLE: !horse
         RESULT: A beautiful picture of a horse o3o"""
-        result = await utils.request("http://hrsendl.com/horse")
+        data = await utils.request("http://hrsendl.com/api/horse")
+        result = data['data']
         if result is None:
             await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
             return
-        filename = result.get('image', None)
+        filename = result.get('file_url_size_large', None)
         if filename is None:
             await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
             return
