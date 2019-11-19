@@ -93,7 +93,8 @@ async def on_command_error(ctx, error):
         else:
             if isinstance(bot.error_channel, int):
                 bot.error_channel = bot.get_channel(bot.error_channel)
-            elif bot.error_channel is None:
+
+            if bot.error_channel is None:
                 now = datetime.datetime.now()
                 with open("error_log", 'a') as f:
                     print("In server '{0.message.guild}' at {1}\n"
