@@ -115,6 +115,7 @@ if __name__ == '__main__':
     # Setup our bot vars, db and cache
     bot.db = utils.DB()
     bot.cache = utils.Cache(bot.db)
+    bot.error_channel = utils.error_channel
     # Start our startup task (cache sets up the database, so just this)
     bot.loop.create_task(bot.cache.setup())
     for e in utils.extensions:
