@@ -91,12 +91,21 @@ async def on_command_error(ctx, error):
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.message.channel.send(error)
         else:
-            now = datetime.datetime.now()
-            with open("error_log", 'a') as f:
-                print("In server '{0.message.guild}' at {1}\nFull command: `{0.message.content}`".format(ctx, str(now)),
-                      file=f)
-                traceback.print_tb(error.__traceback__, file=f)
-                print('{0.__class__.__name__}: {0}'.format(error), file=f)
+            if isinstance(bot.error_channel, int):
+                bot.error_channel = bot.get_channel(bot.error_channel)
+            elif bot.error_channel is None:
+                now = datetime.datetime.now()
+                with open("error_log", 'a') as f:
+                    print("In server '{0.message.guild}' at {1}\n"
+                          "Full command: `{0.message.content}`".format(ctx, str(now)), file=f)
+                    traceback.print_tb(error.__traceback__, file=f)
+                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+            else:
+                await bot.error_channel.send(f"""```
+Command = {discord.utils.escape_markdown(ctx.message.clean_content).strip()}
+{''.join(traceback.format_tb(error.__traceback__)).strip()}
+{error.__class__.__name__}: {error.strip()}
+```""")
     except discord.HTTPException:
         pass
 

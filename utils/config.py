@@ -50,6 +50,8 @@ patreon_link = global_config.get('patreon_link', None)
 # The client ID/secret for spotify
 spotify_id = global_config.get("spotify_id", None)
 spotify_secret = global_config.get("spotify_secret", None)
+# Error channel to send uncaught exceptions to
+error_channel = global_config.get("error_channel", None)
 
 # The extensions to load
 extensions = [
