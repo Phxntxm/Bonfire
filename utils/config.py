@@ -7,7 +7,7 @@ global_config = {}
 # Ensure that the required config.yml file actually exists
 try:
     with open("config.yml", "r") as f:
-        global_config = yaml.load(f)
+        global_config = yaml.safe_load(f)
         global_config = {k: v for k, v in global_config.items() if v}
 except FileNotFoundError:
     print("You have no config file setup! Please use config.yml.sample to setup a valid config file")
