@@ -41,8 +41,8 @@ class Osu(commands.Cog):
 
     async def get_user_from_api(self, username):
         """A simple helper function to parse the list given and handle failures"""
-        user = await self.api.get_user(username)
         try:
+            user = await self.api.get_user(username)
             return user[0]
         except IndexError:
             return None
