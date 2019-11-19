@@ -27,6 +27,9 @@ class Osu(commands.Cog):
             if user is not None:
                 self.osu_users[member.id] = user
             return user
+        # Just return False for the "osu API does not work correctly" issue
+        elif user is False:
+            return False
         else:
             if user.username.lower() == username.lower():
                 return user
@@ -43,6 +46,9 @@ class Osu(commands.Cog):
             return user[0]
         except IndexError:
             return None
+        # So we can send a specific message for this error
+        except TypeError:
+            return False
 
     async def get_users(self):
         """A task used to 'cache' all member's and their Osu profile's"""
@@ -53,7 +59,7 @@ class Osu(commands.Cog):
 
         for row in rows:
             user = await self.get_user_from_api(row['osu'])
-            if user:
+            if user is not None:
                 self.osu_users[row['id']] = user
 
     @commands.group(invoke_without_command=True)
@@ -101,6 +107,9 @@ class Osu(commands.Cog):
         if user is None:
             await ctx.send("I couldn't find an osu user that matches {}".format(username))
             return
+        elif user is False:
+            await ctx.send("Unfortunately OSU's API is a 'beta', and for some users they do not return **any** data."
+                           "In this case, that's you! Congrats?")
 
         await ctx.send("I have just saved your Osu user {}".format(author.display_name))
         update = {
