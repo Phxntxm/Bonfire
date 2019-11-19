@@ -24,7 +24,7 @@ class Poll:
         return self.message.reactions
 
     async def update_message(self):
-        self.message = await self.message.channel.get_message(self.message.id)
+        self.message = await self.message.channel.fetch_message(self.message.id)
 
     async def remove_other_reaction(self, reaction, member):
         """Ensures that this is the only reaction set for this user"""
