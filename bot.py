@@ -104,8 +104,7 @@ async def on_command_error(ctx, error):
                 await bot.error_channel.send(f"""```
 Command = {discord.utils.escape_markdown(ctx.message.clean_content).strip()}
 {''.join(traceback.format_tb(error.__traceback__)).strip()}
-{error.__class__.__name__}: {error.strip()}
-```""")
+{error.__class__.__name__}: {error}```""")
     except discord.HTTPException:
         pass
 
