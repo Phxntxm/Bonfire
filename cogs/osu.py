@@ -4,6 +4,7 @@ from discord.ext import commands
 import discord
 
 from osuapi import OsuApi, AHConnector
+from asyncpg import UniqueViolationError
 
 # https://github.com/ppy/osu-api/wiki
 BASE_URL = 'https://osu.ppy.sh/api/'
@@ -111,12 +112,11 @@ class Osu(commands.Cog):
             await ctx.send("Unfortunately OSU's API is a 'beta', and for some users they do not return **any** data."
                            "In this case, that's you! Congrats?")
 
+        try:
+            await ctx.bot.db.execute("INSERT INTO users (id, osu) VALUES ($1, $2)", ctx.author.id, user.username)
+        except UniqueViolationError:
+            await ctx.bot.db.execute("UPDATE users SET osu = $1 WHERE id = $2", user.username, ctx.author.id)
         await ctx.send("I have just saved your Osu user {}".format(author.display_name))
-        update = {
-            "id": author.id,
-            "osu": user.username
-        }
-        await ctx.bot.db.upsert("users", update)
 
     @osu.command(name='score', aliases=['scores'])
     @utils.can_run(send_messages=True)
