@@ -90,6 +90,13 @@ async def on_command_error(ctx, error):
             await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.message.channel.send(error)
+        elif isinstance(error, (
+                commands.InvalidEndOfQuotedStringError,
+                commands.ExpectedClosingQuoteError,
+                commands.UnexpectedQuoteError)
+                        ):
+            await ctx.message.channel.send("Quotes must go around the arguments you want to provide to the command,"
+                                           " recheck where your quotes are")
         else:
             if isinstance(bot.error_channel, int):
                 bot.error_channel = bot.get_channel(bot.error_channel)
