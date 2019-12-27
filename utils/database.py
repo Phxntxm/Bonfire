@@ -86,6 +86,17 @@ FROM
             from_restrictions.append(opt)
             self.restrictions[row['guild']][row['from_to']] = from_restrictions
 
+    def add_restriction(self, guild, from_to, restriction):
+        restrictions = self.restrictions[guild.id].get(from_to, [])
+        restrictions.append(restriction)
+        self.restrictions[guild.id][from_to] = restrictions
+
+    def remove_restriction(self, guild, from_to, restriction):
+        restrictions = self.restrictions[guild.id].get(from_to, [])
+        if restriction in restrictions:
+            restrictions.remove(restriction)
+            self.restrictions[guild.id][from_to] = restrictions
+
 
 class DB:
     def __init__(self):

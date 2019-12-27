@@ -299,8 +299,10 @@ guild=$2
                 )
             except UniqueViolationError:
                 # If it's already inserted, then nothing needs to be updated
-                # It just meansthis particular restriction is already set
+                # It just means this particular restriction is already set
                 pass
+            else:
+                ctx.bot.cache.add_restriction(ctx.guild, from_to, {"source": source, "destination": destination})
         elif overwrites:
             channel = overwrites.pop('channel')
             for target, setting in overwrites.items():
@@ -364,6 +366,7 @@ WHERE
     destination=$2 AND 
     from_to=$3 AND 
     guild=$4""", source, destination, arg2, ctx.guild.id)
+            ctx.bot.cache.remove_restriction(ctx.guild.id, arg2, {"source": source, "destination": destination})
 
         # If this isn't a blacklist/whitelist, then we are attempting to remove an overwrite
         else:
@@ -524,6 +527,8 @@ WHERE
             perm_value
         )
 
+        ctx.bot.cache.update_custom_permission(ctx.guild, cmd.qualified_name, perm_value)
+
         await ctx.send("I have just added your custom permissions; "
                        "you now need to have `{}` permissions to use the command `{}`".format(permission, command))
 
@@ -546,6 +551,8 @@ WHERE
         await ctx.bot.db.execute(
             "DELETE FROM custom_permissions WHERE guild=$1 AND command=$2", ctx.guild.id, cmd.qualified_name
         )
+
+        ctx.bot.cache.update_custom_permission(ctx.guild, cmd.qualified_name, None)
 
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 

@@ -279,10 +279,7 @@ class GuildConfiguration(commands.Cog):
         if setting.lower().strip() == "none":
             setting = None
 
-        result = await self._set_db_guild_opt("prefix", setting, ctx)
-        # We want to update our cache for prefixes
-        ctx.bot.cache.update_prefix(ctx.guild, setting)
-        return result
+        return await self._set_db_guild_opt("prefix", setting, ctx)
 
     async def _handle_set_default_alerts(self, ctx, setting):
         channel = await self._get_channel(ctx, setting)
