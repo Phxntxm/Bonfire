@@ -366,7 +366,7 @@ WHERE
     destination=$2 AND 
     from_to=$3 AND 
     guild=$4""", source, destination, arg2, ctx.guild.id)
-            ctx.bot.cache.remove_restriction(ctx.guild.id, arg2, {"source": source, "destination": destination})
+            ctx.bot.cache.remove_restriction(ctx.guild, arg2, {"source": source, "destination": destination})
 
         # If this isn't a blacklist/whitelist, then we are attempting to remove an overwrite
         else:
