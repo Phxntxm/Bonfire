@@ -1,3 +1,5 @@
+import discord
+
 from discord.ext import commands
 
 import utils
@@ -33,7 +35,10 @@ class Poll:
                 continue
             users = await r.users().flatten()
             if member.id in [x.id for x in users]:
-                await self.message.remove_reaction(r, member)
+                try:
+                    await self.message.remove_reaction(r, member)
+                except discord.Forbidden:
+                    return
 
 
 class Polls(commands.Cog):
