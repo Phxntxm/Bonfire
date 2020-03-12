@@ -16,13 +16,11 @@ class Admin(commands.Cog):
     async def disable(self, ctx, *, command):
         """Disables the use of a command on this server"""
         if command == "disable" or command == "enable":
-            await ctx.send("You cannot disable `{}`".format(command))
-            return
+            return await ctx.send("You cannot disable `{}`".format(command))
 
         cmd = ctx.bot.get_command(command)
         if cmd is None:
-            await ctx.send("No command called `{}`".format(command))
-            return
+            return await ctx.send("No command called `{}`".format(command))
 
         try:
             await ctx.bot.db.execute(
@@ -34,6 +32,11 @@ class Admin(commands.Cog):
             await ctx.send(f"{cmd.qualified_name} is already disabled")
         else:
             await ctx.send(f"{cmd.qualified_name} is now disabled")
+            ctx.bot.cache.add_restriction(
+                ctx.guild,
+                "from",
+                {"source": cmd.qualified_name, "destination": "everyone"}
+            )
 
     @commands.command()
     @commands.guild_only()
@@ -53,6 +56,11 @@ destination='everyone' AND
 guild=$2
 """
         await ctx.bot.db.execute(query, cmd.qualified_name, ctx.guild.id)
+        ctx.bot.cache.remove_restriction(
+            ctx.guild,
+            "from",
+            {"source": cmd.qualified_name, "destination": "everyone"}
+        )
         await ctx.send(f"{cmd.qualified_name} is no longer disabled")
 
     @commands.command()
@@ -362,9 +370,9 @@ guild=$2
 DELETE FROM
     restrictions
 WHERE
-    source=$1 AND 
-    destination=$2 AND 
-    from_to=$3 AND 
+    source=$1 AND
+    destination=$2 AND
+    from_to=$3 AND
     guild=$4""", source, destination, arg2, ctx.guild.id)
             ctx.bot.cache.remove_restriction(ctx.guild, arg2, {"source": source, "destination": destination})
 
