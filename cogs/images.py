@@ -23,10 +23,16 @@ class Images(commands.Cog):
 
         try:
             image = await utils.download_image(result)
-            f = discord.File(image, filename=result.name)
-            await ctx.send(file=f)
         except (ValueError, AttributeError):
             await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
+
+        f = discord.File(image, filename=result.name)
+        try:
+            await ctx.send(file=f)
+        except discord.HTTPException:
+            await ctx.send(
+                f"File to large to send as attachment, here is the URL: {url}"
+            )
 
     @commands.command(aliases=['dog', 'rd'])
     @utils.can_run(send_messages=True)
@@ -45,7 +51,12 @@ class Images(commands.Cog):
 
         image = await utils.download_image(url)
         f = discord.File(image, filename=filename)
-        await ctx.send(file=f)
+        try:
+            await ctx.send(file=f)
+        except discord.HTTPException:
+            await ctx.send(
+                f"File to large to send as attachment, here is the URL: {url}"
+            )
 
     @commands.command(aliases=['snake'])
     @utils.can_run(send_messages=True)
@@ -68,7 +79,12 @@ class Images(commands.Cog):
         image = await utils.download_image(filename)
         filename = re.search('.*/optimized/large/(.*)', filename).group(1)
         f = discord.File(image, filename=filename)
-        await ctx.send(file=f)
+        try:
+            await ctx.send(file=f)
+        except discord.HTTPException:
+            await ctx.send(
+                f"File to large to send as attachment, here is the URL: {url}"
+            )
 
     @commands.command()
     @utils.can_run(send_messages=True)
@@ -91,7 +107,12 @@ class Images(commands.Cog):
         image = await utils.download_image(filename)
         filename = re.search('.*/optimized/large/(.*)', filename).group(1)
         f = discord.File(image, filename=filename)
-        await ctx.send(file=f)
+        try:
+            await ctx.send(file=f)
+        except discord.HTTPException:
+            await ctx.send(
+                f"File to large to send as attachment, here is the URL: {url}"
+            )
 
     @commands.command()
     @commands.guild_only()

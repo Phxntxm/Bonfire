@@ -192,12 +192,18 @@ class TicTacToe(commands.Cog):
             # Handle updating ratings based on the winner and loser
             await utils.update_records('tictactoe', ctx.bot.db, winner, loser)
             # This game has ended, delete it so another one can be made
-            del self.boards[ctx.message.guild.id]
+            try:
+                del self.boards[ctx.message.guild.id]
+            except KeyError:
+                pass
         else:
             # If no one has won, make sure the game is not full. If it has, delete the board and say it was a tie
             if board.full():
                 await ctx.send("This game has ended in a tie!")
-                del self.boards[ctx.message.guild.id]
+                try:
+                    del self.boards[ctx.message.guild.id]
+                except KeyError:
+                    pass
             # If no one has won, and the game has not ended in a tie, print the new updated board
             else:
                 player_turn = board.challengers.get('x') if board.X_turn else board.challengers.get('o')
