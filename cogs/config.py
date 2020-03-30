@@ -30,7 +30,7 @@ class GuildConfiguration(commands.Cog):
     """Handles configuring the different settings that can be used on the bot"""
 
     keys = {
-        
+
     }
 
     def _str_to_bool(self, opt, setting):
@@ -333,7 +333,7 @@ WHERE
     id=$2 AND
     NOT $1 = ANY(ignored_channels);
 """
-        ctx.bot.loop.create_task(ctx.cache.load_ignored())
+        ctx.bot.loop.create_task(ctx.bot.cache.load_ignored())
         return await ctx.bot.db.execute(query, channel.id, ctx.guild.id)
 
     async def _handle_set_ignored_members(self, ctx, setting):
@@ -353,7 +353,7 @@ WHERE
     id=$2 AND
     NOT $1 = ANY(ignored_members);
 """
-        ctx.bot.loop.create_task(ctx.cache.load_ignored())
+        ctx.bot.loop.create_task(ctx.bot.cache.load_ignored())
         return await ctx.bot.db.execute(query, setting, ctx.guild.id)
 
     async def _handle_set_rules(self, ctx, setting):
@@ -641,44 +641,44 @@ WHERE
     birthday_notifications
     *Notify on the birthday that users in this guild have saved*
     **{settings.get("birthday_notifications")}**
-    
+
     welcome_notifications
     *Notify when someone has joined this guild*
-    **{settings.get("welcome_notifications")}** 
-    
+    **{settings.get("welcome_notifications")}**
+
     goodbye_notifications
     *Notify when someone has left this guild
     **{settings.get("goodbye_notifications")}**
-    
+
     welcome_msg
     *A message that can be customized and used when someone joins the server*
-    **{"Set" if settings.get("welcome_msg") is not None else "Not set"}** 
-    
+    **{"Set" if settings.get("welcome_msg") is not None else "Not set"}**
+
     goodbye_msg
     *A message that can be customized and used when someone leaves the server*
     **{"Set" if settings.get("goodbye_msg") is not None else "Not set"}**
-    
+
 **Alert Channels**
     default_alerts
     *The channel to default alert messages to*
     **{alerts.get("default_alerts")}**
-    
+
     welcome_alerts
     *The channel to send welcome alerts to (when someone joins the server)*
     **{alerts.get("welcome_alerts")}**
-    
+
     goodbye_alerts
     *The channel to send goodbye alerts to (when someone leaves the server)*
     **{alerts.get("goodbye_alerts")}**
-    
+
     picarto_alerts
     *The channel to send Picarto alerts to (when a channel the server follows goes on/offline)*
     **{alerts.get("picarto_alerts")}**
-    
+
     birthday_alerts
     *The channel to send birthday alerts to (on the day of someone's birthday)*
     **{alerts.get("birthday_alerts")}**
-    
+
     raffle_alerts
     *The channel to send alerts for server raffles to*
     **{alerts.get("raffle_alerts")}**
@@ -688,30 +688,30 @@ WHERE
     followed_picarto_channels
     *Channels for the bot to "follow" and notify this server when they go live*
     **{len(settings.get("followed_picarto_channels"))}**
-    
+
     ignored_channels
     *Channels that the bot ignores*
-    **{len(settings.get("ignored_channels"))}** 
-    
+    **{len(settings.get("ignored_channels"))}**
+
     ignored_members
     *Members that the bot ignores*
     **{len(settings.get("ignored_members"))}**
-    
+
     rules
     *Rules for this server*
     **{len(settings.get("rules"))}**
-    
+
     assignable_roles
     *Roles that can be self-assigned by users*
     **{len(settings.get("assignable_roles"))}**
-    
+
     custom_battles
     *Possible outcomes to battles that can be received on this server*
-    **{len(settings.get("custom_battles"))}** 
-    
+    **{len(settings.get("custom_battles"))}**
+
     custom_hugs
     *Possible outcomes to hugs that can be received on this server*
-    **{len(settings.get("custom_hugs"))}** 
+    **{len(settings.get("custom_hugs"))}**
 """.strip()
 
         embed = discord.Embed(title=f"Configuration for {ctx.guild.name}", description=fmt)
