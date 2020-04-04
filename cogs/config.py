@@ -5,8 +5,6 @@ import utils
 
 import discord
 
-valid_perms = list(discord.Permissions.VALID_FLAGS.keys())
-
 
 class ConfigException(Exception):
     pass
