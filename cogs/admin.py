@@ -4,7 +4,7 @@ import utils
 from asyncpg import UniqueViolationError
 from discord.ext import commands
 
-valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
+valid_perms = list(discord.Permissions.VALID_FLAGS.keys())
 
 
 class Admin(commands.Cog):
