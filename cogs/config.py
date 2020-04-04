@@ -5,7 +5,7 @@ import utils
 
 import discord
 
-valid_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
+valid_perms = list(discord.Permissions.VALID_FLAGS.keys())
 
 
 class ConfigException(Exception):
