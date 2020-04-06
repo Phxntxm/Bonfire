@@ -34,6 +34,10 @@ twitch_key = global_config.get('twitch_key', "")
 youtube_key = global_config.get("youtube_key", "")
 # The key for Osu API calls
 osu_key = global_config.get('osu_key', '')
+# The key for e621 calls
+e621_key = global_config.get('e621_key', '')
+# The username the API key is under
+e621_user = global_config.get('e621_user', '')
 # The key for League of Legends API calls
 lol_key = global_config.get('lol_key', '')
 # The keys needed for deviant art calls

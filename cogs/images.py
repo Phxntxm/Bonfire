@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord
+import itertools
 import random
 import re
 import math
@@ -228,12 +229,14 @@ class Images(commands.Cog):
         tags = tags.replace(' ', '_')
         tags = tags.replace(',_', ' ')
 
-        url = 'https://e621.net/post/index.json'
+        url = 'https://e621.net/posts.json'
         params = {
+            'login': config.e621_user,
+            'api_key': config.e621_key,
             'limit': 5,
             'tags': tags
         }
-
+        headers = {'User-Agent': config.user_agent}
         nsfw = utils.channel_is_nsfw(ctx.message.channel)
 
         # e621 by default does not filter explicit content, so tack on
@@ -242,7 +245,7 @@ class Images(commands.Cog):
         # Tack on a random order
         params['tags'] += " order:random"
 
-        data = await utils.request(url, payload=params)
+        data = await utils.request(url, payload=params, headers=headers)
 
         if data is None:
             await ctx.send("Sorry, I had trouble connecting at the moment; please try again later")
@@ -253,15 +256,15 @@ class Images(commands.Cog):
         # The response should be in a list format, so we'll end up getting a key error if the response was in json
         # i.e. it responded with a 404/504/etc.
         try:
-            for image in data:
+            for image in data["posts"]:
                 # Will support in the future
                 blacklist = []
-                tags = image["tags"]
+                tags = itertools.chain.from_iterable(image["tags"].values())
                 # Check if any of the tags are in the blacklist
-                if any(tag in blacklist for tag in tags):
+                if any(tag in tags for tag in blacklist):
                     continue
                 # If this image is fine, then send this and break
-                await ctx.send(image["file_url"])
+                await ctx.send(image["file"]["url"])
                 return
         except (ValueError, KeyError):
             await ctx.send("No results with that tag {}".format(ctx.message.author.mention))
