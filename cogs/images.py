@@ -231,12 +231,12 @@ class Images(commands.Cog):
 
         url = 'https://e621.net/posts.json'
         params = {
-            'login': config.e621_user,
-            'api_key': config.e621_key,
+            'login': utils.config.e621_user,
+            'api_key': utils.config.e621_key,
             'limit': 5,
             'tags': tags
         }
-        headers = {'User-Agent': config.user_agent}
+        headers = {'User-Agent': utils.config.user_agent}
         nsfw = utils.channel_is_nsfw(ctx.message.channel)
 
         # e621 by default does not filter explicit content, so tack on
