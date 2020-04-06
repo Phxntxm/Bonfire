@@ -77,7 +77,10 @@ class Polls(commands.Cog):
             return
         poll = self.get_poll(reaction.message)
         if poll:
-            await poll.remove_other_reaction(reaction, user)
+            try:
+                await poll.remove_other_reaction(reaction, user)
+            except discord.Forbidden:
+                pass
 
     @commands.command()
     @commands.guild_only()
