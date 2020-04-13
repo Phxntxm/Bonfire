@@ -72,13 +72,13 @@ class Images(commands.Cog):
             await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
             return
         result = data['data']
-        filename = result.get('file_url_size_large', None)
-        if filename is None:
+        filename = result.get('file_name')
+        url = result.get('file_url_size_large')
+        if url is None:
             await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
             return
 
-        image = await utils.download_image(filename)
-        filename = re.search('.*/optimized/large/(.*)', filename).group(1)
+        image = await utils.download_image(url)
         f = discord.File(image, filename=filename)
         try:
             await ctx.send(file=f)
@@ -100,13 +100,13 @@ class Images(commands.Cog):
             await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
             return
         result = data['data']
-        filename = result.get('file_url_size_large', None)
-        if filename is None:
+        filename = result.get('file_name')
+        url = result.get('file_url_size_large')
+        if url is None:
             await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
             return
 
-        image = await utils.download_image(filename)
-        filename = re.search('.*/optimized/large/(.*)', filename).group(1)
+        image = await utils.download_image(url)
         f = discord.File(image, filename=filename)
         try:
             await ctx.send(file=f)
