@@ -188,11 +188,16 @@ class Owner(commands.Cog):
     @commands.command()
     async def bash(self, ctx, *, cmd: str):
         """Runs a bash command"""
-        output = subprocess.check_output("{}; exit 0".format(cmd), stderr=subprocess.STDOUT, shell=True)
-        if output:
-            await ctx.send("```\n{}\n```".format(output.decode("utf-8", "ignore").strip()))
+        proc = await asyncio.create_subprocess_shell(
+            cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT
+        )
+        stdout = (await proc.communicate())[0]
+        if stdout:
+            await ctx.send(f'[stdout]\n{stdout.decode()}')
         else:
-            await ctx.send("No output for `{}`".format(cmd))
+            await ctx.send("Process finished, no output")
 
     @commands.command()
     async def shutdown(self, ctx):
