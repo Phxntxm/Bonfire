@@ -14,24 +14,20 @@ class Images(commands.Cog):
     async def horse_noodle_api(self, ctx, animal):
         data = await utils.request(f"http://hrsendl.com/api/{animal}")
 
-        if data is None:
-            await ctx.send(f"I couldn't connect! Sorry no {animal}s right now ;w;")
-            return
-        result = data['data']
-        filename = result.get('file_name')
-        url = result.get('file_url_size_large')
-        if url is None:
-            await ctx.send(f"I couldn't connect! Sorry no {animal}s right now ;w;")
-            return
-
-        image = await utils.download_image(url)
-        f = discord.File(image, filename=filename)
         try:
-            await ctx.send(file=f)
-        except discord.HTTPException:
-            await ctx.send(
-                f"File to large to send as attachment, here is the URL: {url}"
-            )
+            url = data["data"]["file_url_size_large"]
+            filename = data["data"]["file_name"]
+        except (KeyError, TypeError):
+            return await ctx.send(f"I couldn't connect! Sorry no {animal}s right now ;w;")
+        else:
+            image = await utils.download_image(url)
+            f = discord.File(image, filename=filename)
+            try:
+                await ctx.send(file=f)
+            except discord.HTTPException:
+                await ctx.send(
+                    f"File to large to send as attachment, here is the URL: {url}"
+                )
 
     @commands.command(aliases=['rc'])
     @utils.can_run(send_messages=True)
