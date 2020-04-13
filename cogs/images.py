@@ -11,6 +11,28 @@ import utils
 class Images(commands.Cog):
     """Commands that post images, or look up images"""
 
+    async def horse_noodle_api(self, ctx, animal):
+        data = await utils.request(f"http://hrsendl.com/api/{animal}")
+
+        if data is None:
+            await ctx.send(f"I couldn't connect! Sorry no {animal}s right now ;w;")
+            return
+        result = data['data']
+        filename = result.get('file_name')
+        url = result.get('file_url_size_large')
+        if url is None:
+            await ctx.send(f"I couldn't connect! Sorry no {animal}s right now ;w;")
+            return
+
+        image = await utils.download_image(url)
+        f = discord.File(image, filename=filename)
+        try:
+            await ctx.send(file=f)
+        except discord.HTTPException:
+            await ctx.send(
+                f"File to large to send as attachment, here is the URL: {url}"
+            )
+
     @commands.command(aliases=['rc'])
     @utils.can_run(send_messages=True)
     async def cat(self, ctx):
@@ -66,26 +88,7 @@ class Images(commands.Cog):
 
         EXAMPLE: !snek
         RESULT: A beautiful picture of a snek o3o"""
-        data = await utils.request("http://hrsendl.com/api/snake")
-
-        if data is None:
-            await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
-            return
-        result = data['data']
-        filename = result.get('file_name')
-        url = result.get('file_url_size_large')
-        if url is None:
-            await ctx.send("I couldn't connect! Sorry no snakes right now ;w;")
-            return
-
-        image = await utils.download_image(url)
-        f = discord.File(image, filename=filename)
-        try:
-            await ctx.send(file=f)
-        except discord.HTTPException:
-            await ctx.send(
-                f"File to large to send as attachment, here is the URL: {url}"
-            )
+        await self.horse_noodle_api(ctx, "snake")
 
     @commands.command()
     @utils.can_run(send_messages=True)
@@ -94,26 +97,43 @@ class Images(commands.Cog):
 
         EXAMPLE: !horse
         RESULT: A beautiful picture of a horse o3o"""
-        data = await utils.request("http://hrsendl.com/api/horse")
+        await self.horse_noodle_api(ctx, "horse")
 
-        if data is None:
-            await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
-            return
-        result = data['data']
-        filename = result.get('file_name')
-        url = result.get('file_url_size_large')
-        if url is None:
-            await ctx.send("I couldn't connect! Sorry no horses right now ;w;")
-            return
+    @commands.command()
+    @utils.can_run(send_messages=True)
+    async def duck(self, ctx):
+        """Use this to print a random duck image.
 
-        image = await utils.download_image(url)
-        f = discord.File(image, filename=filename)
-        try:
-            await ctx.send(file=f)
-        except discord.HTTPException:
-            await ctx.send(
-                f"File to large to send as attachment, here is the URL: {url}"
-            )
+        EXAMPLE: !duck
+        RESULT: A beautiful picture of a duck o3o"""
+        await self.horse_noodle_api(ctx, "duck")
+
+    @commands.command()
+    @utils.can_run(send_messages=True)
+    async def snail(self, ctx):
+        """Use this to print a random snail image.
+
+        EXAMPLE: !snail
+        RESULT: A beautiful picture of a snail o3o"""
+        await self.horse_noodle_api(ctx, "snail")
+
+    @commands.command()
+    @utils.can_run(send_messages=True)
+    async def pleco(self, ctx):
+        """Use this to print a random pleco image.
+
+        EXAMPLE: !pleco
+        RESULT: A beautiful picture of a pleco o3o"""
+        await self.horse_noodle_api(ctx, "pleco")
+
+    @commands.command()
+    @utils.can_run(send_messages=True)
+    async def moth(self, ctx):
+        """Use this to print a random moth image.
+
+        EXAMPLE: !moth
+        RESULT: A beautiful picture of a moth o3o"""
+        await self.horse_noodle_api(ctx, "moth")
 
     @commands.command()
     @commands.guild_only()
