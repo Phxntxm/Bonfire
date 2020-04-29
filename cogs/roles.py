@@ -313,7 +313,7 @@ class Roles(commands.Cog):
         name = msg.content
 
         # Print a list of all the permissions available, then ask for which ones need to be active on this new role
-        all_perms = [p for p in dir(discord.Permissions) if isinstance(getattr(discord.Permissions, p), property)]
+        all_perms = list(discord.Permissions.VALID_FLAGS.keys())
         fmt = "\n".join("{}) {}".format(i, perm) for i, perm in enumerate(all_perms))
         await ctx.send("Sounds fancy! Here is a list of all the permissions available. Please respond with just "
                        "the numbers, seperated by commas, of the permissions you want this role to have.\n"
