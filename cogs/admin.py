@@ -535,7 +535,7 @@ WHERE
             perm_value
         )
 
-        ctx.bot.cache.update_custom_permission(ctx.guild, cmd.qualified_name, perm_value)
+        ctx.bot.cache.update_custom_permission(ctx.guild, cmd, perm_value)
 
         await ctx.send("I have just added your custom permissions; "
                        "you now need to have `{}` permissions to use the command `{}`".format(permission, command))
@@ -560,7 +560,7 @@ WHERE
             "DELETE FROM custom_permissions WHERE guild=$1 AND command=$2", ctx.guild.id, cmd.qualified_name
         )
 
-        ctx.bot.cache.update_custom_permission(ctx.guild, cmd.qualified_name, None)
+        ctx.bot.cache.update_custom_permission(ctx.guild, cmd, None)
 
         await ctx.send("I have just removed the custom permissions for {}!".format(cmd))
 
