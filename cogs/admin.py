@@ -528,13 +528,20 @@ WHERE
                 await ctx.send("This command cannot have custom permissions setup!")
                 return
 
-        await ctx.bot.db.execute(
-            "INSERT INTO custom_permissions (guild, command, permission) VALUES ($1, $2, $3)",
-            ctx.guild.id,
-            cmd.qualified_name,
-            perm_value
-        )
-
+        try:
+            await ctx.bot.db.execute(
+                "INSERT INTO custom_permissions (guild, command, permission) VALUES ($1, $2, $3)",
+                ctx.guild.id,
+                cmd.qualified_name,
+                perm_value
+            )
+        except UniqueViolationError:
+            await ctx.bot.db.execute(
+                "UPDATE custom_permissions SET permission = $1 WHERE guild = $2 AND command = $3",
+                perm_value,
+                ctx.guild.id,
+                cmd.qualified_name
+            )
         ctx.bot.cache.update_custom_permission(ctx.guild, cmd, perm_value)
 
         await ctx.send("I have just added your custom permissions; "
