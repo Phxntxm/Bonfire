@@ -1,9 +1,10 @@
 from discord.ext import commands
 
+import asyncio
 import utils
+import typing
 
 import discord
-import asyncio
 
 
 class Moderation(commands.Cog):
@@ -47,43 +48,21 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @utils.can_run(ban_members=True)
-    async def ban(self, ctx, member, *, reason=None):
+    async def ban(self, ctx, member: typing.Union[discord.Member, discord.Object], *, reason=None):
         """Used to ban a member
         This can be used to ban someone preemptively as well.
         Provide the ID of the user and this should ban them without them being in the server
 
         EXAMPLE: !ban 531251325312
         RESULT: That dude be banned"""
-
-        # Lets first check if a user ID was provided, as that will be the easiest case to ban
-        if member.isdigit():
-            try:
-                await ctx.bot.http.ban(member, ctx.guild.id, reason=reason)
-                await ctx.send("\N{OK HAND SIGN}")
-            except discord.Forbidden:
-                await ctx.send("But I can't, muh permissions >:c")
-            except discord.HTTPException:
-                await ctx.send("Sorry, I failed to ban that user!")
-            finally:
-                return
+        try:
+            await ctx.guild.ban(member, reason=reason)
+        except discord.Forbidden:
+            await ctx.send("But I can't, muh permissions >:c")
+        except discord.HTTPException:
+            await ctx.send("Sorry, I failed to ban that user!")
         else:
-            # If no ID was provided, lets try to convert what was given using the internal coverter
-            converter = commands.converter.MemberConverter()
-            try:
-                member = await converter.convert(ctx, member)
-            except commands.converter.BadArgument:
-                await ctx.send(
-                    '{} does not appear to be a valid member. If this member is not in this server, please provide '
-                    'their ID'.format(member))
-                return
-            # Now lets try actually banning the member we've been given
-            try:
-                await member.ban(reason=reason)
-                await ctx.send("\N{OK HAND SIGN}")
-            except discord.Forbidden:
-                await ctx.send("But I can't, muh permissions >:c")
-            except discord.HTTPException:
-                await ctx.send("Sorry, I failed to ban that user!")
+            await ctx.send("\N{OK HAND SIGN}")
 
     @commands.command()
     @commands.guild_only()
