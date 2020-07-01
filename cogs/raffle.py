@@ -118,7 +118,7 @@ class Raffle(commands.Cog):
         elif "day" in term:
             num = num * 24 * 60 * 60
 
-        if 60 < num < 259200:
+        if not 60 < num < 259200:
             await ctx.send(
                 "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 days")
             return
