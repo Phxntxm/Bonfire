@@ -38,7 +38,7 @@ def _command_signature(cmd):
     return ' '.join(result)
 
 
-class Miscallaneous(commands.Cog):
+class Miscellaneous(commands.Cog):
     """Core commands, these are the miscallaneous commands that don't fit into other categories'"""
     process = psutil.Process()
     process.cpu_percent()
@@ -236,7 +236,7 @@ class Miscallaneous(commands.Cog):
         value = ""
 
         memory_usage = self.process.memory_full_info().uss / 1024 ** 2
-        cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
+        cpu_usage = self.process.cpu_percent()
         value += 'Memory: {:.2f} MiB'.format(memory_usage)
         value += '\nCPU: {}%'.format(cpu_usage)
         if hasattr(ctx.bot, 'uptime'):
