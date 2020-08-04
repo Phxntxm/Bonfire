@@ -69,7 +69,7 @@ class Games(commands.Cog):
         # If we're here, game over, someone messed up
         await message.add_reaction("❌")
         if last_letter in ("ん", "ン"):
-            await ctx.send(f"Wrong! ん cannot be used as the last letter!")
+            await ctx.send(f"Wrong! ん cannot be used as the last kana!")
         else:
             await ctx.send(f"Wrong! {message.author.mention} is a loser!")
 
