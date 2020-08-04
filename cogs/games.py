@@ -15,6 +15,8 @@ class Games(commands.Cog):
         apple, then the next word can be elephant because apple ends in e and elephant begins in e
 
         The last player who entered a word cannot be the next person who enters a word
+        The kana ん cannot be used, as no word in Japanese starts with this
+        The word used cannot be a previously given word
         """
         def grab_letter(word, last=True):
             iterator = reversed(word) if last else iter(word)
