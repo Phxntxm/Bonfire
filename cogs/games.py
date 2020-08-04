@@ -36,35 +36,33 @@ class Games(commands.Cog):
             else:
                 return True
 
-        # The info for the last word used
-        last_word = start_word
-        last_letter = grab_letter(start_word)
-        last_author = ctx.author
-        words_used = [start_word]
-
-        # Add the reaction to the first message, to show we've started
-        await ctx.message.add_reaction("✅")
+        # Setup the info needed for the game
+        message = ctx.message
+        mesage.content = start_word
+        words_used = []
 
         while True:
-            message = await ctx.bot.wait_for("message", check=check)
-
-            # Grab the first letter of this new word
+            # Grab the first letter of this new word and check it
             first_letter = grab_letter(message.content, last=False)
-
-            if first_letter != last_letter:
+            # Include extra check for if this is the first word
+            if words_used and first_letter != last_letter:
                 break
-
-            # As long as we got a valid message, and the letter matches, then we're all good. Continue on
+            # Now set the "last" information, to start checking if it's correct
             last_word = message.content
-            last_letter = grab_letter(message.content)
+            last_letter = grab_letter(last_word)
+            last_author = message.author
 
             # Extra check for the japanese version, ん cannot be used
             if last_letter in ("ん", "ン"):
                 break
+            # Cannot reuuse words; though make sure this doesn't get caught on the very first usage
+            if last_word in words_used and len(words_used) > 1:
+                break
 
-            last_author = message.author
+            # If we're here, then the last letter used was valid
             words_used.append(last_word)
             await message.add_reaction("✅")
+            message = await ctx.bot.wait_for("message", check=check)
 
         # If we're here, game over, someone messed up
         await message.add_reaction("❌")
