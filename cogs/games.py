@@ -38,7 +38,7 @@ class Games(commands.Cog):
 
         # Setup the info needed for the game
         message = ctx.message
-        mesage.content = start_word
+        message.content = start_word
         words_used = []
 
         while True:
