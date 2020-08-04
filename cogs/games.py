@@ -7,7 +7,7 @@ class Games(commands.Cog):
 
     @commands.guild_only()
     @utils.can_run(send_messages=True)
-    @commands.command(aliases=["word_chain"])
+    @commands.command(aliases=["word_chain", "しりとり"])
     async def shiritori(self, ctx, *, start_word):
         """
         Starts a game of Shiritori, in which the last letter of the last word given
@@ -57,13 +57,21 @@ class Games(commands.Cog):
             # As long as we got a valid message, and the letter matches, then we're all good. Continue on
             last_word = message.content
             last_letter = grab_letter(message.content)
+
+            # Extra check for the japanese version, ん cannot be used
+            if last_letter in ("ん", "ン"):
+                break
+
             last_author = message.author
             words_used.append(last_word)
             await message.add_reaction("✅")
 
         # If we're here, game over, someone messed up
         await message.add_reaction("❌")
-        await ctx.send(f"Wrong! {message.author.mention} is a loser!")
+        if last_letter in ("ん", "ン"):
+            await ctx.send(f"Wrong! ん cannot be used as the last letter!")
+        else:
+            await ctx.send(f"Wrong! {message.author.mention} is a loser!")
 
 
 def setup(bot):
