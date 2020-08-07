@@ -82,7 +82,7 @@ async def on_command_error(ctx, error):
         return
 
     try:
-        if isinstance(error, commands.BadArgument):
+        if isinstance(error, (commands.BadArgument, commands.BadUnionArgument)):
             fmt = "Please provide a valid argument to pass to the command: {}".format(error)
             await ctx.message.channel.send(fmt)
         elif isinstance(error, commands.NoPrivateMessage):
