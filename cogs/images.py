@@ -286,6 +286,9 @@ class Images(commands.Cog):
             await ctx.send("No results with that tag {}".format(ctx.message.author.mention))
             return
 
+        # If we're here then there was nothing in the posts, or nothing found that's not blacklisted
+        await ctx.send("No results with that tag {}".format(ctx.message.author.mention))
+
 
 def setup(bot):
     bot.add_cog(Images(bot))
