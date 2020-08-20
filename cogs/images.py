@@ -171,7 +171,7 @@ class Images(commands.Cog):
         RESULT: A picture of Rainbow Dash!"""
 
         if len(search) > 0:
-            url = 'https://derpibooru.org/search.json'
+            url = 'https://derpibooru.org/api/v1/json/search/images'
 
             # Ensure a filter was not provided, as we either want to use our own, or none (for safe pics)
             query = ' '.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
@@ -196,7 +196,7 @@ class Images(commands.Cog):
                 if data is None:
                     await ctx.send("Sorry but I failed to connect to Derpibooru!")
                     return
-                results = data['search']
+                results = data['images']
             except KeyError:
                 await ctx.send("No results with that search term, {0}!".format(ctx.message.author.mention))
                 return
@@ -213,12 +213,12 @@ class Images(commands.Cog):
                     await ctx.send("Sorry but I failed to connect to Derpibooru!")
                     return
                 # Now get the results again
-                results = data['search']
+                results = data['images']
 
                 # Get the image link from the now random page'd and random result from that page
                 index = random.SystemRandom().randint(0, len(results) - 1)
                 # image_link = 'https://derpibooru.org/{}'.format(results[index]['id'])
-                image_link = 'https:{}'.format(results[index]['image'])
+                image_link = results[index]['view_url']
             else:
                 await ctx.send("No results with that search term, {0}!".format(ctx.message.author.mention))
                 return
