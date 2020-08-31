@@ -50,7 +50,7 @@ class Tags(commands.Cog):
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @utils.can_run(send_messages=True)
-    async def tag(self, ctx, *, tag: str):
+    async def tag(self, ctx, *, trigger: str):
         """This can be used to call custom tags
         The format to call a custom tag is !tag <tag>
 
@@ -59,14 +59,14 @@ class Tags(commands.Cog):
         tag = await ctx.bot.db.fetchrow(
             "SELECT id, result FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
-            tag.lower().strip()
+            trigger.lower().strip()
         )
 
         if tag:
             await ctx.send("\u200B{}".format(tag['result']))
             await ctx.bot.db.execute("UPDATE tags SET uses = uses + 1 WHERE id = $1", tag['id'])
         else:
-            await ctx.send("There is no tag called {}".format(tag))
+            await ctx.send("There is no tag called {}".format(trigger))
 
     @tag.command(name='add', aliases=['create', 'setup'])
     @commands.guild_only()
