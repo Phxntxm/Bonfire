@@ -134,9 +134,7 @@ class Roles(commands.Cog):
 
         # This allows the user to remove multiple roles from the list of users, if they want.
         await ctx.send("Alright, please provide the roles you would like to remove from this member. "
-                       "Make sure the roles, if more than one is provided, are separate by commas. "
-                       "Here is a list of this server's roles:"
-                       "```\n{}```".format("\n".join([r.name for r in server_roles])))
+                       "Make sure the roles, if more than one is provided, are separate by commas. ")
         try:
             msg = await ctx.bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
@@ -195,9 +193,7 @@ class Roles(commands.Cog):
             members = msg.mentions
 
         await ctx.send("Alright, please provide the roles you would like to add to this member. "
-                       "Make sure the roles, if more than one is provided, are separate by commas. "
-                       "Here is a list of this server's roles:"
-                       "```\n{}```".format("\n".join([r.name for r in server_roles])))
+                       "Make sure the roles, if more than one is provided, are separate by commas. ")
         try:
             msg = await ctx.bot.wait_for('message', check=check, timeout=60)
         except asyncio.TimeoutError:
