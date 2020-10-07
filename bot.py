@@ -11,6 +11,9 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 from discord.ext import commands
 import utils
 
+intent = discord.Intents.all()
+intent.presences = False
+
 opts = {
     "command_prefix": utils.command_prefix,
     "description": utils.bot_description,
@@ -18,6 +21,7 @@ opts = {
     "command_not_found": "",
     "activity": discord.Activity(name=utils.default_status, type=0),
     "allowed_mentions": discord.AllowedMentions(everyone=False),
+    "intents": intent,
 }
 
 bot = commands.AutoShardedBot(**opts)
