@@ -37,6 +37,16 @@ async def start_typing(ctx):
 
 
 @bot.event
+async def on_ready():
+    completion = "Ready in: ```\n{}```".format(
+        (pendulum.now(tz="UTC") - bot.uptime).in_words()
+    )
+    await bot.get_guild(214143647447253003).get_channel(214146604519784449).send(
+        completion
+    )
+
+
+@bot.event
 async def on_command_completion(ctx):
     author = ctx.author.id
     guild = ctx.guild.id if ctx.guild else None
