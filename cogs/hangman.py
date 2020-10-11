@@ -12,7 +12,9 @@ class Game:
     def __init__(self, word):
         self.word = word
         # This converts everything but spaces to a blank
-        self.blanks = "".join(letter if not re.search("[a-zA-Z0-9]", letter) else "_" for letter in word)
+        self.blanks = "".join(
+            letter if not re.search("[a-zA-Z0-9]", letter) else "_" for letter in word
+        )
         self.failed_letters = []
         self.guessed_letters = []
         self.fails = 0
@@ -24,8 +26,9 @@ class Game:
             # Replace every occurence of the guessed letter, with the correct letter
             # Use the one in the word instead of letter, due to capitalization
             self.blanks = "".join(
-                word_letter if letter.lower() == word_letter.lower() else self.blanks[i] for i, word_letter in
-                enumerate(self.word))
+                word_letter if letter.lower() == word_letter.lower() else self.blanks[i]
+                for i, word_letter in enumerate(self.word)
+            )
             return True
         else:
             self.fails += 1
@@ -52,15 +55,22 @@ class Game:
         man = "     ——\n"
         man += "    |  |\n"
         man += "    {}  |\n".format("o" if self.fails > 0 else " ")
-        man += "   {}{}{} |\n".format("/" if self.fails > 1 else " ", "|" if self.fails > 2 else " ",
-                                      "\\" if self.fails > 3 else " ")
+        man += "   {}{}{} |\n".format(
+            "/" if self.fails > 1 else " ",
+            "|" if self.fails > 2 else " ",
+            "\\" if self.fails > 3 else " ",
+        )
         man += "    {}  |\n".format("|" if self.fails > 4 else " ")
-        man += "   {} {} |\n".format("/" if self.fails > 5 else " ", "\\" if self.fails > 6 else " ")
+        man += "   {} {} |\n".format(
+            "/" if self.fails > 5 else " ", "\\" if self.fails > 6 else " "
+        )
         man += "       |\n"
         man += "    ———————\n"
         fmt = "```\n{}```".format(man)
         # Then just add the guesses and the blanks to the string
-        fmt += "```\nGuesses: {}\nWord: {}```".format(", ".join(self.failed_letters), " ".join(self.blanks))
+        fmt += "```\nGuesses: {}\nWord: {}```".format(
+            ", ".join(self.failed_letters), " ".join(self.blanks)
+        )
         return fmt
 
 
@@ -77,7 +87,7 @@ class Hangman(commands.Cog):
         game.author = ctx.message.author.id
         return game
 
-    @commands.group(aliases=['hm'], invoke_without_command=True)
+    @commands.group(aliases=["hm"], invoke_without_command=True)
     @commands.guild_only()
     @commands.cooldown(1, 7, BucketType.user)
     @checks.can_run(send_messages=True)
@@ -126,7 +136,7 @@ class Hangman(commands.Cog):
 
         await ctx.send(fmt)
 
-    @hangman.command(name='create', aliases=['start'])
+    @hangman.command(name="create", aliases=["start"])
     @commands.guild_only()
     @checks.can_run(send_messages=True)
     async def create_hangman(self, ctx):
@@ -142,49 +152,62 @@ class Hangman(commands.Cog):
             await ctx.send("Sorry but only one Hangman game can be running per server!")
             return
         if ctx.guild.id in self.pending_games:
-            await ctx.send("Someone has already started one, and I'm now waiting for them...")
+            await ctx.send(
+                "Someone has already started one, and I'm now waiting for them..."
+            )
             return
 
         try:
             msg = await ctx.message.author.send(
                 "Please respond with a phrase you would like to use for your hangman game in **{}**\n\nPlease keep "
-                "phrases less than 31 characters".format(
-                    ctx.message.guild.name))
+                "phrases less than 31 characters".format(ctx.message.guild.name)
+            )
         except discord.Forbidden:
             await ctx.send(
                 "I can't message you {}! Please allow DM's so I can message you and ask for the hangman phrase you "
-                "want to use!".format(ctx.message.author.display_name))
+                "want to use!".format(ctx.message.author.display_name)
+            )
             return
 
-        await ctx.send("I have DM'd you {}, please respond there with the phrase you would like to setup".format(
-            ctx.message.author.display_name))
+        await ctx.send(
+            "I have DM'd you {}, please respond there with the phrase you would like to setup".format(
+                ctx.message.author.display_name
+            )
+        )
 
         def check(m):
             return m.channel == msg.channel and len(m.content) <= 30
 
         self.pending_games.append(ctx.guild.id)
         try:
-            msg = await ctx.bot.wait_for('message', check=check, timeout=60)
+            msg = await ctx.bot.wait_for("message", check=check, timeout=60)
         except asyncio.TimeoutError:
             self.pending_games.remove(ctx.guild.id)
             await ctx.send(
-                "You took too long! Please look at your DM's as that's where I'm asking for the phrase you want to use")
+                "You took too long! Please look at your DM's as that's where I'm asking for the phrase you want to use"
+            )
             return
         else:
             self.pending_games.remove(ctx.guild.id)
 
-        forbidden_phrases = ['stop', 'delete', 'remove', 'end', 'create', 'start']
+        forbidden_phrases = ["stop", "delete", "remove", "end", "create", "start"]
         if msg.content in forbidden_phrases:
-            await ctx.send("Detected forbidden hangman phrase; current forbidden phrases are: \n{}".format(
-                "\n".join(forbidden_phrases)))
+            await ctx.send(
+                "Detected forbidden hangman phrase; current forbidden phrases are: \n{}".format(
+                    "\n".join(forbidden_phrases)
+                )
+            )
             return
 
         game = self.create(msg.content, ctx)
         # Let them know the game has started, then print the current game so that the blanks are shown
         await ctx.send(
-            "Alright, a hangman game has just started, you can start guessing now!\n{}".format(str(game)))
+            "Alright, a hangman game has just started, you can start guessing now!\n{}".format(
+                str(game)
+            )
+        )
 
-    @hangman.command(name='delete', aliases=['stop', 'remove', 'end'])
+    @hangman.command(name="delete", aliases=["stop", "remove", "end"])
     @commands.guild_only()
     @checks.can_run(kick_members=True)
     async def stop_game(self, ctx):
@@ -199,7 +222,9 @@ class Hangman(commands.Cog):
             return
 
         del self.games[ctx.message.guild.id]
-        await ctx.send("I have just stopped the game of Hangman, a new should be able to be started now!")
+        await ctx.send(
+            "I have just stopped the game of Hangman, a new should be able to be started now!"
+        )
 
 
 def setup(bot):

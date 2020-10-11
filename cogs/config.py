@@ -11,13 +11,11 @@ class ConfigException(Exception):
 
 
 class WrongSettingType(ConfigException):
-
     def __init__(self, message):
         self.message = message
 
 
 class MessageFormatError(ConfigException):
-
     def __init__(self, original, keys):
         self.original = original
         self.keys = keys
@@ -27,9 +25,7 @@ class MessageFormatError(ConfigException):
 class GuildConfiguration(commands.Cog):
     """Handles configuring the different settings that can be used on the bot"""
 
-    keys = {
-
-    }
+    keys = {}
 
     def _str_to_bool(self, opt, setting):
         setting = setting.title()
@@ -48,27 +44,41 @@ class GuildConfiguration(commands.Cog):
         if opt == "prefix":
             ctx.bot.cache.update_prefix(ctx.guild, setting)
         try:
-            return await ctx.bot.db.execute(f"INSERT INTO guilds (id, \"{opt}\") VALUES ($1, $2)", ctx.guild.id, setting)
+            return await ctx.bot.db.execute(
+                f'INSERT INTO guilds (id, "{opt}") VALUES ($1, $2)',
+                ctx.guild.id,
+                setting,
+            )
         except UniqueViolationError:
-            return await ctx.bot.db.execute(f"UPDATE guilds SET {opt} = $1 WHERE id = $2", setting, ctx.guild.id)
+            return await ctx.bot.db.execute(
+                f"UPDATE guilds SET {opt} = $1 WHERE id = $2", setting, ctx.guild.id
+            )
 
     async def _show_bool_options(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT * FROM guilds WHERE id = $1", ctx.guild.id
+        )
         return f"`{opt}` are currently {'enabled' if result is not None and result[opt] else 'disabled'}"
 
     async def _show_channel_options(self, ctx, opt):
         """For showing options that rely on a certain channel"""
-        result = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT * FROM guilds WHERE id = $1", ctx.guild.id
+        )
         if result is None:
             return f"You do not have a channel set for {opt}"
         channel_id = result[opt]
         if channel_id:
             channel = ctx.guild.get_channel(channel_id)
             if channel:
-                return f"Your {opt} alerts channel is currently set to {channel.mention}"
+                return (
+                    f"Your {opt} alerts channel is currently set to {channel.mention}"
+                )
             else:
-                return "It looks like you used to have a channel set for this," \
-                       "however the channel has since been deleted"
+                return (
+                    "It looks like you used to have a channel set for this,"
+                    "however the channel has since been deleted"
+                )
         else:
             return f"You do not have a channel set for {opt}"
 
@@ -89,23 +99,33 @@ class GuildConfiguration(commands.Cog):
     _handle_show_raffle_alerts = _show_channel_options
 
     async def _handle_show_welcome_msg(self, ctx, setting):
-        result = await ctx.bot.db.fetchrow("SELECT welcome_msg FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT welcome_msg FROM guilds WHERE id = $1", ctx.guild.id
+        )
         try:
-            msg = result["welcome_msg"].format(server=ctx.guild.name, member=ctx.author.mention)
-            return f"Your current welcome message will appear like this:\n\n"
+            msg = result["welcome_msg"].format(
+                server=ctx.guild.name, member=ctx.author.mention
+            )
+            return f"Your current welcome message will appear like this:\n\n{msg}"
         except (AttributeError, TypeError):
             return "You currently have no welcome message setup"
 
     async def _handle_show_goodbye_msg(self, ctx, setting):
-        result = await ctx.bot.db.fetchrow("SELECT goodbye_msg FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT goodbye_msg FROM guilds WHERE id = $1", ctx.guild.id
+        )
         try:
-            msg = result["goodbye_msg"].format(server=ctx.guild.name, member=ctx.author.mention)
-            return f"Your current goodbye message will appear like this:\n\n"
+            msg = result["goodbye_msg"].format(
+                server=ctx.guild.name, member=ctx.author.mention
+            )
+            return f"Your current goodbye message will appear like this:\n\n{msg}"
         except (AttributeError, TypeError):
             return "You currently have no goodbye message setup"
 
     async def _handle_show_prefix(self, ctx, setting):
-        result = await ctx.bot.db.fetchrow("SELECT prefix FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT prefix FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result is not None:
             prefix = result["prefix"]
@@ -115,7 +135,9 @@ class GuildConfiguration(commands.Cog):
         return "You do not have a custom prefix set, you are using the default prefix"
 
     async def _handle_show_followed_picarto_channels(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT followed_picarto_channels FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT followed_picarto_channels FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result and result["followed_picarto_channels"]:
             try:
@@ -127,7 +149,9 @@ class GuildConfiguration(commands.Cog):
             return "This server is not following any picarto channels"
 
     async def _handle_show_ignored_channels(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT ignored_channels FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT ignored_channels FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result and result["ignored_channels"]:
             try:
@@ -144,7 +168,9 @@ class GuildConfiguration(commands.Cog):
             return "This server is not ignoring any channels"
 
     async def _handle_show_ignored_members(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT ignored_members FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT ignored_members FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result and result["ignored_members"]:
             try:
@@ -161,7 +187,9 @@ class GuildConfiguration(commands.Cog):
             return "This server is not ignoring any members"
 
     async def _handle_show_rules(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT rules FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT rules FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result and result["rules"]:
             try:
@@ -173,7 +201,9 @@ class GuildConfiguration(commands.Cog):
             return "This server has no rules"
 
     async def _handle_show_assignable_roles(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT assignable_roles FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT assignable_roles FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result and result["assignable_roles"]:
             try:
@@ -190,7 +220,9 @@ class GuildConfiguration(commands.Cog):
             return "This server has no assignable roles"
 
     async def _handle_show_custom_battles(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT custom_battles FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT custom_battles FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result and result["custom_battles"]:
             try:
@@ -202,7 +234,9 @@ class GuildConfiguration(commands.Cog):
             return "This server has no custom battles"
 
     async def _handle_show_custom_hugs(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT custom_hugs FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT custom_hugs FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
         if result and result["custom_hugs"]:
             try:
@@ -214,10 +248,12 @@ class GuildConfiguration(commands.Cog):
             return "This server has no custom hugs"
 
     async def _handle_show_join_role(self, ctx, opt):
-        result = await ctx.bot.db.fetchrow("SELECT join_role FROM guilds WHERE id = $1", ctx.guild.id)
+        result = await ctx.bot.db.fetchrow(
+            "SELECT join_role FROM guilds WHERE id = $1", ctx.guild.id
+        )
 
-        if result and result['join_role']:
-            role = ctx.guild.get_role(result['join_role'])
+        if result and result["join_role"]:
+            role = ctx.guild.get_role(result["join_role"])
             if role is None:
                 return "You had a role set, but I can't find it...it's most likely been deleted afterwords!"
             else:
@@ -257,7 +293,7 @@ class GuildConfiguration(commands.Cog):
 
     async def _handle_set_welcome_msg(self, ctx, setting):
         try:
-            setting.format(member='test', server='test')
+            setting.format(member="test", server="test")
         except KeyError as e:
             raise MessageFormatError(e, ["member", "server"])
         else:
@@ -265,7 +301,7 @@ class GuildConfiguration(commands.Cog):
 
     async def _handle_set_goodbye_msg(self, ctx, setting):
         try:
-            setting.format(member='test', server='test')
+            setting.format(member="test", server="test")
         except KeyError as e:
             raise MessageFormatError(e, ["member", "server"])
         else:
@@ -306,7 +342,9 @@ class GuildConfiguration(commands.Cog):
     async def _handle_set_followed_picarto_channels(self, ctx, setting):
         user = await utils.request(f"http://api.picarto.tv/v1/channel/name/{setting}")
         if user is None:
-            raise WrongSettingType(f"Could not find a picarto user with the username {setting}")
+            raise WrongSettingType(
+                f"Could not find a picarto user with the username {setting}"
+            )
 
         query = """
 UPDATE
@@ -401,7 +439,7 @@ WHERE
     async def _handle_set_custom_hugs(self, ctx, setting):
         try:
             setting.format(user="user")
-        except (KeyError, ValueError)as e:
+        except (KeyError, ValueError) as e:
             raise MessageFormatError(e, ["user"])
         else:
             query = """
@@ -480,7 +518,9 @@ where
 
     async def _handle_remove_followed_picarto_channels(self, ctx, setting=None):
         if setting is None:
-            raise WrongSettingType("Specifying which channel you want to remove is required")
+            raise WrongSettingType(
+                "Specifying which channel you want to remove is required"
+            )
 
         query = """
 UPDATE
@@ -494,7 +534,9 @@ WHERE
 
     async def _handle_remove_ignored_channels(self, ctx, setting=None):
         if setting is None:
-            raise WrongSettingType("Specifying which channel you want to remove is required")
+            raise WrongSettingType(
+                "Specifying which channel you want to remove is required"
+            )
 
         channel = await self._get_channel(ctx, setting)
 
@@ -510,7 +552,9 @@ WHERE
 
     async def _handle_remove_ignored_members(self, ctx, setting=None):
         if setting is None:
-            raise WrongSettingType("Specifying which channel you want to remove is required")
+            raise WrongSettingType(
+                "Specifying which channel you want to remove is required"
+            )
         # We want to make it possible to have members that aren't in the server ignored
         # So first check if it's a digit (the id)
         if not setting.isdigit():
@@ -532,7 +576,9 @@ WHERE
 
     async def _handle_remove_rules(self, ctx, setting=None):
         if setting is None or not setting.isdigit():
-            raise WrongSettingType("Please provide the number of the rule you want to remove")
+            raise WrongSettingType(
+                "Please provide the number of the rule you want to remove"
+            )
 
         query = """
 UPDATE
@@ -546,7 +592,9 @@ WHERE
 
     async def _handle_remove_assignable_roles(self, ctx, setting=None):
         if setting is None:
-            raise WrongSettingType("Specifying which channel you want to remove is required")
+            raise WrongSettingType(
+                "Specifying which channel you want to remove is required"
+            )
         if not setting.isdigit():
             converter = commands.converter.RoleConverter()
             role = await converter.convert(ctx, setting)
@@ -566,7 +614,9 @@ WHERE
 
     async def _handle_remove_custom_battles(self, ctx, setting=None):
         if setting is None or not setting.isdigit():
-            raise WrongSettingType("Please provide the number of the custom battle you want to remove")
+            raise WrongSettingType(
+                "Please provide the number of the custom battle you want to remove"
+            )
         else:
             setting = int(setting)
 
@@ -582,7 +632,9 @@ WHERE
 
     async def _handle_remove_custom_hugs(self, ctx, setting=None):
         if setting is None or not setting.isdigit():
-            raise WrongSettingType("Please provide the number of the custom hug you want to remove")
+            raise WrongSettingType(
+                "Please provide the number of the custom hug you want to remove"
+            )
         else:
             setting = int(setting)
 
@@ -609,7 +661,9 @@ WHERE
             try:
                 coro = getattr(self, f"_handle_show_{opt}")
             except AttributeError:
-                await ctx.send(f"{opt} is not a valid config option. Use {ctx.prefix}config to list all config options")
+                await ctx.send(
+                    f"{opt} is not a valid config option. Use {ctx.prefix}config to list all config options"
+                )
             else:
                 try:
                     msg = await coro(ctx, opt)
@@ -620,16 +674,29 @@ WHERE
                 else:
                     return await ctx.send(msg)
 
-        settings = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id=$1", ctx.guild.id)
+        settings = await ctx.bot.db.fetchrow(
+            "SELECT * FROM guilds WHERE id=$1", ctx.guild.id
+        )
 
         # For convenience, if it's None, just create it and return the default values
         if settings is None:
-            await ctx.bot.db.execute("INSERT INTO guilds (id) VALUES ($1)", ctx.guild.id)
-            settings = await ctx.bot.db.fetchrow("SELECT * FROM guilds WHERE id=$1", ctx.guild.id)
+            await ctx.bot.db.execute(
+                "INSERT INTO guilds (id) VALUES ($1)", ctx.guild.id
+            )
+            settings = await ctx.bot.db.fetchrow(
+                "SELECT * FROM guilds WHERE id=$1", ctx.guild.id
+            )
 
         alerts = {}
         # This is dirty I know, but oh well...
-        for alert_type in ["default", "welcome", "goodbye", "picarto", "birthday", "raffle"]:
+        for alert_type in [
+            "default",
+            "welcome",
+            "goodbye",
+            "picarto",
+            "birthday",
+            "raffle",
+        ]:
             channel = ctx.guild.get_channel(settings.get(f"{alert_type}_alerts"))
             name = channel.name if channel else None
             alerts[alert_type] = name
@@ -712,7 +779,9 @@ WHERE
     **{len(settings.get("custom_hugs"))}**
 """.strip()
 
-        embed = discord.Embed(title=f"Configuration for {ctx.guild.name}", description=fmt)
+        embed = discord.Embed(
+            title=f"Configuration for {ctx.guild.name}", description=fmt
+        )
         embed.set_image(url=ctx.guild.icon_url)
         await ctx.send(embed=embed)
 
@@ -724,11 +793,15 @@ WHERE
         try:
             coro = getattr(self, f"_handle_set_{option}")
         except AttributeError:
-            await ctx.send(f"{option} is not a valid config option. Use {ctx.prefix}config to list all config options")
+            await ctx.send(
+                f"{option} is not a valid config option. Use {ctx.prefix}config to list all config options"
+            )
         else:
             # First make sure there's an entry for this guild before doing anything
             try:
-                await ctx.bot.db.execute("INSERT INTO guilds(id) VALUES ($1)", ctx.guild.id)
+                await ctx.bot.db.execute(
+                    "INSERT INTO guilds(id) VALUES ($1)", ctx.guild.id
+                )
             except UniqueViolationError:
                 pass
 
@@ -755,7 +828,9 @@ Extraneous args provided: {', '.join(k for k in exc.original.args)}
         try:
             coro = getattr(self, f"_handle_remove_{option}")
         except AttributeError:
-            await ctx.send(f"{option} is not a valid config option. Use {ctx.prefix}config to list all config options")
+            await ctx.send(
+                f"{option} is not a valid config option. Use {ctx.prefix}config to list all config options"
+            )
         else:
             try:
                 await coro(ctx, setting=setting)

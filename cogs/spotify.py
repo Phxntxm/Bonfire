@@ -31,9 +31,9 @@ class Spotify(commands.Cog):
             try:
                 delay = await self.get_api_token()
             except Exception as error:
-                with open("error_log", 'a') as f:
+                with open("error_log", "a") as f:
                     traceback.print_tb(error.__traceback__, file=f)
-                    print('{0.__class__.__name__}: {0}'.format(error), file=f)
+                    print("{0.__class__.__name__}: {0}".format(error), file=f)
             finally:
                 await asyncio.sleep(delay)
 
@@ -61,7 +61,12 @@ class Spotify(commands.Cog):
         url = "https://api.spotify.com/v1/search"
         response = await utils.request(url, headers=headers, payload=opts)
         try:
-            await ctx.send(response.get("tracks").get("items")[0].get("external_urls").get("spotify"))
+            await ctx.send(
+                response.get("tracks")
+                .get("items")[0]
+                .get("external_urls")
+                .get("spotify")
+            )
         except (KeyError, AttributeError, IndexError):
             await ctx.send("Couldn't find a song for:\n{}".format(query))
 
@@ -79,7 +84,12 @@ class Spotify(commands.Cog):
         url = "https://api.spotify.com/v1/search"
         response = await utils.request(url, headers=headers, payload=opts)
         try:
-            await ctx.send(response.get("playlists").get("items")[0].get("external_urls").get("spotify"))
+            await ctx.send(
+                response.get("playlists")
+                .get("items")[0]
+                .get("external_urls")
+                .get("spotify")
+            )
         except (KeyError, AttributeError, IndexError):
             await ctx.send("Couldn't find a song for:\n{}".format(query))
 

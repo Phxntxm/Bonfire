@@ -17,10 +17,12 @@ class Tags(commands.Cog):
 
         EXAMPLE: !tags
         RESULT: All tags setup on this server"""
-        tags = await ctx.bot.db.fetch("SELECT trigger FROM tags WHERE guild=$1", ctx.guild.id)
+        tags = await ctx.bot.db.fetch(
+            "SELECT trigger FROM tags WHERE guild=$1", ctx.guild.id
+        )
 
         if len(tags) > 0:
-            entries = [t['trigger'] for t in tags]
+            entries = [t["trigger"] for t in tags]
             pages = utils.Pages(ctx, entries=entries)
             await pages.paginate()
         else:
@@ -37,11 +39,11 @@ class Tags(commands.Cog):
         tags = await ctx.bot.db.fetch(
             "SELECT trigger FROM tags WHERE guild=$1 AND creator=$2",
             ctx.guild.id,
-            ctx.author.id
+            ctx.author.id,
         )
 
         if len(tags) > 0:
-            entries = [t['trigger'] for t in tags]
+            entries = [t["trigger"] for t in tags]
             pages = utils.Pages(ctx, entries=entries)
             await pages.paginate()
         else:
@@ -59,16 +61,18 @@ class Tags(commands.Cog):
         tag = await ctx.bot.db.fetchrow(
             "SELECT id, result FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
-            trigger.lower().strip()
+            trigger.lower().strip(),
         )
 
         if tag:
-            await ctx.send("\u200B{}".format(tag['result']))
-            await ctx.bot.db.execute("UPDATE tags SET uses = uses + 1 WHERE id = $1", tag['id'])
+            await ctx.send("\u200B{}".format(tag["result"]))
+            await ctx.bot.db.execute(
+                "UPDATE tags SET uses = uses + 1 WHERE id = $1", tag["id"]
+            )
         else:
             await ctx.send("There is no tag called {}".format(trigger))
 
-    @tag.command(name='add', aliases=['create', 'setup'])
+    @tag.command(name="add", aliases=["create", "setup"])
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     async def add_tag(self, ctx):
@@ -78,9 +82,15 @@ class Tags(commands.Cog):
         RESULT: A follow-along in order to create a new tag"""
 
         def check(m):
-            return m.channel == ctx.message.channel and m.author == ctx.message.author and len(m.content) > 0
+            return (
+                m.channel == ctx.message.channel
+                and m.author == ctx.message.author
+                and len(m.content) > 0
+            )
 
-        my_msg = await ctx.send("Ready to setup a new tag! What do you want the trigger for the tag to be?")
+        my_msg = await ctx.send(
+            "Ready to setup a new tag! What do you want the trigger for the tag to be?"
+        )
 
         try:
             msg = await ctx.bot.wait_for("message", check=check, timeout=60)
@@ -89,20 +99,32 @@ class Tags(commands.Cog):
             return
 
         trigger = msg.content.lower().strip()
-        forbidden_tags = ['add', 'create', 'setup', 'edit', 'info', 'delete', 'remove', 'stop']
+        forbidden_tags = [
+            "add",
+            "create",
+            "setup",
+            "edit",
+            "info",
+            "delete",
+            "remove",
+            "stop",
+        ]
         if len(trigger) > 100:
             await ctx.send("Please keep tag triggers under 100 characters")
             return
         elif trigger.lower() in forbidden_tags:
             await ctx.send(
                 "Sorry, but your tag trigger was detected to be forbidden. "
-                "Current forbidden tag triggers are: \n{}".format("\n".join(forbidden_tags)))
+                "Current forbidden tag triggers are: \n{}".format(
+                    "\n".join(forbidden_tags)
+                )
+            )
             return
 
         tag = await ctx.bot.db.fetchrow(
             "SELECT result FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
-            trigger.lower().strip()
+            trigger.lower().strip(),
         )
         if tag:
             await ctx.send("There is already a tag setup called {}!".format(trigger))
@@ -116,7 +138,9 @@ class Tags(commands.Cog):
 
         my_msg = await ctx.send(
             "Alright, your new tag can be called with {}!\n\nWhat do you want to be displayed with this tag?".format(
-                trigger))
+                trigger
+            )
+        )
 
         try:
             msg = await ctx.bot.wait_for("message", check=check, timeout=60)
@@ -131,34 +155,45 @@ class Tags(commands.Cog):
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-        await ctx.send("I have just setup a new tag for this server! You can call your tag with {}".format(trigger))
+        await ctx.send(
+            "I have just setup a new tag for this server! You can call your tag with {}".format(
+                trigger
+            )
+        )
         await ctx.bot.db.execute(
             "INSERT INTO tags(guild, creator, trigger, result) VALUES ($1, $2, $3, $4)",
             ctx.guild.id,
             ctx.author.id,
             trigger,
-            result
+            result,
         )
 
-    @tag.command(name='edit')
+    @tag.command(name="edit")
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     async def edit_tag(self, ctx, *, trigger: str):
         """This will allow you to edit a tag that you have created
         EXAMPLE: !tag edit this tag
         RESULT: I'll ask what you want the new result to be"""
+
         def check(m):
-            return m.channel == ctx.message.channel and m.author == ctx.message.author and len(m.content) > 0
+            return (
+                m.channel == ctx.message.channel
+                and m.author == ctx.message.author
+                and len(m.content) > 0
+            )
 
         tag = await ctx.bot.db.fetchrow(
             "SELECT id, trigger FROM tags WHERE guild=$1 AND creator=$2 AND trigger=$3",
             ctx.guild.id,
             ctx.author.id,
-            trigger
+            trigger,
         )
 
         if tag:
-            my_msg = await ctx.send(f"Alright, what do you want the new result for the tag {tag} to be")
+            my_msg = await ctx.send(
+                f"Alright, what do you want the new result for the tag {tag} to be"
+            )
             try:
                 msg = await ctx.bot.wait_for("message", check=check, timeout=60)
             except asyncio.TimeoutError:
@@ -174,11 +209,13 @@ class Tags(commands.Cog):
                 pass
 
             await ctx.send(f"Alright, the tag {trigger} has been updated")
-            await ctx.bot.db.execute("UPDATE tags SET result=$1 WHERE id=$2", new_result, tag['id'])
+            await ctx.bot.db.execute(
+                "UPDATE tags SET result=$1 WHERE id=$2", new_result, tag["id"]
+            )
         else:
             await ctx.send(f"You do not have a tag called {trigger} on this server!")
 
-    @tag.command(name='delete', aliases=['remove', 'stop'])
+    @tag.command(name="delete", aliases=["remove", "stop"])
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     async def del_tag(self, ctx, *, trigger: str):
@@ -192,12 +229,12 @@ class Tags(commands.Cog):
             "SELECT id FROM tags WHERE guild=$1 AND creator=$2 AND trigger=$3",
             ctx.guild.id,
             ctx.author.id,
-            trigger
+            trigger,
         )
 
         if tag:
             await ctx.send(f"I have just deleted the tag {trigger}")
-            await ctx.bot.db.execute("DELETE FROM tags WHERE id=$1", tag['id'])
+            await ctx.bot.db.execute("DELETE FROM tags WHERE id=$1", tag["id"])
         else:
             await ctx.send(f"You do not own a tag called {trigger} on this server!")
 
@@ -210,15 +247,15 @@ class Tags(commands.Cog):
         tag = await ctx.bot.db.fetchrow(
             "SELECT creator, uses, trigger FROM tags WHERE guild=$1 AND trigger=$2",
             ctx.guild.id,
-            trigger
+            trigger,
         )
 
         if tag is not None:
-            embed = discord.Embed(title=tag['trigger'])
-            creator = ctx.guild.get_member(tag['creator'])
+            embed = discord.Embed(title=tag["trigger"])
+            creator = ctx.guild.get_member(tag["creator"])
             if creator:
                 embed.set_author(name=creator.display_name, url=creator.avatar_url)
-            embed.add_field(name="Uses", value=tag['uses'])
+            embed.add_field(name="Uses", value=tag["uses"])
             embed.add_field(name="Owner", value=creator.mention)
 
             await ctx.send(embed=embed)

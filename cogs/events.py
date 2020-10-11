@@ -8,9 +8,9 @@ from discord.ext import commands
 
 log = logging.getLogger()
 
-discord_bots_url = 'https://bots.discord.pw/api/bots/{}/stats'
+discord_bots_url = "https://bots.discord.pw/api/bots/{}/stats"
 discordbots_url = "https://discordbots.org/api/bots/{}/stats"
-carbonitex_url = 'https://www.carbonitex.net/discord/data/botdata.php'
+carbonitex_url = "https://www.carbonitex.net/discord/data/botdata.php"
 
 
 class StatsUpdate(commands.Cog):
@@ -27,39 +27,42 @@ class StatsUpdate(commands.Cog):
         server_count = len(self.bot.guilds)
 
         # Carbonitex request
-        carbon_payload = {
-            'key': config.carbon_key,
-            'servercount': server_count
-        }
+        carbon_payload = {"key": config.carbon_key, "servercount": server_count}
 
         async with self.session.post(carbonitex_url, data=carbon_payload) as resp:
-            log.info('Carbonitex statistics returned {} for {}'.format(resp.status, carbon_payload))
+            log.info(
+                "Carbonitex statistics returned {} for {}".format(
+                    resp.status, carbon_payload
+                )
+            )
 
         # Discord.bots.pw request
-        payload = json.dumps({
-            'server_count': server_count
-        })
+        payload = json.dumps({"server_count": server_count})
 
         headers = {
-            'authorization': config.discord_bots_key,
-            'content-type': 'application/json'
+            "authorization": config.discord_bots_key,
+            "content-type": "application/json",
         }
 
         url = discord_bots_url.format(self.bot.user.id)
         async with self.session.post(url, data=payload, headers=headers) as resp:
-            log.info('bots.discord.pw statistics returned {} for {}'.format(resp.status, payload))
+            log.info(
+                "bots.discord.pw statistics returned {} for {}".format(
+                    resp.status, payload
+                )
+            )
 
         # discordbots.com request
         url = discordbots_url.format(self.bot.user.id)
-        payload = {
-            "server_count": server_count
-        }
+        payload = {"server_count": server_count}
 
-        headers = {
-            "Authorization": config.discordbots_key
-        }
+        headers = {"Authorization": config.discordbots_key}
         async with self.session.post(url, data=payload, headers=headers) as resp:
-            log.info('discordbots.com statistics retruned {} for {}'.format(resp.status, payload))
+            log.info(
+                "discordbots.com statistics retruned {} for {}".format(
+                    resp.status, payload
+                )
+            )
 
     @commands.Cog.listener()
     async def on_guild_join(self, _):
@@ -88,11 +91,13 @@ WHERE
 """
         settings = await self.bot.db.fetchrow(query, member.guild.id)
         if settings:
-            message = settings['msg'] or "Welcome to the '{server}' server {member}!"
+            message = settings["msg"] or "Welcome to the '{server}' server {member}!"
             if settings["notify"]:
                 try:
-                    channel = member.guild.get_channel(settings['channel'])
-                    await channel.send(message.format(server=member.guild.name, member=member.mention))
+                    channel = member.guild.get_channel(settings["channel"])
+                    await channel.send(
+                        message.format(server=member.guild.name, member=member.mention)
+                    )
                     # Forbidden for if the channel has send messages perms off
                     # HTTP Exception to catch any weird happenings
                     # Attribute Error catches when a channel is set, but that channel doesn't exist any more
@@ -100,7 +105,7 @@ WHERE
                     pass
 
             try:
-                role = member.guild.get_role(settings['role'])
+                role = member.guild.get_role(settings["role"])
                 await member.add_roles(role)
             except (discord.Forbidden, discord.HTTPException, AttributeError):
                 pass
@@ -122,10 +127,15 @@ AND
 """
         settings = await self.bot.db.fetchrow(query, member.guild.id)
         if settings:
-            message = settings['msg'] or "{member} has left the server, I hope it wasn't because of something I said :c"
-            channel = member.guild.get_channel(settings['channel'])
+            message = (
+                settings["msg"]
+                or "{member} has left the server, I hope it wasn't because of something I said :c"
+            )
+            channel = member.guild.get_channel(settings["channel"])
             try:
-                await channel.send(message.format(server=member.guild.name, member=member.mention))
+                await channel.send(
+                    message.format(server=member.guild.name, member=member.mention)
+                )
             except (discord.Forbidden, discord.HTTPException, AttributeError):
                 pass
 

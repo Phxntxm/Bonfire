@@ -48,7 +48,9 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.guild_only()
     @utils.can_run(ban_members=True)
-    async def ban(self, ctx, member: typing.Union[discord.Member, discord.Object], *, reason=None):
+    async def ban(
+        self, ctx, member: typing.Union[discord.Member, discord.Object], *, reason=None
+    ):
         """Used to ban a member
         This can be used to ban someone preemptively as well.
         Provide the ID of the user and this should ban them without them being in the server
@@ -72,7 +74,9 @@ class Moderation(commands.Cog):
 
         EXAMPLE: !purge 50
         RESULT: -50 messages in this channel"""
-        if not ctx.message.channel.permissions_for(ctx.message.guild.me).manage_messages:
+        if not ctx.message.channel.permissions_for(
+            ctx.message.guild.me
+        ).manage_messages:
             await ctx.send("I do not have permission to delete messages...")
             return
         try:
@@ -80,10 +84,12 @@ class Moderation(commands.Cog):
             await ctx.message.delete()
         except discord.HTTPException:
             try:
-                await ctx.message.channel.send("Detected messages that are too far "
-                                               "back for me to delete; I can only bulk delete messages"
-                                               " that are under 14 days old.")
-            except:
+                await ctx.message.channel.send(
+                    "Detected messages that are too far "
+                    "back for me to delete; I can only bulk delete messages"
+                    " that are under 14 days old."
+                )
+            except discord.Forbidden:
                 pass
 
     @commands.command()
@@ -125,7 +131,9 @@ class Moderation(commands.Cog):
 
         # If we're not setting the user to the bot, then we're deleting someone elses messages
         # To do so, we need manage_messages permission, so check if we have that
-        if not ctx.message.channel.permissions_for(ctx.message.guild.me).manage_messages:
+        if not ctx.message.channel.permissions_for(
+            ctx.message.guild.me
+        ).manage_messages:
             await ctx.send("I do not have permission to delete messages...")
             return
 
@@ -137,7 +145,7 @@ class Moderation(commands.Cog):
                 try:
                     await msg.delete()
                     count += 1
-                except:
+                except discord.HTTPException:
                     pass
                 if count >= limit:
                     break
@@ -147,7 +155,7 @@ class Moderation(commands.Cog):
         try:
             await msg.delete()
             await ctx.message.delete()
-        except:
+        except discord.HTTPException:
             pass
 
 

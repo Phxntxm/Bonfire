@@ -3,9 +3,9 @@ import discord
 import traceback
 import utils
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 
-BASE_URL = 'https://api.picarto.tv/v1'
+BASE_URL = "https://api.picarto.tv/v1"
 
 
 def produce_embed(*channels):
@@ -19,7 +19,9 @@ def produce_embed(*channels):
 **Gaming:** {"Yes" if channel.get("gaming") else "No"}
 **Commissions:** {"Yes" if channel.get("commissions") else "No"}"""
 
-    return discord.Embed(title="Channels that have gone online!", description=description.strip())
+    return discord.Embed(
+        title="Channels that have gone online!", description=description.strip()
+    )
 
 
 class Picarto(commands.Cog):
@@ -27,17 +29,13 @@ class Picarto(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.task = self.bot.loop.create_task(self.picarto_task())
         self.channel_info = {}
 
     # noinspection PyAttributeOutsideInit
     async def get_online_users(self):
         # This method is in place to just return all online users so we can compare against it
-        url = BASE_URL + '/online'
-        payload = {
-            'adult': 'true',
-            'gaming': 'true'
-        }
+        url = BASE_URL + "/online"
+        payload = {"adult": "true", "gaming": "true"}
         channel_info = {}
         channels = await utils.request(url, payload=payload)
         if channels and isinstance(channels, (list, set, tuple)) and len(channels) > 0:
@@ -58,24 +56,7 @@ class Picarto(commands.Cog):
             # After loop has finished successfully, we want to override the statuses of the channels
             self.channel_info = channel_info
 
-    async def picarto_task(self):
-        # The first time we setup this task, if we leave an empty dict as channel_info....it will announce anything
-        # So what we want to do here, is get everyone who is online now before starting the actual check
-        # Also wait a little before starting
-        await self.bot.wait_until_ready()
-        await self.get_online_users()
-        await asyncio.sleep(30)
-        # Now that we've done the initial setup, start the actual loop we'll use
-        try:
-            while not self.bot.is_closed():
-                await self.check_channels()
-                await asyncio.sleep(30)
-        except Exception as error:
-            with open("error_log", 'a') as f:
-                traceback.print_tb(error.__traceback__, file=f)
-                print('{0.__class__.__name__}: {0}'.format(error), file=f)
-            await asyncio.sleep(30)
-
+    @tasks.loop(seconds=30)
     async def check_channels(self):
         query = """
 SELECT
@@ -99,12 +80,23 @@ WHERE
             # If they've gone online, produce the embed for them and send it
             if gone_online:
                 embed = produce_embed(*gone_online)
-                channel = self.bot.get_channel(result["channel"])
+                g = self.bot.get_guild(result["id"])
+                channel = g.get_channel(result["channel"])
                 if channel is not None:
                     try:
                         await channel.send(embed=embed)
                     except (discord.Forbidden, discord.HTTPException, AttributeError):
                         pass
+
+    @check_channels.before_task
+    async def before_check_channels(self):
+        await self.get_online_users()
+        await asyncio.sleep(30)
+
+    @check_channels.error
+    async def picarto_error(self, error):
+        await utils.log_error(error, self.bot)
+        await self.check_channels.restart()
 
 
 def setup(bot):

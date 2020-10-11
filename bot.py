@@ -1,12 +1,7 @@
 import discord
-import traceback
 import logging
-import datetime
 import pendulum
-import os
 import aiohttp
-
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 from discord.ext import commands
 import utils
@@ -29,11 +24,16 @@ logging.basicConfig(level=logging.INFO, filename="bonfire.log")
 
 
 @bot.before_invoke
-async def start_typing(ctx):
+async def before_invocation(ctx):
+    # Start typing
     try:
         await ctx.trigger_typing()
     except (discord.Forbidden, discord.HTTPException):
         pass
+
+    # Ensure guild is chunked
+    if ctx.guild and not ctx.guild.chunked:
+        await ctx.guild.chunk()
 
 
 @bot.event
@@ -121,26 +121,7 @@ async def on_command_error(ctx, error):
                 " recheck where your quotes are"
             )
         else:
-            if isinstance(bot.error_channel, int):
-                bot.error_channel = bot.get_channel(bot.error_channel)
-
-            if bot.error_channel is None:
-                now = datetime.datetime.now()
-                with open("error_log", "a") as f:
-                    print(
-                        "In server '{0.message.guild}' at {1}\n"
-                        "Full command: `{0.message.content}`".format(ctx, str(now)),
-                        file=f,
-                    )
-                    traceback.print_tb(error.__traceback__, file=f)
-                    print("{0.__class__.__name__}: {0}".format(error), file=f)
-            else:
-                await bot.error_channel.send(
-                    f"""```
-Command = {discord.utils.escape_markdown(ctx.message.clean_content).strip()}
-{''.join(traceback.format_tb(error.__traceback__)).strip()}
-{error.__class__.__name__}: {error}```"""
-                )
+            await utils.log_error(error, ctx.bot, ctx)
     except discord.HTTPException:
         pass
 

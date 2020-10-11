@@ -4,7 +4,6 @@ import utils
 
 
 class Games(commands.Cog):
-
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     @commands.command(aliases=["word_chain", "しりとり"])
@@ -18,6 +17,7 @@ class Games(commands.Cog):
         The kana ん cannot be used, as no word in Japanese starts with this
         The word used cannot be a previously given word
         """
+
         def grab_letter(word, last=True):
             iterator = reversed(word) if last else iter(word)
 
@@ -41,6 +41,7 @@ class Games(commands.Cog):
         # Setup the info needed for the game
         message = ctx.message
         message.content = start_word
+        last_letter = None
         words_used = []
 
         while True:
@@ -69,7 +70,7 @@ class Games(commands.Cog):
         # If we're here, game over, someone messed up
         await message.add_reaction("❌")
         if last_letter in ("ん", "ン"):
-            await ctx.send(f"Wrong! ん cannot be used as the last kana!")
+            await ctx.send("Wrong! ん cannot be used as the last kana!")
         else:
             await ctx.send(f"Wrong! {message.author.mention} is a loser!")
 

@@ -2,6 +2,7 @@ import aiohttp
 from io import BytesIO
 import inspect
 import discord
+import traceback
 from discord.ext import commands
 
 from . import config
@@ -14,7 +15,7 @@ def channel_is_nsfw(channel):
 async def download_image(url):
     """Returns a file-like object based on the URL provided"""
     # Simply read the image, to get the bytes
-    bts = await request(url, attr='read')
+    bts = await request(url, attr="read")
     if bts is None:
         return None
 
@@ -23,12 +24,20 @@ async def download_image(url):
     return image
 
 
-async def request(url, *, headers=None, payload=None, method='GET', attr='json', force_content_type_json=False):
+async def request(
+    url,
+    *,
+    headers=None,
+    payload=None,
+    method="GET",
+    attr="json",
+    force_content_type_json=False,
+):
     # Make sure our User Agent is what's set, and ensure it's sent even if no headers are passed
     if headers is None:
         headers = {}
 
-    headers['User-Agent'] = config.user_agent
+    headers["User-Agent"] = config.user_agent
 
     # Try 5 times
     for i in range(5):
@@ -50,7 +59,9 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json',
                             # This causes some places with different mimetypes to fail, even if it's valid json
                             # This check allows us to force the content_type to use whatever content type is given
                             if force_content_type_json:
-                                return_value = return_value(content_type=response.headers['content-type'])
+                                return_value = return_value(
+                                    content_type=response.headers["content-type"]
+                                )
                             else:
                                 return_value = return_value()
                         # If this is awaitable, await it
@@ -65,6 +76,27 @@ async def request(url, *, headers=None, payload=None, method='GET', attr='json',
         # If an error was hit other than the one we want to catch, try again
         except:
             continue
+
+
+async def log_error(error, bot, ctx=None):
+    # First set the actual channel if it's not set yet
+    if isinstance(bot.error_channel, int):
+        bot.error_channel = bot.get_channel(bot.error_channel)
+    # Format the error message
+    fmt = f"""```
+{''.join(traceback.format_tb(error.__traceback__)).strip()}
+{error.__class__.__name__}: {error}```"""
+    # Add the command if ctx is given
+    if ctx is not None:
+        fmt = f"Command = {discord.utils.escape_markdown(ctx.message.clean_content).strip()}\n{fmt}"
+    # If no channel is set, log to a file
+    if bot.error_channel is None:
+        fmt = fmt.strip("`")
+        with open("error_log", "a") as f:
+            print(fmt, file=f)
+    # Otherwise send to the error channel
+    else:
+        await bot.error_channel.send(fmt)
 
 
 async def convert(ctx, option):
@@ -130,7 +162,9 @@ async def update_records(key, db, winner, loser):
     key = f"{key}_rating"
     winner_found = False
     loser_found = False
-    query = f"SELECT id, {key}, {wins}, {losses} FROM users WHERE id = any($1::bigint[])"
+    query = (
+        f"SELECT id, {key}, {wins}, {losses} FROM users WHERE id = any($1::bigint[])"
+    )
     results = await db.fetch(query, [winner.id, loser.id])
 
     # Set our defaults for the stats
@@ -138,7 +172,7 @@ async def update_records(key, db, winner, loser):
     winner_wins = loser_wins = 0
     winner_losses = loser_losses = 0
     for result in results:
-        if result['id'] == winner.id:
+        if result["id"] == winner.id:
             winner_found = True
             winner_rating = result[key]
             winner_wins = result[wins]
@@ -174,14 +208,18 @@ async def update_records(key, db, winner, loser):
     loser_losses += 1
 
     update_query = f"UPDATE users SET {key}=$1, {wins}=$2, {losses}=$3 WHERE id = $4"
-    create_query = f"INSERT INTO users ({key}, {wins}, {losses}, id) VALUES ($1, $2, $3, $4)"
+    create_query = (
+        f"INSERT INTO users ({key}, {wins}, {losses}, id) VALUES ($1, $2, $3, $4)"
+    )
     if winner_found:
-        await db.execute(update_query, winner_rating, winner_wins, winner_losses, winner.id)
+        await db.execute(
+            update_query, winner_rating, winner_wins, winner_losses, winner.id
+        )
     else:
-        await db.execute(create_query, winner_rating, winner_wins, winner_losses, winner.id)
+        await db.execute(
+            create_query, winner_rating, winner_wins, winner_losses, winner.id
+        )
     if loser_found:
         await db.execute(update_query, loser_rating, loser_wins, loser_losses, loser.id)
     else:
         await db.execute(create_query, loser_rating, loser_wins, loser_losses, loser.id)
-
-

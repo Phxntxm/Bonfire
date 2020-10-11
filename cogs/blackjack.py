@@ -24,7 +24,7 @@ class Blackjack(commands.Cog):
         game = Game(self.bot, message, self)
         self.games[message.guild.id] = game
 
-    @commands.group(aliases=['bj'], invoke_without_command=True)
+    @commands.group(aliases=["bj"], invoke_without_command=True)
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     async def blackjack(self, ctx):
@@ -49,9 +49,11 @@ class Blackjack(commands.Cog):
                 if game.playing(ctx.message.author):
                     await ctx.send("You are already playing! Wait for your turn!")
                 else:
-                    await ctx.send("There are already a max number of players playing/waiting to play!")
+                    await ctx.send(
+                        "There are already a max number of players playing/waiting to play!"
+                    )
 
-    @blackjack.command(name='leave', aliases=['quit'])
+    @blackjack.command(name="leave", aliases=["quit"])
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     async def blackjack_leave(self, ctx):
@@ -69,11 +71,15 @@ class Blackjack(commands.Cog):
 
         status = game.leave(ctx.message.author)
         if status:
-            await ctx.send("You have left the game, and will be removed at the end of this round")
+            await ctx.send(
+                "You have left the game, and will be removed at the end of this round"
+            )
         else:
-            await ctx.send("Either you have already bet, or you are not even playing right now!")
+            await ctx.send(
+                "Either you have already bet, or you are not even playing right now!"
+            )
 
-    @blackjack.command(name='forcestop', aliases=['stop'])
+    @blackjack.command(name="forcestop", aliases=["stop"])
     @commands.guild_only()
     @utils.can_run(manage_guild=True)
     async def blackjack_stop(self, ctx):
@@ -140,10 +146,10 @@ class Player:
             value = card.value.value
             face = card.value.name
 
-            if face in ['queen', 'king', 'jack']:
+            if face in ["queen", "king", "jack"]:
                 for index, t in enumerate(total):
                     total[index] += 10
-            elif face == 'ace':
+            elif face == "ace":
                 total = FOIL(total, [1, 11])
             else:
                 for index, t in enumerate(total):
@@ -162,7 +168,7 @@ class Player:
 
     def __eq__(self, other):
         if isinstance(other, Player):
-            if hasattr(other, 'member') and other.member == self.member:
+            if hasattr(other, "member") and other.member == self.member:
                 return True
         return False
 
@@ -179,7 +185,7 @@ class Game:
         player = Player(message.author)
         self.bj = bj
         self.bot = bot
-        self.players = [{'status': 'playing', 'player': player}]
+        self.players = [{"status": "playing", "player": player}]
         # Our buffer for players who want to join
         # People cannot join in the middle of a game, so we'll add them at the end
         self._added_players = []
@@ -202,7 +208,7 @@ class Game:
         del _deck2
         self.deck.shuffle()
         # The dealer
-        self.dealer = Player('Dealer')
+        self.dealer = Player("Dealer")
 
         self.min_bet = 5
         self.max_bet = 500
@@ -269,19 +275,23 @@ class Game:
         # Our check to make sure a valid 'command' was provided
         def check(m):
             if m.channel == self.channel and m.author == player.member:
-                return m.content.lower() in ['hit', 'stand', 'double']
+                return m.content.lower() in ["hit", "stand", "double"]
             else:
                 return False
 
         # First lets handle the blackjacks
-        for entry in [p for p in self.players if p['status'] == 'blackjack']:
-            player = entry['player']
+        for entry in [p for p in self.players if p["status"] == "blackjack"]:
+            player = entry["player"]
             fmt = "You got a blackjack {0.member.mention}!\n\n{0}".format(player)
 
             await self.channel.send(fmt)
         # Loop through each player (as long as their status is playing) and they have bet chips
-        for entry in [p for p in self.players if p['status'] == 'playing' and hasattr(p['player'], 'bet')]:
-            player = entry['player']
+        for entry in [
+            p
+            for p in self.players
+            if p["status"] == "playing" and hasattr(p["player"], "bet")
+        ]:
+            player = entry["player"]
 
             # Let them know it's their turn to play
             fmt = "It is your turn to play {0.member.mention}\n\n{0}".format(player)
@@ -290,7 +300,7 @@ class Game:
 
             # If they're not playing anymore (i.e. they busted, are standing, etc.) then we don't want to keep asking
             #  them to hit or stand
-            while entry['status'] not in ['stand', 'bust']:
+            while entry["status"] not in ["stand", "bust"]:
 
                 # Ask if they want to hit or stand
                 if first:
@@ -300,19 +310,19 @@ class Game:
                 await self.channel.send(fmt)
 
                 try:
-                    msg = await self.bot.wait_for('message', timeout=60, check=check)
+                    msg = await self.bot.wait_for("message", timeout=60, check=check)
                 except asyncio.TimeoutError:
                     await self.channel.send("Took to long! You're standing!")
-                    entry['status'] = 'stand'
+                    entry["status"] = "stand"
                 else:
                     # If they want to hit
-                    if 'hit' in msg.content.lower():
+                    if "hit" in msg.content.lower():
                         self.hit(player)
                         await self.channel.send(player)
                     # If they want to stand
-                    elif 'stand' in msg.content.lower():
+                    elif "stand" in msg.content.lower():
                         self.stand(player)
-                    elif 'double' in msg.content.lower() and first:
+                    elif "double" in msg.content.lower() and first:
                         self.double(player)
                         await self.channel.send(player)
                         # TODO: Handle double, split
@@ -327,14 +337,14 @@ class Game:
         # this, we'll loop 'infinitely', get a list of players who haven't bet yet, and then use the first person in
         # that list
         while True:
-            players = [p for p in self.players if p['status'] == 'playing']
+            players = [p for p in self.players if p["status"] == "playing"]
 
             # If everyone has bet/there is no one playing anymore
             if len(players) == 0:
                 break
 
             entry = players[0]
-            player = entry['player']
+            player = entry["player"]
 
             def check(_msg):
                 """Makes sure the  message provided is within the min and max bets"""
@@ -343,25 +353,33 @@ class Game:
                         msg_length = int(_msg.content)
                         return self.min_bet <= msg_length <= self.max_bet
                     except ValueError:
-                        return _msg.content.lower() == 'skip'
+                        return _msg.content.lower() == "skip"
                 else:
                     return False
 
-            fmt = "Your turn to bet {0.member.mention}, your current chips are: {0.chips}\n" \
-                  "Current min bet is {1}, current max bet is {2}\n" \
-                  "Place your bet now (please provide only the number;" \
-                  "'skip' if you would like to leave this game)".format(player, self.min_bet, self.max_bet)
+            fmt = (
+                "Your turn to bet {0.member.mention}, your current chips are: {0.chips}\n"
+                "Current min bet is {1}, current max bet is {2}\n"
+                "Place your bet now (please provide only the number;"
+                "'skip' if you would like to leave this game)".format(
+                    player, self.min_bet, self.max_bet
+                )
+            )
 
             await self.channel.send(fmt)
 
             try:
                 msg = await self.bot.wait_for("message", timeout=60, check=check)
             except asyncio.TimeoutError:
-                await self.channel.send("You took too long! You're sitting this round out")
-                entry['status'] = 'stand'
+                await self.channel.send(
+                    "You took too long! You're sitting this round out"
+                )
+                entry["status"] = "stand"
             else:
-                if msg.content.lower() == 'skip':
-                    await self.channel.send("Alright, you've been removed from the game")
+                if msg.content.lower() == "skip":
+                    await self.channel.send(
+                        "Alright, you've been removed from the game"
+                    )
                     self.leave(player.member)
                 else:
                     num = int(msg.content)
@@ -369,7 +387,7 @@ class Game:
                     if num <= player.chips:
                         player.bet = num
                         player.chips -= num
-                        entry['status'] = 'bet'
+                        entry["status"] = "bet"
                     else:
                         await self.channel.send("You can't bet more than you have!!")
 
@@ -387,10 +405,10 @@ class Game:
         blackjack = []
 
         for entry in self.players:
-            player = entry['player']
+            player = entry["player"]
             # Quick check here to ensure the player isn't someone who got added
             # Specifically right after the betting phase
-            if not hasattr(player, 'bet'):
+            if not hasattr(player, "bet"):
                 continue
 
             hand = player.hand
@@ -400,7 +418,7 @@ class Game:
             # TODO: Handle blackjacks
             # First if is to check If we can possibly win (a bust is an automatic loss, no matter what)
             # Payouts for wins are 2 times the bet
-            if entry['status'] == 'blackjack':
+            if entry["status"] == "blackjack":
                 if dealer_count != 21:
                     player.chips += math.floor(player.bet * 2.5)
                     blackjack.append(player)
@@ -442,7 +460,7 @@ class Game:
             if player.chips <= 0:
                 self._removed_players.append(player)
 
-            entry['status'] = 'playing'
+            entry["status"] = "playing"
 
         # Now that we've looped through everyone, send the message regarding the outcome
         fmt = "Round stats:\n"
@@ -486,30 +504,32 @@ class Game:
 
         # What we want to do is remove any players that are in the game and have left the guild
         for entry in self.players:
-            m = entry['player'].member
+            m = entry["player"].member
             if m not in self.channel.guild.members:
-                self._removed_players.append(entry['player'])
+                self._removed_players.append(entry["player"])
 
         # Remove the players who left
-        self.players = [p for p in self.players if p['player'] not in self._removed_players]
+        self.players = [
+            p for p in self.players if p["player"] not in self._removed_players
+        ]
         self._removed_players.clear()
 
     def _get_player_index(self, player):
         """Provides the index of a certain player"""
         for i, entry in enumerate(self.players):
-            if entry['player'] == player:
+            if entry["player"] == player:
                 return i
 
     def get_player(self, member):
         """Returns the player object for the discord member provided"""
         for entry in self.players:
-            if entry['player'].member == member:
-                return entry['player']
+            if entry["player"].member == member:
+                return entry["player"]
 
     def playing(self, member):
         """Returns true if the member provided is currently in this game"""
         for entry in self.players:
-            if member == entry['player'].member:
+            if member == entry["player"].member:
                 return True
         return False
 
@@ -520,13 +540,13 @@ class Game:
         for i in range(2):
             for entry in self.players:
                 card = list(self.deck.draw())
-                entry['player'].hand.insert(card)
+                entry["player"].hand.insert(card)
 
                 # Make sure we detect blackjack here, as this is when it matters
-                if 21 in entry['player'].count:
-                    entry['status'] = 'blackjack'
+                if 21 in entry["player"].count:
+                    entry["status"] = "blackjack"
                 else:
-                    entry['status'] = 'playing'
+                    entry["status"] = "playing"
             # Also add a card to the dealer's hand
             card = list(self.deck.draw())
             self.dealer.hand.insert(card)
@@ -538,7 +558,7 @@ class Game:
         if len(self.players) + len(self._added_players) >= self._max_players:
             return False
         player = Player(member)
-        entry = {'status': 'playing', 'player': player}
+        entry = {"status": "playing", "player": player}
         self._added_players.append(entry)
         return True
 
@@ -549,10 +569,10 @@ class Game:
         if player:
             # We need to make sure they haven't already bet
             index = self._get_player_index(player)
-            if self.players[index]['status'] == 'bet':
+            if self.players[index]["status"] == "bet":
                 return False
             else:
-                self.players[index]['status'] = 'left'
+                self.players[index]["status"] = "left"
                 self._removed_players.append(player)
                 return True
         else:
@@ -571,8 +591,8 @@ class Game:
     def stand(self, player):
         """Causes a player to stand"""
         for entry in self.players:
-            if entry['player'] == player:
-                entry['status'] = 'stand'
+            if entry["player"] == player:
+                entry["status"] = "stand"
                 return
 
     def hit(self, player):
@@ -588,10 +608,10 @@ class Game:
 
         if player.bust:
             index = self._get_player_index(player)
-            self.players[index]['status'] = 'bust'
+            self.players[index]["status"] = "bust"
         elif 21 in player.count:
             index = self._get_player_index(player)
-            self.players[index]['status'] = 'stand'
+            self.players[index]["status"] = "stand"
 
 
 def setup(bot):

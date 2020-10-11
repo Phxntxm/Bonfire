@@ -11,6 +11,7 @@ import random
 
 class Raffle(commands.Cog):
     """Used to hold custom raffles"""
+
     raffles = defaultdict(list)
 
     def create_raffle(self, ctx, title, num):
@@ -37,9 +38,9 @@ class Raffle(commands.Cog):
             embed.add_field(
                 name=f"Raffle {num + 1}",
                 value=f"Title: {raffle.title}\n"
-                      f"Total Entrants: {len(raffle.entrants)}\n"
-                      f"Ends in {raffle.remaining}",
-                inline=False
+                f"Total Entrants: {len(raffle.entrants)}\n"
+                f"Ends in {raffle.remaining}",
+                inline=False,
             )
         await ctx.send(embed=embed)
 
@@ -63,7 +64,7 @@ class Raffle(commands.Cog):
             else:
                 await ctx.send("You have already entered this raffle!")
 
-    @raffle.command(name='create', aliases=['start', 'begin', 'add'])
+    @raffle.command(name="create", aliases=["start", "begin", "add"])
     @commands.guild_only()
     @utils.can_run(kick_members=True)
     async def raffle_create(self, ctx):
@@ -76,37 +77,48 @@ class Raffle(commands.Cog):
         channel = ctx.channel
 
         await ctx.send(
-            "Ready to start a new raffle! Please respond with the title you would like to use for this raffle!")
+            "Ready to start a new raffle! Please respond with the title you would like to use for this raffle!"
+        )
 
-        check = lambda m: m.author == author and m.channel == channel
         try:
-            msg = await ctx.bot.wait_for('message', check=check, timeout=120)
+            msg = await ctx.bot.wait_for(
+                "message",
+                check=lambda m: m.author == author and m.channel == channel,
+                timeout=120,
+            )
         except asyncio.TimeoutError:
             await ctx.send("You took too long! >:c")
             return
 
         title = msg.content
 
-        fmt = "Alright, your new raffle will be titled:\n\n{}\n\nHow long would you like this raffle to run for? " \
-              "The format should be [number] [length] for example, `2 days` or `1 hour` or `30 minutes` etc. " \
-              "The minimum for this is 10 minutes, and the maximum is 3 days"
+        fmt = (
+            "Alright, your new raffle will be titled:\n\n{}\n\nHow long would you like this raffle to run for? "
+            "The format should be [number] [length] for example, `2 days` or `1 hour` or `30 minutes` etc. "
+            "The minimum for this is 10 minutes, and the maximum is 3 days"
+        )
         await ctx.send(fmt.format(title))
 
         # Our check to ensure that a proper length of time was passed
         def check(m):
             if m.author == author and m.channel == channel:
-                return re.search("\d+ (minutes?|hours?|days?)", m.content.lower()) is not None
+                return (
+                    re.search(r"\d+ (minutes?|hours?|days?)", m.content.lower())
+                    is not None
+                )
             else:
                 return False
 
         try:
-            msg = await ctx.bot.wait_for('message', timeout=120, check=check)
+            msg = await ctx.bot.wait_for("message", timeout=120, check=check)
         except asyncio.TimeoutError:
             await ctx.send("You took too long! >:c")
             return
 
         # Lets get the length provided, based on the number and type passed
-        num, term = re.search("(\d+) (minutes?|hours?|days?)", msg.content.lower()).groups()
+        num, term = re.search(
+            r"(\d+) (minutes?|hours?|days?)", msg.content.lower()
+        ).groups()
         # This should be safe to convert, we already made sure with our check earlier this would match
         num = int(num)
 
@@ -120,7 +132,8 @@ class Raffle(commands.Cog):
 
         if not 60 < num < 259200:
             await ctx.send(
-                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 days")
+                "Length provided out of range! The minimum for this is 10 minutes, and the maximum is 3 days"
+            )
             return
 
         self.create_raffle(ctx, title, num)
@@ -132,7 +145,6 @@ def setup(bot):
 
 
 class GuildRaffle:
-
     def __init__(self, ctx, title, expires):
         self._ctx = ctx
         self.title = title
@@ -178,13 +190,15 @@ AND
         result = await self.db.fetch(query, self.guild.id)
 
         if result:
-            channel = self.guild.get_channel(result['channel'])
+            channel = self.guild.get_channel(result["channel"])
         if channel is None:
             return
 
         if entrants:
             winner = random.SystemRandom().choice(self.entrants)
-            await channel.send(f"The winner of the raffle `{self.title}` is {winner.mention}! Congratulations!")
+            await channel.send(
+                f"The winner of the raffle `{self.title}` is {winner.mention}! Congratulations!"
+            )
         else:
             await channel.send(
                 f"There were no entrants to the raffle `{self.title}`, who are in this server currently!"

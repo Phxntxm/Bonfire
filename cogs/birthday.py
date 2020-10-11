@@ -1,11 +1,9 @@
 import discord
 import datetime
-import asyncio
-import traceback
 import re
 import calendar
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 from asyncpg import UniqueViolationError
 import utils
 
@@ -40,7 +38,7 @@ def parse_string(date):
         "dec": 12,
     }
 
-    num_re = re.compile("^(\d+)[a-z]*$")
+    num_re = re.compile(r"^(\d+)[a-z]*$")
 
     for part in [x.lower() for x in date.split()]:
         match = num_re.match(part)
@@ -62,17 +60,15 @@ class Birthday(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.task = self.bot.loop.create_task(self.birthday_task())
 
     async def get_birthdays_for_server(self, server, today=False):
-        members = ", ".join(f"{m.id}" for m in server.members)
-        query = f"""
+        query = """
 SELECT
     id, birthday
-FROM 
+FROM
     users
 WHERE
-    id IN ({members})
+    id=ANY($1::bigint[])
 """
         if today:
             query += """
@@ -84,29 +80,16 @@ ORDER BY
     birthday
 """
 
-        return await self.bot.db.fetch(query)
+        return await self.bot.db.fetch(query, [m.id for m in server.members])
 
-    async def birthday_task(self):
-        await self.bot.wait_until_ready()
-
-        while not self.bot.is_closed():
-            try:
-                await self.notify_birthdays()
-            except Exception as error:
-                with open("error_log", 'a') as f:
-                    traceback.print_tb(error.__traceback__, file=f)
-                    print(f"{error.__class__.__name__}: {error}", file=f)
-            finally:
-                # Every day
-                await asyncio.sleep(60 * 60 * 24)
-
+    @tasks.loop(hours=24)
     async def notify_birthdays(self):
         query = """
 SELECT
     id, COALESCE(birthday_alerts, default_alerts) AS channel
-FROM 
+FROM
     guilds
-WHERE 
+WHERE
     birthday_notifications=True
 AND
     COALESCE(birthday_alerts, default_alerts) IS NOT NULL
@@ -117,23 +100,33 @@ AND
             return
 
         for s in servers:
+            # Get guild
+            g = self.bot.get_guild(s["id"])
+            if not g:
+                continue
             # Get the channel based on the birthday alerts, or default alerts channel
-            channel = self.bot.get_channel(s['channel'])
+            channel = g.get_channel(s["channel"])
             if not channel:
                 continue
 
-            bds = await self.get_birthdays_for_server(channel.guild, today=True)
+            # Make sure it's chunked
+            if not g.chunked:
+                await g.chunk()
+
+            bds = await self.get_birthdays_for_server(g, today=True)
 
             # A list of the id's that will get updated
             for bd in bds:
                 try:
-                    member = channel.guild.get_member(bd["id"])
-                    await channel.send(f"It is {member.mention}'s birthday today! "
-                                       "Wish them a happy birthday! \N{SHORTCAKE}")
+                    member = g.get_member(bd["id"])
+                    await channel.send(
+                        f"It is {member.mention}'s birthday today! "
+                        "Wish them a happy birthday! \N{SHORTCAKE}"
+                    )
                 except (discord.Forbidden, discord.HTTPException):
                     pass
                 finally:
-                    update_bds.append(bd['id'])
+                    update_bds.append(bd["id"])
 
         if not update_bds:
             return
@@ -148,7 +141,11 @@ WHERE
 """
         await self.bot.db.execute(query)
 
-    @commands.group(aliases=['birthdays'], invoke_without_command=True)
+    @notify_birthdays.error
+    async def notify_birthdays_errors(self, error):
+        await utils.log_error(error, self.bot)
+
+    @commands.group(aliases=["birthdays"], invoke_without_command=True)
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     async def birthday(self, ctx, *, member: discord.Member = None):
@@ -156,13 +153,20 @@ WHERE
 
         EXAMPLE: !birthdays
         RESULT: A printout of the birthdays from everyone on this server"""
+        if not ctx.guild.chunked:
+            await ctx.guild.chunk()
+
         if member:
-            date = await ctx.bot.db.fetchrow("SELECT birthday FROM users WHERE id=$1", member.id)
+            date = await ctx.bot.db.fetchrow(
+                "SELECT birthday FROM users WHERE id=$1", member.id
+            )
             if date is None or date["birthday"] is None:
                 await ctx.send(f"I do not have {member.display_name}'s birthday saved!")
             else:
-                date = date['birthday']
-                await ctx.send(f"{member.display_name}'s birthday is {calendar.month_name[date.month]} {date.day}")
+                date = date["birthday"]
+                await ctx.send(
+                    f"{member.display_name}'s birthday is {calendar.month_name[date.month]} {date.day}"
+                )
         else:
             # Get this server's birthdays
             bds = await self.get_birthdays_for_server(ctx.guild)
@@ -170,7 +174,7 @@ WHERE
             entries = [
                 f"{ctx.guild.get_member(bd['id']).display_name} ({bd['birthday'].strftime('%B %-d')})"
                 for bd in bds
-                if bd['birthday']
+                if bd["birthday"]
             ]
             if not entries:
                 await ctx.send("I don't know anyone's birthday in this server!")
@@ -184,7 +188,7 @@ WHERE
             except utils.CannotPaginate as e:
                 await ctx.send(str(e))
 
-    @birthday.command(name='add')
+    @birthday.command(name="add")
     @utils.can_run(send_messages=True)
     async def _add_bday(self, ctx, *, date):
         """Used to link your birthday to your account
@@ -192,26 +196,36 @@ WHERE
         EXAMPLE: !birthday add December 1st
         RESULT: I now know your birthday is December 1st"""
         if len(date.split()) != 2:
-            await ctx.send("Please provide date in a valid format, such as December 1st!")
+            await ctx.send(
+                "Please provide date in a valid format, such as December 1st!"
+            )
             return
 
         try:
             date = parse_string(date)
         except ValueError:
-            await ctx.send("Please provide date in a valid format, such as December 1st!")
+            await ctx.send(
+                "Please provide date in a valid format, such as December 1st!"
+            )
             return
 
         if date is None:
-            await ctx.send("Please provide date in a valid format, such as December 1st!")
+            await ctx.send(
+                "Please provide date in a valid format, such as December 1st!"
+            )
             return
 
         await ctx.send(f"I have just saved your birthday as {date}")
         try:
-            await ctx.bot.db.execute("INSERT INTO users (id, birthday) VALUES ($1, $2)", ctx.author.id, date)
+            await ctx.bot.db.execute(
+                "INSERT INTO users (id, birthday) VALUES ($1, $2)", ctx.author.id, date
+            )
         except UniqueViolationError:
-            await ctx.bot.db.execute("UPDATE users SET birthday = $1 WHERE id = $2", date, ctx.author.id)
+            await ctx.bot.db.execute(
+                "UPDATE users SET birthday = $1 WHERE id = $2", date, ctx.author.id
+            )
 
-    @birthday.command(name='remove')
+    @birthday.command(name="remove")
     @utils.can_run(send_messages=True)
     async def _remove_bday(self, ctx):
         """Used to unlink your birthday to your account
@@ -219,7 +233,9 @@ WHERE
         EXAMPLE: !birthday remove
         RESULT: I have magically forgotten your birthday"""
         await ctx.send("I don't know your birthday anymore :(")
-        await ctx.bot.db.execute("UPDATE users SET birthday=NULL WHERE id=$1", ctx.author.id)
+        await ctx.bot.db.execute(
+            "UPDATE users SET birthday=NULL WHERE id=$1", ctx.author.id
+        )
 
 
 def setup(bot):

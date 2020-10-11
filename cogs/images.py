@@ -18,7 +18,9 @@ class Images(commands.Cog):
             url = data["data"]["file_url_size_large"]
             filename = data["data"]["file_name"]
         except (KeyError, TypeError):
-            return await ctx.send(f"I couldn't connect! Sorry no {animal}s right now ;w;")
+            return await ctx.send(
+                f"I couldn't connect! Sorry no {animal}s right now ;w;"
+            )
         else:
             image = await utils.download_image(url)
             f = discord.File(image, filename=filename)
@@ -29,7 +31,7 @@ class Images(commands.Cog):
                     f"File to large to send as attachment, here is the URL: {url}"
                 )
 
-    @commands.command(aliases=['rc'])
+    @commands.command(aliases=["rc"])
     @utils.can_run(send_messages=True)
     async def cat(self, ctx):
         """Use this to print a random cat image.
@@ -38,7 +40,7 @@ class Images(commands.Cog):
         RESULT: A beautiful picture of a cat o3o"""
         url = "http://thecatapi.com/api/images/get"
         opts = {"format": "src"}
-        result = await utils.request(url, attr='url', payload=opts)
+        result = await utils.request(url, attr="url", payload=opts)
 
         try:
             image = await utils.download_image(result)
@@ -53,14 +55,14 @@ class Images(commands.Cog):
                 f"File to large to send as attachment, here is the URL: {url}"
             )
 
-    @commands.command(aliases=['dog', 'rd'])
+    @commands.command(aliases=["dog", "rd"])
     @utils.can_run(send_messages=True)
     async def doggo(self, ctx):
         """Use this to print a random doggo image.
 
         EXAMPLE: !doggo
         RESULT: A beautiful picture of a dog o3o"""
-        result = await utils.request('https://random.dog/woof.json')
+        result = await utils.request("https://random.dog/woof.json")
         try:
             url = result.get("url")
             filename = re.match("https://random.dog/(.*)", url).group(1)
@@ -77,7 +79,7 @@ class Images(commands.Cog):
                 f"File to large to send as attachment, here is the URL: {url}"
             )
 
-    @commands.command(aliases=['snake'])
+    @commands.command(aliases=["snake"])
     @utils.can_run(send_messages=True)
     async def snek(self, ctx):
         """Use this to print a random snek image.
@@ -144,11 +146,11 @@ class Images(commands.Cog):
             member = ctx.message.author
 
         url = str(member.avatar_url)
-        if '.gif' not in url:
-            url = str(member.avatar_url_as(format='png'))
-            filename = 'avatar.png'
+        if ".gif" not in url:
+            url = str(member.avatar_url_as(format="png"))
+            filename = "avatar.png"
         else:
-            filename = 'avatar.gif'
+            filename = "avatar.gif"
         if ctx.message.guild.me.permissions_in(ctx.message.channel).attach_files:
             filedata = await utils.download_image(url)
             if filedata is None:
@@ -171,23 +173,25 @@ class Images(commands.Cog):
         RESULT: A picture of Rainbow Dash!"""
 
         if len(search) > 0:
-            url = 'https://derpibooru.org/api/v1/json/search/images'
+            url = "https://derpibooru.org/api/v1/json/search/images"
 
             # Ensure a filter was not provided, as we either want to use our own, or none (for safe pics)
-            query = ' '.join(value for value in search if not re.search('&?filter_id=[0-9]+', value))
-            params = {'q': query}
+            query = " ".join(
+                value for value in search if not re.search("&?filter_id=[0-9]+", value)
+            )
+            params = {"q": query}
 
             nsfw = utils.channel_is_nsfw(ctx.message.channel)
             # If this is a nsfw channel, we just need to tack on 'explicit' to the terms
             # Also use the custom filter that I have setup, that blocks some certain tags
             # If the channel is not nsfw, we don't need to do anything, as the default filter blocks explicit
             if nsfw:
-                params['q'] += ", (explicit OR suggestive)"
-                params['filter_id'] = 95938
+                params["q"] += ", (explicit OR suggestive)"
+                params["filter_id"] = 95938
             else:
-                params['q'] += ", safe"
+                params["q"] += ", safe"
             # Lets filter out some of the "crap" that's on derpibooru by requiring an image with a score higher than 15
-            params['q'] += ', score.gt:15'
+            params["q"] += ", score.gt:15"
 
             try:
                 # Get the response from derpibooru and parse the 'search' result from it
@@ -196,37 +200,47 @@ class Images(commands.Cog):
                 if data is None:
                     await ctx.send("Sorry but I failed to connect to Derpibooru!")
                     return
-                results = data['images']
+                results = data["images"]
             except KeyError:
-                await ctx.send("No results with that search term, {0}!".format(ctx.message.author.mention))
+                await ctx.send(
+                    "No results with that search term, {0}!".format(
+                        ctx.message.author.mention
+                    )
+                )
                 return
 
             # The first request we've made ensures there are results
             # Now we can get the total count from that, and make another request based on the number of pages as well
             if len(results) > 0:
                 # Get the total number of pages
-                pages = math.ceil(data['total'] / len(results))
+                pages = math.ceil(data["total"] / len(results))
                 # Set a new paramater to set which page to use, randomly based on the number of pages
-                params['page'] = random.SystemRandom().randint(1, pages)
+                params["page"] = random.SystemRandom().randint(1, pages)
                 data = await utils.request(url, payload=params)
                 if data is None:
                     await ctx.send("Sorry but I failed to connect to Derpibooru!")
                     return
                 # Now get the results again
-                results = data['images']
+                results = data["images"]
 
                 # Get the image link from the now random page'd and random result from that page
                 index = random.SystemRandom().randint(0, len(results) - 1)
                 # image_link = 'https://derpibooru.org/{}'.format(results[index]['id'])
-                image_link = results[index]['view_url']
+                image_link = results[index]["view_url"]
             else:
-                await ctx.send("No results with that search term, {0}!".format(ctx.message.author.mention))
+                await ctx.send(
+                    "No results with that search term, {0}!".format(
+                        ctx.message.author.mention
+                    )
+                )
                 return
         else:
             # If no search term was provided, search for a random image
             # .url will be the URL we end up at, not the one requested.
             # https://derpibooru.org/images/random redirects to a random image, so this is exactly what we want
-            image_link = await utils.request('https://derpibooru.org/images/random', attr='url')
+            image_link = await utils.request(
+                "https://derpibooru.org/images/random", attr="url"
+            )
         await ctx.send(image_link)
 
     @commands.command()
@@ -242,29 +256,31 @@ class Images(commands.Cog):
         # This changes the formatting for queries, so we don't
         # Have to use e621's stupid formatting when using the command
 
-        tags = tags.replace(' ', '_')
-        tags = tags.replace(',_', ' ')
+        tags = tags.replace(" ", "_")
+        tags = tags.replace(",_", " ")
 
-        url = 'https://e621.net/posts.json'
+        url = "https://e621.net/posts.json"
         params = {
-            'login': utils.config.e621_user,
-            'api_key': utils.config.e621_key,
-            'limit': 5,
-            'tags': tags
+            "login": utils.config.e621_user,
+            "api_key": utils.config.e621_key,
+            "limit": 5,
+            "tags": tags,
         }
-        headers = {'User-Agent': utils.config.user_agent}
+        headers = {"User-Agent": utils.config.user_agent}
         nsfw = utils.channel_is_nsfw(ctx.message.channel)
 
         # e621 by default does not filter explicit content, so tack on
         # safe/explicit based on if this channel is nsfw or not
-        params['tags'] += " rating:explicit" if nsfw else " rating:safe"
+        params["tags"] += " rating:explicit" if nsfw else " rating:safe"
         # Tack on a random order
-        params['tags'] += " order:random"
+        params["tags"] += " order:random"
 
         data = await utils.request(url, payload=params, headers=headers)
 
         if data is None:
-            await ctx.send("Sorry, I had trouble connecting at the moment; please try again later")
+            await ctx.send(
+                "Sorry, I had trouble connecting at the moment; please try again later"
+            )
             return
 
         # Try to find an image from the list. If there were no results, we're going to attempt to find
@@ -283,7 +299,9 @@ class Images(commands.Cog):
                 await ctx.send(image["file"]["url"])
                 return
         except (ValueError, KeyError):
-            await ctx.send("No results with that tag {}".format(ctx.message.author.mention))
+            await ctx.send(
+                "No results with that tag {}".format(ctx.message.author.mention)
+            )
             return
 
         # If we're here then there was nothing in the posts, or nothing found that's not blacklisted

@@ -10,6 +10,7 @@ import utils
 
 class Roulette(commands.Cog):
     """A fun game that ends in someone getting kicked!"""
+
     roulettes = []
 
     def get_game(self, server):
@@ -47,14 +48,17 @@ class Roulette(commands.Cog):
             result = r.join(ctx.message.author)
             time_left = r.time_left
             if result:
-                await ctx.send("You have joined this roulette game! Good luck~ This roulette will end in " + time_left)
+                await ctx.send(
+                    "You have joined this roulette game! Good luck~ This roulette will end in "
+                    + time_left
+                )
             else:
                 await ctx.send("This roulette will end in " + time_left)
 
-    @roulette.command(name='start', aliases=['create'])
+    @roulette.command(name="start", aliases=["create"])
     @commands.guild_only()
     @utils.can_run(kick_members=True)
-    async def roulette_start(self, ctx, time: int=5):
+    async def roulette_start(self, ctx, time: int = 5):
         """Starts a roulette, that will end in one of the entrants being kicked from the server
         By default, the roulette will end in 5 minutes; provide a number (up to 30)
         to change how many minutes until it ends
@@ -62,15 +66,23 @@ class Roulette(commands.Cog):
         EXAMPLE: !roulette start
         RESULT: A new roulette game!"""
         if time < 1 or time > 30:
-            await ctx.send("Invalid time! The roulette must be set to run between 1 and 30 minutes")
+            await ctx.send(
+                "Invalid time! The roulette must be set to run between 1 and 30 minutes"
+            )
             return
         else:
             game = self.start_game(ctx.message.guild, time)
             if game:
-                await ctx.send("A new roulette game has just started! A random entrant will be kicked in {} minutes."
-                               " Type {}roulette to join this roulette...good luck~".format(game.time_left, ctx.prefix))
+                await ctx.send(
+                    "A new roulette game has just started! A random entrant will be kicked in {} minutes."
+                    " Type {}roulette to join this roulette...good luck~".format(
+                        game.time_left, ctx.prefix
+                    )
+                )
             else:
-                await ctx.send("There is already a roulette game running on this server!")
+                await ctx.send(
+                    "There is already a roulette game running on this server!"
+                )
                 return
 
         await asyncio.sleep(time * 60)
@@ -94,7 +106,6 @@ class Roulette(commands.Cog):
 
 
 class Game:
-
     def __init__(self, guild, time):
         self.entrants = []
         self.server = guild

@@ -6,7 +6,7 @@ import utils
 
 
 def to_keycap(c):
-    return '\N{KEYCAP TEN}' if c == 10 else str(c) + '\u20e3'
+    return "\N{KEYCAP TEN}" if c == 10 else str(c) + "\u20e3"
 
 
 class Poll:
@@ -55,8 +55,7 @@ class Polls(commands.Cog):
         else:
             fmt = "{} asked: {}\n".format(ctx.message.author.display_name, question)
             fmt += "\n".join(
-                "{}: {}".format(to_keycap(i + 1), opt)
-                for i, opt in enumerate(options)
+                "{}: {}".format(to_keycap(i + 1), opt) for i, opt in enumerate(options)
             )
 
             msg = await ctx.send(fmt)

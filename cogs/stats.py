@@ -1,4 +1,3 @@
-import re
 import utils
 import discord
 import datetime
@@ -14,10 +13,14 @@ class Stats(commands.Cog):
 
     async def _get_guild_usage(self, guild):
         embed = discord.Embed(title="Server Command Usage")
-        count = await self.bot.db.fetchrow("SELECT COUNT(*), MIN(executed) FROM command_usage WHERE guild=$1", guild.id)
+        count = await self.bot.db.fetchrow(
+            "SELECT COUNT(*), MIN(executed) FROM command_usage WHERE guild=$1", guild.id
+        )
 
         embed.description = f"{count[0]} total commands used"
-        embed.set_footer(text='Tracking command usage since').timestamp = count[1] or datetime.datetime.utcnow()
+        embed.set_footer(text="Tracking command usage since").timestamp = (
+            count[1] or datetime.datetime.utcnow()
+        )
 
         query = """
 SELECT
@@ -34,8 +37,10 @@ LIMIT 5
         """
 
         results = await self.bot.db.fetch(query, guild.id)
-        value = "\n".join(f"{command} ({uses} uses)" for command, uses in results or "No Commands")
-        embed.add_field(name='Top Commands', value=value)
+        value = "\n".join(
+            f"{command} ({uses} uses)" for command, uses in results or "No Commands"
+        )
+        embed.add_field(name="Top Commands", value=value)
 
         return embed
 
@@ -43,11 +48,13 @@ LIMIT 5
         embed = discord.Embed(title=f"{member.display_name}'s command usage")
         count = await self.bot.db.fetchrow(
             "SELECT COUNT(*), MIN(executed) FROM command_usage WHERE author=$1",
-            member.id
+            member.id,
         )
 
         embed.description = f"{count[0]} total commands used"
-        embed.set_footer(text='Tracking command usage since').timestamp = count[1] or datetime.datetime.utcnow()
+        embed.set_footer(text="Tracking command usage since").timestamp = (
+            count[1] or datetime.datetime.utcnow()
+        )
 
         query = """
 SELECT
@@ -64,8 +71,10 @@ LIMIT 5
         """
 
         results = await self.bot.db.fetch(query, member.id)
-        value = "\n".join(f"{command} ({uses} uses)" for command, uses in results or "No Commands")
-        embed.add_field(name='Top Commands', value=value)
+        value = "\n".join(
+            f"{command} ({uses} uses)" for command, uses in results or "No Commands"
+        )
+        embed.add_field(name="Top Commands", value=value)
 
         return embed
 
@@ -79,26 +88,35 @@ LIMIT 5
         RESULT: Information about your server!"""
         server = ctx.message.guild
         # Create our embed that we'll use for the information
-        embed = discord.Embed(title=server.name, description="Created on: {}".format(server.created_at.date()))
+        embed = discord.Embed(
+            title=server.name,
+            description="Created on: {}".format(server.created_at.date()),
+        )
 
         # Make sure we only set the icon url if it has been set
         if server.icon_url:
             embed.set_thumbnail(url=server.icon_url)
 
         # Add our fields, these are self-explanatory
-        embed.add_field(name='Region', value=str(server.region))
-        embed.add_field(name='Total Emojis', value=len(server.emojis))
+        embed.add_field(name="Region", value=str(server.region))
+        embed.add_field(name="Total Emojis", value=len(server.emojis))
 
         # Get the amount of online members
-        online_members = [m for m in server.members if str(m.status) == 'online']
-        embed.add_field(name='Total members', value='{}/{}'.format(len(online_members), server.member_count))
-        embed.add_field(name='Roles', value=len(server.roles))
+        online_members = [m for m in server.members if str(m.status) == "online"]
+        embed.add_field(
+            name="Total members",
+            value="{}/{}".format(len(online_members), server.member_count),
+        )
+        embed.add_field(name="Roles", value=len(server.roles))
 
         # Split channels into voice and text channels
         voice_channels = [c for c in server.channels if type(c) is discord.VoiceChannel]
         text_channels = [c for c in server.channels if type(c) is discord.TextChannel]
-        embed.add_field(name='Channels', value='{} text, {} voice'.format(len(text_channels), len(voice_channels)))
-        embed.add_field(name='Owner', value=server.owner.display_name)
+        embed.add_field(
+            name="Channels",
+            value="{} text, {} voice".format(len(text_channels), len(voice_channels)),
+        )
+        embed.add_field(name="Owner", value=server.owner.display_name)
 
         await ctx.send(embed=embed)
 
@@ -117,8 +135,12 @@ LIMIT 5
         fmt = "{} ({})".format(str(user), user.id)
         embed.set_author(name=fmt, icon_url=user.avatar_url)
 
-        embed.add_field(name='Joined this server', value=user.joined_at.date(), inline=False)
-        embed.add_field(name='Joined Discord', value=user.created_at.date(), inline=False)
+        embed.add_field(
+            name="Joined this server", value=user.joined_at.date(), inline=False
+        )
+        embed.add_field(
+            name="Joined Discord", value=user.created_at.date(), inline=False
+        )
 
         # Sort them based on the hierarchy, but don't include @everyone
         roles = sorted([x for x in user.roles if not x.is_default()], reverse=True)
@@ -126,14 +148,14 @@ LIMIT 5
         roles = ", ".join("{}".format(x.name) for x in roles[:5])
         # If there are no roles, then just say this
         roles = roles or "No roles added"
-        embed.add_field(name='Top 5 roles', value=roles, inline=False)
+        embed.add_field(name="Top 5 roles", value=roles, inline=False)
 
         # Add the activity if there is one
         act = user.activity
         if isinstance(act, discord.activity.Spotify):
             embed.add_field(name="Listening to", value=act.title, inline=False)
         elif isinstance(act, discord.activity.Game):
-            embed.add_field(name='Playing', value=act.name, inline=False)
+            embed.add_field(name="Playing", value=act.name, inline=False)
         await ctx.send(embed=embed)
 
     @commands.group()
@@ -180,9 +202,11 @@ LIMIT 1
         most = await ctx.bot.db.fetchrow(query, ctx.author.id, members)
 
         if most is None or len(most) == 0:
-            await ctx.send(f"You have not booped anyone in this server {ctx.author.mention}")
+            await ctx.send(
+                f"You have not booped anyone in this server {ctx.author.mention}"
+            )
         else:
-            member = ctx.guild.get_member(most['boopee'])
+            member = ctx.guild.get_member(most["boopee"])
             await ctx.send(
                 f"{ctx.author.mention} you have booped {member.display_name} the most amount of times, "
                 f"coming in at {most['amount']} times"
@@ -218,8 +242,8 @@ LIMIT 10
             embed = discord.Embed(title="Your booped victims", colour=ctx.author.colour)
             embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
             for row in most:
-                member = ctx.guild.get_member(row['boopee'])
-                embed.add_field(name=member.display_name, value=row['amount'])
+                member = ctx.guild.get_member(row["boopee"])
+                embed.add_field(name=member.display_name, value=row["amount"])
             await ctx.send(embed=embed)
         else:
             await ctx.send("You haven't booped anyone in this server!")
@@ -252,7 +276,7 @@ ORDER BY
 
             output = []
             for row in results:
-                member = ctx.guild.get_member(row['id'])
+                member = ctx.guild.get_member(row["id"])
                 output.append(f"{member.display_name} (Rating: {row['battle_rating']})")
 
             try:
@@ -297,7 +321,10 @@ WHERE id = $2
         rating = result["battle_rating"]
         record = f"{result['battle_wins']} - {result['battle_losses']}"
 
-        embed = discord.Embed(title="Battling stats for {}".format(ctx.author.display_name), colour=ctx.author.colour)
+        embed = discord.Embed(
+            title="Battling stats for {}".format(ctx.author.display_name),
+            colour=ctx.author.colour,
+        )
         embed.set_author(name=str(member), icon_url=member.avatar_url)
         embed.add_field(name="Record", value=record, inline=False)
         embed.add_field(name="Server Rank", value=server_rank, inline=False)
