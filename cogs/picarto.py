@@ -88,7 +88,7 @@ WHERE
                     except (discord.Forbidden, discord.HTTPException, AttributeError):
                         pass
 
-    @check_channels.before_task
+    @check_channels.before_loop
     async def before_check_channels(self):
         await self.get_online_users()
         await asyncio.sleep(30)
