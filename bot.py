@@ -2,6 +2,7 @@ import discord
 import logging
 import pendulum
 import aiohttp
+import asyncio
 
 from discord.ext import commands
 import utils
@@ -17,6 +18,7 @@ opts = {
     "activity": discord.Activity(name=utils.default_status, type=0),
     "allowed_mentions": discord.AllowedMentions(everyone=False),
     "intents": intent,
+    "chunk_guilds_at_startup": False,
 }
 
 bot = commands.AutoShardedBot(**opts)
@@ -31,19 +33,21 @@ async def before_invocation(ctx):
     except (discord.Forbidden, discord.HTTPException):
         pass
 
-    # Ensure guild is chunked
-    if ctx.guild and not ctx.guild.chunked:
-        await ctx.guild.chunk()
+    # If this is a DM, or the guild has been chunked, we're done
+    if not ctx.guild or ctx.guild.chunked:
+        return
 
-
-@bot.event
-async def on_ready():
-    completion = "Ready in: ```\n{}```".format(
-        (pendulum.now(tz="UTC") - bot.uptime).in_words()
-    )
-    await bot.get_guild(214143647447253003).get_channel(214146604519784449).send(
-        completion
-    )
+    # Get a lock for the guild
+    lock = bot.chunked_guild_locks.get(ctx.guild.id)
+    # If one hasn't been created yet, create it
+    if lock is None:
+        lock = asyncio.Lock()
+        bot.chunked_guild_locks[ctx.guild.id] = lock
+    # Now only try to chunk when the lock is available
+    async with lock:
+        # Recheck if it's been chunked just in case, don't want to chunk if we don't have to
+        if ctx.guild and not ctx.guild.chunked:
+            await ctx.guild.chunk()
 
 
 @bot.event
@@ -138,4 +142,5 @@ if __name__ == "__main__":
         bot.load_extension(e)
 
     bot.uptime = pendulum.now(tz="UTC")
+    bot.chunked_guild_locks = {}
     bot.run(utils.bot_token)
