@@ -1,9 +1,13 @@
 from discord.ext import commands
 
 import utils
+import collections
 
 
 class Games(commands.Cog):
+    def __init__(self):
+        self.running_games = collections.defaultdict(dict)
+
     @commands.guild_only()
     @utils.can_run(send_messages=True)
     @commands.command(aliases=["word_chain", "しりとり"])
@@ -44,7 +48,16 @@ class Games(commands.Cog):
         last_letter = None
         words_used = []
 
+        await ctx.send(
+            f"Shiritori game started! First word is `{start_word}`, any responses after this"
+            "count towards the game"
+        )
+
         while True:
+            game = self.running_games["shiritori"].get(ctx.channel.id)
+            if game:
+                return await ctx.send("Only one game per channel!")
+            self.running_games["shiritori"][ctx.channel.id] = True
             # Grab the first letter of this new word and check it
             first_letter = grab_letter(message.content, last=False)
             # Include extra check for if this is the first word
@@ -68,6 +81,7 @@ class Games(commands.Cog):
             message = await ctx.bot.wait_for("message", check=check)
 
         # If we're here, game over, someone messed up
+        self.running_games["shiritori"][ctx.channel.id] = False
         await message.add_reaction("❌")
         if last_letter in ("ん", "ン"):
             await ctx.send("Wrong! ん cannot be used as the last kana!")
