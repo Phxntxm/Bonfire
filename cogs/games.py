@@ -75,15 +75,12 @@ class Games(commands.Cog):
             if last_letter in ("ん", "ン"):
                 break
             # Cannot reuuse words; though make sure this doesn't get caught on the very first usage
-            if last_word in words_used and len(words_used) > 1:
+            if last_word in words_used and len(words_used) >= 1:
                 break
 
             # If we're here, then the last letter used was valid
             words_used.append(last_word)
             await message.add_reaction("✅")
-            await ctx.send(
-                f"{words_used} - {last_letter} - {last_author} - {last_word}"
-            )
             message = await ctx.bot.wait_for("message", check=check)
 
         # If we're here, game over, someone messed up
