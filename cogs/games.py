@@ -9,7 +9,8 @@ class Games(commands.Cog):
         self.running_games = collections.defaultdict(dict)
 
     @commands.guild_only()
-    @utils.can_run(send_messages=True)
+    # @utils.can_run(send_messages=True)
+    @commands.is_owner()
     @commands.command(aliases=["word_chain", "しりとり"])
     async def shiritori(self, ctx, *, start_word):
         """
@@ -48,17 +49,18 @@ class Games(commands.Cog):
         last_letter = None
         words_used = []
 
+        # Ensure only one game is happening at once
+        game = self.running_games["shiritori"].get(ctx.channel.id)
+        if game:
+            return await ctx.send("Only one game per channel!")
+        self.running_games["shiritori"][ctx.channel.id] = True
+
         await ctx.send(
             f"Shiritori game started! First word is `{start_word}`, any responses after this"
             "count towards the game"
         )
 
         while True:
-            # Ensure only one game is happening at once
-            game = self.running_games["shiritori"].get(ctx.channel.id)
-            if game:
-                return await ctx.send("Only one game per channel!")
-            self.running_games["shiritori"][ctx.channel.id] = True
             # Grab the first letter of this new word and check it
             first_letter = grab_letter(message.content, last=False)
             # Include extra check for if this is the first word
@@ -79,7 +81,9 @@ class Games(commands.Cog):
             # If we're here, then the last letter used was valid
             words_used.append(last_word)
             await message.add_reaction("✅")
-            print(words_used, last_letter, last_author, last_word)
+            await ctx.send(
+                f"{words_used} - {last_letter} - {last_author} - {last_word}"
+            )
             message = await ctx.bot.wait_for("message", check=check)
 
         # If we're here, game over, someone messed up
