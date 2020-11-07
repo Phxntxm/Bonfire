@@ -54,6 +54,7 @@ class Games(commands.Cog):
         )
 
         while True:
+            # Ensure only one game is happening at once
             game = self.running_games["shiritori"].get(ctx.channel.id)
             if game:
                 return await ctx.send("Only one game per channel!")
@@ -78,6 +79,7 @@ class Games(commands.Cog):
             # If we're here, then the last letter used was valid
             words_used.append(last_word)
             await message.add_reaction("✅")
+            print(words_used, last_letter, last_author, last_word)
             message = await ctx.bot.wait_for("message", check=check)
 
         # If we're here, game over, someone messed up
