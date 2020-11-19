@@ -514,10 +514,8 @@ WHERE
                 # Loop through and check if there is a check called is_owner
                 # If we loop through and don't find one, this means that the only other choice is to be
                 # Able to manage the server (for the utils on perm commands)
-                for func in cmd.checks:
-                    if "is_owner" in func.__qualname__:
-                        await ctx.send("You need to own the bot to run this command")
-                        return
+                if cmd.cog.cog_check and cmd.cog.__cog_name__ == "Owner":
+                    return await ctx.send("You need to own the bot to run this command")
                 await ctx.send(
                     "You are required to have `manage_guild` permissions to run `{}`".format(
                         cmd.qualified_name
