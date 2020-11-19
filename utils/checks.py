@@ -2,7 +2,6 @@ import asyncio
 
 from discord.ext import commands
 import discord
-from . import utilities
 
 loop = asyncio.get_event_loop()
 
@@ -13,7 +12,10 @@ def should_ignore(ctx):
     ignored = ctx.bot.cache.ignored[ctx.guild.id]
     if not ignored:
         return False
-    return ctx.message.author.id in ignored['members'] or ctx.message.channel.id in ignored['channels']
+    return (
+        ctx.message.author.id in ignored["members"]
+        or ctx.message.channel.id in ignored["channels"]
+    )
 
 
 async def check_not_restricted(ctx):
@@ -24,30 +26,27 @@ async def check_not_restricted(ctx):
     # First get all the restrictions
     restrictions = ctx.bot.cache.restrictions[ctx.guild.id]
     # Now lets check the "from" restrictions
-    for from_restriction in restrictions.get('from', []):
+    for from_restriction in restrictions.get("from", []):
         # Get the source and destination
         # Source should ALWAYS be a command in this case
-        source = from_restriction.get('source')
-        destination = from_restriction.get('destination')
+        source = from_restriction.get("source")
+        destination = int(from_restriction.get("destination"))
         # Special check for what the "disable" command produces
         if destination == "everyone" and ctx.command.qualified_name == source:
             return False
-        # Convert destination to the object we want
-        destination = await utilities.convert(ctx, destination)
-        # If we couldn't find the destination, just continue with other restrictions
-        # Also if this restriction we're checking isn't for this command
-        if destination is None or source != ctx.command.qualified_name:
+        # If this isn't the command we care about, continue
+        if source != ctx.command.qualified_name:
             continue
 
         # This means that the type of restriction we have is `command from channel`
         # Which means we do not want commands to be ran in this channel
-        if destination == ctx.message.channel:
+        if destination == ctx.channel.id:
             return False
         # This type is `command from Role` meaning anyone with this role can't run this command
-        elif destination in ctx.message.author.roles:
+        elif discord.utils.get(ctx.author.roles, id=destination):
             return False
         # This is `command from Member` meaning this user specifically cannot run this command
-        elif destination == ctx.message.author:
+        elif destination == ctx.author.id:
             return False
 
     # If we are here, then there are no blacklists stopping this from running
@@ -55,44 +54,38 @@ async def check_not_restricted(ctx):
     # Now for the to restrictions this is a little different, we need to make a whitelist and
     # see if our current channel is in this whitelist, as well as any whitelisted roles are in the author's roles
     # Only if there is no whitelist, do we want to blanket return True
-    to_restrictions = restrictions.get('to', [])
-    if len(to_restrictions) == 0:
+    to_restrictions = restrictions.get("to", [])
+    if not to_restrictions:
         return True
 
-    # Otherwise there is a whitelist, and we need to start it
-    whitelisted_channels = []
-    whitelisted_roles = []
+    # If the author has a role that should whitelist them
+    whitelisted_role = False
+    # If this channel is one that is whitelisted
+    whitelisted_channel = False
+    # If a whitelist was found for this command
+    whitelist_found = False
 
+    # Otherwise check whitelists
     for to_restriction in to_restrictions:
         # Get the source and destination
         # Source should ALWAYS be a command in this case
-        source = to_restriction.get('source')
-        destination = to_restriction.get('destination')
-        # Convert destination to the object we want
-        destination = await utilities.convert(ctx, destination)
-        # If we couldn't find the destination, just continue with other restrictions
-        # Also if this restriction we're checking isn't for this command
-        if destination is None or source != ctx.command.qualified_name:
+        source = to_restriction.get("source")
+        destination = int(to_restriction.get("destination"))
+        # If this isn't the source we care about, continue
+        if source != ctx.command.qualified_name:
             continue
 
-        # Append to our two whitelists depending on what type this is
-        if isinstance(destination, discord.TextChannel):
-            whitelisted_channels.append(destination)
-        elif isinstance(destination, discord.Role):
-            whitelisted_roles.append(destination)
+        # If we've found a whitelist valid for this command, now we can set it
+        whitelist_found = True
+        # Now check against roles
+        if not whitelisted_role and discord.utils.get(ctx.author.roles, id=destination):
+            whitelisted_role = True
+        if ctx.channel.id == destination:
+            whitelisted_channel = True
 
-    if whitelisted_channels:
-        if ctx.channel not in whitelisted_channels:
-            return False
-    if whitelisted_roles:
-        if not any(x in ctx.message.author.roles for x in whitelisted_roles):
-            return False
-
-    # If we have passed all of these, then we are allowed to run this command
-    # This looks like a whole lot, but all of these lists will be very tiny in almost all cases
-    # And only delving deep into the specific lists that may be large, will we finally see "large" lists
-    # Which means this still will not be slow in other cases
-    return True
+    # If we have reached here, then there is a whitelist... so we just need to return if they matched
+    # the whitelist
+    return whitelisted_role or whitelisted_channel or not whitelist_found
 
 
 def has_perms(ctx, **perms):
@@ -112,7 +105,9 @@ def has_perms(ctx, **perms):
     for perm, setting in perms.items():
         setattr(required_perm, perm, setting)
 
-    required_perm_value = ctx.bot.cache.custom_permissions[ctx.guild.id].get(ctx.command.qualified_name)
+    required_perm_value = ctx.bot.cache.custom_permissions[ctx.guild.id].get(
+        ctx.command.qualified_name
+    )
     if required_perm_value:
         required_perm = discord.Permissions(required_perm_value)
 
