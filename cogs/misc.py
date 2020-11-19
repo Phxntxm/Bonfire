@@ -53,21 +53,25 @@ class Miscellaneous(commands.Cog):
     @utils.can_run(send_messages=True)
     async def help(self, ctx, *, command: str = None):
         """Shows help about a command or the bot"""
-
-        if command is None:
-            p = await utils.HelpPaginator.from_bot(ctx)
-        else:
-            entity = ctx.bot.get_cog(command) or ctx.bot.get_command(command)
-
-            if entity is None:
-                clean = command.replace("@", "@\u200b")
-                return await ctx.send(f'Command or category "{clean}" not found.')
-            elif isinstance(entity, commands.Command):
-                p = await utils.HelpPaginator.from_command(ctx, entity)
+        try:
+            if command is None:
+                p = await utils.HelpPaginator.from_bot(ctx)
             else:
-                p = await utils.HelpPaginator.from_cog(ctx, entity)
+                entity = ctx.bot.get_cog(command) or ctx.bot.get_command(command)
 
-        await p.paginate()
+                if entity is None:
+                    clean = command.replace("@", "@\u200b")
+                    return await ctx.send(f'Command or category "{clean}" not found.')
+                elif isinstance(entity, commands.Command):
+                    p = await utils.HelpPaginator.from_command(ctx, entity)
+                else:
+                    p = await utils.HelpPaginator.from_cog(ctx, entity)
+
+            await p.paginate()
+        except utils.CannotPaginate:
+            await ctx.send(
+                "I need embed links permissions in order to do this command :("
+            )
 
     @commands.command()
     @utils.can_run(send_messages=True)
