@@ -30,13 +30,16 @@ async def check_not_restricted(ctx):
         # Get the source and destination
         # Source should ALWAYS be a command in this case
         source = from_restriction.get("source")
-        destination = int(from_restriction.get("destination"))
+        destination = from_restriction.get("destination")
         # Special check for what the "disable" command produces
         if destination == "everyone" and ctx.command.qualified_name == source:
             return False
         # If this isn't the command we care about, continue
         if source != ctx.command.qualified_name:
             continue
+
+        # If the destination isn't everyone, then it's an integer
+        destination = int(destination)
 
         # This means that the type of restriction we have is `command from channel`
         # Which means we do not want commands to be ran in this channel
