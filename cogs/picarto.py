@@ -1,6 +1,5 @@
 import asyncio
 import discord
-import traceback
 import utils
 
 from discord.ext import commands, tasks
@@ -30,6 +29,7 @@ class Picarto(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.channel_info = {}
+        self.check_channels.start()
 
     # noinspection PyAttributeOutsideInit
     async def get_online_users(self):

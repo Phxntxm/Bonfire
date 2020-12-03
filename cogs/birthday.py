@@ -60,6 +60,7 @@ class Birthday(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.notify_birthdays.start()
 
     async def get_birthdays_for_server(self, server, today=False):
         query = """
