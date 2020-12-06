@@ -16,19 +16,19 @@ class Images(commands.Cog):
 
         try:
             url = data["data"]["file_url_size_large"]
-            filename = data["data"]["file_name"]
+            credit = data["data"]["file_source_url"]
         except (KeyError, TypeError):
             return await ctx.send(
                 f"I couldn't connect! Sorry no {animal}s right now ;w;"
             )
         else:
-            image = await utils.download_image(url)
-            f = discord.File(image, filename=filename)
+            e = discord.Embed(title="Source", url=credit)
+            e.set_image(url=url)
             try:
-                await ctx.send(file=f)
+                await ctx.send(embed=e)
             except discord.HTTPException:
                 await ctx.send(
-                    f"File to large to send as attachment, here is the URL: {url}"
+                    f"File too large to send as attachment, here is the URL: {url}"
                 )
 
     @commands.command(aliases=["rc"])
