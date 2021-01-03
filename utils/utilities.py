@@ -131,27 +131,9 @@ async def convert(ctx, option):
 
 
 def update_rating(winner_rating, loser_rating):
-    # The scale is based off of increments of 25, increasing the change by 1 for each increment
-    # That is all this loop does, increment the "change" for every increment of 25
-    # The change caps off at 300 however, so break once we are over that limit
-    difference = abs(winner_rating - loser_rating)
-    rating_change = 0
-    count = 25
-    while count <= difference:
-        if count > 300:
-            break
-        rating_change += 1
-        count += 25
+    difference = int((loser_rating - winner_rating) / 25 + 16)
 
-    # 16 is the base change, increased or decreased based on whoever has the higher current rating
-    if winner_rating > loser_rating:
-        winner_rating += 16 - rating_change
-        loser_rating -= 16 - rating_change
-    else:
-        winner_rating += 16 + rating_change
-        loser_rating -= 16 + rating_change
-
-    return winner_rating, loser_rating
+    return winner_rating + difference, loser_rating - difference
 
 
 async def update_records(key, db, winner, loser):
