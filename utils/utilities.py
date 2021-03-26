@@ -102,9 +102,6 @@ async def request(
 
 
 async def log_error(error, bot, ctx=None):
-    # First set the actual channel if it's not set yet
-    if isinstance(bot.error_channel, int):
-        bot.error_channel = bot.get_channel(bot.error_channel)
     # Format the error message
     fmt = f"""```
 {''.join(traceback.format_tb(error.__traceback__)).strip()}
@@ -112,14 +109,25 @@ async def log_error(error, bot, ctx=None):
     # Add the command if ctx is given
     if ctx is not None:
         fmt = f"Command = {discord.utils.escape_markdown(ctx.message.clean_content).strip()}\n{fmt}"
-    # If no channel is set, log to a file
-    if bot.error_channel is None:
+    # If the channel has been set, use it
+    if isinstance(bot.error_channel, discord.TextChannel):
+        await bot.error_channel.send(fmt)
+    # Otherwise if it hasn't been set yet, try to set it
+    if isinstance(bot.error_channel, int):
+        channel = bot.get_channel(bot.error_channel)
+        if channel is not None:
+            bot.error_channel = channel
+            await bot.error_channel.send(fmt)
+        # If we can't find the channel yet (before ready) just send to file
+        else:
+            fmt = fmt.strip("`")
+            with open("error_log", "a") as f:
+                print(fmt, file=f)
+    # Otherwise just send to file
+    else:
         fmt = fmt.strip("`")
         with open("error_log", "a") as f:
             print(fmt, file=f)
-    # Otherwise send to the error channel
-    else:
-        await bot.error_channel.send(fmt)
 
 
 async def convert(ctx, option):
