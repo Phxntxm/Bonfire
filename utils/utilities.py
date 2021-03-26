@@ -12,6 +12,29 @@ def channel_is_nsfw(channel):
     return isinstance(channel, discord.DMChannel) or channel.is_nsfw()
 
 
+async def readings_for_word(word):
+    """Returns a tuple, the first element representing if this word is a noun or not,
+    the second being all the readings for this word"""
+    data = await request(
+        "https://jisho.org/api/v1/search/words", payload={"keyword": word}
+    )
+    is_noun = False
+    readings = []
+
+    for piece in data["data"]:
+        # Jisho returns parts of words too, we don't want those for this use case
+        if piece["slug"] != word:
+            continue
+
+        # Provide the readings for this word
+        readings.extend([r["reading"] for r in piece["japanese"] if r["word"] == word])
+        for sense in piece["senses"]:
+            if "Noun" in sense["parts_of_speech"]:
+                is_noun = True
+
+    return is_noun, readings
+
+
 async def download_image(url):
     """Returns a file-like object based on the URL provided"""
     # Simply read the image, to get the bytes
@@ -74,7 +97,7 @@ async def request(
                         # If an invalid attribute was requested, return None
                         return None
         # If an error was hit other than the one we want to catch, try again
-        except:
+        except Exception:
             continue
 
 

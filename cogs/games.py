@@ -1,6 +1,7 @@
 from discord.ext import commands
 
 import collections
+import utils
 
 
 class Games(commands.Cog):
@@ -8,9 +9,9 @@ class Games(commands.Cog):
         self.running_games = collections.defaultdict(dict)
 
     @commands.guild_only()
-    # @utils.can_run(send_messages=True)
     @commands.is_owner()
-    @commands.command(aliases=["word_chain", "しりとり"])
+    @commands.command(aliases=["word_chain", "しりとり", "シリトリ"])
+    @commands.max_concurrency(1, per=commands.BucketType.channel)
     async def shiritori(self, ctx, *, start_word):
         """
         Starts a game of Shiritori, in which the last letter of the last word given
@@ -21,13 +22,17 @@ class Games(commands.Cog):
         The kana ん cannot be used, as no word in Japanese starts with this
         The word used cannot be a previously given word
         """
+        game = self.running_games["shiritori"].get(ctx.channel.id)
 
-        def grab_letter(word, last=True):
-            iterator = reversed(word) if last else iter(word)
+        def grab_letter(readings, last=True):
+            readings = [reversed(word) if last else iter(word) for word in readings]
 
-            for char in iterator:
-                if char.isalpha():
-                    return char
+            letters = []
+
+            for reading in readings:
+                for char in reading:
+                    if char.isalpha():
+                        letters.append(char)
 
         def check(message):
             # Ensure it's in the same channel
@@ -39,20 +44,31 @@ class Games(commands.Cog):
             # The last person who gave a message cannot be the next one as well
             elif last_author is not None and message.author == last_author:
                 return False
+            # If no game is running then how did this even happen!?
+            elif game is None:
+                return False
+            # If the author is not a player
+            elif message.author not in game["players"]:
+                return False
+            # Otherwise we good
             else:
                 return True
 
         # Setup the info needed for the game
         message = ctx.message
         message.content = start_word
-        last_letter = None
+        last_letters = None
         words_used = []
 
         # Ensure only one game is happening at once
-        game = self.running_games["shiritori"].get(ctx.channel.id)
-        if game:
-            return await ctx.send("Only one game per channel!")
-        self.running_games["shiritori"][ctx.channel.id] = True
+        if game is not None:
+            if ctx.author not in game["players"]:
+                game["players"].append(ctx.author)
+                await ctx.message.add_reaction("✅")
+            else:
+                await ctx.message.add_reaction("✅")
+        else:
+            self.running_games["shiritori"][ctx.channel.id] = {"players": []}
 
         await ctx.send(
             f"Shiritori game started! First word is `{start_word}`, any responses after this"
@@ -60,32 +76,38 @@ class Games(commands.Cog):
         )
 
         while True:
-            # Grab the first letter of this new word and check it
-            first_letter = grab_letter(message.content, last=False)
-            # Include extra check for if this is the first word
-            if words_used and first_letter != last_letter:
+            is_noun, readings = await utils.readings_for_word(message.content)
+            # Only nouns can be used
+            if not is_noun:
                 break
+            # Grab the first letter of this new word and check it
+            first_letters = grab_letter(readings, last=False)
+            # Include extra check for if this is the first word
+            if words_used:
+                # Check if there's a match between first and last letters
+                if not any(char in first_letters for char in last_letters):
+                    break
             # Now set the "last" information, to start checking if it's correct
-            last_word = message.content
-            last_letter = grab_letter(last_word)
+            last_words = readings
+            last_letters = grab_letter(last_words)
             last_author = message.author
 
             # Extra check for the japanese version, ん cannot be used
-            if last_letter in ("ん", "ン"):
+            if any(char in last_letters for char in ("ん", "ン")):
                 break
             # Cannot reuuse words; though make sure this doesn't get caught on the very first usage
-            if last_word in words_used and len(words_used) >= 1:
+            if any(word in words_used for word in last_words) and len(words_used) >= 1:
                 break
 
             # If we're here, then the last letter used was valid
-            words_used.append(last_word)
+            words_used.extend(last_words)
             await message.add_reaction("✅")
             message = await ctx.bot.wait_for("message", check=check)
 
         # If we're here, game over, someone messed up
         self.running_games["shiritori"][ctx.channel.id] = False
         await message.add_reaction("❌")
-        if last_letter in ("ん", "ン"):
+        if any(char in last_letters for char in ("ん", "ン")):
             await ctx.send("Wrong! ん cannot be used as the last kana!")
         else:
             await ctx.send(f"Wrong! {message.author.mention} is a loser!")
