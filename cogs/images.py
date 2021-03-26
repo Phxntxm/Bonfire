@@ -24,12 +24,7 @@ class Images(commands.Cog):
         else:
             e = discord.Embed(title="Source", url=credit)
             e.set_image(url=url)
-            try:
-                await ctx.send(embed=e)
-            except discord.HTTPException:
-                await ctx.send(
-                    f"File too large to send as attachment, here is the URL: {url}"
-                )
+            await ctx.send(embed=e)
 
     @commands.command(aliases=["rc"])
     @utils.can_run(send_messages=True)
@@ -42,18 +37,9 @@ class Images(commands.Cog):
         opts = {"format": "src"}
         result = await utils.request(url, attr="url", payload=opts)
 
-        try:
-            image = await utils.download_image(result)
-        except (ValueError, AttributeError):
-            await ctx.send("I couldn't connect! Sorry no cats right now ;w;")
-
-        f = discord.File(image, filename=result.name)
-        try:
-            await ctx.send(file=f)
-        except discord.HTTPException:
-            await ctx.send(
-                f"File to large to send as attachment, here is the URL: {url}"
-            )
+        e = discord.Embed(title="Source", url=str(result))
+        e.set_image(url=str(result))
+        await ctx.send(embed=e)
 
     @commands.command(aliases=["dog", "rd"])
     @utils.can_run(send_messages=True)
@@ -62,22 +48,14 @@ class Images(commands.Cog):
 
         EXAMPLE: !doggo
         RESULT: A beautiful picture of a dog o3o"""
-        result = await utils.request("https://random.dog/woof.json")
+        result = await utils.request("https://dog.ceo/api/breeds/image/random")
         try:
-            url = result.get("url")
-            filename = re.match("https://random.dog/(.*)", url).group(1)
+            url = result.get("message")
+            e = discord.Embed(title="Source", url=str(url))
+            e.set_image(url=str(url))
+            await ctx.send(embed=e)
         except AttributeError:
             await ctx.send("I couldn't connect! Sorry no dogs right now ;w;")
-            return
-
-        image = await utils.download_image(url)
-        f = discord.File(image, filename=filename)
-        try:
-            await ctx.send(file=f)
-        except discord.HTTPException:
-            await ctx.send(
-                f"File to large to send as attachment, here is the URL: {url}"
-            )
 
     @commands.command(aliases=["snake"])
     @utils.can_run(send_messages=True)
