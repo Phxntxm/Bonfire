@@ -84,6 +84,7 @@ extensions = [
     "cogs.spotify",
     "cogs.polls",
     "cogs.games",
+    "cogs.japanese",
 ]
 
 
