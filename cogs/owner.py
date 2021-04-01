@@ -1,12 +1,13 @@
 from discord.ext import commands
 
 import asyncio
+from contextlib import redirect_stdout
 import discord
 import inspect
+import io
+import re
 import textwrap
 import traceback
-import io
-from contextlib import redirect_stdout
 
 
 def get_syntax_error(e):
@@ -201,7 +202,12 @@ class Owner(commands.Cog):
         )
         stdout = (await proc.communicate())[0]
         if stdout:
-            await ctx.send(f"[stdout]\n{stdout.decode()}")
+            output = re.sub(
+                r"(https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b[-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+                r"<\1>",
+                stdout.decode(),
+            )
+            await ctx.send(f"[stdout]\n{output}")
         else:
             await ctx.send("Process finished, no output")
 
