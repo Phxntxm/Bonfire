@@ -200,13 +200,10 @@ class Owner(commands.Cog):
         proc = await asyncio.create_subprocess_shell(
             cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT
         )
+        m = r"(https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
         stdout = (await proc.communicate())[0]
         if stdout:
-            output = re.sub(
-                r"(https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b[-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
-                r"<\1>",
-                stdout.decode(),
-            )
+            output = re.sub(m, r"<\1>", stdout.decode())
             await ctx.send(f"[stdout]\n{output}")
         else:
             await ctx.send("Process finished, no output")
