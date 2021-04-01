@@ -1,6 +1,6 @@
 import json
 from discord.ext import commands
-from utils import conjugator
+from utils import conjugator, checks, request
 
 
 class Japanese(commands.Cog):
@@ -22,6 +22,7 @@ class Japanese(commands.Cog):
         self.verbs = verbs
 
     @commands.command(aliases=["活用", "かつよう", "katsuyou"])
+    @checks.can_run(send_messages=True)
     async def conjugate(self, ctx, verb):
         """Conjugate the provided verb. Provide the verb in dictionary form
 
@@ -34,6 +35,71 @@ class Japanese(commands.Cog):
             return await ctx.send(f"Sorry, I don't know {verb}")
 
         await verb.display(ctx)
+
+    @commands.group(invoke_without_command=True)
+    @checks.can_run(send_messages=True)
+    async def anime(self, ctx):
+        pass
+
+    @anime.command(name="planning")
+    @checks.can_run(send_messages=True)
+    async def anime_planning(self, ctx, *, username):
+        """Searches a user's planning list (ON ANILIST), and provides
+        the top up to 10 results based on the anime's average score
+
+        EXAMPLE: !anime planning User!
+        RESULT: Top 10 results of User!'s planning list based on anime's average score
+        """
+        query = """
+query ($name: String) {
+  MediaListCollection(userName:$name, type:ANIME, status:PLANNING, sort:MEDIA_POPULARITY_DESC) {
+    lists {
+      status
+      entries {
+        media {
+           title {
+             english
+           }
+          averageScore
+          status
+        }
+      }
+    }
+  }
+}
+"""
+
+        url = "https://graphql.anilist.co"
+        payload = {"query": query, "variables": {"name": username}}
+
+        response = await request(url, method="POST", payload=payload)
+        # Anilist API is broken and doesn't filter correctly, guess we have to do that ourselves
+        data = []
+
+        for x in response.json()["data"]["MediaListCollection"]["lists"]:
+            data.extend(
+                [
+                    {
+                        "title": r["media"]["title"]["english"],
+                        "score": r["media"]["averageScore"],
+                    }
+                    for r in x["entries"]
+                    if r["media"]["status"] == "FINISHED"
+                ]
+            )
+
+        # Filtering done, sort it
+        data = sorted(
+            data,
+            key=lambda n: n["score"],
+            reverse=True,
+        )
+        # And convert to a string
+        data = "\n".join(
+            f"**Score**: {x['score']} | **Title**: {x['title']}" for x in data
+        )
+
+        await ctx.send(data)
 
 
 def setup(bot):
