@@ -77,19 +77,22 @@ query ($name: String) {
         # Anilist API is broken and doesn't filter correctly, guess we have to do that ourselves
         data = []
 
-        for x in response["data"]["MediaListCollection"]["lists"]:
-            data.extend(
-                [
-                    {
-                        "title": r["media"]["title"]["english"]
-                        if r["media"]["title"]["english"]
-                        else r["media"]["title"]["romaji"],
-                        "score": r["media"]["averageScore"],
-                    }
-                    for r in x["entries"]
-                    if r["media"]["status"] == "FINISHED"
-                ]
-            )
+        try:
+            for x in response["data"]["MediaListCollection"]["lists"]:
+                data.extend(
+                    [
+                        {
+                            "title": r["media"]["title"]["english"]
+                            if r["media"]["title"]["english"]
+                            else r["media"]["title"]["romaji"],
+                            "score": r["media"]["averageScore"],
+                        }
+                        for r in x["entries"]
+                        if r["media"]["status"] == "FINISHED"
+                    ]
+                )
+        except TypeError:
+            return await ctx.send("Can't find an anilist with that username!")
 
         # Filtering done, sort it
         data = sorted(
