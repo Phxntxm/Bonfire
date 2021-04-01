@@ -45,10 +45,10 @@ class Japanese(commands.Cog):
     @checks.can_run(send_messages=True)
     async def anime_planning(self, ctx, *, username):
         """Searches a user's planning list (ON ANILIST), and provides
-        the top up to 10 results based on the anime's average score
+        the top results based on the anime's average score
 
         EXAMPLE: !anime planning User!
-        RESULT: Top 10 results of User!'s planning list based on anime's average score
+        RESULT: Top results of User!'s planning list based on anime's average score
         """
         query = """
 query ($name: String) {
