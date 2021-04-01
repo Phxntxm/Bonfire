@@ -179,6 +179,7 @@ class Games(commands.Cog):
 
     @commands.command(aliases=["word_chain", "しりとり", "シリトリ"])
     @commands.max_concurrency(1, per=commands.BucketType.channel)
+    @utils.checks.can_run(send_messages=True)
     async def shiritori(self, ctx, *, word):
         """
         Starts or play on a game of Shiritori, in which the last letter of the last word given
