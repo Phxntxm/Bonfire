@@ -29,6 +29,7 @@ async def request(
     *,
     headers=None,
     payload=None,
+    json_data=None,
     method="GET",
     attr="json",
     force_content_type_json=False,
@@ -45,7 +46,9 @@ async def request(
             # Create the session with our headeres
             async with aiohttp.ClientSession(headers=headers) as session:
                 # Make the request, based on the method, url, and paramaters given
-                async with session.request(method, url, params=payload) as response:
+                async with session.request(
+                    method, url, params=payload, json=json_data
+                ) as response:
                     # If the request wasn't successful, re-attempt
                     if response.status != 200:
                         continue

@@ -72,7 +72,7 @@ query ($name: String) {
         url = "https://graphql.anilist.co"
         payload = {"query": query, "variables": {"name": username}}
 
-        response = await request(url, method="POST", payload=payload)
+        response = await request(url, method="POST", json_data=payload)
         # Anilist API is broken and doesn't filter correctly, guess we have to do that ourselves
         data = []
 
