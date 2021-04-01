@@ -90,13 +90,13 @@ query ($name: String) {
 
         # Filtering done, sort it
         data = sorted(
-            data[:10],
+            data,
             key=lambda n: n["score"],
             reverse=True,
         )
         # And convert to a string
         data = "\n".join(
-            f"**Score**: {x['score']} | **Title**: {x['title']}" for x in data
+            f"**Score**: {x['score']} | **Title**: {x['title']}" for x in data[:10]
         )
 
         await ctx.send(data)
