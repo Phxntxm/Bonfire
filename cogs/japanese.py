@@ -90,7 +90,7 @@ query ($name: String) {
 
         # Filtering done, sort it
         data = sorted(
-            data,
+            data[:10],
             key=lambda n: n["score"],
             reverse=True,
         )
