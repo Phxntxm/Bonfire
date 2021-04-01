@@ -59,6 +59,7 @@ query ($name: String) {
         media {
            title {
              english
+             romaji
            }
           averageScore
           status
@@ -80,7 +81,9 @@ query ($name: String) {
             data.extend(
                 [
                     {
-                        "title": r["media"]["title"]["english"],
+                        "title": r["media"]["title"]["english"]
+                        if r["media"]["title"]["english"]
+                        else r["media"]["title"]["romaji"],
                         "score": r["media"]["averageScore"],
                     }
                     for r in x["entries"]
