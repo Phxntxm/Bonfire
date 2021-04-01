@@ -76,7 +76,7 @@ query ($name: String) {
         # Anilist API is broken and doesn't filter correctly, guess we have to do that ourselves
         data = []
 
-        for x in response.json()["data"]["MediaListCollection"]["lists"]:
+        for x in response["data"]["MediaListCollection"]["lists"]:
             data.extend(
                 [
                     {
