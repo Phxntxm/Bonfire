@@ -1,6 +1,6 @@
 import json
 from discord.ext import commands
-from utils import conjugator, checks, request
+from utils import conjugator, checks, request, Pages, CannotPaginate
 
 
 class Japanese(commands.Cog):
@@ -98,11 +98,15 @@ query ($name: String) {
             reverse=True,
         )
         # And convert to a string
-        data = "\n".join(
-            f"**Score**: {x['score']} | **Title**: {x['title']}" for x in data[:10]
+        output = "\n".join(
+            f"**Score**: {x['score']} | **Title**: {x['title']}" for x in data
         )
 
-        await ctx.send(data)
+        try:
+            pages = Pages(ctx, entries=output, per_page=7)
+            await pages.paginate()
+        except CannotPaginate as e:
+            await ctx.send(str(e))
 
 
 def setup(bot):
