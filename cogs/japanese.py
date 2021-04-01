@@ -98,9 +98,7 @@ query ($name: String) {
             reverse=True,
         )
         # And convert to a string
-        output = "\n".join(
-            f"**Score**: {x['score']} | **Title**: {x['title']}" for x in data
-        )
+        output = [f"**Score**: {x['score']} | **Title**: {x['title']}" for x in data]
 
         try:
             pages = Pages(ctx, entries=output, per_page=7)
