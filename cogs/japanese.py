@@ -6,7 +6,7 @@ from utils import (
     request,
     Pages,
     CannotPaginate,
-    chunks,
+    FlashCard,
     FlashCardDisplay,
 )
 
@@ -31,18 +31,28 @@ class Japanese(commands.Cog):
         self.verbs = verbs
 
         # Load the JLPT vocab
-        with open("utils/japanese_vocabulary_n2.json") as f:
-            n2 = json.load(f)
-        self.n2_packs = list(chunks(n2, 50))
-        with open("utils/japanese_vocabulary_n3.json") as f:
-            n3 = json.load(f)
-        self.n3_packs = list(chunks(n3, 50))
-        with open("utils/japanese_vocabulary_n4.json") as f:
-            n4 = json.load(f)
-        self.n4_packs = list(chunks(n4, 50))
-        with open("utils/japanese_vocabulary_n5.json") as f:
-            n5 = json.load(f)
-        self.n5_packs = list(chunks(n5, 50))
+        for i in range(2, 6):
+            with open(f"utils/japanese_vocabulary_n{i}.json") as f:
+                n = json.load(f)
+                count = 0
+                # Will be a list of flash card packs
+                packs = []
+                # A list of flash cards
+                pack = []
+
+                for card in n:
+                    # Add the card to the pack
+                    pack.append(FlashCard(card["vocabulary"], None, card["meaning"]))
+                    count += 1
+
+                    # Limit each pack to 50 cards
+                    if count == 50:
+                        count = 0
+                        packs.append(pack.copy())
+                        pack = []
+
+                # Now that the loading is done, set it
+                setattr(self, f"n{i}_packs", packs)
 
     @commands.command(aliases=["活用", "かつよう", "katsuyou"])
     @checks.can_run(send_messages=True)
@@ -147,7 +157,7 @@ query ($name: String) {
             return await ctx.send("JLPT level options are n2, n3, n4, or n5")
         packs = getattr(self, f"{level}_packs")
         if pack > len(packs) or pack < 1:
-            return await ctx.send(f"The JLPT {level} has {len(packs)} available")
+            return await ctx.send(f"The JLPT {level} has {len(packs)} packs available")
 
         pack = packs[pack - 1]
         await FlashCardDisplay(pack).start(ctx, wait=True)
