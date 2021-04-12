@@ -135,7 +135,7 @@ query ($name: String) {
     @commands.command()
     @commands.max_concurrency(1, per=commands.BucketType.channel)
     @checks.can_run(send_messages=True)
-    async def jlpt(self, ctx, level=None, pack: int = None):
+    async def jlpt(self, ctx, level=None, pack: int = 0):
         """
         Runs a "flash card" pack for the JLPT level specified. This has N2-N5 available
         and there are 50 cards per pack, per level.
@@ -145,9 +145,9 @@ query ($name: String) {
         """
         if level not in ("n2", "n3", "n4", "n5"):
             return await ctx.send("JLPT level options are n2, n3, n4, or n5")
-        packs = getattr(self, f"n{level}_packs")
+        packs = getattr(self, f"{level}_packs")
         if pack > len(packs) or pack < 1:
-            return await ctx.send(f"The JLPT n{level} has {len(packs)} available")
+            return await ctx.send(f"The JLPT {level} has {len(packs)} available")
 
         pack = packs[pack - 1]
         await FlashCardDisplay(pack).start(ctx, wait=True)
