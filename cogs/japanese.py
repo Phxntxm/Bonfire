@@ -1,4 +1,6 @@
 import json
+import random
+
 from discord.ext import commands
 from utils import (
     conjugator,
@@ -164,7 +166,7 @@ query ($name: String) {
             return await ctx.send(f"The JLPT {level} has {len(packs)} packs available")
 
         pack = packs[pack - 1]
-        await FlashCardDisplay(pack).start(ctx, wait=True)
+        await FlashCardDisplay(random.shuffle(pack.copy())).start(ctx, wait=True)
 
 
 def setup(bot):

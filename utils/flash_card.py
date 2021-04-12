@@ -1,3 +1,4 @@
+import random
 import discord
 from discord.ext import menus
 
@@ -40,10 +41,10 @@ class FlashCardDisplay(menus.Menu):
     def __init__(self, pack):
         super().__init__(clear_reactions_after=True)
         self.pack = pack
-        self.count = 0
-        self.current_card = pack[self.count]
-        self.amount_of_cards = len(pack)
+        self.current_card = pack.pop()
         self.showing_answer = False
+        self.incorrect = 0
+        self.correct = 0
 
     async def send_initial_message(self, ctx, channel):
         await ctx.send(
@@ -54,17 +55,26 @@ class FlashCardDisplay(menus.Menu):
         embed = self.modify_embed(self.current_card.show_question())
         return await self.ctx.send(embed=embed)
 
-    def next_card(self):
+    def next_card(self, reinsert=False):
         try:
-            self.count += 1
-            self.current_card = self.pack[self.count]
+            if reinsert:
+                spot = random.randint(0, round(len(self.pack) * 3 / 4 - 1))
+                self.pack.insert(spot, self.current_card)
+            self.current_card = self.pack.pop()
             return self.modify_embed(self.current_card.show_question())
         except IndexError:
-            # Probably show results
             self.stop()
+            embed = discord.Embed(
+                description=f"Got {self.correct}/{self.incorrect + self.correct} right. "
+                f"{self.correct/(self.incorrect + self.correct) * 100:.2f}%"
+            )
+            embed = embed.set_author(
+                name=self.ctx.author, icon_url=self.ctx.author.avatar_url
+            )
+            return embed
 
     def modify_embed(self, embed):
-        embed = embed.set_footer(text=f"{self.count + 1}/{self.amount_of_cards}")
+        embed = embed.set_footer(text=f"{len(self.pack) + 1} cards left")
         embed = embed.set_author(
             name=self.ctx.author, icon_url=self.ctx.author.avatar_url
         )
@@ -85,16 +95,16 @@ class FlashCardDisplay(menus.Menu):
     async def do_failure(self, payload):
         if not self.showing_answer:
             return
-        # Save that they got it wrong
+        self.incorrect += 1
         self.showing_answer = False
-        embed = self.next_card()
+        embed = self.next_card(reinsert=True)
         return await self.message.edit(embed=embed)
 
     @menus.button("🟢")
     async def do_correct(self, payload):
         if not self.showing_answer:
             return
-        # Save that they got it right
+        self.correct += 1
         self.showing_answer = False
         embed = self.next_card()
         return await self.message.edit(embed=embed)
