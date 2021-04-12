@@ -165,8 +165,9 @@ query ($name: String) {
         if pack > len(packs) or pack < 1:
             return await ctx.send(f"The JLPT {level} has {len(packs)} packs available")
 
-        pack = packs[pack - 1]
-        await FlashCardDisplay(random.shuffle(pack.copy())).start(ctx, wait=True)
+        pack = packs[pack - 1].copy()
+        random.shuffle(pack)
+        await FlashCardDisplay(pack).start(ctx, wait=True)
 
 
 def setup(bot):
