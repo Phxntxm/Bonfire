@@ -1,398 +1,497 @@
 [
     {
-        "vocabulary": " 明け方",
+        "vocabulary": "明け方",
+        "reading": "あけがた",
         "meaning": "dawn"
     },
     {
-        "vocabulary": " 青白い",
+        "vocabulary": "青白い",
+        "reading": "あおじろい",
         "meaning": "pale; bluish-white"
     },
     {
-        "vocabulary": " 足跡",
+        "vocabulary": "足跡",
+        "reading": "あしあと",
         "meaning": "footprints"
     },
     {
-        "vocabulary": " 売買",
+        "vocabulary": "売買",
+        "reading": "ばいばい",
         "meaning": "trade; buying and selling"
     },
     {
-        "vocabulary": " 売店",
+        "vocabulary": "売店",
+        "reading": "ばいてん",
         "meaning": "stand; stall; booth; kiosk; store"
     },
     {
-        "vocabulary": " 募集",
+        "vocabulary": "募集",
+        "reading": "ぼしゅう",
         "meaning": "recruitment; invitation; taking applications; solicitation"
     },
     {
-        "vocabulary": " 長男",
+        "vocabulary": "長男",
+        "reading": "ちょうなん",
         "meaning": "eldest son; first-born son"
     },
     {
-        "vocabulary": " 楕円",
+        "vocabulary": "楕円",
+        "reading": "だえん",
         "meaning": "ellipse"
     },
     {
-        "vocabulary": " 大学院",
+        "vocabulary": "大学院",
+        "reading": "だいがくいん",
         "meaning": "graduate school"
     },
     {
-        "vocabulary": " 出入口",
+        "vocabulary": "出入口",
+        "reading": "でいりぐち",
         "meaning": "exit and entrance"
     },
     {
-        "vocabulary": " 宴会",
+        "vocabulary": "宴会",
+        "reading": "えんかい",
         "meaning": "party; banquet; reception; feast; dinner"
     },
     {
-        "vocabulary": " 円周",
+        "vocabulary": "円周",
+        "reading": "えんしゅう",
         "meaning": "circumference"
     },
     {
-        "vocabulary": " 遠足",
+        "vocabulary": "遠足",
+        "reading": "えんそく",
         "meaning": "excursion; outing; trip"
     },
     {
-        "vocabulary": " 学科",
+        "vocabulary": "学科",
+        "reading": "がっか",
         "meaning": "study subject; course of study​; department"
     },
     {
-        "vocabulary": " 学会",
+        "vocabulary": "学会",
+        "reading": "がっかい",
         "meaning": "scientific society; academic meeting; academic conference"
     },
     {
-        "vocabulary": " 学力",
+        "vocabulary": "学力",
+        "reading": "がくりょく",
         "meaning": "scholarly ability; scholarship; knowledge; literary ability"
     },
     {
-        "vocabulary": " 外科",
+        "vocabulary": "外科",
+        "reading": "げか",
         "meaning": "surgery; department of surgery"
     },
     {
-        "vocabulary": " 花火",
+        "vocabulary": "花火",
+        "reading": "はなび",
         "meaning": "fireworks"
     },
     {
-        "vocabulary": " 半径",
+        "vocabulary": "半径",
+        "reading": "はんけい",
         "meaning": "radius"
     },
     {
-        "vocabulary": " 半島",
+        "vocabulary": "半島",
+        "reading": "はんとう",
         "meaning": "peninsula"
     },
     {
-        "vocabulary": " 発売",
+        "vocabulary": "発売",
+        "reading": "はつばい",
         "meaning": "sale; release (for sale); launch (product)"
     },
     {
-        "vocabulary": " 早口",
+        "vocabulary": "早口",
+        "reading": "はやぐち",
         "meaning": "fast-talking; rapid talking"
     },
     {
-        "vocabulary": " 外れる",
+        "vocabulary": "外れる",
+        "reading": "はずれる",
         "meaning": "to be disconnected; to be off; to miss the mark"
     },
     {
-        "vocabulary": " 閉会",
+        "vocabulary": "閉会",
+        "reading": "へいかい",
         "meaning": "closure (of a ceremony, event, meeting, etc.)"
     },
     {
-        "vocabulary": " 昼寝",
+        "vocabulary": "昼寝",
+        "reading": "ひるね",
         "meaning": "nap, siesta"
     },
     {
-        "vocabulary": " 意地悪",
+        "vocabulary": "意地悪",
+        "reading": "いじわる",
         "meaning": "malicious; ill-tempered; unkind"
     },
     {
-        "vocabulary": " 移転",
+        "vocabulary": "移転",
+        "reading": "いてん",
         "meaning": "moving; relocation; change of address"
     },
     {
-        "vocabulary": " 一旦",
+        "vocabulary": "一旦",
+        "reading": "いったん",
         "meaning": "once; for a short time; briefly; temporarily"
     },
     {
-        "vocabulary": " 寺院",
+        "vocabulary": "寺院",
+        "reading": "じいん",
         "meaning": "Buddhist temple; religious building"
     },
     {
-        "vocabulary": " 人文科学",
+        "vocabulary": "人文科学",
+        "reading": "じんぶんかがく",
         "meaning": "humanities; social sciences; liberal arts"
     },
     {
-        "vocabulary": " 自習",
+        "vocabulary": "自習",
+        "reading": "じしゅう",
         "meaning": "self-study; teaching oneself"
     },
     {
-        "vocabulary": " 時速",
+        "vocabulary": "時速",
+        "reading": "じそく",
         "meaning": "speed (per hour)"
     },
     {
-        "vocabulary": " 実習",
+        "vocabulary": "実習",
+        "reading": "じっしゅう",
         "meaning": "practice; training; practical exercise; drill"
     },
     {
-        "vocabulary": " 過半数",
+        "vocabulary": "過半数",
+        "reading": "かはんすう",
         "meaning": "majority"
     },
     {
-        "vocabulary": " 開会",
+        "vocabulary": "開会",
+        "reading": "かいかい",
         "meaning": "opening of a meeting; starting (an event, etc)"
     },
     {
-        "vocabulary": " 会館",
+        "vocabulary": "会館",
+        "reading": "かいかん",
         "meaning": "meeting hall; assembly hall"
     },
     {
-        "vocabulary": " 回転",
+        "vocabulary": "回転",
+        "reading": "かいてん",
         "meaning": "rotation; revolution; turning"
     },
     {
-        "vocabulary": " 加速",
+        "vocabulary": "加速",
+        "reading": "かぞく",
         "meaning": "acceleration; speeding up"
     },
     {
-        "vocabulary": " 加速度",
+        "vocabulary": "加速度",
+        "reading": "かそくど",
         "meaning": "acceleration"
     },
     {
-        "vocabulary": " 見学",
+        "vocabulary": "見学",
+        "reading": "けんがく",
         "meaning": "study by observation; field trip; tour; review; inspection"
     },
     {
-        "vocabulary": " 国王",
+        "vocabulary": "国王",
+        "reading": "こくおう",
         "meaning": "king; queen; monarch; sovereign"
     },
     {
-        "vocabulary": " 国立",
+        "vocabulary": "国立",
+        "reading": "こくりつ",
         "meaning": "national"
     },
     {
-        "vocabulary": " 国籍",
+        "vocabulary": "国籍",
+        "reading": "こくせき",
         "meaning": "nationality; citizenship"
     },
     {
-        "vocabulary": " 転がる",
+        "vocabulary": "転がる",
+        "reading": "ころがる",
         "meaning": "to roll; to fall over; to lie down"
     },
     {
-        "vocabulary": " 転がす",
+        "vocabulary": "転がす",
+        "reading": "ころがす",
         "meaning": "to roll; to turn over"
     },
     {
-        "vocabulary": " 校舎",
+        "vocabulary": "校舎",
+        "reading": "こうしゃ",
         "meaning": "school building; schoolhouse"
     },
     {
-        "vocabulary": " 校庭",
+        "vocabulary": "校庭",
+        "reading": "こうてい",
         "meaning": "schoolyard; playground; school grounds; campus"
     },
     {
-        "vocabulary": " 待合室",
+        "vocabulary": "待合室",
+        "reading": "まちあいしつ",
         "meaning": "waiting room"
     },
     {
-        "vocabulary": " 待ち合わせる",
+        "vocabulary": "待ち合わせる",
+        "reading": "まちあわせる",
         "meaning": "to rendezvous; to meet at a prearranged place and time; to arrange to meet"
     },
     {
-        "vocabulary": " 窓口",
-        "meaning": " ticket window; teller window; counter"
+        "vocabulary": "窓口",
+        "reading": "まどぐち",
+        "meaning": "ticket window; teller window; counter"
     },
     {
-        "vocabulary": " 毎度",
+        "vocabulary": "毎度",
+        "reading": "まいど",
         "meaning": "each time; always; often; thank you for your continued patronage​"
     },
     {
-        "vocabulary": " 真っ青",
+        "vocabulary": "真っ青",
+        "reading": "まっさお",
         "meaning": "deep blue; bright blue​; ghastly pale; white as a sheet"
     },
     {
-        "vocabulary": " 真っ白",
+        "vocabulary": "真っ白",
+        "reading": "まっしろ",
         "meaning": "pure white; blank"
     },
     {
-        "vocabulary": " 名刺",
+        "vocabulary": "名刺",
+        "reading": "めいし",
         "meaning": "business card"
     },
     {
-        "vocabulary": " 店屋",
+        "vocabulary": "店屋",
+        "reading": "みせや",
         "meaning": "store; shop"
     },
     {
-        "vocabulary": " 木材",
+        "vocabulary": "木材",
+        "reading": "もくざい",
         "meaning": "lumber; timber; wood"
     },
     {
-        "vocabulary": " 元々",
+        "vocabulary": "元々",
+        "reading": "もともと",
         "meaning": "originally, by nature, from the start"
     },
     {
-        "vocabulary": " 内科",
+        "vocabulary": "内科",
+        "reading": "ないか",
         "meaning": "internal medicine"
     },
     {
-        "vocabulary": " 並木",
+        "vocabulary": "並木",
+        "reading": "なみき",
         "meaning": "roadside tree; row of trees"
     },
     {
-        "vocabulary": " 入社",
+        "vocabulary": "入社",
+        "reading": "にゅうしゃ",
         "meaning": "joining a company"
     },
     {
-        "vocabulary": " 押さえる",
+        "vocabulary": "押さえる",
+        "reading": "おさえる",
         "meaning": "to pin down; to hold down; to press down"
     },
     {
-        "vocabulary": " 理科",
+        "vocabulary": "理科",
+        "reading": "りか",
         "meaning": "science (department; course)"
     },
     {
-        "vocabulary": " 領収",
+        "vocabulary": "領収",
+        "reading": "りょうしゅう",
         "meaning": "receipt (of money); receiving"
     },
     {
-        "vocabulary": " 再三",
+        "vocabulary": "再三",
+        "reading": "さいさん",
         "meaning": "again and again; repeatedly"
     },
     {
-        "vocabulary": " 刺さる",
+        "vocabulary": "刺さる",
+        "reading": "ささる",
         "meaning": "to stick into (with a sharp point); to prick; to get stuck (in);"
     },
     {
-        "vocabulary": " 刺身",
+        "vocabulary": "刺身",
+        "reading": "さしみ",
         "meaning": "sashimi (raw sliced fish, shellfish or crustaceans)"
     },
     {
-        "vocabulary": " 早速",
+        "vocabulary": "早速",
+        "reading": "さっそく",
         "meaning": "at once; immediately; without delay; promptly"
     },
     {
-        "vocabulary": " 刺す",
+        "vocabulary": "刺す",
+        "reading": "さす",
         "meaning": "to pierce; to stab; to prick; to stick; to thrust; to sting"
     },
     {
-        "vocabulary": " 青少年",
+        "vocabulary": "青少年",
+        "reading": "せいしょうねん",
         "meaning": "youth; young person"
     },
     {
-        "vocabulary": " 赤道",
+        "vocabulary": "赤道",
+        "reading": "せきどう",
         "meaning": "equator"
     },
     {
-        "vocabulary": " 社会科学",
+        "vocabulary": "社会科学",
+        "reading": "しゃかいかがく",
         "meaning": "social science"
     },
     {
-        "vocabulary": " 社説",
+        "vocabulary": "社説",
+        "reading": "しゃせつ",
         "meaning": "editorial; leading article; leader"
     },
     {
-        "vocabulary": " 司会",
+        "vocabulary": "司会",
+        "reading": "しかい",
         "meaning": "master of ceremonies; leading a meeting; presenter; host"
     },
     {
-        "vocabulary": " 新幹線",
+        "vocabulary": "新幹線",
+        "reading": "しんかんせん",
         "meaning": "Japanese bullet train"
     },
     {
-        "vocabulary": " 白髪",
+        "vocabulary": "白髪",
+        "reading": "しらが",
         "meaning": "white hair; grey hair"
     },
     {
-        "vocabulary": " 自然科学",
+        "vocabulary": "自然科学",
+        "reading": "しぜんかがく",
         "meaning": "natural science"
     },
     {
-        "vocabulary": " 書店",
+        "vocabulary": "書店",
+        "reading": "しょてん",
         "meaning": "bookshop; bookstore"
     },
     {
-        "vocabulary": " 商社",
+        "vocabulary": "商社",
+        "reading": "しょうしゃ",
         "meaning": "trading company; firm"
     },
     {
-        "vocabulary": " 商店",
+        "vocabulary": "商店",
+        "reading": "しょうてん",
         "meaning": "shop; small store; business; firm"
     },
     {
-        "vocabulary": " 集合",
+        "vocabulary": "集合",
+        "reading": "しゅうごう",
         "meaning": "gathering; assembly; meeting"
     },
     {
-        "vocabulary": " 習字",
+        "vocabulary": "習字",
+        "reading": "しゅうじ",
         "meaning": "calligraphy; penmanship"
     },
     {
-        "vocabulary": " 集会",
+        "vocabulary": "集会",
+        "reading": "しゅうかい",
         "meaning": "meeting; assembly; gathering; convention; rally"
     },
     {
-        "vocabulary": " 父母",
+        "vocabulary": "父母",
+        "reading": "そぼ",
         "meaning": "father and mother; parents"
     },
     {
-        "vocabulary": " 速力",
+        "vocabulary": "速力",
+        "reading": "そくりょく",
         "meaning": "speed"
     },
     {
-        "vocabulary": " 速達",
+        "vocabulary": "速達",
+        "reading": "そくたつ",
         "meaning": "express; special delivery"
     },
     {
-        "vocabulary": " 足袋",
+        "vocabulary": "足袋",
+        "reading": "たび",
         "meaning": "Japanese socks (with split toe)"
     },
     {
-        "vocabulary": " 足る",
+        "vocabulary": "足る",
+        "reading": "たる",
         "meaning": "to be sufficient; to be enough​; to be worth doing; to be worthy of; to deserve​"
     },
     {
-        "vocabulary": " 特売",
+        "vocabulary": "特売",
+        "reading": "とくばい",
         "meaning": "special sale"
     },
     {
-        "vocabulary": " 透明",
+        "vocabulary": "透明",
+        "reading": "とうめい",
         "meaning": "transparent; clear"
     },
     {
-        "vocabulary": " 東洋",
+        "vocabulary": "東洋",
+        "reading": "とうよう",
         "meaning": "Orient"
     },
     {
-        "vocabulary": " 売れ行き",
+        "vocabulary": "売れ行き",
+        "reading": "うれゆき",
         "meaning": "sales; demand"
     },
     {
-        "vocabulary": " 売上",
+        "vocabulary": "売上",
+        "reading": "うりあげ",
         "meaning": "amount sold; sales; proceeds; turnover"
     },
     {
-        "vocabulary": " 売り切れ",
+        "vocabulary": "売り切れ",
+        "reading": "うりきれ",
         "meaning": "sold out"
     },
     {
-        "vocabulary": " 売り切れる",
+        "vocabulary": "売り切れる",
+        "reading": "うりきれる",
         "meaning": "to be sold out"
     },
     {
-        "vocabulary": " 我が",
+        "vocabulary": "我が",
+        "reading": "わが",
         "meaning": "my; our; one's own"
     },
     {
-        "vocabulary": " 洋品店",
+        "vocabulary": "洋品店",
+        "reading": "ようひんてん",
         "meaning": "shop that handles Western-style apparel and accessories"
     },
     {
-        "vocabulary": " 輸血",
+        "vocabulary": "輸血",
+        "reading": "ゆけつ",
         "meaning": "blood transfusion"
     },
     {
-        "vocabulary": " 輸送",
+        "vocabulary": "輸送",
+        "reading": "ゆそう",
         "meaning": "transport; transportation"
     },
     {
-        "vocabulary": " 材木",
+        "vocabulary": "材木",
+        "reading": "ざいもく",
         "meaning": "lumber; timber"
     }
 ]

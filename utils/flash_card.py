@@ -3,9 +3,10 @@ from discord.ext import menus
 
 
 class FlashCard:
-    def __init__(self, vocab, sentence, answer):
+    def __init__(self, vocab, sentence, reading, answer):
         self.vocab = vocab
         self.sentence = sentence
+        self.reading = reading
         self.answer = answer
 
     def show_question(self):
@@ -28,8 +29,9 @@ class FlashCard:
             description=f"""
             **Vocabulary**: {self.vocab}
             """  # **Example sentence**: {self.sentence}
-            """
-            **Answer**: {self.answer}
+            f"""
+            **Reading**: {self.reading}
+            **Meaning**: {self.answer}
             """
         )
 

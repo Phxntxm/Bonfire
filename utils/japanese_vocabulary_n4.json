@@ -1,2286 +1,2857 @@
 [
     {
-        "vocabulary": " あ",
+        "vocabulary": "あ",
+        "reading": "a",
         "meaning": "Ah; oh"
     },
     {
-        "vocabulary": " ああ",
+        "vocabulary": "ああ",
+        "reading": "aa",
         "meaning": "ah; yes"
     },
     {
-        "vocabulary": " アフリカ",
+        "vocabulary": "アフリカ",
+        "reading": "afurika",
         "meaning": "Africa"
     },
     {
-        "vocabulary": " 上がる ",
+        "vocabulary": "上がる",
+        "reading": "あがる",
         "meaning": "to rise"
     },
     {
-        "vocabulary": " 挨拶",
+        "vocabulary": "挨拶",
+        "reading": "あいさつ",
         "meaning": "to greet"
     },
     {
-        "vocabulary": " 味",
+        "vocabulary": "味",
+        "reading": "あじ",
         "meaning": "flavor; taste​; uniqueness; attractiveness; experience"
     },
     {
-        "vocabulary": " アジア",
+        "vocabulary": "アジア",
+        "reading": "ajia",
         "meaning": "Asia"
     },
     {
-        "vocabulary": " 赤ちゃん",
+        "vocabulary": "赤ちゃん",
+        "reading": "あかちゃん",
         "meaning": "baby; infant"
     },
     {
-        "vocabulary": " 赤ん坊",
+        "vocabulary": "赤ん坊",
+        "reading": "あかんぼう",
         "meaning": "baby; infant"
     },
     {
-        "vocabulary": " アクセサリー ",
+        "vocabulary": "アクセサリー",
+        "reading": "akusesarii",
         "meaning": "accessory"
     },
     {
-        "vocabulary": " アメリカ ",
+        "vocabulary": "アメリカ",
+        "reading": "amerika",
         "meaning": "America"
     },
     {
-        "vocabulary": " アナウンサー",
+        "vocabulary": "アナウンサー",
+        "reading": "anaunsaa",
         "meaning": "announcer"
     },
     {
-        "vocabulary": " あんな ",
+        "vocabulary": "あんな",
+        "reading": "anna",
         "meaning": "such"
     },
     {
-        "vocabulary": " 案内 ",
+        "vocabulary": "案内",
+        "reading": "あんない",
         "meaning": "to guide"
     },
     {
-        "vocabulary": " 安心",
+        "vocabulary": "安心",
+        "reading": "あんしん",
         "meaning": "peace of mind"
     },
     {
-        "vocabulary": " 安全 ",
+        "vocabulary": "安全",
+        "reading": "あんぜん",
         "meaning": "safety; security​"
     },
     {
-        "vocabulary": " アルバイト",
+        "vocabulary": "アルバイト",
+        "reading": "arubaito",
         "meaning": "part-time job"
     },
     {
-        "vocabulary": " アルコール",
+        "vocabulary": "アルコール",
+        "reading": "arukooru",
         "meaning": "alcohol"
     },
     {
-        "vocabulary": " 浅い ",
+        "vocabulary": "浅い",
+        "reading": "あさい",
         "meaning": "shallow"
     },
     {
-        "vocabulary": " 遊び",
+        "vocabulary": "遊び",
+        "reading": "あそび",
         "meaning": "playing"
     },
     {
-        "vocabulary": " 集まる",
+        "vocabulary": "集まる",
+        "reading": "あつまる",
         "meaning": "to gather; to collect; to assemble"
     },
     {
-        "vocabulary": " 集める",
+        "vocabulary": "集める",
+        "reading": "あつめる",
         "meaning": "to collect; to assemble; to gather"
     },
     {
-        "vocabulary": " 謝る",
+        "vocabulary": "謝る",
+        "reading": "あやまる",
         "meaning": "to apologize"
     },
     {
-        "vocabulary": " 倍",
+        "vocabulary": "倍",
+        "reading": "ばい",
         "meaning": "double"
     },
     {
-        "vocabulary": " 番組 ",
+        "vocabulary": "番組",
+        "reading": "ばんぐみ",
         "meaning": "program (e.g. TV)"
     },
     {
-        "vocabulary": " 場所 ",
+        "vocabulary": "場所",
+        "reading": "ばしょ",
         "meaning": "place"
     },
     {
-        "vocabulary": " ベル",
+        "vocabulary": "ベル",
+        "reading": "beru",
         "meaning": "bell"
     },
     {
-        "vocabulary": " 美術館",
+        "vocabulary": "美術館",
+        "reading": "びじゅつかん",
         "meaning": "art gallery; art museum"
     },
     {
-        "vocabulary": " びっくり",
+        "vocabulary": "びっくり",
+        "reading": "bikkuri",
         "meaning": "to be surprised"
     },
     {
-        "vocabulary": " ビル",
+        "vocabulary": "ビル",
+        "reading": "biru",
         "meaning": "building"
     },
     {
-        "vocabulary": " 僕 ",
+        "vocabulary": "僕",
+        "reading": "ぼく",
         "meaning": "I (used by males)"
     },
     {
-        "vocabulary": " 貿易",
+        "vocabulary": "貿易",
+        "reading": "ぼうえき",
         "meaning": "trade"
     },
     {
-        "vocabulary": " 部長",
+        "vocabulary": "部長",
+        "reading": "ぶちょう",
         "meaning": "manager; head (chief, director) of a section or department"
     },
     {
-        "vocabulary": " ぶどう",
+        "vocabulary": "ぶどう",
+        "reading": "budou",
         "meaning": "grapes"
     },
     {
-        "vocabulary": " 文学",
+        "vocabulary": "文学",
+        "reading": "ぶんがく",
         "meaning": "literature"
     },
     {
-        "vocabulary": " 文化",
+        "vocabulary": "文化",
+        "reading": "ぶんか",
         "meaning": "culture"
     },
     {
-        "vocabulary": " 文法",
+        "vocabulary": "文法",
+        "reading": "ぶんぽう",
         "meaning": "grammar"
     },
     {
-        "vocabulary": " ちゃん ",
+        "vocabulary": "ちゃん",
+        "reading": "chan",
         "meaning": "suffix for familiar female person"
     },
     {
-        "vocabulary": " チェック",
+        "vocabulary": "チェック",
+        "reading": "chekku",
         "meaning": "to check"
     },
     {
-        "vocabulary": " 血",
+        "vocabulary": "血",
+        "reading": "ち",
         "meaning": "blood"
     },
     {
-        "vocabulary": " 力",
+        "vocabulary": "力",
+        "reading": "ちから",
         "meaning": "energy; force; strength; might; power"
     },
     {
-        "vocabulary": " 地理",
+        "vocabulary": "地理",
+        "reading": "ちり",
         "meaning": "geography"
     },
     {
-        "vocabulary": " 中学校",
+        "vocabulary": "中学校",
+        "reading": "ちゅうがっこう",
         "meaning": "junior high school; middle school"
     },
     {
-        "vocabulary": " 注意 ",
+        "vocabulary": "注意",
+        "reading": "ちゅうい",
         "meaning": "caution"
     },
     {
-        "vocabulary": " 注射 ",
+        "vocabulary": "注射",
+        "reading": "ちゅうしゃ",
         "meaning": "injection"
     },
     {
-        "vocabulary": " 駐車場 ",
+        "vocabulary": "駐車場",
+        "reading": "ちゅうしゃじょう",
         "meaning": "parking lot"
     },
     {
-        "vocabulary": " 大分",
+        "vocabulary": "大分",
+        "reading": "だいぶ",
         "meaning": "considerably; greatly; a lot​"
     },
     {
-        "vocabulary": " 大学生",
+        "vocabulary": "大学生",
+        "reading": "だいがくせい",
         "meaning": "university student; college student"
     },
     {
-        "vocabulary": " 大事 ",
+        "vocabulary": "大事",
+        "reading": "だいじ",
         "meaning": "important; serious; crucial"
     },
     {
-        "vocabulary": " 大体",
+        "vocabulary": "大体",
+        "reading": "だいたい",
         "meaning": "roughly"
     },
     {
-        "vocabulary": " 暖房 ",
+        "vocabulary": "暖房",
+        "reading": "だんぼう",
         "meaning": "heating"
     },
     {
-        "vocabulary": " 男性",
+        "vocabulary": "男性",
+        "reading": "だんせい",
         "meaning": "man; male"
     },
     {
-        "vocabulary": " できるだけ ",
+        "vocabulary": "できるだけ",
+        "reading": "dekiru dake",
         "meaning": "as much as possible"
     },
     {
-        "vocabulary": " 電報 ",
+        "vocabulary": "電報",
+        "reading": "でんぽう",
         "meaning": "telegram"
     },
     {
-        "vocabulary": " 電灯",
+        "vocabulary": "電灯",
+        "reading": "でんとう",
         "meaning": "electric light"
     },
     {
-        "vocabulary": " どんどん ",
+        "vocabulary": "どんどん",
+        "reading": "dondon",
         "meaning": "rapidly; more and more"
     },
     {
-        "vocabulary": " 泥棒",
+        "vocabulary": "泥棒",
+        "reading": "どろぼう",
         "meaning": "thief"
     },
     {
-        "vocabulary": " 動物園",
+        "vocabulary": "動物園",
+        "reading": "どうぶつえん",
         "meaning": "zoo; zoological gardens"
     },
     {
-        "vocabulary": " 道具 ",
+        "vocabulary": "道具",
+        "reading": "どうぐ",
         "meaning": "tool"
     },
     {
-        "vocabulary": " 枝",
+        "vocabulary": "枝",
+        "reading": "えだ",
         "meaning": "branch"
     },
     {
-        "vocabulary": " 遠慮",
+        "vocabulary": "遠慮",
+        "reading": "えんりょ",
         "meaning": "reserve; refraining"
     },
     {
-        "vocabulary": " 選ぶ",
+        "vocabulary": "選ぶ",
+        "reading": "えらぶ",
         "meaning": "to choose"
     },
     {
-        "vocabulary": " エスカレーター",
+        "vocabulary": "エスカレーター",
+        "reading": "esukareetaa",
         "meaning": "escalator"
     },
     {
-        "vocabulary": " ファックス",
+        "vocabulary": "ファックス",
+        "reading": "fakkusu",
         "meaning": "fax"
     },
     {
-        "vocabulary": " 不便",
+        "vocabulary": "不便",
+        "reading": "ふべん",
         "meaning": "inconvenience"
     },
     {
-        "vocabulary": " 増える ",
+        "vocabulary": "増える",
+        "reading": "ふえる",
         "meaning": "to increase"
     },
     {
-        "vocabulary": " 深い",
+        "vocabulary": "深い",
+        "reading": "ふかい",
         "meaning": "deep"
     },
     {
-        "vocabulary": " 復習",
+        "vocabulary": "復習",
+        "reading": "ふくしゅう",
         "meaning": "review (of learned material); revision"
     },
     {
-        "vocabulary": " 複雑",
+        "vocabulary": "複雑",
+        "reading": "ふくざつ",
         "meaning": "complexity; complication"
     },
     {
-        "vocabulary": " 踏む",
+        "vocabulary": "踏む",
+        "reading": "ふむ",
         "meaning": "to step on"
     },
     {
-        "vocabulary": " 舟",
+        "vocabulary": "舟",
+        "reading": "ふね",
         "meaning": "ship"
     },
     {
-        "vocabulary": " 降り出す ",
+        "vocabulary": "降り出す",
+        "reading": "ふりだす",
         "meaning": "to start to rain"
     },
     {
-        "vocabulary": " 布団 ",
+        "vocabulary": "布団",
+        "reading": "ふとん",
         "meaning": "Japanese bedding, futon"
     },
     {
-        "vocabulary": " 太る",
+        "vocabulary": "太る",
+        "reading": "ふとる",
         "meaning": "to become fat"
     },
     {
-        "vocabulary": " 普通 ",
+        "vocabulary": "普通",
+        "reading": "ふつう",
         "meaning": "usually"
     },
     {
-        "vocabulary": " ガラス ",
+        "vocabulary": "ガラス",
+        "reading": "garasu",
         "meaning": "a glass"
     },
     {
-        "vocabulary": " ガソリン",
+        "vocabulary": "ガソリン",
+        "reading": "gasorin",
         "meaning": "gasoline; petrol"
     },
     {
-        "vocabulary": " ガソリンスタンド",
+        "vocabulary": "ガソリンスタンド",
+        "reading": "gasorin sutando",
         "meaning": "petrol station"
     },
     {
-        "vocabulary": " ガス",
+        "vocabulary": "ガス",
+        "reading": "gasu",
         "meaning": "petrol"
     },
     {
-        "vocabulary": " 原因",
+        "vocabulary": "原因",
+        "reading": "げんいん",
         "meaning": "cause"
     },
     {
-        "vocabulary": " 下宿 ",
+        "vocabulary": "下宿",
+        "reading": "げしゅく",
         "meaning": "lodging"
     },
     {
-        "vocabulary": " 技術",
+        "vocabulary": "技術",
+        "reading": "ぎじゅつ",
         "meaning": "art,technology,skill"
     },
     {
-        "vocabulary": " ごちそう",
+        "vocabulary": "ごちそう",
+        "reading": "gochisou",
         "meaning": "a feast"
     },
     {
-        "vocabulary": " ごみ ",
+        "vocabulary": "ごみ",
+        "reading": "gomi",
         "meaning": "rubbish"
     },
     {
-        "vocabulary": " ご覧になる",
+        "vocabulary": "ご覧になる",
+        "reading": "ごらんになる",
         "meaning": "(respectful) to see"
     },
     {
-        "vocabulary": " ご主人",
+        "vocabulary": "ご主人",
+        "reading": "ごしゅじん",
         "meaning": "your husband; her husband"
     },
     {
-        "vocabulary": " ご存じ",
+        "vocabulary": "ご存じ",
+        "reading": "ごぞんじ",
         "meaning": "knowing"
     },
     {
-        "vocabulary": " 具合",
+        "vocabulary": "具合",
+        "reading": "ぐあい",
         "meaning": "condition; health"
     },
     {
-        "vocabulary": " 葉",
+        "vocabulary": "葉",
+        "reading": "は",
         "meaning": "leaves; leaf"
     },
     {
-        "vocabulary": " 拝見 ",
+        "vocabulary": "拝見",
+        "reading": "はいけん",
         "meaning": "seeing; looking at​"
     },
     {
-        "vocabulary": " 歯医者 ",
+        "vocabulary": "歯医者",
+        "reading": "はいしゃ",
         "meaning": "dentist"
     },
     {
-        "vocabulary": " はっきり",
+        "vocabulary": "はっきり",
+        "reading": "hakkiri",
         "meaning": "clearly"
     },
     {
-        "vocabulary": " 運ぶ ",
+        "vocabulary": "運ぶ",
+        "reading": "はこぶ",
         "meaning": "to carry"
     },
     {
-        "vocabulary": " 花見",
+        "vocabulary": "花見",
+        "reading": "はなみ",
         "meaning": "cherry blossom viewing; flower viewing"
     },
     {
-        "vocabulary": " ハンドバッグ",
+        "vocabulary": "ハンドバッグ",
+        "reading": "handobaggu",
         "meaning": "handbag"
     },
     {
-        "vocabulary": " 反対",
+        "vocabulary": "反対",
+        "reading": "はんたい",
         "meaning": "opposition"
     },
     {
-        "vocabulary": " 払う",
+        "vocabulary": "払う",
+        "reading": "はらう",
         "meaning": "to pay"
     },
     {
-        "vocabulary": " 発音 ",
+        "vocabulary": "発音",
+        "reading": "はつおん",
         "meaning": "pronunciation"
     },
     {
-        "vocabulary": " 林 ",
+        "vocabulary": "林",
+        "reading": "はやし",
         "meaning": "woods; forest"
     },
     {
-        "vocabulary": " 恥ずかしい",
+        "vocabulary": "恥ずかしい",
+        "reading": "はずかしい",
         "meaning": "embarrassed"
     },
     {
-        "vocabulary": " 変",
+        "vocabulary": "変",
+        "reading": "へん",
         "meaning": "strange; peculiar; weird"
     },
     {
-        "vocabulary": " 返事 ",
+        "vocabulary": "返事",
+        "reading": "へんじ",
         "meaning": "reply; answer; response"
     },
     {
-        "vocabulary": " 火",
+        "vocabulary": "火",
+        "reading": "ひ",
         "meaning": "fire"
     },
     {
-        "vocabulary": " 酷い ",
+        "vocabulary": "酷い",
+        "reading": "ひどい",
         "meaning": "terrible; awful​"
     },
     {
-        "vocabulary": " 冷える ",
+        "vocabulary": "冷える",
+        "reading": "ひえる",
         "meaning": "to grow cold"
     },
     {
-        "vocabulary": " 髭",
+        "vocabulary": "髭",
+        "reading": "ひげ",
         "meaning": "beard"
     },
     {
-        "vocabulary": " 非常に",
+        "vocabulary": "非常に",
+        "reading": "ひじょうに",
         "meaning": "extremely"
     },
     {
-        "vocabulary": " 光",
+        "vocabulary": "光",
+        "reading": "ひかり",
         "meaning": "light"
     },
     {
-        "vocabulary": " 光る",
+        "vocabulary": "光る",
+        "reading": "ひかる",
         "meaning": "to shine"
     },
     {
-        "vocabulary": " 引き出し",
+        "vocabulary": "引き出し",
+        "reading": "ひきだし",
         "meaning": "drawer"
     },
     {
-        "vocabulary": " 引き出す",
+        "vocabulary": "引き出す",
+        "reading": "ひきだす",
         "meaning": "to withdraw"
     },
     {
-        "vocabulary": " 引っ越す",
+        "vocabulary": "引っ越す",
+        "reading": "ひっこす",
         "meaning": "to move house"
     },
     {
-        "vocabulary": " 飛行場",
+        "vocabulary": "飛行場",
+        "reading": "ひこうじょう",
         "meaning": "airfield; airport"
     },
     {
-        "vocabulary": " 開く",
+        "vocabulary": "開く",
+        "reading": "ひらく",
         "meaning": "to open; to undo; to unseal; to unpack"
     },
     {
-        "vocabulary": " 拾う",
+        "vocabulary": "拾う",
+        "reading": "ひろう",
         "meaning": "to pick up"
     },
     {
-        "vocabulary": " 昼間",
+        "vocabulary": "昼間",
+        "reading": "ひるま",
         "meaning": "daytime; during the day"
     },
     {
-        "vocabulary": " 昼休み",
+        "vocabulary": "昼休み",
+        "reading": "ひるやすみ",
         "meaning": "lunch break; noon recess; noon rest period"
     },
     {
-        "vocabulary": " 久しぶり ",
+        "vocabulary": "久しぶり",
+        "reading": "ひさしぶり",
         "meaning": "after a long time"
     },
     {
-        "vocabulary": " 褒める",
+        "vocabulary": "褒める",
+        "reading": "ほめる",
         "meaning": "to praise"
     },
     {
-        "vocabulary": " 翻訳",
+        "vocabulary": "翻訳",
+        "reading": "ほんやく",
         "meaning": "translation"
     },
     {
-        "vocabulary": " 星 ",
+        "vocabulary": "星",
+        "reading": "ほし",
         "meaning": "star"
     },
     {
-        "vocabulary": " ほとんど",
+        "vocabulary": "ほとんど",
+        "reading": "hotondo",
         "meaning": "mostly"
     },
     {
-        "vocabulary": " 法律",
+        "vocabulary": "法律",
+        "reading": "ほうりつ",
         "meaning": "law"
     },
     {
-        "vocabulary": " 放送",
+        "vocabulary": "放送",
+        "reading": "ほうそう",
         "meaning": "to broadcast"
     },
     {
-        "vocabulary": " 一度",
+        "vocabulary": "一度",
+        "reading": "いちど",
         "meaning": "once; one time; on one occasion"
     },
     {
-        "vocabulary": " 以外",
+        "vocabulary": "以外",
+        "reading": "いがい",
         "meaning": "with the exception of; excepting"
     },
     {
-        "vocabulary": " 医学",
+        "vocabulary": "医学",
+        "reading": "いがく",
         "meaning": "medical science; medicine"
     },
     {
-        "vocabulary": " いじめる ",
+        "vocabulary": "いじめる",
+        "reading": "ijimeru",
         "meaning": "to tease"
     },
     {
-        "vocabulary": " 以上",
+        "vocabulary": "以上",
+        "reading": "いじょう",
         "meaning": "... and more; ... and upwards​"
     },
     {
-        "vocabulary": " 以下",
+        "vocabulary": "以下",
+        "reading": "いか",
         "meaning": "not exceeding"
     },
     {
-        "vocabulary": " 意見",
+        "vocabulary": "意見",
+        "reading": "いけん",
         "meaning": "opinion; view; comment"
     },
     {
-        "vocabulary": " 生き物",
+        "vocabulary": "生き物",
+        "reading": "いきもの",
         "meaning": "living thing"
     },
     {
-        "vocabulary": " 生きる",
+        "vocabulary": "生きる",
+        "reading": "いきる",
         "meaning": "to live"
     },
     {
-        "vocabulary": " 以内 ",
+        "vocabulary": "以内",
+        "reading": "いない",
         "meaning": "within"
     },
     {
-        "vocabulary": " 田舎",
+        "vocabulary": "田舎",
+        "reading": "いなか",
         "meaning": "countryside"
     },
     {
-        "vocabulary": " 祈る",
+        "vocabulary": "祈る",
+        "reading": "いのる",
         "meaning": "to pray"
     },
     {
-        "vocabulary": " いっぱい",
+        "vocabulary": "いっぱい",
+        "reading": "ippai",
         "meaning": "full"
     },
     {
-        "vocabulary": " 色んな",
+        "vocabulary": "色んな",
+        "reading": "いろんな",
         "meaning": "various"
     },
     {
-        "vocabulary": " 石",
+        "vocabulary": "石",
+        "reading": "いし",
         "meaning": "stone"
     },
     {
-        "vocabulary": " 急ぐ",
+        "vocabulary": "急ぐ",
+        "reading": "いそぐ",
         "meaning": "to hurry; to rush; to hasten; to make something happen sooner"
     },
     {
-        "vocabulary": " 一生懸命",
+        "vocabulary": "一生懸命",
+        "reading": "いっしょうけんめい",
         "meaning": "very hard; with utmost effort"
     },
     {
-        "vocabulary": " 頂く ",
+        "vocabulary": "頂く",
+        "reading": "いただく",
         "meaning": "(humble) to receive"
     },
     {
-        "vocabulary": " 致す",
+        "vocabulary": "致す",
+        "reading": "いたす",
         "meaning": "(humble) to do"
     },
     {
-        "vocabulary": " 糸",
+        "vocabulary": "糸",
+        "reading": "いと",
         "meaning": "thread"
     },
     {
-        "vocabulary": " ジャム ",
+        "vocabulary": "ジャム",
+        "reading": "jamu",
         "meaning": "jam"
     },
     {
-        "vocabulary": " 字",
+        "vocabulary": "字",
+        "reading": "じ",
         "meaning": "character"
     },
     {
-        "vocabulary": " 時代 ",
+        "vocabulary": "時代",
+        "reading": "じだい",
         "meaning": "period"
     },
     {
-        "vocabulary": " 事故 ",
+        "vocabulary": "事故",
+        "reading": "じこ",
         "meaning": "accident"
     },
     {
-        "vocabulary": " 事務所 ",
+        "vocabulary": "事務所",
+        "reading": "じむしょ",
         "meaning": "office"
     },
     {
-        "vocabulary": " 神社",
+        "vocabulary": "神社",
+        "reading": "じんじゃ",
         "meaning": "Shinto shrine"
     },
     {
-        "vocabulary": " 人口",
+        "vocabulary": "人口",
+        "reading": "じんこう",
         "meaning": "population"
     },
     {
-        "vocabulary": " 人生",
+        "vocabulary": "人生",
+        "reading": "じんせい",
         "meaning": "human life"
     },
     {
-        "vocabulary": " 地震",
+        "vocabulary": "地震",
+        "reading": "じしん",
         "meaning": "earthquake"
     },
     {
-        "vocabulary": " 辞典",
+        "vocabulary": "辞典",
+        "reading": "じてん",
         "meaning": "dictionary"
     },
     {
-        "vocabulary": " 自由",
+        "vocabulary": "自由",
+        "reading": "じゆう",
         "meaning": "freedom"
     },
     {
-        "vocabulary": " 女性 ",
+        "vocabulary": "女性",
+        "reading": "じょせい",
         "meaning": "woman; female"
     },
     {
-        "vocabulary": " 準備 ",
+        "vocabulary": "準備",
+        "reading": "じゅんび",
         "meaning": "to prepare"
     },
     {
-        "vocabulary": " 十分",
+        "vocabulary": "十分",
+        "reading": "じゅうぶん",
         "meaning": "enough; sufficient; plenty; adequate; satisfactory"
     },
     {
-        "vocabulary": " 柔道 ",
+        "vocabulary": "柔道",
+        "reading": "じゅうどう",
         "meaning": "judo"
     },
     {
-        "vocabulary": " 住所 ",
+        "vocabulary": "住所",
+        "reading": "じゅうしょ",
         "meaning": "address"
     },
     {
-        "vocabulary": " カーテン",
+        "vocabulary": "カーテン",
+        "reading": "kaaten",
         "meaning": "curtain"
     },
     {
-        "vocabulary": " 壁",
+        "vocabulary": "壁",
+        "reading": "かべ",
         "meaning": "wall"
     },
     {
-        "vocabulary": " 課長",
+        "vocabulary": "課長",
+        "reading": "かちょう",
         "meaning": "section manager; section chief"
     },
     {
-        "vocabulary": " 帰り",
+        "vocabulary": "帰り",
+        "reading": "かえり",
         "meaning": "return; coming back"
     },
     {
-        "vocabulary": " 変える",
+        "vocabulary": "変える",
+        "reading": "かえる",
         "meaning": "to change; to transform"
     },
     {
-        "vocabulary": " 科学",
+        "vocabulary": "科学",
+        "reading": "かがく",
         "meaning": "science"
     },
     {
-        "vocabulary": " 鏡",
+        "vocabulary": "鏡",
+        "reading": "かがみ",
         "meaning": "mirror"
     },
     {
-        "vocabulary": " 海岸",
+        "vocabulary": "海岸",
+        "reading": "かいがん",
         "meaning": "coast"
     },
     {
-        "vocabulary": " 会議",
+        "vocabulary": "会議",
+        "reading": "かいぎ",
         "meaning": "meeting; conference; session; assembly"
     },
     {
-        "vocabulary": " 会議室",
+        "vocabulary": "会議室",
+        "reading": "かいぎしつ",
         "meaning": "conference room; conference hall; council room"
     },
     {
-        "vocabulary": " 会場",
+        "vocabulary": "会場",
+        "reading": "かいじょう",
         "meaning": "assembly hall; meeting place; venue; grounds"
     },
     {
-        "vocabulary": " 会話",
+        "vocabulary": "会話",
+        "reading": "かいわ",
         "meaning": "conversation"
     },
     {
-        "vocabulary": " 火事 ",
+        "vocabulary": "火事",
+        "reading": "かじ",
         "meaning": "fire"
     },
     {
-        "vocabulary": " 格好 ",
+        "vocabulary": "格好",
+        "reading": "かっこう",
         "meaning": "appearance"
     },
     {
-        "vocabulary": " 構う",
+        "vocabulary": "構う",
+        "reading": "かまう",
         "meaning": "to mind"
     },
     {
-        "vocabulary": " 髪",
+        "vocabulary": "髪",
+        "reading": "かみ",
         "meaning": "hair"
     },
     {
-        "vocabulary": " 噛む",
+        "vocabulary": "噛む",
+        "reading": "かむ",
         "meaning": "to bite,to chew"
     },
     {
-        "vocabulary": " 家内",
+        "vocabulary": "家内",
+        "reading": "かない",
         "meaning": "(my) wife; inside the home; one's family"
     },
     {
-        "vocabulary": " 必ず",
+        "vocabulary": "必ず",
+        "reading": "かならず",
         "meaning": "always; certainly"
     },
     {
-        "vocabulary": " 悲しい",
+        "vocabulary": "悲しい",
+        "reading": "かなしい",
         "meaning": "sad"
     },
     {
-        "vocabulary": " 考える ",
+        "vocabulary": "考える",
+        "reading": "かんがえる",
         "meaning": "to think"
     },
     {
-        "vocabulary": " 看護婦 ",
+        "vocabulary": "看護婦",
+        "reading": "かんごふ",
         "meaning": "female nurse"
     },
     {
-        "vocabulary": " 関係 ",
+        "vocabulary": "関係",
+        "reading": "かんけい",
         "meaning": "relationship"
     },
     {
-        "vocabulary": " 彼女 ",
+        "vocabulary": "彼女",
+        "reading": "かのじょ",
         "meaning": "she; her​"
     },
     {
-        "vocabulary": " 簡単",
+        "vocabulary": "簡単",
+        "reading": "かんたん",
         "meaning": "simple; easy"
     },
     {
-        "vocabulary": " 彼 ",
+        "vocabulary": "彼",
+        "reading": "かれ",
         "meaning": "he; him​; his"
     },
     {
-        "vocabulary": " 彼ら ",
+        "vocabulary": "彼ら",
+        "reading": "かれら",
         "meaning": "they; them"
     },
     {
-        "vocabulary": " 形 ",
+        "vocabulary": "形",
+        "reading": "かたち",
         "meaning": "shape"
     },
     {
-        "vocabulary": " 片付ける",
+        "vocabulary": "片付ける",
+        "reading": "かたづける",
         "meaning": "to tidy up"
     },
     {
-        "vocabulary": " 硬い",
+        "vocabulary": "硬い",
+        "reading": "かたい",
         "meaning": "hard"
     },
     {
-        "vocabulary": " 勝つ ",
+        "vocabulary": "勝つ",
+        "reading": "かつ",
         "meaning": "to win"
     },
     {
-        "vocabulary": " 乾く",
+        "vocabulary": "乾く",
+        "reading": "かわく",
         "meaning": "to get dry"
     },
     {
-        "vocabulary": " 代わり ",
+        "vocabulary": "代わり",
+        "reading": "かわり",
         "meaning": "instead; in place"
     },
     {
-        "vocabulary": " 変わる ",
+        "vocabulary": "変わる",
+        "reading": "かわる",
         "meaning": "to change"
     },
     {
-        "vocabulary": " 通う",
+        "vocabulary": "通う",
+        "reading": "かよう",
         "meaning": "to commute"
     },
     {
-        "vocabulary": " 飾る ",
+        "vocabulary": "飾る",
+        "reading": "かざる",
         "meaning": "to decorate"
     },
     {
-        "vocabulary": " 毛",
+        "vocabulary": "毛",
+        "reading": "け",
         "meaning": "hair or fur"
     },
     {
-        "vocabulary": " ケーキ ",
+        "vocabulary": "ケーキ",
+        "reading": "keeki",
         "meaning": "cake"
     },
     {
-        "vocabulary": " 怪我",
+        "vocabulary": "怪我",
+        "reading": "けが",
         "meaning": "to injure"
     },
     {
-        "vocabulary": " 計画",
+        "vocabulary": "計画",
+        "reading": "けいかく",
         "meaning": "to plan"
     },
     {
-        "vocabulary": " 経験",
+        "vocabulary": "経験",
+        "reading": "けいけん",
         "meaning": "to experience"
     },
     {
-        "vocabulary": " 警察",
+        "vocabulary": "警察",
+        "reading": "けいさつ",
         "meaning": "police"
     },
     {
-        "vocabulary": " 経済 ",
+        "vocabulary": "経済",
+        "reading": "けいざい",
         "meaning": "finance, economy"
     },
     {
-        "vocabulary": " 見物",
+        "vocabulary": "見物",
+        "reading": "けんぶつ",
         "meaning": "sightseeing; visit"
     },
     {
-        "vocabulary": " 喧嘩",
+        "vocabulary": "喧嘩",
+        "reading": "けんか",
         "meaning": "to quarrel"
     },
     {
-        "vocabulary": " 研究 ",
+        "vocabulary": "研究",
+        "reading": "けんきゅう",
         "meaning": "research"
     },
     {
-        "vocabulary": " 研究室 ",
+        "vocabulary": "研究室",
+        "reading": "けんきゅうしつ",
         "meaning": "laboratory"
     },
     {
-        "vocabulary": " 消しゴム ",
+        "vocabulary": "消しゴム",
+        "reading": "keshigomu",
         "meaning": "eraser"
     },
     {
-        "vocabulary": " 景色 ",
+        "vocabulary": "景色",
+        "reading": "けしき",
         "meaning": "scenery"
     },
     {
-        "vocabulary": " 気",
+        "vocabulary": "気",
+        "reading": "き",
         "meaning": "spirit"
     },
     {
-        "vocabulary": " 厳しい",
+        "vocabulary": "厳しい",
+        "reading": "きびしい",
         "meaning": "strict"
     },
     {
-        "vocabulary": " 気分",
+        "vocabulary": "気分",
+        "reading": "きぶん",
         "meaning": "feeling; mood"
     },
     {
-        "vocabulary": " 機会",
+        "vocabulary": "機会",
+        "reading": "きかい",
         "meaning": "chance; opportunity"
     },
     {
-        "vocabulary": " 危険",
+        "vocabulary": "危険",
+        "reading": "きけん",
         "meaning": "danger"
     },
     {
-        "vocabulary": " 聞こえる",
+        "vocabulary": "聞こえる",
+        "reading": "きこえる",
         "meaning": "to be heard; to be audible; to be said"
     },
     {
-        "vocabulary": " 決まる",
+        "vocabulary": "決まる",
+        "reading": "きまる",
         "meaning": "to be decided"
     },
     {
-        "vocabulary": " 決める ",
+        "vocabulary": "決める",
+        "reading": "きめる",
         "meaning": "to decide"
     },
     {
-        "vocabulary": " 君",
+        "vocabulary": "君",
+        "reading": "きみ",
         "meaning": "You"
     },
     {
-        "vocabulary": " 気持ち",
+        "vocabulary": "気持ち",
+        "reading": "きもち",
         "meaning": "feeling"
     },
     {
-        "vocabulary": " 着物",
+        "vocabulary": "着物",
+        "reading": "きもの",
         "meaning": "kimono; Japanese traditional clothing"
     },
     {
-        "vocabulary": " 近所",
+        "vocabulary": "近所",
+        "reading": "きんじょ",
         "meaning": "neighbourhood"
     },
     {
-        "vocabulary": " 絹",
+        "vocabulary": "絹",
+        "reading": "きぬ",
         "meaning": "silk"
     },
     {
-        "vocabulary": " 季節 ",
+        "vocabulary": "季節",
+        "reading": "きせつ",
         "meaning": "season"
     },
     {
-        "vocabulary": " 汽車",
+        "vocabulary": "汽車",
+        "reading": "きしゃ",
         "meaning": "train"
     },
     {
-        "vocabulary": " 規則",
+        "vocabulary": "規則",
+        "reading": "きそく",
         "meaning": "rule"
     },
     {
-        "vocabulary": " 子",
+        "vocabulary": "子",
+        "reading": "こ",
         "meaning": "child"
     },
     {
-        "vocabulary": " 心",
+        "vocabulary": "心",
+        "reading": "こころ",
         "meaning": "heart"
     },
     {
-        "vocabulary": " 国際",
+        "vocabulary": "国際",
+        "reading": "こくさい",
         "meaning": "international"
     },
     {
-        "vocabulary": " 細かい",
+        "vocabulary": "細かい",
+        "reading": "こまかい",
         "meaning": "small, fine"
     },
     {
-        "vocabulary": " 米 ",
+        "vocabulary": "米",
+        "reading": "こめ",
         "meaning": "(husked grains of) rice"
     },
     {
-        "vocabulary": " 込む ",
+        "vocabulary": "込む",
+        "reading": "こむ",
         "meaning": "to be crowded"
     },
     {
-        "vocabulary": " 今度",
+        "vocabulary": "今度",
+        "reading": "こんど",
         "meaning": "this time; next time"
     },
     {
-        "vocabulary": " この間 ",
+        "vocabulary": "この間",
+        "reading": "このあいだ",
         "meaning": "the other day; recently"
     },
     {
-        "vocabulary": " このごろ ",
+        "vocabulary": "このごろ",
+        "reading": "kono goro",
         "meaning": "these days; nowadays"
     },
     {
-        "vocabulary": " コンピュータ",
+        "vocabulary": "コンピュータ",
+        "reading": "konpyuuta",
         "meaning": "computer"
     },
     {
-        "vocabulary": " コンサート",
+        "vocabulary": "コンサート",
+        "reading": "konsaato",
         "meaning": "concert"
     },
     {
-        "vocabulary": " 今夜",
-        "meaning": " this evening; tonigh"
+        "vocabulary": "今夜",
+        "reading": "こんや",
+        "meaning": "this evening; tonigh"
     },
     {
-        "vocabulary": " これから ",
+        "vocabulary": "これから",
+        "reading": "korekara",
         "meaning": "after this"
     },
     {
-        "vocabulary": " 故障",
+        "vocabulary": "故障",
+        "reading": "こしょう",
         "meaning": "to break-down"
     },
     {
-        "vocabulary": " 答え ",
+        "vocabulary": "答え",
+        "reading": "こたえ",
         "meaning": "response"
     },
     {
-        "vocabulary": " 小鳥",
+        "vocabulary": "小鳥",
+        "reading": "ことり",
         "meaning": "small bird"
     },
     {
-        "vocabulary": " こう ",
+        "vocabulary": "こう",
+        "reading": "kou",
         "meaning": "this way"
     },
     {
-        "vocabulary": " 校長",
+        "vocabulary": "校長",
+        "reading": "こうちょう",
         "meaning": "principal; headmaster"
     },
     {
-        "vocabulary": " 講堂 ",
+        "vocabulary": "講堂",
+        "reading": "こうどう",
         "meaning": "auditorium"
     },
     {
-        "vocabulary": " 郊外",
+        "vocabulary": "郊外",
+        "reading": "こうがい",
         "meaning": "suburb; residential area on the outskirt of a city"
     },
     {
-        "vocabulary": " 講義",
+        "vocabulary": "講義",
+        "reading": "こうぎ",
         "meaning": "lecture"
     },
     {
-        "vocabulary": " 工業",
+        "vocabulary": "工業",
+        "reading": "こうぎょう",
         "meaning": "industry"
     },
     {
-        "vocabulary": " 工場 ",
+        "vocabulary": "工場",
+        "reading": "こうじょう",
         "meaning": "factory"
     },
     {
-        "vocabulary": " 高校",
+        "vocabulary": "高校",
+        "reading": "こうこう",
         "meaning": "senior high school; high school​"
     },
     {
-        "vocabulary": " 高校生",
+        "vocabulary": "高校生",
+        "reading": "こうこうせい",
         "meaning": "high school student"
     },
     {
-        "vocabulary": " 公務員",
+        "vocabulary": "公務員",
+        "reading": "こうむいん",
         "meaning": "government worker"
     },
     {
-        "vocabulary": " 高等学校",
+        "vocabulary": "高等学校",
+        "reading": "こうとうがっこう",
         "meaning": "high school"
     },
     {
-        "vocabulary": " 交通 ",
+        "vocabulary": "交通",
+        "reading": "こうつう",
         "meaning": "traffic"
     },
     {
-        "vocabulary": " 怖い",
+        "vocabulary": "怖い",
+        "reading": "こわい",
         "meaning": "frightening"
     },
     {
-        "vocabulary": " 壊れる",
+        "vocabulary": "壊れる",
+        "reading": "こわれる",
         "meaning": "to be broken"
     },
     {
-        "vocabulary": " 壊す",
+        "vocabulary": "壊す",
+        "reading": "こわす",
         "meaning": "to break"
     },
     {
-        "vocabulary": " 首",
+        "vocabulary": "首",
+        "reading": "くび",
         "meaning": "neck"
     },
     {
-        "vocabulary": " 下さる",
+        "vocabulary": "下さる",
+        "reading": "くださる",
         "meaning": "(respectful) to give"
     },
     {
-        "vocabulary": " 雲 ",
+        "vocabulary": "雲",
+        "reading": "くも",
         "meaning": "cloud"
     },
     {
-        "vocabulary": " 君",
+        "vocabulary": "君",
+        "reading": "くん",
         "meaning": "suffix for familiar young male"
     },
     {
-        "vocabulary": " 比べる",
+        "vocabulary": "比べる",
+        "reading": "くらべる",
         "meaning": "to compare"
     },
     {
-        "vocabulary": "  暮れる ",
+        "vocabulary": "暮れる",
+        "reading": "くれる",
         "meaning": "to get dark"
     },
     {
-        "vocabulary": " 草",
+        "vocabulary": "草",
+        "reading": "くさ",
         "meaning": "grass"
     },
     {
-        "vocabulary": " 空気 ",
+        "vocabulary": "空気",
+        "reading": "くうき",
         "meaning": "air"
     },
     {
-        "vocabulary": " 空港 ",
+        "vocabulary": "空港",
+        "reading": "くうこう",
         "meaning": "airport"
     },
     {
-        "vocabulary": " 客",
+        "vocabulary": "客",
+        "reading": "きゃく",
         "meaning": "guest; customer"
     },
     {
-        "vocabulary": " 教育",
+        "vocabulary": "教育",
+        "reading": "きょういく",
         "meaning": "education"
     },
     {
-        "vocabulary": " 教会",
+        "vocabulary": "教会",
+        "reading": "きょうかい",
         "meaning": "church; congregation; Christian church"
     },
     {
-        "vocabulary": " 興味",
+        "vocabulary": "興味",
+        "reading": "きょうみ",
         "meaning": "interest (in something); curiosity (about something); zest (for)"
     },
     {
-        "vocabulary": " 競争",
+        "vocabulary": "競争",
+        "reading": "きょうそう",
         "meaning": "competition"
     },
     {
-        "vocabulary": " 急",
+        "vocabulary": "急",
+        "reading": "きゅう",
         "meaning": "sudden; abrupt; unexpected"
     },
     {
-        "vocabulary": " 急行",
+        "vocabulary": "急行",
+        "reading": "きゅうこう",
         "meaning": "hurrying (to somewhere); rushing; hastening"
     },
     {
-        "vocabulary": " 間違える",
+        "vocabulary": "間違える",
+        "reading": "まちがえる",
         "meaning": "to make a mistake (in)"
     },
     {
-        "vocabulary": " 参る ",
+        "vocabulary": "参る",
+        "reading": "まいる",
         "meaning": "(humble) to go; to come"
     },
     {
-        "vocabulary": " 負ける",
+        "vocabulary": "負ける",
+        "reading": "まける",
         "meaning": "to lose"
     },
     {
-        "vocabulary": " 漫画",
+        "vocabulary": "漫画",
+        "reading": "まんが",
         "meaning": "comic"
     },
     {
-        "vocabulary": " 間に合う",
+        "vocabulary": "間に合う",
+        "reading": "まにあう",
         "meaning": "to be in time (for)"
     },
     {
-        "vocabulary": " 真ん中",
+        "vocabulary": "真ん中",
+        "reading": "まんなか",
         "meaning": "middle; centre; center"
     },
     {
-        "vocabulary": " 周り",
+        "vocabulary": "周り",
+        "reading": "まわり",
         "meaning": "around"
     },
     {
-        "vocabulary": " 回る",
+        "vocabulary": "回る",
+        "reading": "まわる",
         "meaning": "to go around"
     },
     {
-        "vocabulary": " まず",
+        "vocabulary": "まず",
+        "reading": "mazu",
         "meaning": "first of all"
     },
     {
-        "vocabulary": " 召し上がる",
+        "vocabulary": "召し上がる",
+        "reading": "めしあがる",
         "meaning": "to eat; to drink​"
     },
     {
-        "vocabulary": " 珍しい",
+        "vocabulary": "珍しい",
+        "reading": "めずらしい",
         "meaning": "unusual; rare"
     },
     {
-        "vocabulary": " 見える",
+        "vocabulary": "見える",
+        "reading": "みえる",
         "meaning": "to be seen; to be in sight; to look; to seem"
     },
     {
-        "vocabulary": " 港 ",
+        "vocabulary": "港",
+        "reading": "みなと",
         "meaning": "harbour"
     },
     {
-        "vocabulary": " 味噌",
+        "vocabulary": "味噌",
+        "reading": "みそ",
         "meaning": "fermented condiment made from soybeans"
     },
     {
-        "vocabulary": " 見つかる",
+        "vocabulary": "見つかる",
+        "reading": "みつかる",
         "meaning": "to be found; to be discovered"
     },
     {
-        "vocabulary": " 見つける",
+        "vocabulary": "見つける",
+        "reading": "みつける",
         "meaning": "to discover; to find; to come across; to detect; to spot"
     },
     {
-        "vocabulary": " 都 ",
+        "vocabulary": "都",
+        "reading": "みやこ",
         "meaning": "capital"
     },
     {
-        "vocabulary": " 湖 ",
+        "vocabulary": "湖",
+        "reading": "みずうみ",
         "meaning": "lake"
     },
     {
-        "vocabulary": " 戻る",
+        "vocabulary": "戻る",
+        "reading": "もどる",
         "meaning": "to turn back"
     },
     {
-        "vocabulary": " 木綿",
+        "vocabulary": "木綿",
+        "reading": "もめん",
         "meaning": "cotton (material)"
     },
     {
-        "vocabulary": " 森",
+        "vocabulary": "森",
+        "reading": "もり",
         "meaning": "forest"
     },
     {
-        "vocabulary": " もし",
+        "vocabulary": "もし",
+        "reading": "moshi",
         "meaning": "if; in case; supposing"
     },
     {
-        "vocabulary": " 申し上げる",
+        "vocabulary": "申し上げる",
+        "reading": "もうしあげる",
         "meaning": "to say; to offer"
     },
     {
-        "vocabulary": " 申す ",
+        "vocabulary": "申す",
+        "reading": "もうす",
         "meaning": "to be called; to say"
     },
     {
-        "vocabulary": " もうすぐ ",
+        "vocabulary": "もうすぐ",
+        "reading": "mousugu",
         "meaning": "soon"
     },
     {
-        "vocabulary": " 迎える",
+        "vocabulary": "迎える",
+        "reading": "むかえる",
         "meaning": "to go out to meet"
     },
     {
-        "vocabulary": " 昔",
+        "vocabulary": "昔",
+        "reading": "むかし",
         "meaning": "olden days, former"
     },
     {
-        "vocabulary": " 向かう ",
+        "vocabulary": "向かう",
+        "reading": "むかう",
         "meaning": "to head towards"
     },
     {
-        "vocabulary": " 無理 ",
+        "vocabulary": "無理",
+        "reading": "むり",
         "meaning": "impossible"
     },
     {
-        "vocabulary": " 虫",
+        "vocabulary": "虫",
+        "reading": "むし",
         "meaning": "insect"
     },
     {
-        "vocabulary": " 息子",
+        "vocabulary": "息子",
+        "reading": "むすこ",
         "meaning": "son"
     },
     {
-        "vocabulary": " 娘",
+        "vocabulary": "娘",
+        "reading": "むすめ",
         "meaning": "daughter"
     },
     {
-        "vocabulary": " 投げる",
+        "vocabulary": "投げる",
+        "reading": "なげる",
         "meaning": "to throw or cast away"
     },
     {
-        "vocabulary": " 泣く",
+        "vocabulary": "泣く",
+        "reading": "なく",
         "meaning": "to weep"
     },
     {
-        "vocabulary": " 無くなる ",
+        "vocabulary": "無くなる",
+        "reading": "なくなる",
         "meaning": "to disappear; to get lost"
     },
     {
-        "vocabulary": " 亡くなる",
+        "vocabulary": "亡くなる",
+        "reading": "なくなる",
         "meaning": "to die"
     },
     {
-        "vocabulary": " 生 ",
+        "vocabulary": "生",
+        "reading": "なま",
         "meaning": "raw"
     },
     {
-        "vocabulary": " 直る ",
+        "vocabulary": "直る",
+        "reading": "なおる",
         "meaning": "to be fixed,to be repaired"
     },
     {
-        "vocabulary": " 治る ",
+        "vocabulary": "治る",
+        "reading": "なおる",
         "meaning": "to be cured; to heal"
     },
     {
-        "vocabulary": " 慣れる",
+        "vocabulary": "慣れる",
+        "reading": "なれる",
         "meaning": "to get used to"
     },
     {
-        "vocabulary": " 鳴る",
+        "vocabulary": "鳴る",
+        "reading": "なる",
         "meaning": "to sound"
     },
     {
-        "vocabulary": " なるほど",
+        "vocabulary": "なるほど",
+        "reading": "naruhodo",
         "meaning": "now I understand"
     },
     {
-        "vocabulary": " 寝坊",
+        "vocabulary": "寝坊",
+        "reading": "ねぼう",
         "meaning": "sleeping in late; oversleeping"
     },
     {
-        "vocabulary": " 値段",
+        "vocabulary": "値段",
+        "reading": "ねだん",
         "meaning": "price; cost"
     },
     {
-        "vocabulary": " 眠い",
+        "vocabulary": "眠い",
+        "reading": "ねむい",
         "meaning": "sleepy"
     },
     {
-        "vocabulary": " 眠る",
+        "vocabulary": "眠る",
+        "reading": "ねむる",
         "meaning": "to sleep"
     },
     {
-        "vocabulary": " 熱",
+        "vocabulary": "熱",
+        "reading": "ねつ",
         "meaning": "fever"
     },
     {
-        "vocabulary": " 苦い",
+        "vocabulary": "苦い",
+        "reading": "にがい",
         "meaning": "bitter"
     },
     {
-        "vocabulary": " 逃げる",
+        "vocabulary": "逃げる",
+        "reading": "にげる",
         "meaning": "to escape"
     },
     {
-        "vocabulary": " 二階建て ",
+        "vocabulary": "二階建て",
+        "reading": "にかいだて",
         "meaning": "two-storied building"
     },
     {
-        "vocabulary": " 人形",
+        "vocabulary": "人形",
+        "reading": "にんぎょう",
         "meaning": "doll"
     },
     {
-        "vocabulary": " 匂い ",
+        "vocabulary": "匂い",
+        "reading": "におい",
         "meaning": "a smell"
     },
     {
-        "vocabulary": " 似る ",
+        "vocabulary": "似る",
+        "reading": "にる",
         "meaning": "to be similar"
     },
     {
-        "vocabulary": " 喉",
+        "vocabulary": "喉",
+        "reading": "のど",
         "meaning": "throat"
     },
     {
-        "vocabulary": " 残る ",
+        "vocabulary": "残る",
+        "reading": "のこる",
         "meaning": "to remain"
     },
     {
-        "vocabulary": " 乗り換える",
+        "vocabulary": "乗り換える",
+        "reading": "のりかえる",
         "meaning": "to change between buses or trains"
     },
     {
-        "vocabulary": " 乗り物 ",
+        "vocabulary": "乗り物",
+        "reading": "のりもの",
         "meaning": "vehicle"
     },
     {
-        "vocabulary": " 濡れる ",
+        "vocabulary": "濡れる",
+        "reading": "ぬれる",
         "meaning": "to get wet"
     },
     {
-        "vocabulary": " 塗る",
+        "vocabulary": "塗る",
+        "reading": "ぬる",
         "meaning": "to paint; to plaster"
     },
     {
-        "vocabulary": " 盗む",
+        "vocabulary": "盗む",
+        "reading": "ぬすむ",
         "meaning": "to steal"
     },
     {
-        "vocabulary": " 入学",
+        "vocabulary": "入学",
+        "reading": "にゅうがく",
         "meaning": "entry to school or university; enrollment"
     },
     {
-        "vocabulary": " 入院",
+        "vocabulary": "入院",
+        "reading": "にゅういん",
         "meaning": "hospitalization"
     },
     {
-        "vocabulary": " 落ちる",
+        "vocabulary": "落ちる",
+        "reading": "おちる",
         "meaning": "to fall or drop"
     },
     {
-        "vocabulary": " 踊り ",
+        "vocabulary": "踊り",
+        "reading": "おどり",
         "meaning": "a dance"
     },
     {
-        "vocabulary": " 驚く",
+        "vocabulary": "驚く",
+        "reading": "おどろく",
         "meaning": "to be surprised"
     },
     {
-        "vocabulary": " 踊る",
+        "vocabulary": "踊る",
+        "reading": "おどる",
         "meaning": "to dance"
     },
     {
-        "vocabulary": " お出でになる",
+        "vocabulary": "お出でになる",
+        "reading": "おいでになる",
         "meaning": "(respectful) to be"
     },
     {
-        "vocabulary": " お祝い ",
+        "vocabulary": "お祝い",
+        "reading": "おいわい",
         "meaning": "congratulation"
     },
     {
-        "vocabulary": " お嬢さん",
+        "vocabulary": "お嬢さん",
+        "reading": "おじょうさん",
         "meaning": "(another's) daughter"
     },
     {
-        "vocabulary": " 可笑しい ",
+        "vocabulary": "可笑しい",
+        "reading": "おかしい",
         "meaning": "strange or funny"
     },
     {
-        "vocabulary": " 行う",
+        "vocabulary": "行う",
+        "reading": "おこなう",
         "meaning": "to do"
     },
     {
-        "vocabulary": " 怒る",
+        "vocabulary": "怒る",
+        "reading": "おこる",
         "meaning": "to be angry"
     },
     {
-        "vocabulary": " 起こす",
+        "vocabulary": "起こす",
+        "reading": "おこす",
         "meaning": "to wake"
     },
     {
-        "vocabulary": " 億",
+        "vocabulary": "億",
+        "reading": "おく",
         "meaning": "one hundred million"
     },
     {
-        "vocabulary": " 屋上",
+        "vocabulary": "屋上",
+        "reading": "おくじょう",
         "meaning": "rooftop​"
     },
     {
-        "vocabulary": " 遅れる",
+        "vocabulary": "遅れる",
+        "reading": "おくれる",
         "meaning": "to be late"
     },
     {
-        "vocabulary": " 贈り物 ",
+        "vocabulary": "贈り物",
+        "reading": "おくりもの",
         "meaning": "present; gift"
     },
     {
-        "vocabulary": " 送る",
+        "vocabulary": "送る",
+        "reading": "おくる",
         "meaning": "to send"
     },
     {
-        "vocabulary": " お祭り",
+        "vocabulary": "お祭り",
+        "reading": "おまつり",
         "meaning": "festival"
     },
     {
-        "vocabulary": " お見舞い",
+        "vocabulary": "お見舞い",
+        "reading": "おみまい",
         "meaning": "visiting ill or distressed people"
     },
     {
-        "vocabulary": " お土産",
+        "vocabulary": "お土産",
+        "reading": "おみやげ",
         "meaning": "souvenir"
     },
     {
-        "vocabulary": " おもちゃ",
+        "vocabulary": "おもちゃ",
+        "reading": "omocha",
         "meaning": "toy"
     },
     {
-        "vocabulary": " 思い出す",
+        "vocabulary": "思い出す",
+        "reading": "おもいだす",
         "meaning": "to remember"
     },
     {
-        "vocabulary": " 表",
+        "vocabulary": "表",
+        "reading": "おもて",
         "meaning": "the front"
     },
     {
-        "vocabulary": " オートバイ",
+        "vocabulary": "オートバイ",
+        "reading": "ootobai",
         "meaning": "motorcycle"
     },
     {
-        "vocabulary": " お礼 ",
+        "vocabulary": "お礼",
+        "reading": "おれい",
         "meaning": "thanks"
     },
     {
-        "vocabulary": " 折れる",
+        "vocabulary": "折れる",
+        "reading": "おれる",
         "meaning": "to break or be folded"
     },
     {
-        "vocabulary": " 下りる",
+        "vocabulary": "下りる",
+        "reading": "おりる",
         "meaning": "to get off"
     },
     {
-        "vocabulary": " 折る",
+        "vocabulary": "折る",
+        "reading": "おる",
         "meaning": "to break or to fold"
     },
     {
-        "vocabulary": " 押し入れ",
+        "vocabulary": "押し入れ",
+        "reading": "おしいれ",
         "meaning": "closet"
     },
     {
-        "vocabulary": " 仰る",
+        "vocabulary": "仰る",
+        "reading": "おっしゃる",
         "meaning": "(respectful) to say"
     },
     {
-        "vocabulary": " お宅 ",
+        "vocabulary": "お宅",
+        "reading": "おたく",
         "meaning": "your home"
     },
     {
-        "vocabulary": " 音",
+        "vocabulary": "音",
+        "reading": "おと",
         "meaning": "sound; note"
     },
     {
-        "vocabulary": " 落とす ",
+        "vocabulary": "落とす",
+        "reading": "おとす",
         "meaning": "to drop"
     },
     {
-        "vocabulary": " お釣り",
+        "vocabulary": "お釣り",
+        "reading": "おつり",
         "meaning": "change (for a purchase)​"
     },
     {
-        "vocabulary": " 夫",
+        "vocabulary": "夫",
+        "reading": "おっと",
         "meaning": "husband"
     },
     {
-        "vocabulary": " 終わり",
+        "vocabulary": "終わり",
+        "reading": "おわり",
         "meaning": "the end"
     },
     {
-        "vocabulary": " 親",
+        "vocabulary": "親",
+        "reading": "おや",
         "meaning": "parents"
     },
     {
-        "vocabulary": " 泳ぎ方",
+        "vocabulary": "泳ぎ方",
+        "reading": "およぎかた",
         "meaning": "way of swimming"
     },
     {
-        "vocabulary": " パート ",
+        "vocabulary": "パート",
+        "reading": "paato",
         "meaning": "part; part time"
     },
     {
-        "vocabulary": " パソコン",
+        "vocabulary": "パソコン",
+        "reading": "pasokon",
         "meaning": "personal computer"
     },
     {
-        "vocabulary": " ピアノ",
+        "vocabulary": "ピアノ",
+        "reading": "piano",
         "meaning": "piano"
     },
     {
-        "vocabulary": " プレゼント",
+        "vocabulary": "プレゼント",
+        "reading": "purezento",
         "meaning": "present; gift"
     },
     {
-        "vocabulary": " 冷房 ",
+        "vocabulary": "冷房",
+        "reading": "れいぼう",
         "meaning": "air conditioning"
     },
     {
-        "vocabulary": " レジ",
+        "vocabulary": "レジ",
+        "reading": "reji",
         "meaning": "cashier​"
     },
     {
-        "vocabulary": " 歴史 ",
+        "vocabulary": "歴史",
+        "reading": "れきし",
         "meaning": "history"
     },
     {
-        "vocabulary": " 連絡",
+        "vocabulary": "連絡",
+        "reading": "れんらく",
         "meaning": "to contact; to get in touch​"
     },
     {
-        "vocabulary": " レポート ",
+        "vocabulary": "レポート",
+        "reading": "repooto",
         "meaning": "report"
     },
     {
-        "vocabulary": " 利用",
+        "vocabulary": "利用",
+        "reading": "りよう",
         "meaning": "use; utilization; application"
     },
     {
-        "vocabulary": " 理由",
+        "vocabulary": "理由",
+        "reading": "りゆう",
         "meaning": "reason"
     },
     {
-        "vocabulary": " 留守 ",
+        "vocabulary": "留守",
+        "reading": "るす",
         "meaning": "absence"
     },
     {
-        "vocabulary": " 旅館",
+        "vocabulary": "旅館",
+        "reading": "りょかん",
         "meaning": "traditional inn; Japanese-style lodging"
     },
     {
-        "vocabulary": " 両方",
+        "vocabulary": "両方",
+        "reading": "りょうほう",
         "meaning": "both sides"
     },
     {
-        "vocabulary": " 寂しい",
+        "vocabulary": "寂しい",
+        "reading": "さびしい",
         "meaning": "lonely"
     },
     {
-        "vocabulary": " 下がる",
+        "vocabulary": "下がる",
+        "reading": "さがる",
         "meaning": "to get down"
     },
     {
-        "vocabulary": " 探す",
+        "vocabulary": "探す",
+        "reading": "さがす",
         "meaning": "to look for"
     },
     {
-        "vocabulary": " 下げる",
+        "vocabulary": "下げる",
+        "reading": "さげる",
         "meaning": "to lower"
     },
     {
-        "vocabulary": " 最後 ",
+        "vocabulary": "最後",
+        "reading": "さいご",
         "meaning": "end; last"
     },
     {
-        "vocabulary": " 最近 ",
+        "vocabulary": "最近",
+        "reading": "さいきん",
         "meaning": "recently"
     },
     {
-        "vocabulary": " 最初 ",
+        "vocabulary": "最初",
+        "reading": "さいしょ",
         "meaning": "beginning; first"
     },
     {
-        "vocabulary": " 坂 ",
+        "vocabulary": "坂",
+        "reading": "さか",
         "meaning": "slope; hill"
     },
     {
-        "vocabulary": " 盛ん",
+        "vocabulary": "盛ん",
+        "reading": "さかん",
         "meaning": "popularity; prosperous"
     },
     {
-        "vocabulary": " 昨夜",
+        "vocabulary": "昨夜",
+        "reading": "さくや",
         "meaning": "last night"
     },
     {
-        "vocabulary": " サンダル",
+        "vocabulary": "サンダル",
+        "reading": "sandaru",
         "meaning": "sandal"
     },
     {
-        "vocabulary": " サンドイッチ",
+        "vocabulary": "サンドイッチ",
+        "reading": "sandoicchi",
         "meaning": "sandwich"
     },
     {
-        "vocabulary": " 産業",
+        "vocabulary": "産業",
+        "reading": "さんぎょう",
         "meaning": "industry"
     },
     {
-        "vocabulary": " サラダ ",
+        "vocabulary": "サラダ",
+        "reading": "sarada",
         "meaning": "salad"
     },
     {
-        "vocabulary": " 再来月",
+        "vocabulary": "再来月",
+        "reading": "さらいげつ",
         "meaning": "month after next"
     },
     {
-        "vocabulary": " 再来週",
+        "vocabulary": "再来週",
+        "reading": "さらいしゅう",
         "meaning": "week after next"
     },
     {
-        "vocabulary": " 差し上げる",
+        "vocabulary": "差し上げる",
+        "reading": "さしあげる",
         "meaning": "to give"
     },
     {
-        "vocabulary": " 騒ぐ",
+        "vocabulary": "騒ぐ",
+        "reading": "さわぐ",
         "meaning": "to make noise,to be excited"
     },
     {
-        "vocabulary": " 触る",
+        "vocabulary": "触る",
+        "reading": "さわる",
         "meaning": "to touch"
     },
     {
-        "vocabulary": " 生物",
+        "vocabulary": "生物",
+        "reading": "せいぶつ",
         "meaning": "living thing"
     },
     {
-        "vocabulary": " 政治",
+        "vocabulary": "政治",
+        "reading": "せいじ",
         "meaning": "politics"
     },
     {
-        "vocabulary": " 生活 ",
+        "vocabulary": "生活",
+        "reading": "せいかつ",
         "meaning": "to live"
     },
     {
-        "vocabulary": " 生命",
+        "vocabulary": "生命",
+        "reading": "せいめい",
         "meaning": "life"
     },
     {
-        "vocabulary": " 生産",
+        "vocabulary": "生産",
+        "reading": "せいさん",
         "meaning": "production"
     },
     {
-        "vocabulary": " 西洋",
+        "vocabulary": "西洋",
+        "reading": "せいよう",
         "meaning": "the west; Western countries"
     },
     {
-        "vocabulary": " 世界 ",
+        "vocabulary": "世界",
+        "reading": "せかい",
         "meaning": "the world"
     },
     {
-        "vocabulary": " 席",
+        "vocabulary": "席",
+        "reading": "せき",
         "meaning": "seat"
     },
     {
-        "vocabulary": " 線",
+        "vocabulary": "線",
+        "reading": "せん",
         "meaning": "line"
     },
     {
-        "vocabulary": " 背中",
+        "vocabulary": "背中",
+        "reading": "せなか",
         "meaning": "back (of body)"
     },
     {
-        "vocabulary": " 先輩 ",
+        "vocabulary": "先輩",
+        "reading": "せんぱい",
         "meaning": "senior"
     },
     {
-        "vocabulary": " 戦争",
+        "vocabulary": "戦争",
+        "reading": "せんそう",
         "meaning": "war"
     },
     {
-        "vocabulary": " 説明",
+        "vocabulary": "説明",
+        "reading": "せつめい",
         "meaning": "explanation"
     },
     {
-        "vocabulary": " 社長",
+        "vocabulary": "社長",
+        "reading": "しゃちょう",
         "meaning": "company president; manager; director"
     },
     {
-        "vocabulary": " 社会",
+        "vocabulary": "社会",
+        "reading": "しゃかい",
         "meaning": "society; public; community; the world"
     },
     {
-        "vocabulary": " 市",
+        "vocabulary": "市",
+        "reading": "し",
         "meaning": "city"
     },
     {
-        "vocabulary": " 試合",
+        "vocabulary": "試合",
+        "reading": "しあい",
         "meaning": "match,game"
     },
     {
-        "vocabulary": " 叱る",
+        "vocabulary": "叱る",
+        "reading": "しかる",
         "meaning": "to scold"
     },
     {
-        "vocabulary": " 仕方",
+        "vocabulary": "仕方",
+        "reading": "しかた",
         "meaning": "way; method"
     },
     {
-        "vocabulary": " 試験 ",
+        "vocabulary": "試験",
+        "reading": "しけん",
         "meaning": "examination"
     },
     {
-        "vocabulary": " しっかり ",
+        "vocabulary": "しっかり",
+        "reading": "shikkari",
         "meaning": "firmly; steadily"
     },
     {
-        "vocabulary": " 島",
+        "vocabulary": "島",
+        "reading": "しま",
         "meaning": "island"
     },
     {
-        "vocabulary": " 市民 ",
+        "vocabulary": "市民",
+        "reading": "市民",
         "meaning": "citizen"
     },
     {
-        "vocabulary": " 品物",
+        "vocabulary": "品物",
+        "reading": "しなもの",
         "meaning": "goods; article; thing"
     },
     {
-        "vocabulary": " 新聞社",
+        "vocabulary": "新聞社",
+        "reading": "しんぶんしゃ",
         "meaning": "newspaper company"
     },
     {
-        "vocabulary": " 親切 ",
+        "vocabulary": "親切",
+        "reading": "しんせつ",
         "meaning": "kindness"
     },
     {
-        "vocabulary": " 失敗 ",
+        "vocabulary": "失敗",
+        "reading": "しっぱい",
         "meaning": "failure"
     },
     {
-        "vocabulary": " 調べる",
+        "vocabulary": "調べる",
+        "reading": "しらべる",
         "meaning": "to investigate"
     },
     {
-        "vocabulary": " 知らせる ",
+        "vocabulary": "知らせる",
+        "reading": "しらせる",
         "meaning": "to notify"
     },
     {
-        "vocabulary": " 下着 ",
+        "vocabulary": "下着",
+        "reading": "したぎ",
         "meaning": "underwear"
     },
     {
-        "vocabulary": " 食料品",
+        "vocabulary": "食料品",
+        "reading": "しょくりょうひん",
         "meaning": "food; groceries"
     },
     {
-        "vocabulary": " 小学校",
+        "vocabulary": "小学校",
+        "reading": "しょうがっこう",
         "meaning": "elementary school"
     },
     {
-        "vocabulary": " 生じる",
+        "vocabulary": "生じる",
+        "reading": "しょうじる",
         "meaning": "to produce"
     },
     {
-        "vocabulary": " 紹介 ",
+        "vocabulary": "紹介",
+        "reading": "しょうかい",
         "meaning": "introduction"
     },
     {
-        "vocabulary": " 将来",
+        "vocabulary": "将来",
+        "reading": "しょうらい",
         "meaning": "future"
     },
     {
-        "vocabulary": " 小説",
+        "vocabulary": "小説",
+        "reading": "しょうせつ",
         "meaning": "novel"
     },
     {
-        "vocabulary": " 趣味",
+        "vocabulary": "趣味",
+        "reading": "しゅみ",
         "meaning": "hobby; pastime; preference"
     },
     {
-        "vocabulary": " 習慣",
+        "vocabulary": "習慣",
+        "reading": "しゅうかん",
         "meaning": "habit; custom; cultural practice."
     },
     {
-        "vocabulary": " 祖母",
+        "vocabulary": "祖母",
+        "reading": "そぼ",
         "meaning": "grandmother"
     },
     {
-        "vocabulary": " 育てる",
+        "vocabulary": "育てる",
+        "reading": "そだてる",
         "meaning": "to rear,to bring up"
     },
     {
-        "vocabulary": " 祖父",
+        "vocabulary": "祖父",
+        "reading": "そふ",
         "meaning": "grandfather"
     },
     {
-        "vocabulary": " ソフト",
+        "vocabulary": "ソフト",
+        "reading": "sofuto",
         "meaning": "soft"
     },
     {
-        "vocabulary": " そんな ",
+        "vocabulary": "そんな",
+        "reading": "sonna",
         "meaning": "that sort of"
     },
     {
-        "vocabulary": " それで",
+        "vocabulary": "それで",
+        "reading": "sore de",
         "meaning": "because of that"
     },
     {
-        "vocabulary": " それほど",
+        "vocabulary": "それほど",
+        "reading": "sore hodo",
         "meaning": "to that extent"
     },
     {
-        "vocabulary": " そろそろ",
+        "vocabulary": "そろそろ",
+        "reading": "sorosoro",
         "meaning": "gradually; soon"
     },
     {
-        "vocabulary": " 卒業",
+        "vocabulary": "卒業",
+        "reading": "そつぎょう",
         "meaning": "graduation"
     },
     {
-        "vocabulary": " 相談 ",
+        "vocabulary": "相談",
+        "reading": "そうだん",
         "meaning": "to discuss"
     },
     {
-        "vocabulary": " 素晴らしい",
+        "vocabulary": "素晴らしい",
+        "reading": "すばらしい",
         "meaning": "wonderful"
     },
     {
-        "vocabulary": " 滑る ",
+        "vocabulary": "滑る",
+        "reading": "すべる",
         "meaning": "to slide; to slip"
     },
     {
-        "vocabulary": " 凄い",
+        "vocabulary": "凄い",
+        "reading": "すごい",
         "meaning": "terrific"
     },
     {
-        "vocabulary": " 水道",
+        "vocabulary": "水道",
+        "reading": "すいどう",
         "meaning": "water supply"
     },
     {
-        "vocabulary": " 水泳",
+        "vocabulary": "水泳",
+        "reading": "すいえい",
         "meaning": "swimming"
     },
     {
-        "vocabulary": " すっかり",
+        "vocabulary": "すっかり",
+        "reading": "sukkari",
         "meaning": "completely"
     },
     {
-        "vocabulary": " 空く",
+        "vocabulary": "空く",
+        "reading": "すく",
         "meaning": "to be hungry"
     },
     {
-        "vocabulary": " スクリーン ",
+        "vocabulary": "スクリーン",
+        "reading": "sukuriin",
         "meaning": "screen"
     },
     {
-        "vocabulary": " 隅 ",
+        "vocabulary": "隅",
+        "reading": "すみ",
         "meaning": "corner; nook"
     },
     {
-        "vocabulary": " 済む",
+        "vocabulary": "済む",
+        "reading": "すむ",
         "meaning": "to finish"
     },
     {
-        "vocabulary": " 砂 ",
+        "vocabulary": "砂",
+        "reading": "すな",
         "meaning": "sand"
     },
     {
-        "vocabulary": " すり ",
+        "vocabulary": "すり",
+        "reading": "suri",
         "meaning": "pickpocket"
     },
     {
-        "vocabulary": " スーツケース",
+        "vocabulary": "スーツケース",
+        "reading": "sustsukeesu",
         "meaning": "suitcase"
     },
     {
-        "vocabulary": " 進む",
+        "vocabulary": "進む",
+        "reading": "すすむ",
         "meaning": "to make progress"
     },
     {
-        "vocabulary": " ステーキ ",
+        "vocabulary": "ステーキ",
+        "reading": "suteeki",
         "meaning": "steak"
     },
     {
-        "vocabulary": " ステレオ",
+        "vocabulary": "ステレオ",
+        "reading": "sutereo",
         "meaning": "stereo"
     },
     {
-        "vocabulary": " 捨てる",
+        "vocabulary": "捨てる",
+        "reading": "すてる",
         "meaning": "to throw away"
     },
     {
-        "vocabulary": " 数学",
+        "vocabulary": "数学",
+        "reading": "すうがく",
         "meaning": "mathematics; arithmetic"
     },
     {
-        "vocabulary": " スーツ",
+        "vocabulary": "スーツ",
+        "reading": "suutsu",
         "meaning": "suit"
     },
     {
-        "vocabulary": " 正しい ",
+        "vocabulary": "正しい",
+        "reading": "ただしい",
         "meaning": "right; correct"
     },
     {
-        "vocabulary": " 退院",
+        "vocabulary": "退院",
+        "reading": "たいいん",
         "meaning": "leaving hospital; discharge from hospital"
     },
     {
-        "vocabulary": " 台風 ",
+        "vocabulary": "台風",
+        "reading": "たいふう",
         "meaning": "typhoon"
     },
     {
-        "vocabulary": " タイプ ",
+        "vocabulary": "タイプ",
+        "reading": "taipu",
         "meaning": "type,style"
     },
     {
-        "vocabulary": " たいてい ",
+        "vocabulary": "たいてい",
+        "reading": "taitei",
         "meaning": "usually"
     },
     {
-        "vocabulary": " たまに ",
+        "vocabulary": "たまに",
+        "reading": "tamani",
         "meaning": "occasionally"
     },
     {
-        "vocabulary": " 棚",
+        "vocabulary": "棚",
+        "reading": "たな",
         "meaning": "shelves"
     },
     {
-        "vocabulary": " 誕生 ",
+        "vocabulary": "誕生",
+        "reading": "たんじょう",
         "meaning": "birth"
     },
     {
-        "vocabulary": " 楽しみ",
+        "vocabulary": "楽しみ",
+        "reading": "たのしみ",
         "meaning": "looking forward to​"
     },
     {
-        "vocabulary": " 倒れる ",
-        "meaning": " to fall (over, down)"
+        "vocabulary": "倒れる",
+        "reading": "たおれる",
+        "meaning": "to fall (over, down)"
     },
     {
-        "vocabulary": " 足りる",
+        "vocabulary": "足りる",
+        "reading": "たりる",
         "meaning": "to be sufficient; to be enough"
     },
     {
-        "vocabulary": " 足す",
+        "vocabulary": "足す",
+        "reading": "たす",
         "meaning": "to add (numbers / something)"
     },
     {
-        "vocabulary": " 畳",
+        "vocabulary": "畳",
+        "reading": "たたみ",
         "meaning": "Japanese straw mat"
     },
     {
-        "vocabulary": " 建てる ",
+        "vocabulary": "建てる",
+        "reading": "たてる",
         "meaning": "to build"
     },
     {
-        "vocabulary": " 訪ねる",
+        "vocabulary": "訪ねる",
+        "reading": "たずねる",
         "meaning": "to visit"
     },
     {
-        "vocabulary": " 尋ねる",
+        "vocabulary": "尋ねる",
+        "reading": "たずねる",
         "meaning": "to ask"
     },
     {
-        "vocabulary": " 手袋",
+        "vocabulary": "手袋",
+        "reading": "てぶくろ",
         "meaning": "glove"
     },
     {
-        "vocabulary": " 丁寧",
+        "vocabulary": "丁寧",
+        "reading": "ていねい",
         "meaning": "polite"
     },
     {
-        "vocabulary": " テキスト ",
+        "vocabulary": "テキスト",
+        "reading": "tekisuto",
         "meaning": "text; textbook"
     },
     {
-        "vocabulary": " 適当",
+        "vocabulary": "適当",
+        "reading": "てきとう",
         "meaning": "suitable"
     },
     {
-        "vocabulary": " 点",
+        "vocabulary": "点",
+        "reading": "てん",
         "meaning": "point; dot"
     },
     {
-        "vocabulary": " 店員",
+        "vocabulary": "店員",
+        "reading": "てんいん",
         "meaning": "employee (of a store); shop assistant; clerk"
     },
     {
-        "vocabulary": " テニス",
+        "vocabulary": "テニス",
+        "reading": "tenisu",
         "meaning": "tennis"
     },
     {
-        "vocabulary": " 天気予報",
+        "vocabulary": "天気予報",
+        "reading": "てんきよほう",
         "meaning": "weather forecast"
     },
     {
-        "vocabulary": " 展覧会",
+        "vocabulary": "展覧会",
+        "reading": "てんらんかい",
         "meaning": "exhibition"
     },
     {
-        "vocabulary": " 寺",
+        "vocabulary": "寺",
+        "reading": "てら",
         "meaning": "temple"
     },
     {
-        "vocabulary": " 手伝う ",
+        "vocabulary": "手伝う",
+        "reading": "てつだう",
         "meaning": "to help; to assist; to aid​"
     },
     {
-        "vocabulary": " 途中",
+        "vocabulary": "途中",
+        "reading": "とちゅう",
         "meaning": "on the way"
     },
     {
-        "vocabulary": " 届ける",
+        "vocabulary": "届ける",
+        "reading": "とどける",
         "meaning": "to send​"
     },
     {
-        "vocabulary": " 特急",
+        "vocabulary": "特急",
+        "reading": "とっきゅう",
         "meaning": "limited express (train, faster than an express)"
     },
     {
-        "vocabulary": " 床屋",
+        "vocabulary": "床屋",
+        "reading": "とこや",
         "meaning": "barber"
     },
     {
-        "vocabulary": " 特別",
+        "vocabulary": "特別",
+        "reading": "とくべつ",
         "meaning": "special; particular; extraordinary; exceptional"
     },
     {
-        "vocabulary": " 特に",
+        "vocabulary": "特に",
+        "reading": "とくに",
         "meaning": "particularly; especially; in particular; expressly"
     },
     {
-        "vocabulary": " 泊まる",
+        "vocabulary": "泊まる",
+        "reading": "とまる",
         "meaning": "to stay at"
     },
     {
-        "vocabulary": " 止める ",
+        "vocabulary": "止める",
+        "reading": "とめる",
         "meaning": "to stop something"
     },
     {
-        "vocabulary": " 遠く",
+        "vocabulary": "遠く",
+        "reading": "とおく",
         "meaning": "distant"
     },
     {
-        "vocabulary": " 通る ",
+        "vocabulary": "通る",
+        "reading": "とおる",
         "meaning": "to go through"
     },
     {
-        "vocabulary": " 取り替える",
+        "vocabulary": "取り替える",
+        "reading": "とりかえる",
         "meaning": "to exchange; to swap; to replace"
     },
     {
-        "vocabulary": " 到頭",
+        "vocabulary": "到頭",
+        "reading": "とうとう",
         "meaning": "finally, after all"
     },
     {
-        "vocabulary": " 続ける ",
+        "vocabulary": "続ける",
+        "reading": "つづける",
         "meaning": "to continue; to keep up; to keep on"
     },
     {
-        "vocabulary": " 続く",
+        "vocabulary": "続く",
+        "reading": "つづく",
         "meaning": "to continue"
     },
     {
-        "vocabulary": " 都合",
+        "vocabulary": "都合",
+        "reading": "つごう",
         "meaning": "convenience"
     },
     {
-        "vocabulary": " 捕まえる",
+        "vocabulary": "捕まえる",
+        "reading": "つかまえる",
         "meaning": "to catch"
     },
     {
-        "vocabulary": " 漬ける",
+        "vocabulary": "漬ける",
+        "reading": "つける",
         "meaning": "to soak; to pickle"
     },
     {
-        "vocabulary": " 月",
+        "vocabulary": "月",
+        "reading": "つき",
         "meaning": "moon"
     },
     {
-        "vocabulary": " 付く ",
+        "vocabulary": "付く",
+        "reading": "つく",
         "meaning": "to be attached"
     },
     {
-        "vocabulary": " 妻",
+        "vocabulary": "妻",
+        "reading": "つま",
         "meaning": "(humble) wife"
     },
     {
-        "vocabulary": " 連れる ",
+        "vocabulary": "連れる",
+        "reading": "つれる",
         "meaning": "to take (someone) with one"
     },
     {
-        "vocabulary": " 釣る ",
+        "vocabulary": "釣る",
+        "reading": "つる",
         "meaning": "to fish"
     },
     {
-        "vocabulary": " 伝える",
+        "vocabulary": "伝える",
+        "reading": "つたえる",
         "meaning": "to report; to tell"
     },
     {
-        "vocabulary": " 包む",
+        "vocabulary": "包む",
+        "reading": "つつむ",
         "meaning": "to wrap"
     },
     {
-        "vocabulary": " 腕",
+        "vocabulary": "腕",
+        "reading": "うで",
         "meaning": "arm"
     },
     {
-        "vocabulary": " 植える",
+        "vocabulary": "植える",
+        "reading": "うえる",
         "meaning": "to plant; to grow"
     },
     {
-        "vocabulary": " 動く",
+        "vocabulary": "動く",
+        "reading": "うごく",
         "meaning": "to move"
     },
     {
-        "vocabulary": " 伺う ",
+        "vocabulary": "伺う",
+        "reading": "うかがう",
         "meaning": "to visit"
     },
     {
-        "vocabulary": " 受ける",
+        "vocabulary": "受ける",
+        "reading": "うける",
         "meaning": "to take a lesson or test"
     },
     {
-        "vocabulary": " 受付",
+        "vocabulary": "受付",
+        "reading": "うけつけ",
         "meaning": "reception (desk); information desk​"
     },
     {
-        "vocabulary": " 生まれ",
+        "vocabulary": "生まれ",
+        "reading": "うまれ",
         "meaning": "birth"
     },
     {
-        "vocabulary": " 運転手",
+        "vocabulary": "運転手",
+        "reading": "うんてんしゅ",
         "meaning": "driver; chauffeur"
     },
     {
-        "vocabulary": " 裏",
+        "vocabulary": "裏",
+        "reading": "うら",
         "meaning": "reverse side"
     },
     {
-        "vocabulary": " 嬉しい ",
+        "vocabulary": "嬉しい",
+        "reading": "うれしい",
         "meaning": "happy"
     },
     {
-        "vocabulary": " 売り場",
+        "vocabulary": "売り場",
+        "reading": "うりば",
         "meaning": "selling area"
     },
     {
-        "vocabulary": " 嘘",
+        "vocabulary": "嘘",
+        "reading": "うそ",
         "meaning": "a lie"
     },
     {
-        "vocabulary": " 打つ ",
+        "vocabulary": "打つ",
+        "reading": "うつ",
         "meaning": "to hit"
     },
     {
-        "vocabulary": " 美しい",
+        "vocabulary": "美しい",
+        "reading": "うつくしい",
         "meaning": "beautiful"
     },
     {
-        "vocabulary": " 移る ",
+        "vocabulary": "移る",
+        "reading": "うつる",
         "meaning": "to move house or transfer"
     },
     {
-        "vocabulary": " 写す",
+        "vocabulary": "写す",
+        "reading": "うつす",
         "meaning": "to copy or photograph"
     },
     {
-        "vocabulary": " ワープロ",
+        "vocabulary": "ワープロ",
+        "reading": "waapuro",
         "meaning": "word processor"
     },
     {
-        "vocabulary": " 別れる",
+        "vocabulary": "別れる",
+        "reading": "わかれる",
         "meaning": "to separate"
     },
     {
-        "vocabulary": " 沸かす",
+        "vocabulary": "沸かす",
+        "reading": "わかす",
         "meaning": "to boil; to heat"
     },
     {
-        "vocabulary": " 沸く",
+        "vocabulary": "沸く",
+        "reading": "わく",
         "meaning": "to boil"
     },
     {
-        "vocabulary": " 笑う",
+        "vocabulary": "笑う",
+        "reading": "わらう",
         "meaning": "to laugh; to smile"
     },
     {
-        "vocabulary": " 割れる ",
+        "vocabulary": "割れる",
+        "reading": "われる",
         "meaning": "to break"
     },
     {
-        "vocabulary": " 割合",
+        "vocabulary": "割合",
+        "reading": "わりあい",
         "meaning": "rate; ratio"
     },
     {
-        "vocabulary": " 忘れ物",
+        "vocabulary": "忘れ物",
+        "reading": "わすれもの",
         "meaning": "lost article"
     },
     {
-        "vocabulary": " 焼ける",
+        "vocabulary": "焼ける",
+        "reading": "やける",
         "meaning": "to burn; to be roasted"
     },
     {
-        "vocabulary": " 焼く ",
+        "vocabulary": "焼く",
+        "reading": "やく",
         "meaning": "to bake; to grill"
     },
     {
-        "vocabulary": " 役に立つ ",
+        "vocabulary": "役に立つ",
+        "reading": "やくにたつ",
         "meaning": "to be helpful"
     },
     {
-        "vocabulary": " 約束 ",
+        "vocabulary": "約束",
+        "reading": "やくそく",
         "meaning": "promise"
     },
     {
-        "vocabulary": " 止む",
+        "vocabulary": "止む",
+        "reading": "やむ",
         "meaning": "to stop"
     },
     {
-        "vocabulary": " やっぱり ",
+        "vocabulary": "やっぱり",
+        "reading": "yappari",
         "meaning": "as I thought"
     },
     {
-        "vocabulary": " 優しい ",
+        "vocabulary": "優しい",
+        "reading": "やさしい",
         "meaning": "kind"
     },
     {
-        "vocabulary": " 痩せる",
+        "vocabulary": "痩せる",
+        "reading": "やせる",
         "meaning": "to become thin"
     },
     {
-        "vocabulary": " 柔らかい ",
+        "vocabulary": "柔らかい",
+        "reading": "やわらかい",
         "meaning": "soft"
     },
     {
-        "vocabulary": " 汚れる ",
+        "vocabulary": "汚れる",
+        "reading": "よごれる",
         "meaning": "to get dirty"
     },
     {
-        "vocabulary": " 喜ぶ ",
+        "vocabulary": "喜ぶ",
+        "reading": "よろこぶ",
         "meaning": "to be delighted"
     },
     {
-        "vocabulary": " 寄る ",
+        "vocabulary": "寄る",
+        "reading": "よる",
         "meaning": "to visit; to drop by"
     },
     {
-        "vocabulary": " 予習",
+        "vocabulary": "予習",
+        "reading": "よしゅう",
         "meaning": "preparation for a lesson"
     },
     {
-        "vocabulary": " 予定 ",
+        "vocabulary": "予定",
+        "reading": "よてい",
         "meaning": "plan"
     },
     {
-        "vocabulary": " 用",
+        "vocabulary": "用",
+        "reading": "よう",
         "meaning": "business; task; errand; use; purpose"
     },
     {
-        "vocabulary": " 用意",
+        "vocabulary": "用意",
+        "reading": "ようい",
         "meaning": "preparation; arrangements; provision; getting ready"
     },
     {
-        "vocabulary": " 用事",
+        "vocabulary": "用事",
+        "reading": "ようじ",
         "meaning": "tasks; things to do; errand; business (to take care of)"
     },
     {
-        "vocabulary": " 予約",
+        "vocabulary": "予約",
+        "reading": "よやく",
         "meaning": "reservation"
     },
     {
-        "vocabulary": " 湯",
+        "vocabulary": "湯",
+        "reading": "ゆ",
         "meaning": "hot water"
     },
     {
-        "vocabulary": " 指 ",
+        "vocabulary": "指",
+        "reading": "ゆび",
         "meaning": "finger"
     },
     {
-        "vocabulary": " 指輪 ",
+        "vocabulary": "指輪",
+        "reading": "ゆびわ",
         "meaning": "finger ring"
     },
     {
-        "vocabulary": " 夢",
+        "vocabulary": "夢",
+        "reading": "ゆめ",
         "meaning": "dream"
     },
     {
-        "vocabulary": " 揺れる",
+        "vocabulary": "揺れる",
+        "reading": "ゆれる",
         "meaning": "to shake"
     },
     {
-        "vocabulary": " 残念",
+        "vocabulary": "残念",
+        "reading": "ざんねん",
         "meaning": "regrettable; unfortunate"
     },
     {
-        "vocabulary": " 全然",
+        "vocabulary": "全然",
+        "reading": "ぜんぜん",
         "meaning": "not entirely (used in a negative sentence)"
     }
 ]

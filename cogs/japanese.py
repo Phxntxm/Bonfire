@@ -42,7 +42,11 @@ class Japanese(commands.Cog):
 
                 for card in n:
                     # Add the card to the pack
-                    pack.append(FlashCard(card["vocabulary"], None, card["meaning"]))
+                    pack.append(
+                        FlashCard(
+                            card["vocabulary"], None, card["reading"], card["meaning"]
+                        )
+                    )
                     count += 1
 
                     # Limit each pack to 50 cards
