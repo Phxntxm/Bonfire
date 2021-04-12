@@ -1,6 +1,14 @@
 import json
 from discord.ext import commands
-from utils import conjugator, checks, request, Pages, CannotPaginate
+from utils import (
+    conjugator,
+    checks,
+    request,
+    Pages,
+    CannotPaginate,
+    chunks,
+    FlashCardDisplay,
+)
 
 
 class Japanese(commands.Cog):
@@ -8,6 +16,7 @@ class Japanese(commands.Cog):
 
     def __init__(self):
 
+        # Load the verbs
         with open("utils/japanese_verbs.json") as f:
             verbs = json.load(f)
 
@@ -20,6 +29,20 @@ class Japanese(commands.Cog):
                 verbs[key] = conjugator.IrregularVerbs(key)
 
         self.verbs = verbs
+
+        # Load the JLPT vocab
+        with open("utils/japanese_vocabulary_n2.json") as f:
+            n2 = json.load(f)
+        self.n2_packs = list(chunks(n2, 50))
+        with open("utils/japanese_vocabulary_n3.json") as f:
+            n3 = json.load(f)
+        self.n3_packs = list(chunks(n3, 50))
+        with open("utils/japanese_vocabulary_n4.json") as f:
+            n4 = json.load(f)
+        self.n4_packs = list(chunks(n4, 50))
+        with open("utils/japanese_vocabulary_n5.json") as f:
+            n5 = json.load(f)
+        self.n5_packs = list(chunks(n5, 50))
 
     @commands.command(aliases=["活用", "かつよう", "katsuyou"])
     @checks.can_run(send_messages=True)
@@ -108,6 +131,26 @@ query ($name: String) {
             await pages.paginate()
         except CannotPaginate as e:
             await ctx.send(str(e))
+
+    @commands.command()
+    @commands.max_concurrency(1, per=commands.BucketType.channel)
+    @checks.can_run(send_messages=True)
+    async def jlpt(self, ctx, level=None, pack: int = None):
+        """
+        Runs a "flash card" pack for the JLPT level specified. This has N2-N5 available
+        and there are 50 cards per pack, per level.
+
+        EXAMPLE: !jlpt n5 1
+        RESULT: Starts a flash card game of 50 cards from the JLPT n5 vocab list
+        """
+        if level not in ("n2", "n3", "n4", "n5"):
+            return await ctx.send("JLPT level options are n2, n3, n4, or n5")
+        packs = getattr(self, f"n{level}_packs")
+        if pack > len(packs) or pack < 1:
+            return await ctx.send(f"The JLPT n{level} has {len(packs)} available")
+
+        pack = packs[pack - 1]
+        await FlashCardDisplay(pack).start(ctx, wait=True)
 
 
 def setup(bot):

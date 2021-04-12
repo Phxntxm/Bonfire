@@ -1,0 +1,770 @@
+[
+    {
+        "vocabulary": " 明かり",
+        "meaning": "light; illumination; glow; gleam"
+    },
+    {
+        "vocabulary": " 明ける",
+        "meaning": "to dawn,to become daylight"
+    },
+    {
+        "vocabulary": " 明らか",
+        "meaning": "clear; obvious"
+    },
+    {
+        "vocabulary": " 悪魔",
+        "meaning": "devil; demon; fiend; Satan"
+    },
+    {
+        "vocabulary": " 暗記",
+        "meaning": "memorization; learning by heart"
+    },
+    {
+        "vocabulary": " 新た",
+        "meaning": "new; fresh; novel"
+    },
+    {
+        "vocabulary": " 有らゆる",
+        "meaning": "all; every​"
+    },
+    {
+        "vocabulary": " 集まり",
+        "meaning": "gathering; meeting; assembly; collection; attendance"
+    },
+    {
+        "vocabulary": " 部分",
+        "meaning": "portion; section; part"
+    },
+    {
+        "vocabulary": " 分",
+        "meaning": "part; segment; share; ration"
+    },
+    {
+        "vocabulary": " 文明",
+        "meaning": "civilization; culture"
+    },
+    {
+        "vocabulary": " 分析",
+        "meaning": "analysis"
+    },
+    {
+        "vocabulary": " 分野",
+        "meaning": "field; sphere; realm; division; branch"
+    },
+    {
+        "vocabulary": " 父親",
+        "meaning": "father"
+    },
+    {
+        "vocabulary": " 地平線",
+        "meaning": "horizon (related to land)​"
+    },
+    {
+        "vocabulary": " 地位",
+        "meaning": "(social) position; status"
+    },
+    {
+        "vocabulary": " 長期",
+        "meaning": "long-term"
+    },
+    {
+        "vocabulary": " 中",
+        "meaning": "during; while; medium; middle"
+    },
+    {
+        "vocabulary": " 中学",
+        "meaning": "junior high school; middle school"
+    },
+    {
+        "vocabulary": " 昼食",
+        "meaning": "lunch; midday meal"
+    },
+    {
+        "vocabulary": " 大部分",
+        "meaning": "most part; greater part; majority"
+    },
+    {
+        "vocabulary": " 駄目 ",
+        "meaning": "no good; cannot"
+    },
+    {
+        "vocabulary": " 男子",
+        "meaning": "youth; young man"
+    },
+    {
+        "vocabulary": " 出会い",
+        "meaning": "meeting; rendezvous; encounter"
+    },
+    {
+        "vocabulary": " 出会う",
+        "meaning": "to meet (by chance); to come across; to run across; to encounter"
+    },
+    {
+        "vocabulary": " 読書",
+        "meaning": "reading"
+    },
+    {
+        "vocabulary": " 努力",
+        "meaning": "effort; exertion; endeavor; hard work; striving"
+    },
+    {
+        "vocabulary": " 同一",
+        "meaning": "identical; same; one and the same; equal"
+    },
+    {
+        "vocabulary": " 円",
+        "meaning": "yen; Japanese monetary unit; circle"
+    },
+    {
+        "vocabulary": " 不利",
+        "meaning": "disadvantage; handicap; unfavorable position"
+    },
+    {
+        "vocabulary": " 不足",
+        "meaning": "insufficiency; shortage; deficiency; lack; dearth"
+    },
+    {
+        "vocabulary": " 再び",
+        "meaning": "again; once more; a second time"
+    },
+    {
+        "vocabulary": " 外交",
+        "meaning": "diplomacy"
+    },
+    {
+        "vocabulary": " 外出",
+        "meaning": "going out; outing; leaving (one's home, office, etc.)"
+    },
+    {
+        "vocabulary": " 学期",
+        "meaning": "school term; semester"
+    },
+    {
+        "vocabulary": " 学",
+        "meaning": "learning; education; study of"
+    },
+    {
+        "vocabulary": " 学問",
+        "meaning": "scholarship; study; learning"
+    },
+    {
+        "vocabulary": " 学者",
+        "meaning": "scholar"
+    },
+    {
+        "vocabulary": " 学習",
+        "meaning": "study; learning; tutorial"
+    },
+    {
+        "vocabulary": " 議長",
+        "meaning": "chairman; president; moderator"
+    },
+    {
+        "vocabulary": " 議会",
+        "meaning": "congress; parliament; diet; legislative assembly"
+    },
+    {
+        "vocabulary": " 語学",
+        "meaning": "study of foreign languages; linguistics"
+    },
+    {
+        "vocabulary": " 激しい",
+        "meaning": "violent; extreme; intense"
+    },
+    {
+        "vocabulary": " 母親",
+        "meaning": "mother"
+    },
+    {
+        "vocabulary": " 博物館",
+        "meaning": "museum"
+    },
+    {
+        "vocabulary": " 販売",
+        "meaning": "sales; selling; marketing"
+    },
+    {
+        "vocabulary": " 発明",
+        "meaning": "invention"
+    },
+    {
+        "vocabulary": " 外す",
+        "meaning": "to remove; to undo; to drop; to miss"
+    },
+    {
+        "vocabulary": " 品",
+        "meaning": "elegance, article"
+    },
+    {
+        "vocabulary": " 一言",
+        "meaning": "single word; a few words; brief comment"
+    },
+    {
+        "vocabulary": " 一人一人",
+        "meaning": "one by one; each; one at a time"
+    },
+    {
+        "vocabulary": " 本物",
+        "meaning": "genuine article; real thing; real deal​"
+    },
+    {
+        "vocabulary": " 本人",
+        "meaning": "the person in question; the person themselves; said person"
+    },
+    {
+        "vocabulary": " 一致",
+        "meaning": "agreement; union; match​; coincidence"
+    },
+    {
+        "vocabulary": " 一時",
+        "meaning": "one o'clock"
+    },
+    {
+        "vocabulary": " 意外",
+        "meaning": "unexpected; surprising"
+    },
+    {
+        "vocabulary": " 一家",
+        "meaning": "a family; a household; a home; one's family; whole family"
+    },
+    {
+        "vocabulary": " 今に",
+        "meaning": "before long; even now"
+    },
+    {
+        "vocabulary": " 今にも",
+        "meaning": "at any moment; at any minute; on the verge of"
+    },
+    {
+        "vocabulary": " 一般",
+        "meaning": "general; universal; ordinary; average; common"
+    },
+    {
+        "vocabulary": " 一方",
+        "meaning": "one (esp. of two); one way; the other direction; although"
+    },
+    {
+        "vocabulary": " 一生",
+        "meaning": "whole life; a lifetime; a generation"
+    },
+    {
+        "vocabulary": " 一種",
+        "meaning": "species; kind; variety"
+    },
+    {
+        "vocabulary": " 一瞬",
+        "meaning": "instant; moment; for an instant"
+    },
+    {
+        "vocabulary": " 一層",
+        "meaning": "much more; still more; all the more; single layer; sooner; preferably​"
+    },
+    {
+        "vocabulary": " 一体",
+        "meaning": "(what) the heck; (why) in the world"
+    },
+    {
+        "vocabulary": " 所謂",
+        "meaning": "what is called; as it is called; the so-called; so to speak​"
+    },
+    {
+        "vocabulary": " 邪魔",
+        "meaning": "hindrance"
+    },
+    {
+        "vocabulary": " 化学",
+        "meaning": "chemistry"
+    },
+    {
+        "vocabulary": " 会",
+        "meaning": "meeting; assembly; party; association; club"
+    },
+    {
+        "vocabulary": " 会員",
+        "meaning": "member"
+    },
+    {
+        "vocabulary": " 海外",
+        "meaning": "foreign; abroad; overseas"
+    },
+    {
+        "vocabulary": " 会合",
+        "meaning": "meeting; assembly; gathering; association"
+    },
+    {
+        "vocabulary": " 会計",
+        "meaning": "finance; account; treasurer; bill"
+    },
+    {
+        "vocabulary": " 開始",
+        "meaning": "start; commencement; beginning; initiation​"
+    },
+    {
+        "vocabulary": " 科目",
+        "meaning": "(school) subject; curriculum; course"
+    },
+    {
+        "vocabulary": " 権利",
+        "meaning": "right; privilege"
+    },
+    {
+        "vocabulary": " 基本",
+        "meaning": "basics; fundamentals; basis; foundation"
+    },
+    {
+        "vocabulary": " 記事",
+        "meaning": "article; news story; report; account"
+    },
+    {
+        "vocabulary": " 気味",
+        "meaning": "sensation; feeling​; tendency"
+    },
+    {
+        "vocabulary": " 記念",
+        "meaning": "commemoration; celebration; honoring the memory of something"
+    },
+    {
+        "vocabulary": " 気に入る",
+        "meaning": "to like; to take a liking to"
+    },
+    {
+        "vocabulary": " 記入",
+        "meaning": "entry; filling in; filling out"
+    },
+    {
+        "vocabulary": " 記憶",
+        "meaning": "memory; recollection; remembrance"
+    },
+    {
+        "vocabulary": " 記者",
+        "meaning": "reporter; journalist"
+    },
+    {
+        "vocabulary": " 期待",
+        "meaning": "expectation; anticipation; hope"
+    },
+    {
+        "vocabulary": " 国家",
+        "meaning": "state; country; nation"
+    },
+    {
+        "vocabulary": " 国会",
+        "meaning": "National Diet; legislative assembly of Japan;  parliament; congress"
+    },
+    {
+        "vocabulary": " 国境",
+        "meaning": "national border"
+    },
+    {
+        "vocabulary": " 国語",
+        "meaning": "national language"
+    },
+    {
+        "vocabulary": " 国民",
+        "meaning": "people (of a country); nation; citizen; national"
+    },
+    {
+        "vocabulary": " 今後",
+        "meaning": "from now on; hereafter"
+    },
+    {
+        "vocabulary": " 今回",
+        "meaning": "now; this time; lately"
+    },
+    {
+        "vocabulary": " 今日",
+        "meaning": "today; this day"
+    },
+    {
+        "vocabulary": " 転ぶ",
+        "meaning": "to fall down; to fall over"
+    },
+    {
+        "vocabulary": " 高速",
+        "meaning": "high-speed; rapid; express"
+    },
+    {
+        "vocabulary": " 訓練",
+        "meaning": "training; drill; practice; discipline"
+    },
+    {
+        "vocabulary": " 教科書",
+        "meaning": "textbook; coursebook; schoolbook"
+    },
+    {
+        "vocabulary": " 協力",
+        "meaning": "cooperation; collaboration"
+    },
+    {
+        "vocabulary": " 強力",
+        "meaning": "powerful; strong"
+    },
+    {
+        "vocabulary": " 急激",
+        "meaning": "sudden; abrupt; rapid; sharp; drastic; radical"
+    },
+    {
+        "vocabulary": " 急に",
+        "meaning": "swiftly; rapidly; quickly; immediately; hastily"
+    },
+    {
+        "vocabulary": " 吸収",
+        "meaning": "absorption; suction; attraction"
+    },
+    {
+        "vocabulary": " 急速",
+        "meaning": "rapid (e.g. progress)"
+    },
+    {
+        "vocabulary": " 真面目 ",
+        "meaning": "serious; earnest"
+    },
+    {
+        "vocabulary": " 真っ赤",
+        "meaning": "bright red; deep red; flushed (of face)"
+    },
+    {
+        "vocabulary": " 学ぶ",
+        "meaning": "to study (in depth); to learn; to take lessons in"
+    },
+    {
+        "vocabulary": " 万一",
+        "meaning": "emergency; unlikely event​; by some chance; by some possibility"
+    },
+    {
+        "vocabulary": " 満足",
+        "meaning": "satisfaction; contentment;​ sufficient; enough"
+    },
+    {
+        "vocabulary": " 明確",
+        "meaning": "clear; precise; definite; distinct"
+    },
+    {
+        "vocabulary": " 飯",
+        "meaning": "cooked rice; meal"
+    },
+    {
+        "vocabulary": " 味方",
+        "meaning": "friend; ally; supporter; taking sides with; supporting"
+    },
+    {
+        "vocabulary": " 魅力",
+        "meaning": "charm; fascination; glamour; attraction; appeal"
+    },
+    {
+        "vocabulary": " 木曜",
+        "meaning": "Thursday"
+    },
+    {
+        "vocabulary": " 半ば",
+        "meaning": "middle; half; semi; halfway; partly"
+    },
+    {
+        "vocabulary": " 熱心",
+        "meaning": "enthusiastic; eager"
+    },
+    {
+        "vocabulary": " 日本",
+        "meaning": "Japan"
+    },
+    {
+        "vocabulary": " 能力",
+        "meaning": "ability; faculty"
+    },
+    {
+        "vocabulary": " 入場",
+        "meaning": "entrance; admission; entering"
+    },
+    {
+        "vocabulary": " お昼",
+        "meaning": "lunch; midday; daytime"
+    },
+    {
+        "vocabulary": " 収める",
+        "meaning": "to supply; to dedicate; to make an offering; to pay"
+    },
+    {
+        "vocabulary": " 連続",
+        "meaning": "continuation; succession; series"
+    },
+    {
+        "vocabulary": " 利益",
+        "meaning": "profit; gains; benefit"
+    },
+    {
+        "vocabulary": " 利口",
+        "meaning": "clever; intelligent; wise; bright; sharp"
+    },
+    {
+        "vocabulary": " 留学",
+        "meaning": "studying abroad"
+    },
+    {
+        "vocabulary": " 作品",
+        "meaning": "work of art; performance"
+    },
+    {
+        "vocabulary": " 左右",
+        "meaning": "left and right"
+    },
+    {
+        "vocabulary": " 成長",
+        "meaning": "growth; development; growing up; becoming an adult"
+    },
+    {
+        "vocabulary": " 製品",
+        "meaning": "manufactured goods; finished goods; product"
+    },
+    {
+        "vocabulary": " 青年",
+        "meaning": "youth; young man"
+    },
+    {
+        "vocabulary": " 刺激",
+        "meaning": "stimulus; impetus; incentive; encouragement; motivation; provocation; excitement; thrill"
+    },
+    {
+        "vocabulary": " 資本",
+        "meaning": "funds; capital"
+    },
+    {
+        "vocabulary": " 品",
+        "meaning": "article; item; thing; goods; stock; quality"
+    },
+    {
+        "vocabulary": " 身長",
+        "meaning": "body height; stature"
+    },
+    {
+        "vocabulary": " 進学",
+        "meaning": "entering a higher-level school (often university)"
+    },
+    {
+        "vocabulary": " 新鮮",
+        "meaning": "fresh"
+    },
+    {
+        "vocabulary": " 支店",
+        "meaning": "branch office; branch store​"
+    },
+    {
+        "vocabulary": " 使用",
+        "meaning": "use; application; employment; utilization."
+    },
+    {
+        "vocabulary": " 食品",
+        "meaning": "food; food products"
+    },
+    {
+        "vocabulary": " 書物",
+        "meaning": "book; volume"
+    },
+    {
+        "vocabulary": " 書類",
+        "meaning": "document; official papers"
+    },
+    {
+        "vocabulary": " 書斎",
+        "meaning": "study; library; den; home office; reading room"
+    },
+    {
+        "vocabulary": " 商売",
+        "meaning": "trade; business; commerce; transaction; occupation"
+    },
+    {
+        "vocabulary": " 奨学金",
+        "meaning": "scholarship; stipend; student loan"
+    },
+    {
+        "vocabulary": " 正午",
+        "meaning": "midday"
+    },
+    {
+        "vocabulary": " 商品",
+        "meaning": "commodity; article of commerce; goods; stock; merchandise"
+    },
+    {
+        "vocabulary": " 少女",
+        "meaning": "little girl; maiden; young lady"
+    },
+    {
+        "vocabulary": " 証明",
+        "meaning": "proof; verification; certification"
+    },
+    {
+        "vocabulary": " 少年",
+        "meaning": "boy; juvenile; young boy; youth; lad"
+    },
+    {
+        "vocabulary": " 少々",
+        "meaning": "just a minute; small quantity"
+    },
+    {
+        "vocabulary": " 招待",
+        "meaning": "invitation"
+    },
+    {
+        "vocabulary": " 週",
+        "meaning": "week"
+    },
+    {
+        "vocabulary": " 集中",
+        "meaning": "concentration; focusing; centralization; integration"
+    },
+    {
+        "vocabulary": " 集団",
+        "meaning": "group; mass"
+    },
+    {
+        "vocabulary": " 収穫",
+        "meaning": "harvest; crop; fruits (of one's labors)"
+    },
+    {
+        "vocabulary": " 週間",
+        "meaning": "week"
+    },
+    {
+        "vocabulary": " 週刊",
+        "meaning": "weekly publication"
+    },
+    {
+        "vocabulary": " 収入",
+        "meaning": "income; receipts; revenue; salary"
+    },
+    {
+        "vocabulary": " 速度",
+        "meaning": "speed; velocity; pace; rate"
+    },
+    {
+        "vocabulary": " 少しも",
+        "meaning": "anything of; not one bit (with negative sentence)"
+    },
+    {
+        "vocabulary": " 大半",
+        "meaning": "majority; more than half; most; largely; mainly"
+    },
+    {
+        "vocabulary": " 大会",
+        "meaning": "convention; rally; conference; tournament;"
+    },
+    {
+        "vocabulary": " 大した",
+        "meaning": "considerable; great; important; significant; a big deal"
+    },
+    {
+        "vocabulary": " 単なる",
+        "meaning": "mere; simple; sheer"
+    },
+    {
+        "vocabulary": " 多少",
+        "meaning": "more or less; somewhat; a little; a few; some"
+    },
+    {
+        "vocabulary": " 手品",
+        "meaning": "magic trick; illusion"
+    },
+    {
+        "vocabulary": " 哲学",
+        "meaning": "philosophy"
+    },
+    {
+        "vocabulary": " 徹夜",
+        "meaning": "staying up all night"
+    },
+    {
+        "vocabulary": " 土地",
+        "meaning": "plot of land; lot; soil"
+    },
+    {
+        "vocabulary": " 都会",
+        "meaning": "(big) city"
+    },
+    {
+        "vocabulary": " 取れる",
+        "meaning": "to come off; to be removed; to be obtainable"
+    },
+    {
+        "vocabulary": " 取り上げる",
+        "meaning": "to pick up"
+    },
+    {
+        "vocabulary": " 図書",
+        "meaning": "books"
+    },
+    {
+        "vocabulary": " 通学",
+        "meaning": "commuting to school; school commute"
+    },
+    {
+        "vocabulary": " 受け取る",
+        "meaning": "to receive; to understand"
+    },
+    {
+        "vocabulary": " 上手い",
+        "meaning": "skillful; delicious"
+    },
+    {
+        "vocabulary": " 運転",
+        "meaning": "operation; driving"
+    },
+    {
+        "vocabulary": " 売れる",
+        "meaning": "to sell (well)"
+    },
+    {
+        "vocabulary": " 分ける",
+        "meaning": "to divide; to split; to part; to separate"
+    },
+    {
+        "vocabulary": " 悪口",
+        "meaning": "slander; bad-mouthing; abuse; insult; speaking ill (of)"
+    },
+    {
+        "vocabulary": " 夜明け",
+        "meaning": "dawn; daybreak"
+    },
+    {
+        "vocabulary": " 余分",
+        "meaning": "extra; excess; surplus"
+    },
+    {
+        "vocabulary": " 読み",
+        "meaning": "reading (of a kanji, situation, etc)"
+    },
+    {
+        "vocabulary": " 夜中",
+        "meaning": "middle of the night; dead of night"
+    },
+    {
+        "vocabulary": " 宜しい",
+        "meaning": "(respectful) OK; all right"
+    },
+    {
+        "vocabulary": " 唯一",
+        "meaning": "only; sole; unique"
+    },
+    {
+        "vocabulary": " 輸入",
+        "meaning": "import; importation; introduction"
+    },
+    {
+        "vocabulary": " 輸出",
+        "meaning": "export; exportation​"
+    },
+    {
+        "vocabulary": " 夕べ",
+        "meaning": "evening /  last night; yesterday evening"
+    },
+    {
+        "vocabulary": " 有利",
+        "meaning": "advantageous; favorable; profitable"
+    },
+    {
+        "vocabulary": " 全国",
+        "meaning": "the whole country"
+    },
+    {
+        "vocabulary": " 随分",
+        "meaning": "very; extremely; surprisingly; considerably; awfully"
+    }
+]

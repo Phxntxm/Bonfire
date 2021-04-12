@@ -216,3 +216,9 @@ async def update_records(key, db, winner, loser):
         await db.execute(update_query, loser_rating, loser_wins, loser_losses, loser.id)
     else:
         await db.execute(create_query, loser_rating, loser_wins, loser_losses, loser.id)
+
+
+def chunks(list, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(list), n):
+        yield list[i : i + n]
