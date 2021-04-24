@@ -1,6 +1,8 @@
 import yaml
 import asyncio
 
+from discord.ext import commands
+
 loop = asyncio.get_event_loop()
 global_config = {}
 
@@ -113,4 +115,6 @@ db_opts = {
 def command_prefix(bot, message):
     if not message.guild:
         return default_prefix
-    return bot.cache.prefixes.get(message.guild.id) or default_prefix
+    return commands.when_mentioned_or(
+        bot.cache.prefixes.get(message.guild.id) or default_prefix
+    )(bot, message)
