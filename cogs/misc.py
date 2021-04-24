@@ -6,6 +6,8 @@ import utils
 import random
 import re
 import calendar
+import inspect
+import io
 import pendulum
 import datetime
 import psutil
@@ -267,6 +269,25 @@ class Miscellaneous(commands.Cog):
                 discord.utils.oauth_url(app_info.id, perms)
             )
         )
+
+    @commands.command()
+    @utils.can_run(send_messages=True)
+    async def source(self, ctx, *, command: str = None):
+        """Displays my full source code or for a specific command.
+
+        EXAMPLE: !source source
+        RESULTS: Shows the code for this command!
+        """
+        if command is None:
+            return await ctx.send("https://github.com/Phxntxm/Bonfire")
+
+        obj = self.bot.get_command(command)
+        if obj is None:
+            return await ctx.send(f"Could not find command {command}")
+
+        src = io.StringIO(inspect.getsource(obj.callback.__code__))
+
+        await ctx.send(file=discord.File(src, filename=f"{command}.py"))
 
     @commands.command(enabled=False)
     @utils.can_run(send_messages=True)
