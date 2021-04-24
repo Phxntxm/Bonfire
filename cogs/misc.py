@@ -281,7 +281,7 @@ class Miscellaneous(commands.Cog):
         if command is None:
             return await ctx.send("https://github.com/Phxntxm/Bonfire")
 
-        obj = self.bot.get_command(command)
+        obj = ctx.bot.get_command(command)
         if obj is None:
             return await ctx.send(f"Could not find command {command}")
 
