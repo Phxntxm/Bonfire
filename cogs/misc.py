@@ -278,16 +278,24 @@ class Miscellaneous(commands.Cog):
         EXAMPLE: !source source
         RESULTS: Shows the code for this command!
         """
+        source_url = "https://github.com/Phxntxm/Bonfire"
+        branch = "master"
         if command is None:
-            return await ctx.send("https://github.com/Phxntxm/Bonfire")
+            return await ctx.send(source_url)
 
         obj = ctx.bot.get_command(command)
         if obj is None:
             return await ctx.send(f"Could not find command {command}")
 
-        src = io.StringIO(inspect.getsource(obj.callback.__code__))
+        # Get source from the callback
+        src = obj.callback.__code__
+        lines, firstlineno = inspect.getsourcelines(src)
+        location = os.path.relpath(src.co_filename).replace("\\", "/")
 
-        await ctx.send(file=discord.File(src, filename=f"{command}.py"))
+        final_url = f"<{source_url}/blob/{branch}/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>"
+        # Provide the source as a file, for the preview file thing
+        src = io.StringIO(inspect.getsource(src))
+        await ctx.send(final_url, file=discord.File(src, filename=f"{command}.py"))
 
     @commands.command(enabled=False)
     @utils.can_run(send_messages=True)
