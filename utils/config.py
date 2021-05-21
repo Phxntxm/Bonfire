@@ -115,6 +115,8 @@ db_opts = {
 def command_prefix(bot, message):
     if not message.guild:
         return default_prefix
-    return commands.when_mentioned_or(
-        bot.cache.prefixes.get(message.guild.id) or default_prefix
-    )(bot, message)
+    prefixes = bot.cache.prefixes.get(message.guild.id)
+    if prefixes:
+        return commands.when_mentioned_or(prefixes)(bot, message)
+    else:
+        return commands.when_mentioned_or(*default_prefix)(bot, message)
