@@ -513,7 +513,7 @@ class Roles(commands.Cog):
             return
 
         fmt = ""
-        roles = [r for r in role if str(r.id) in self_assignable_roles]
+        roles = [r for r in role if r.id in self_assignable_roles]
         fmt += "\n".join(
             [
                 "Successfully removed {}".format(r.name)
