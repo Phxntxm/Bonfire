@@ -516,9 +516,9 @@ class Roles(commands.Cog):
         roles = [r for r in role if r.id in self_assignable_roles]
         fmt += "\n".join(
             [
-                "Successfully removed {}".format(r.name)
-                if str(r.id) in self_assignable_roles
-                else "{} is not available to be self-assigned".format(r.name)
+                f"Successfully removed {r.name}"
+                if r.id in self_assignable_roles
+                else f"{r.name} is not available to be self-assigned"
                 for r in role
             ]
         )
